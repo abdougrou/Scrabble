@@ -23,4 +23,4 @@ import { MaterialPageComponent } from '@app/pages/material-page/material-page.co
     providers: [],
     bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

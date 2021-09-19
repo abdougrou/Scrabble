@@ -55,7 +55,6 @@ export class WordValidationService {
         if (!this.wordInDictionnary(wordsAfter)) {
             return false;
         }
-
         return true;
     }
 

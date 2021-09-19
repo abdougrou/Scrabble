@@ -14,7 +14,7 @@ export class MainPageComponent {
     readonly title: string = 'LOG2990';
     message: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
-    constructor(private readonly communicationService: CommunicationService, private wordValidation: WordValidationService) { }
+    constructor(private readonly communicationService: CommunicationService, private wordValidation: WordValidationService) {}
 
     sendTimeToServer(): void {
         const newTimeMessage: Message = {
