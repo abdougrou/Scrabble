@@ -8,8 +8,6 @@ const BOARD_SIZE = 15;
     providedIn: 'root',
 })
 export class WordValidationService {
-    // eslint-disable-next-line @typescript-eslint/ban-types
-
     dictionnary: string[];
 
     constructor(private httpClient: HttpClient) {
@@ -20,14 +18,12 @@ export class WordValidationService {
         const newBoard: Tile[][] = board;
         const wordsBefore: string[] = this.findWordsFromBoard(board);
 
-        //  End validation if the player places a hyphen or an apostrophe
-        if (!this.checkValidLetters(newTiles)) {
-            return false;
-        }
-
-        //  End validation if a new tile overlapses an already existant tile
+        //  End validation if the player entered an invalid character or placed a tile on top of another
         for (const aTile of newTiles) {
-            if (board[aTile.x][aTile.y].letter !== '' && board[aTile.x][aTile.y].points !== 0) {
+            if (!this.checkValidLetters(aTile)) {
+                return false;
+            }
+            if (!this.tilePositionIsEmpty(aTile, board)) {
                 return false;
             }
         }
@@ -46,20 +42,20 @@ export class WordValidationService {
         }
 
         //  Getting all the words from the board and only keeping the newly formed ones
-        const wordsAfter: string[] = this.findWordsFromBoard(newBoard);
+        let wordsAfter: string[] = this.findWordsFromBoard(newBoard);
         for (const wordA of wordsAfter) {
             for (const wordB of wordsBefore) {
                 if (wordA === wordB) {
-                    wordsAfter.filter((obj) => obj !== wordA);
+                    wordsAfter = wordsAfter.filter((obj) => obj !== wordA);
                 }
             }
         }
 
         //  check if all the new words are contained in the dictionary
-
         if (!this.wordInDictionnary(wordsAfter)) {
             return false;
         }
+
         return true;
     }
 
@@ -81,18 +77,22 @@ export class WordValidationService {
                     currentWord = '';
                 }
             }
-        }
-        for (let j = 0; j < BOARD_SIZE; j++) {
-            let currentWord = '';
-            for (let i = 0; i < BOARD_SIZE; i++) {
-                if (board[i][j].letter !== '') {
-                    currentWord += board[i][j].letter;
+            if (currentWord.length > 1) {
+                boardWords.push(currentWord);
+            }
+            currentWord = '';
+            for (let j = 0; j < BOARD_SIZE; j++) {
+                if (board[j][i].letter !== '') {
+                    currentWord += board[j][i].letter;
                 } else {
                     if (currentWord.length > 1) {
                         boardWords.push(currentWord);
                     }
                     currentWord = '';
                 }
+            }
+            if (currentWord.length > 1) {
+                boardWords.push(currentWord);
             }
         }
         return boardWords;
@@ -107,11 +107,16 @@ export class WordValidationService {
         return letter.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
 
-    checkValidLetters(tiles: TileCoords[]): boolean {
-        for (const aTile of tiles) {
-            if (aTile.tile.letter === '-' || aTile.tile.letter === ',') {
-                return false;
-            }
+    checkValidLetters(aTile: TileCoords): boolean {
+        if (aTile.tile.letter === '-' || aTile.tile.letter === "'") {
+            return false;
+        }
+        return true;
+    }
+
+    tilePositionIsEmpty(aTile: TileCoords, board: Tile[][]): boolean {
+        if (board[aTile.x][aTile.y].letter !== '') {
+            return false;
         }
         return true;
     }
