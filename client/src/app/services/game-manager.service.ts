@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { Easel } from '@app/classes/easel';
 import { GameConfig } from '@app/classes/game-config';
 import { Player } from '@app/classes/player';
-import { Reserve } from '@app/classes/reserve';
 import { Tile } from '@app/classes/tile';
 import { timer } from 'rxjs';
+import { ReserveService } from './reserve.service';
 
 // const BOARD_DIMENSION = 15;
 const FIRST_PLAYER_COIN_FLIP = 0.5;
@@ -15,8 +15,8 @@ const SECOND_MD = 1000;
     providedIn: 'root',
 })
 export class GameManagerService {
-    board: Tile[][];
-    reserve: Reserve;
+    board: Tile[][] = [[]];
+    reserve: ReserveService;
 
     players: Player[] = [];
     get currentPlayer(): Player {
@@ -26,10 +26,11 @@ export class GameManagerService {
     turnDuration: number;
     currentTurnDurationLeft: number;
 
-    initialize(gameConfig: GameConfig) {
-        this.board = [[]];
-        this.reserve = new Reserve();
+    constructor(_reserve: ReserveService) {
+        this.reserve = _reserve;
+    }
 
+    initialize(gameConfig: GameConfig) {
         this.turnDuration = gameConfig.duration;
         this.currentTurnDurationLeft = gameConfig.duration;
 

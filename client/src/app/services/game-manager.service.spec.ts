@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { GameManagerService } from './game-manager.service';
+import { ReserveService } from './reserve.service';
 
 const STARTING_TILE_AMOUNT = 7;
 
@@ -7,11 +8,13 @@ describe('GameManagerService', () => {
     let service: GameManagerService;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({});
+        TestBed.configureTestingModule({
+            providers: [{ provide: ReserveService }],
+        });
         service = TestBed.inject(GameManagerService);
         service.initialize({
-            playerName1: 'Player1',
-            playerName2: 'Player2',
+            playerName1: 'player1',
+            playerName2: 'player2',
             dictionary: 'Dictionary',
             duration: 30,
             bonusEnabled: false,
@@ -27,10 +30,8 @@ describe('GameManagerService', () => {
     });
 
     it('player initialization', () => {
-        service.initializePlayers(['Player1', 'Player2'], 0);
-        expect(service.currentPlayer.name).toBe('Player1');
-        service.initializePlayers(['Player1', 'Player2'], 1);
-        expect(service.currentPlayer.name).toBe('Player2');
+        expect(service.players[0].name).toBeTruthy();
+        expect(service.players[1].name).toBeTruthy();
     });
 
     it('invert current player', () => {
