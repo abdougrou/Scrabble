@@ -1,8 +1,11 @@
+import { Injectable } from '@angular/core';
 import { ReserveTile, Tile } from '@app/classes/tile';
+import { CLASSIC_RESERVE, MIN_EXCHANGE_RESERVE_COUNT } from '@app/constants';
 
-const MIN_EXCHANGE_RESERVE_COUNT = 7;
-
-export class Reserve {
+@Injectable({
+    providedIn: 'root',
+})
+export class ReserveService {
     tiles: Map<string, ReserveTile> = new Map<string, ReserveTile>();
     tileCount: number = 0;
 
@@ -23,7 +26,7 @@ export class Reserve {
         });
     }
 
-    isLetterExchangePossible(amount: number) {
+    isExchangePossible(amount: number) {
         if (this.tileCount < MIN_EXCHANGE_RESERVE_COUNT) return false;
         else if (this.tileCount - amount >= 0) return true;
         return false;
@@ -54,31 +57,3 @@ export class Reserve {
         this.tileCount += tiles.length;
     }
 }
-
-const CLASSIC_RESERVE = `A,9,1
-B,2,3
-C,2,3
-D,3,2
-E,15,1
-F,2,4
-G,2,2
-H,2,4
-I,8,1
-J,1,8
-K,1,10
-L,5,1
-M,3,2
-N,6,1
-O,6,1
-P,2,3
-Q,1,8
-R,6,1
-S,6,1
-T,6,1
-U,6,1
-V,2,4
-W,1,10
-X,1,10
-Y,1,10
-Z,1,10
-*,2,0`;
