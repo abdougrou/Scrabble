@@ -99,8 +99,6 @@ describe('CalculatePoitnsService', () => {
 
         for (let i = 0; i < numNewTiles; i++) {
             newTiles.push(tiles[0][i]);
-            // eslint-disable-next-line no-console
-            console.log(newTiles.length);
         }
         service.calculatePoints(tiles, newTiles);
         const points = 98;
