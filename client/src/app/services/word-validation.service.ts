@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Tile, TileCoords } from '@app/classes/tile';
 import { HttpClient } from '@angular/common/http';
+import { CalculatePointsService } from './calculate-points.service';
+import { GameManagerService } from './game-manager.service';
 
 const BOARD_SIZE = 15;
 
@@ -10,20 +12,22 @@ const BOARD_SIZE = 15;
 export class WordValidationService {
     dictionnary: string[];
 
-    constructor(private httpClient: HttpClient) {
+    constructor(private httpClient: HttpClient, private calculatePoints: CalculatePointsService, private gameManager: GameManagerService) {
         this.getDictionnary();
     }
 
     validateWords(board: Tile[][], newTiles: TileCoords[]): boolean {
         const newBoard: Tile[][] = board;
-        const wordsBefore: string[] = this.findWordsFromBoard(board);
+        const wordsBefore: TileCoords[][] = this.findWordsFromBoard(board);
 
         //  End validation if the player entered an invalid character or placed a tile on top of another
         for (const aTile of newTiles) {
             if (!this.checkValidLetters(aTile)) {
+                this.gameManager.switchPlayer();
                 return false;
             }
             if (!this.tilePositionIsEmpty(aTile, board)) {
+                this.gameManager.switchPlayer();
                 return false;
             }
         }
@@ -37,24 +41,32 @@ export class WordValidationService {
         //  checking That all tiles have at least one adjacent tile
         for (const aTile of newTiles) {
             if (!this.hasAdjacentLetters(board, aTile)) {
+                this.gameManager.switchPlayer();
                 return false;
             }
         }
 
         //  Getting all the words from the board and only keeping the newly formed ones
-        let wordsAfter: string[] = this.findWordsFromBoard(newBoard);
+        let wordsAfter: TileCoords[][] = this.findWordsFromBoard(newBoard);
         for (const wordA of wordsAfter) {
             for (const wordB of wordsBefore) {
-                if (wordA === wordB) {
+                if (JSON.stringify(wordA) === JSON.stringify(wordB)) {
                     wordsAfter = wordsAfter.filter((obj) => obj !== wordA);
                 }
             }
         }
+        const newWords: string[] = new Array();
+        for (const wordA of wordsAfter) {
+            newWords.push(this.getStringFromTileArray(wordA));
+        }
 
         //  check if all the new words are contained in the dictionary
-        if (!this.wordInDictionnary(wordsAfter)) {
+        if (!this.wordInDictionnary(newWords)) {
+            this.gameManager.switchPlayer();
             return false;
         }
+        this.calculatePoints.calculatePoints(wordsAfter, newTiles);
+        this.gameManager.switchPlayer();
         return true;
     }
 
@@ -62,32 +74,32 @@ export class WordValidationService {
      * @param board conceptual representation of the board and the tiles
      * @returns an array of strings representing all the words on the board
      */
-    findWordsFromBoard(board: Tile[][]): string[] {
-        const boardWords: string[] = new Array();
+    findWordsFromBoard(board: Tile[][]): TileCoords[][] {
+        const boardWords: TileCoords[][] = new Array();
         for (let i = 0; i < BOARD_SIZE; i++) {
-            let currentWord = '';
+            let currentWord: TileCoords[] = new Array<TileCoords>();
             for (let j = 0; j < BOARD_SIZE; j++) {
                 if (board[i][j].letter !== '') {
-                    currentWord += board[i][j].letter;
+                    currentWord.push({ tile: board[i][j], x: i, y: j });
                 } else {
                     if (currentWord.length > 1) {
                         boardWords.push(currentWord);
                     }
-                    currentWord = '';
+                    currentWord = [];
                 }
             }
             if (currentWord.length > 1) {
                 boardWords.push(currentWord);
             }
-            currentWord = '';
+            currentWord = [];
             for (let j = 0; j < BOARD_SIZE; j++) {
                 if (board[j][i].letter !== '') {
-                    currentWord += board[j][i].letter;
+                    currentWord.push({ tile: board[j][i], x: j, y: i });
                 } else {
                     if (currentWord.length > 1) {
                         boardWords.push(currentWord);
                     }
-                    currentWord = '';
+                    currentWord = [];
                 }
             }
             if (currentWord.length > 1) {
@@ -158,5 +170,12 @@ export class WordValidationService {
             const dictionnaryJson = data;
             this.dictionnary = JSON.parse(JSON.stringify(dictionnaryJson)).words;
         });
+    }
+    getStringFromTileArray(tiles: TileCoords[]): string {
+        let word = '';
+        for (const aTile of tiles) {
+            word += aTile.tile.letter;
+        }
+        return word;
     }
 }

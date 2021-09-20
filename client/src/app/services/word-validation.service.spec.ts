@@ -69,19 +69,40 @@ describe('WordValidationService', () => {
         board[0][1].letter = 'a';
         board[0][2].letter = 'b';
         board[1][1].letter = 'c';
-        const result: string[] = ['ab', 'ac'];
+        const result: TileCoords[][] = [
+            [
+                { tile: board[0][1], x: 0, y: 1 },
+                { tile: board[0][2], x: 0, y: 2 },
+            ],
+            [
+                { tile: board[0][1], x: 0, y: 1 },
+                { tile: board[1][1], x: 1, y: 1 },
+            ],
+        ];
         expect(service.findWordsFromBoard(board)).toEqual(result);
     });
     it('should not return words containing less than 2 letters', () => {
         board[4][4].letter = 'c';
-        const result: string[] = [];
+        const result: TileCoords[][] = [];
         expect(service.findWordsFromBoard(board)).toEqual(result);
     });
     it('should not merge words from diferent lines of the board', () => {
+        board[13][0].letter = 'a';
+        board[14][0].letter = 'b';
+        board[0][1].letter = 'c';
         board[0][13].letter = 'a';
         board[0][14].letter = 'b';
         board[1][0].letter = 'c';
-        const result: string[] = ['ab'];
+        const result: TileCoords[][] = [
+            [
+                { tile: board[0][13], x: 0, y: 13 },
+                { tile: board[0][14], x: 0, y: 14 },
+            ],
+            [
+                { tile: board[13][0], x: 13, y: 0 },
+                { tile: board[14][0], x: 14, y: 0 },
+            ],
+        ];
         expect(service.findWordsFromBoard(board)).toEqual(result);
     });
     //  Testing hasAdjacentLetters function
