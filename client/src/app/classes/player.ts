@@ -1,8 +1,7 @@
-import { Tile } from './tile';
+import { Easel } from './easel';
 
-export class Player {
+export interface Player {
     name: string;
-    letters: Tile[];
     score: number;
-    isFirst: boolean;
+    easel: Easel;
 }

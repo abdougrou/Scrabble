@@ -1,19 +1,12 @@
-export class GameConfig {
-    constructor(
-        public gameMode: GameMode,
-        public isMultiPlayer: boolean,
-        public name: string,
-        public duration: number,
-        public bonusEnabled: boolean,
-        public dictionnary: Dictionnary,
-    ) {}
-
-    clear() {
-        this.name = '';
-        this.duration = DURATION_INIT;
-        this.bonusEnabled = false;
-        this.dictionnary = Dictionnary.French;
-    }
+export interface GameConfig {
+    playerName1: string;
+    playerName2: string;
+    gameMode: GameMode;
+    isMultiPlayer: boolean;
+    name: string;
+    duration: number;
+    bonusEnabled: boolean;
+    dictionnary: Dictionnary;
 }
 
 export enum GameMode {
