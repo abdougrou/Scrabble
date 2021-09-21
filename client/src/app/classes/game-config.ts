@@ -3,10 +3,9 @@ export interface GameConfig {
     playerName2: string;
     gameMode: GameMode;
     isMultiPlayer: boolean;
-    name: string;
     duration: number;
     bonusEnabled: boolean;
-    dictionnary: Dictionnary;
+    dictionary: Dictionary;
 }
 
 export enum GameMode {
@@ -14,9 +13,7 @@ export enum GameMode {
     LOG2990,
 }
 
-export enum Dictionnary {
+export enum Dictionary {
     French,
     English,
 }
-
-export const DURATION_INIT = 60;

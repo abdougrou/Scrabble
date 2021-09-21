@@ -1,6 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { GameConfig } from '@app/classes/game-config';
+import { Dictionary, GameConfig, GameMode } from '@app/classes/game-config';
+import { DURATION_INIT } from '@app/constants';
 import { DIALOG_HEIGHT, DIALOG_WIDTH } from '@app/pages/main-page/main-page.component';
 // eslint-disable-next-line no-restricted-imports
 import { GameConfigPageComponent } from '../game-config-page/game-config-page.component';
@@ -15,19 +16,28 @@ export class ModeSelectionComponent {
     constructor(
         public dialogRef: MatDialogRef<ModeSelectionComponent>,
         public dialog: MatDialog,
-        @Inject(MAT_DIALOG_DATA) public data: { gameConfig: GameConfig },
+        @Inject(MAT_DIALOG_DATA) public data: { mode: GameMode },
     ) {}
 
     // Open game configuration popup
     playSolo(): void {
+        const gameConfig = {
+            playerName1: 'default',
+            playerName2: 'default',
+            gameMode: this.data.mode,
+            isMultiPlayer: false,
+            duration: DURATION_INIT,
+            bonusEnabled: false,
+            dictionary: Dictionary.French,
+        } as GameConfig;
         const dialogRef = this.dialog.open(GameConfigPageComponent, {
             height: DIALOG_HEIGHT,
             width: DIALOG_WIDTH,
-            data: { gameConfig: this.data.gameConfig },
+            data: { config: gameConfig },
         });
 
         // eslint-disable-next-line no-console
-        console.log(this.data.gameConfig);
+        console.log(gameConfig);
 
         dialogRef.afterClosed().subscribe((result) => {
             if (result === true) {

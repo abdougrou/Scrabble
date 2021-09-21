@@ -18,7 +18,7 @@
       
       <mat-form-field appearance="outline">
         <mat-label>Dictionnaire</mat-label>
-        <mat-select formControlName="dictionnary" >
+        <mat-select formControlName="dictionary" >
           <mat-option value=0>Français</mat-option>
           <mat-option value=1>Anglais</mat-option>
         </mat-select>
@@ -30,7 +30,7 @@
     </div> 
     <div>
       <p> {{ this.gameConfigForm.value | json }} </p>
-      <p> {{ this.data.gameConfig | json }} </p>
+      <p> {{ this.data.config | json }} </p>
     </div>
 </div>
 </form>

@@ -1,7 +1,7 @@
 import { Overlay } from '@angular/cdk/overlay';
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Dictionnary, DURATION_INIT, GameConfig, GameMode } from '@app/classes/game-config';
+import { GameMode } from '@app/classes/game-config';
 import { ModeSelectionComponent } from '@app/components/mode-selection/mode-selection.component';
 import { BehaviorSubject } from 'rxjs';
 
@@ -18,9 +18,6 @@ export class MainPageComponent {
     readonly title: string = 'LOG2990';
     message: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
-    // Construct a game configuration
-    gameConfig = new GameConfig(GameMode.Classic, false, '', DURATION_INIT, false, Dictionnary.French);
-
     constructor(public dialog: MatDialog) {}
 
     // Press Classic Button
@@ -35,11 +32,10 @@ export class MainPageComponent {
 
     // Set the game mode then open the first popup
     start(gameMode: GameMode) {
-        this.gameConfig.gameMode = gameMode;
         const dialogRef = this.dialog.open(ModeSelectionComponent, {
             height: DIALOG_HEIGHT,
             width: DIALOG_WIDTH,
-            data: { gameConfig: this.gameConfig },
+            data: { mode: gameMode },
         });
 
         dialogRef.afterClosed().subscribe(() => {
