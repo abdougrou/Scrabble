@@ -3,6 +3,8 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { GameConfig } from '@app/classes/game-config';
 import { DURATION_INIT } from '@app/constants';
+import { GameManagerService } from '@app/services/game-manager.service';
+
 @Component({
     selector: 'app-game-config-page',
     templateUrl: './game-config-page.component.html',
@@ -23,18 +25,17 @@ export class GameConfigPageComponent {
         public dialogRef: MatDialogRef<GameConfigPageComponent>,
         @Inject(MAT_DIALOG_DATA) public data: { config: GameConfig },
         private formBuilder: FormBuilder,
+        public gameManagerService: GameManagerService,
     ) {}
 
     // assign input values to the gameConfig instance then close all popups
     play() {
-        // eslint-disable-next-line no-console
-        console.log('Before : ', this.data.config);
         this.data.config.playerName1 = this.gameConfigForm.get('name')?.value;
         this.data.config.duration = this.gameConfigForm.get('duration')?.value;
         this.data.config.bonusEnabled = this.gameConfigForm.get('bonusEnabled')?.value;
         this.data.config.dictionary = this.gameConfigForm.get('dictionary')?.value;
-        // eslint-disable-next-line no-console
-        console.log('After : ', this.data.config);
+        // send gameConfig data to the game manager service
+        this.gameManagerService.initialize(this.data.config);
         this.dialogRef.close(true);
     }
 

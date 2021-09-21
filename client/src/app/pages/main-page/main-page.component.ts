@@ -3,10 +3,8 @@ import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { GameMode } from '@app/classes/game-config';
 import { ModeSelectionComponent } from '@app/components/mode-selection/mode-selection.component';
+import { DIALOG_HEIGHT, DIALOG_WIDTH } from '@app/constants';
 import { BehaviorSubject } from 'rxjs';
-
-export const DIALOG_HEIGHT = '80%';
-export const DIALOG_WIDTH = '60%';
 
 @Component({
     selector: 'app-main-page',

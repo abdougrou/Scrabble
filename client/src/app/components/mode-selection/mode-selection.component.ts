@@ -1,8 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Dictionary, GameConfig, GameMode } from '@app/classes/game-config';
-import { DURATION_INIT } from '@app/constants';
-import { DIALOG_HEIGHT, DIALOG_WIDTH } from '@app/pages/main-page/main-page.component';
+import { DIALOG_HEIGHT, DIALOG_WIDTH, DURATION_INIT } from '@app/constants';
 // eslint-disable-next-line no-restricted-imports
 import { GameConfigPageComponent } from '../game-config-page/game-config-page.component';
 
@@ -30,21 +29,17 @@ export class ModeSelectionComponent {
             bonusEnabled: false,
             dictionary: Dictionary.French,
         } as GameConfig;
+
         const dialogRef = this.dialog.open(GameConfigPageComponent, {
             height: DIALOG_HEIGHT,
             width: DIALOG_WIDTH,
             data: { config: gameConfig },
         });
 
-        // eslint-disable-next-line no-console
-        console.log(gameConfig);
-
         dialogRef.afterClosed().subscribe((result) => {
             if (result === true) {
                 this.dialogRef.close();
             }
-            // eslint-disable-next-line no-console
-            console.log(`Game Initialized: ${result}`);
         });
     }
 

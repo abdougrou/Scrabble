@@ -3,6 +3,9 @@ export const DURATION_INIT = 60;
 export const MAX_USERNAME_LENGTH = 20;
 export const MIN_USERNAME_LENGTH = 2;
 
+export const DIALOG_HEIGHT = '80%';
+export const DIALOG_WIDTH = '60%';
+
 // Reserve constants
 export const MIN_EXCHANGE_RESERVE_COUNT = 7;
 export const FULL_RESERVE_COUNT = 102;
