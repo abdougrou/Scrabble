@@ -1,38 +1,50 @@
+import { Overlay } from '@angular/cdk/overlay';
 import { Component } from '@angular/core';
-import { Message } from '@app/classes/message';
-import { CommunicationService } from '@app/services/communication.service';
+import { MatDialog } from '@angular/material/dialog';
+import { Dictionnary, DURATION_INIT, GameConfig, GameMode } from '@app/classes/game-config';
+import { ModeSelectionComponent } from '@app/components/mode-selection/mode-selection.component';
 import { BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+
+export const DIALOG_HEIGHT = '80%';
+export const DIALOG_WIDTH = '60%';
 
 @Component({
     selector: 'app-main-page',
     templateUrl: './main-page.component.html',
     styleUrls: ['./main-page.component.scss'],
+    providers: [MatDialog, Overlay],
 })
 export class MainPageComponent {
     readonly title: string = 'LOG2990';
     message: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
-    constructor(private readonly communicationService: CommunicationService) {}
+    // Construct a game configuration
+    gameConfig = new GameConfig(GameMode.Classic, false, '', DURATION_INIT, false, Dictionnary.French);
 
-    sendTimeToServer(): void {
-        const newTimeMessage: Message = {
-            title: 'Hello from the client',
-            body: 'Time is : ' + new Date().toString(),
-        };
-        // Important de ne pas oublier "subscribe" ou l'appel ne sera jamais lancé puisque personne l'observe
-        this.communicationService.basicPost(newTimeMessage).subscribe();
+    constructor(public dialog: MatDialog) {}
+
+    // Press Classic Button
+    startClassic() {
+        this.start(GameMode.Classic);
     }
 
-    getMessagesFromServer(): void {
-        this.communicationService
-            .basicGet()
-            // Cette étape transforme l'objet Message en un seul string
-            .pipe(
-                map((message: Message) => {
-                    return `${message.title} ${message.body}`;
-                }),
-            )
-            .subscribe(this.message);
+    // Press LOG2990 Button
+    startLOG() {
+        this.start(GameMode.LOG2990);
+    }
+
+    // Set the game mode then open the first popup
+    start(gameMode: GameMode) {
+        this.gameConfig.gameMode = gameMode;
+        const dialogRef = this.dialog.open(ModeSelectionComponent, {
+            height: DIALOG_HEIGHT,
+            width: DIALOG_WIDTH,
+            data: { gameConfig: this.gameConfig },
+        });
+
+        dialogRef.afterClosed().subscribe(() => {
+            // eslint-disable-next-line no-console
+            console.log('Game Starts');
+        });
     }
 }
