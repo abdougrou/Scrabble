@@ -13,6 +13,7 @@ import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { MaterialPageComponent } from '@app/pages/material-page/material-page.component';
 import { GameConfigPageComponent } from './components/game-config-page/game-config-page.component';
 import { ModeSelectionComponent } from './components/mode-selection/mode-selection.component';
+import { ChatBoxComponent } from './components/chat-box/chat-box.component';
 
 /**
  * Main module that is used in main.ts.
@@ -30,6 +31,7 @@ import { ModeSelectionComponent } from './components/mode-selection/mode-selecti
         SidebarComponent,
         ModeSelectionComponent,
         GameConfigPageComponent,
+        ChatBoxComponent,
     ],
     imports: [AppMaterialModule, AppRoutingModule, BrowserAnimationsModule, BrowserModule, FormsModule, ReactiveFormsModule, HttpClientModule],
     providers: [],
