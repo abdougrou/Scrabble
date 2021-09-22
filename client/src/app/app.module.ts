@@ -14,6 +14,7 @@ import { MaterialPageComponent } from '@app/pages/material-page/material-page.co
 import { GameConfigPageComponent } from './components/game-config-page/game-config-page.component';
 import { ModeSelectionComponent } from './components/mode-selection/mode-selection.component';
 import { ChatBoxComponent } from './components/chat-box/chat-box.component';
+import { EaselComponent } from './components/easel/easel.component';
 
 /**
  * Main module that is used in main.ts.
@@ -32,6 +33,7 @@ import { ChatBoxComponent } from './components/chat-box/chat-box.component';
         ModeSelectionComponent,
         GameConfigPageComponent,
         ChatBoxComponent,
+        EaselComponent,
     ],
     imports: [AppMaterialModule, AppRoutingModule, BrowserAnimationsModule, BrowserModule, FormsModule, ReactiveFormsModule, HttpClientModule],
     providers: [],

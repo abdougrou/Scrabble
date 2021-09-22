@@ -3,8 +3,8 @@ import { Vec2 } from '@app/classes/vec2';
 import {
     BOARD_MULTIPLIER,
     COLS,
-    DEFAULT_HEIGHT,
-    DEFAULT_WIDTH,
+    CANVAS_HEIGHT,
+    CANVAS_WIDTH,
     GRID_SIZE,
     L2_MULTIPLIER,
     L3_MULTIPLIER,
@@ -20,7 +20,7 @@ import {
 })
 export class GridService {
     gridContext: CanvasRenderingContext2D;
-    private canvasSize: Vec2 = { x: DEFAULT_WIDTH, y: DEFAULT_HEIGHT };
+    private canvasSize: Vec2 = { x: CANVAS_WIDTH, y: CANVAS_HEIGHT };
 
     // TODO : pas de valeurs magiques!! Faudrait avoir une meilleure manière de le faire
     /* eslint-disable @typescript-eslint/no-magic-numbers */
@@ -52,7 +52,7 @@ export class GridService {
     }
 
     colourTile(x: number, y: number, colour: string) {
-        const step = DEFAULT_HEIGHT / (GRID_SIZE + 1);
+        const step = CANVAS_HEIGHT / (GRID_SIZE + 1);
         this.gridContext.beginPath();
         this.gridContext.rect(x * step, y * step, step, step);
         this.gridContext.fillStyle = colour;

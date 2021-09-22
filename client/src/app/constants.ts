@@ -43,8 +43,8 @@ Y,1,10
 Z,1,10
 *,2,0`;
 
-export const DEFAULT_WIDTH = 600;
-export const DEFAULT_HEIGHT = 600;
+export const CANVAS_WIDTH = 600;
+export const CANVAS_HEIGHT = 600;
 export const NUMBER_LINES = 16;
 export const GRID_SIZE = 15;
 export const COLS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
