@@ -6,6 +6,11 @@ export const MIN_USERNAME_LENGTH = 2;
 export const DIALOG_HEIGHT = '80%';
 export const DIALOG_WIDTH = '60%';
 
+// Game Manager constants
+export const FIRST_PLAYER_COIN_FLIP = 0.5;
+export const STARTING_TILE_AMOUNT = 7;
+export const SECOND_MD = 1000;
+
 // Reserve constants
 export const MIN_EXCHANGE_RESERVE_COUNT = 7;
 export const FULL_RESERVE_COUNT = 102;

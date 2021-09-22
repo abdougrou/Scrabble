@@ -1,7 +1,8 @@
 import { Component, HostListener } from '@angular/core';
 import { ChatMessage } from '@app/classes/message';
 import { CommandHandlerService } from '@app/services/command-handler.service';
-import { GameManagerService } from '@app/services/game-manager.service';
+import { PlayerService } from '@app/services/player.service';
+
 @Component({
     selector: 'app-chat-box',
     templateUrl: './chat-box.component.html',
@@ -12,7 +13,7 @@ export class ChatBoxComponent {
     message = '';
     chatMessage: ChatMessage = { user: '', body: '' };
 
-    constructor(public gameManagerService: GameManagerService, public commandHandlerService: CommandHandlerService) {}
+    constructor(public playerService: PlayerService, public commandHandlerService: CommandHandlerService) {}
 
     @HostListener('keydown', ['$event'])
     buttonDetect(event: KeyboardEvent) {
@@ -25,7 +26,7 @@ export class ChatBoxComponent {
             // console.log('message-input error');
         } else {
             if (input.value !== '') {
-                this.chatMessage.user = this.gameManagerService.players[0].name;
+                this.chatMessage.user = this.playerService.current.name;
                 this.chatMessage.body = this.message;
                 // console.log(this.chatMessage);
                 this.showMessage(this.chatMessage);
@@ -42,10 +43,10 @@ export class ChatBoxComponent {
             case 'System':
                 newMessage.style.color = 'red';
                 break;
-            case this.gameManagerService.players[0].name:
+            case this.playerService.players[0].name:
                 newMessage.style.color = 'gray';
                 break;
-            case this.gameManagerService.players[1].name:
+            case this.playerService.players[1].name:
                 newMessage.style.color = 'darkgoldenrod';
                 break;
             default:
