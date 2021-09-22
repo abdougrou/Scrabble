@@ -1,0 +1,25 @@
+#easel
+{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    background-color: #BA8C63;
+}
+
+.tile
+{
+    display: block;
+    border: 3px;
+    background-color: burlywood;
+    font-weight: 700;
+    font-size: x-large;
+}
+.points
+{
+    height: 29%;
+    font-size: xx-small;
+    position: absolute;
+    bottom: 0%;
+    right:0%;
+    padding: 7%;
+}
