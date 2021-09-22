@@ -1,0 +1,22 @@
+.container {
+    min-height: 50vh;
+    height: auto;
+}
+
+.justified {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.button {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.mat-raised-button {
+    color: white;
+    background-color: #23501f;
+    width: 100%;
+}
