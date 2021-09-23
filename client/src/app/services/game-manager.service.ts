@@ -18,6 +18,8 @@ export class GameManagerService {
     board: Tile[][] = [[]];
     reserve: ReserveService;
 
+    mainPlayerName: string = '';
+    enemyPlayerName: string = '';
     players: Player[] = [];
     get currentPlayer(): Player {
         return this.players[0];
@@ -35,6 +37,8 @@ export class GameManagerService {
         this.currentTurnDurationLeft = gameConfig.duration;
 
         this.initializePlayers([gameConfig.playerName1, gameConfig.playerName2]);
+        this.mainPlayerName = gameConfig.playerName1;
+        this.enemyPlayerName = gameConfig.playerName2;
 
         this.givePlayerTiles(this.players[0], STARTING_TILE_AMOUNT);
         this.givePlayerTiles(this.players[1], STARTING_TILE_AMOUNT);

@@ -36,3 +36,6 @@ X,1,10
 Y,1,10
 Z,1,10
 *,2,0`;
+
+// System name
+export const SYSTEM_NAME = 'Système';
