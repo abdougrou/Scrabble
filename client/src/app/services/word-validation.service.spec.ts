@@ -42,6 +42,14 @@ describe('WordValidationService', () => {
 
         expect(service.validateWords(board, newTiles)).toBe(true);
     });
+    it('should not validate a word placed outside the board', () => {
+        const newTiles: TileCoords[] = [
+            { tile: { letter: 'a', points: 0 }, coords: { x: 13, y: 2 } },
+            { tile: { letter: 'a', points: 2 }, coords: { x: 14, y: 2 } },
+            { tile: { letter: 's', points: 2 }, coords: { x: 15, y: 2 } },
+        ];
+        expect(service.validateWords(board, newTiles)).toBe(false);
+    });
     it('should not validate a word that isnt in the dictionnary', () => {
         const newTiles: TileCoords[] = [
             { tile: { letter: 't', points: 0 }, coords: { x: 2, y: 11 } },
