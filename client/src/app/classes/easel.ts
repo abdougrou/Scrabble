@@ -6,12 +6,25 @@ export class Easel {
         return this.tiles.length;
     }
 
-    constructor(tiles: Tile[]) {
+    constructor(tiles: Tile[] = []) {
         this.tiles = tiles;
     }
 
     addTiles(tiles: Tile[]) {
         this.tiles.push(...tiles);
+    }
+
+    getTiles(tilesStr: string): Tile[] {
+        const tiles: Tile[] = [];
+        for (const letter of tilesStr) {
+            const tile = this.tiles.find((item) => item.letter === letter);
+            if (tile) {
+                const index = this.tiles.indexOf(tile);
+                this.tiles.splice(index, 1);
+                tiles.push(tile);
+            }
+        }
+        return tiles;
     }
 
     containsTiles(tilesStr: string): boolean {
