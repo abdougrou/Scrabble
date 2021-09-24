@@ -89,6 +89,6 @@ export class CalculatePointsService {
     }
 
     getTileColor(tile: TileCoords): string {
-        return COLORS[tile.y].charAt(tile.x);
+        return COLORS[tile.coords.y].charAt(tile.coords.x);
     }
 }

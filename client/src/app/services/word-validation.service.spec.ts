@@ -104,8 +104,8 @@ describe('WordValidationService', () => {
     });
     it('should validate a word made up of old and new tiles', () => {
         const newTiles: TileCoords[] = [
-            { tile: { letter: 'a', points: 0 }, x: 12, y: 2 },
-            { tile: { letter: 's', points: 2 }, x: 14, y: 2 },
+            { tile: { letter: 'a', points: 0 }, coords: { x: 12, y: 2 } },
+            { tile: { letter: 's', points: 2 }, coords: { x: 14, y: 2 } },
         ];
         board[13][2] = { letter: 'a', points: 0 };
 
