@@ -1,3 +1,5 @@
+import { Vec2 } from "./vec2";
+
 export interface Tile {
     letter: string;
     points: number;
@@ -10,6 +12,5 @@ export interface ReserveTile {
 
 export interface TileCoords {
     tile: Tile;
-    x: number;
-    y: number;
+    coords: Vec2;
 }
