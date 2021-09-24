@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
 import { TileCoords } from '@app/classes/tile';
-import { GameManagerService } from './game-manager.service';
-
 //  r=red, e=empty, l=lightblue, p=pink, d=darkblue,
 const COLORS: string[] = [
     'reeleeereeeleer',
@@ -31,8 +29,6 @@ const RED_MULTIPLIER = 3;
     providedIn: 'root',
 })
 export class CalculatePointsService {
-    constructor(private gameManager: GameManagerService) { }
-
     calculatePoints(tileCoords: TileCoords[][], newTiles: TileCoords[]): number {
         let points = 0;
         if (newTiles.length === TILE_NUM_BONUS) {
@@ -41,7 +37,6 @@ export class CalculatePointsService {
         for (const tile of tileCoords) {
             points += this.calculateWordPoint(tile, newTiles);
         }
-        this.gameManager.currentPlayer.score += points;
         return points;
     }
 
