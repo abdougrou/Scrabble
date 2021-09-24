@@ -15,37 +15,29 @@ export class WordValidationService {
     }
 
     validateWords(board: Tile[][], newTiles: TileCoords[]): boolean {
-        const newBoard: Tile[][] = board;
         const wordsBefore: string[] = this.findWordsFromBoard(board);
+        //  Removing the accents from the new tiles and adding them to a temporary copy of the board
+        this.removeAccents(newTiles);
 
         //  End validation if the player entered an invalid character or placed a tile on top of another
-        for (const aTile of newTiles) {
-            if (!this.checkValidLetters(aTile)) {
-                return false;
-            }
-            if (!this.tilePositionIsEmpty(aTile, board)) {
-                return false;
-            }
+        if (!this.checkValidLetters(newTiles)) {
+            return false;
         }
 
-        //  Removing the accents from the new tiles and adding them to a temporary copy of the board
-        for (const aTile of newTiles) {
-            aTile.tile.letter = this.uniformLetters(aTile.tile.letter);
-            newBoard[aTile.x][aTile.y] = aTile.tile;
+        //  Checks that no tiles overlapse before placing them on the board
+        if (!this.placeNewTiles(newTiles, board)) {
+            return false;
         }
-
         //  checking That all tiles have at least one adjacent tile
-        for (const aTile of newTiles) {
-            if (!this.hasAdjacentLetters(board, aTile)) {
-                return false;
-            }
+        if (!this.noLoneTile(newTiles, board)) {
+            return false;
         }
 
         //  Getting all the words from the board and only keeping the newly formed ones
-        let wordsAfter: string[] = this.findWordsFromBoard(newBoard);
+        let wordsAfter: string[] = this.findWordsFromBoard(board);
         for (const wordA of wordsAfter) {
             for (const wordB of wordsBefore) {
-                if (wordA === wordB) {
+                if (JSON.stringify(wordA) === JSON.stringify(wordB)) {
                     wordsAfter = wordsAfter.filter((obj) => obj !== wordA);
                 }
             }
@@ -58,10 +50,6 @@ export class WordValidationService {
         return true;
     }
 
-    /**
-     * @param board conceptual representation of the board and the tiles
-     * @returns an array of strings representing all the words on the board
-     */
     findWordsFromBoard(board: Tile[][]): string[] {
         const boardWords: string[] = new Array();
         for (let i = 0; i < BOARD_SIZE; i++) {
@@ -97,51 +85,60 @@ export class WordValidationService {
         return boardWords;
     }
 
-    /**
-     * @param letter letter that may or may not contain an accent
-     * @returns the letter with no accents
-     */
-    uniformLetters(letter: string): string {
-        //  ligne de code tirer de https://www.codegrepper.com/code-examples/javascript/javascript+remove+accents
-        return letter.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    removeAccents(newTiles: TileCoords[]) {
+        for (const aTile of newTiles) {
+            aTile.tile.letter = aTile.tile.letter.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
     }
 
-    checkValidLetters(aTile: TileCoords): boolean {
-        if (aTile.tile.letter === '-' || aTile.tile.letter === "'") {
-            return false;
+    checkValidLetters(newTiles: TileCoords[]): boolean {
+        for (const aTile of newTiles) {
+            if (aTile.tile.letter === '-' || aTile.tile.letter === "'") {
+                return false;
+            }
         }
         return true;
     }
 
-    tilePositionIsEmpty(aTile: TileCoords, board: Tile[][]): boolean {
-        if (board[aTile.x][aTile.y].letter !== '') {
-            return false;
+    placeNewTiles(newTiles: TileCoords[], board: Tile[][]) {
+        for (const aTile of newTiles) {
+            if (board[aTile.x][aTile.y].letter === '') {
+                board[aTile.x][aTile.y] = aTile.tile;
+            } else {
+                return false;
+            }
         }
         return true;
     }
 
-    hasAdjacentLetters(board: Tile[][], aTile: TileCoords): boolean {
-        if (aTile.x !== 0) {
-            if (board[aTile.x - 1][aTile.y].letter !== '') {
-                return true;
+    noLoneTile(newTiles: TileCoords[], board: Tile[][]): boolean {
+        for (const aTile of newTiles) {
+            let hasAdjacent = false;
+            if (aTile.x !== 0) {
+                if (board[aTile.x - 1][aTile.y].letter !== '') {
+                    hasAdjacent = true;
+                }
+            }
+            if (aTile.x < BOARD_SIZE - 1) {
+                if (board[aTile.x + 1][aTile.y].letter !== '') {
+                    hasAdjacent = true;
+                }
+            }
+            if (aTile.y !== 0) {
+                if (board[aTile.x][aTile.y - 1].letter !== '') {
+                    hasAdjacent = true;
+                }
+            }
+            if (aTile.y < BOARD_SIZE - 1) {
+                if (board[aTile.x][aTile.y + 1].letter !== '') {
+                    hasAdjacent = true;
+                }
+            }
+            if (!hasAdjacent) {
+                return false;
             }
         }
-        if (aTile.x < BOARD_SIZE - 1) {
-            if (board[aTile.x + 1][aTile.y].letter !== '') {
-                return true;
-            }
-        }
-        if (aTile.y !== 0) {
-            if (board[aTile.x][aTile.y - 1].letter !== '') {
-                return true;
-            }
-        }
-        if (aTile.y < BOARD_SIZE - 1) {
-            if (board[aTile.x][aTile.y + 1].letter !== '') {
-                return true;
-            }
-        }
-        return false;
+        return true;
     }
 
     wordInDictionnary(words: string[]): boolean {

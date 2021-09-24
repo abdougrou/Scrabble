@@ -3,6 +3,8 @@ import { ChatMessage } from '@app/classes/message';
 import { COMMAND_RESULT, SYSTEM_NAME } from '@app/constants';
 import { CommandHandlerService } from '@app/services/command-handler.service';
 import { GameManagerService } from '@app/services/game-manager.service';
+import { PlayerService } from '@app/services/player.service';
+
 @Component({
     selector: 'app-chat-box',
     templateUrl: './chat-box.component.html',
@@ -13,11 +15,12 @@ export class ChatBoxComponent {
     message = '';
     chatMessage: ChatMessage = { user: '', body: '' };
 
-    constructor(public gameManager: GameManagerService, public commandHandler: CommandHandlerService) {
+    constructor(public gameManager: GameManagerService, public playerService: PlayerService, public commandHandler: CommandHandlerService) {
         this.gameManager.commandResult.subscribe((message) => {
             this.showMessage(message);
         });
     }
+
     @HostListener('keydown', ['$event'])
     buttonDetect(event: KeyboardEvent) {
         this.buttonPressed = event.key;
@@ -29,7 +32,7 @@ export class ChatBoxComponent {
             throw new Error('message-input error in the chatbox');
         } else {
             if (input.value !== '') {
-                this.chatMessage.user = this.gameManager.mainPlayerName;
+                this.chatMessage.user = this.playerService.current.name;
                 this.chatMessage.body = this.message;
                 this.showMessage(this.chatMessage);
                 this.showMessage(this.checkCommand(this.chatMessage));
@@ -82,7 +85,7 @@ export class ChatBoxComponent {
     checkCommand(message: ChatMessage): ChatMessage {
         let systemMessage: ChatMessage = { user: '', body: '' };
         if (message.body.startsWith('!')) {
-            systemMessage = this.commandHandler.checkCommand(message);
+            systemMessage = this.commandHandler.handleCommand(message.body, this.playerService.getPlayerByName(message.user));
         }
         return systemMessage;
     }
