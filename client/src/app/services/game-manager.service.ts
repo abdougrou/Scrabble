@@ -24,13 +24,12 @@ export class GameManagerService {
     constructor(private board: BoardService, private reserve: ReserveService, private players: PlayerService) {}
 
     initialize(gameConfig: GameConfig) {
+        this.mainPlayerName = gameConfig.playerName1;
+        this.enemyPlayerName = gameConfig.playerName2;
         this.turnDuration = gameConfig.duration;
         this.currentTurnDurationLeft = gameConfig.duration;
 
         this.initializePlayers([gameConfig.playerName1, gameConfig.playerName2]);
-
-        this.mainPlayerName = gameConfig.playerName1;
-        this.enemyPlayerName = gameConfig.playerName2;
 
         this.startTimer();
     }
