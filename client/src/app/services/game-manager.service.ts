@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { GameConfig } from '@app/classes/game-config';
 import { Player } from '@app/classes/player';
 import { Tile } from '@app/classes/tile';
+import { Vec2 } from '@app/classes/vec2';
 import { FIRST_PLAYER_COIN_FLIP, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
 import { timer } from 'rxjs';
 import { PlayerService } from './player.service';
@@ -57,7 +58,40 @@ export class GameManagerService {
         player.easel.addTiles(tiles);
     }
 
-    // TODO to be used by commands
-    // exchangeTiles(tiles: Tile[]) {}
-    // placeTiles(word: string, coord: Vec2, vertical: boolean) {}
+    exchangeTiles(tiles: string, player: Player) {
+        if (this.players.current !== player) {
+            // not player turn
+        } else if (!this.reserve.isExchangePossible(tiles.length)) {
+            // cant exchange, not enough tiles in reserve
+        } else if (!player.easel.containsTiles(tiles)) {
+            // player dosent have tiles in easel
+        } else {
+            this.reserve.returnLetters(player.easel.getTiles(tiles));
+            player.easel.addTiles(this.reserve.getLetters(tiles.length));
+        }
+    }
+    // eslint-disable-next-line no-unused-vars
+    placeTiles(word: string, coord: Vec2, vertical: boolean, player: Player) {
+        // verify if its the first play of the game (should be in H8)
+        // if (this.players.current !== player) {
+        //     // not player turn
+        // } else if (!player.easel.containsTiles(word)) {
+        //     // player doesn't have tiles in easel
+        // } else
+        if (vertical) {
+            for (let i = 0; i < word.length; i++) {
+                this.board[coord.x][coord.y + i] = {
+                    letter: word[i],
+                    points: 0,
+                };
+            }
+        } else {
+            for (let i = 0; i < word.length; i++) {
+                this.board[coord.x + i][coord.y] = {
+                    letter: word[i],
+                    points: 0,
+                };
+            }
+        }
+    }
 }
