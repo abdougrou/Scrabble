@@ -4,6 +4,7 @@ import { Player } from '@app/classes/player';
 import { Tile } from '@app/classes/tile';
 import { FIRST_PLAYER_COIN_FLIP, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
 import { timer } from 'rxjs';
+import { BoardService } from './board.service';
 import { PlayerService } from './player.service';
 import { ReserveService } from './reserve.service';
 
@@ -11,12 +12,10 @@ import { ReserveService } from './reserve.service';
     providedIn: 'root',
 })
 export class GameManagerService {
-    board: Tile[][] = [[]];
-
     turnDuration: number;
     currentTurnDurationLeft: number;
 
-    constructor(private reserve: ReserveService, private players: PlayerService) {}
+    constructor(board: BoardService, private reserve: ReserveService, private players: PlayerService) {}
 
     initialize(gameConfig: GameConfig) {
         this.turnDuration = gameConfig.duration;
