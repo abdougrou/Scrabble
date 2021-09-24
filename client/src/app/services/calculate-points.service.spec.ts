@@ -16,18 +16,18 @@ describe('CalculatePoitnsService', () => {
     });
     //  Testing isNewTile function
     it('should return TRUE when the parameter tile is in the newTiles array', () => {
-        const newTiles: TileCoords[] = [{ tile: { letter: 'a', points: 12 }, x: 4, y: 5 }];
-        const tile: TileCoords = { tile: { letter: 'a', points: 12 }, x: 4, y: 5 };
+        const newTiles: TileCoords[] = [{ tile: { letter: 'a', points: 12 }, coords: { x: 4, y: 5 } }];
+        const tile: TileCoords = { tile: { letter: 'a', points: 12 }, coords: { x: 4, y: 5 } };
         expect(service.isNewTile(tile, newTiles)).toBeTrue();
     });
     it('should return false when the parameter tile is not contained in the newTiles array', () => {
-        const newTiles: TileCoords[] = [{ tile: { letter: 'a', points: 12 }, x: 4, y: 5 }];
-        const tile: TileCoords = { tile: { letter: 'a', points: 12 }, x: 5, y: 5 };
+        const newTiles: TileCoords[] = [{ tile: { letter: 'a', points: 12 }, coords: { x: 4, y: 5 } }];
+        const tile: TileCoords = { tile: { letter: 'a', points: 12 }, coords: { x: 5, y: 5 } };
         expect(service.isNewTile(tile, newTiles)).toBeFalse();
     });
     // Testing getTileColor function
     it('should return the correct string depending on the tiles location', () => {
-        const tile: TileCoords = { tile: { letter: 'a', points: 12 }, x: 5, y: 5 };
+        const tile: TileCoords = { tile: { letter: 'a', points: 12 }, coords: { x: 5, y: 5 } };
         const color = 'd';
         expect(service.getTileColor(tile)).toBe(color);
     });
@@ -38,7 +38,7 @@ describe('CalculatePoitnsService', () => {
         const numTiles = 15;
         const numNewTiles = 7;
         for (let i = 0; i < numTiles; i++) {
-            tiles.push({ tile: { letter: 'a', points: 1 }, x: 0, y: i });
+            tiles.push({ tile: { letter: 'a', points: 1 }, coords: { x: 0, y: i } });
             if (i < numNewTiles) {
                 newTiles[i] = tiles[i];
             }
@@ -52,7 +52,7 @@ describe('CalculatePoitnsService', () => {
         const numTiles = 15;
         const numNewTiles = 7;
         for (let i = 0; i < numTiles; i++) {
-            tiles.push({ tile: { letter: 'a', points: 1 }, x: 1, y: i });
+            tiles.push({ tile: { letter: 'a', points: 1 }, coords: { x: 1, y: i } });
             if (i < numNewTiles) {
                 newTiles[i] = tiles[i];
             }
@@ -68,7 +68,7 @@ describe('CalculatePoitnsService', () => {
         const numNewTiles = 5;
         const row: TileCoords[] = new Array();
         for (let i = 0; i < numTiles; i++) {
-            row.push({ tile: { letter: 'a', points: 1 }, x: i, y: 0 });
+            row.push({ tile: { letter: 'a', points: 1 }, coords: { x: i, y: 0 } });
         }
         tiles.push(row);
 
@@ -87,7 +87,7 @@ describe('CalculatePoitnsService', () => {
         const numNewTiles = 7;
         const row: TileCoords[] = new Array();
         for (let i = 0; i < numTiles; i++) {
-            row.push({ tile: { letter: 'a', points: 1 }, x: i, y: 0 });
+            row.push({ tile: { letter: 'a', points: 1 }, coords: { x: i, y: 0 } });
         }
         tiles.push(row);
 
