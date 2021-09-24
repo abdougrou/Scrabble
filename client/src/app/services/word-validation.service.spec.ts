@@ -29,12 +29,12 @@ describe('WordValidationService', () => {
     });
     it('should validate a correct word', () => {
         const newTiles: TileCoords[] = [
-            { tile: { letter: 'a', points: 0 }, x: 12, y: 2 },
-            { tile: { letter: 'a', points: 2 }, x: 13, y: 2 },
-            { tile: { letter: 's', points: 2 }, x: 14, y: 2 },
-            { tile: { letter: 'h', points: 0 }, x: 3, y: 2 },
-            { tile: { letter: 'e', points: 2 }, x: 4, y: 2 },
-            { tile: { letter: 'y', points: 2 }, x: 5, y: 2 },
+            { tile: { letter: 'a', points: 0 }, coords: { x: 12, y: 2 } },
+            { tile: { letter: 'a', points: 2 }, coords: { x: 13, y: 2 } },
+            { tile: { letter: 's', points: 2 }, coords: { x: 14, y: 2 } },
+            { tile: { letter: 'h', points: 0 }, coords: { x: 3, y: 2 } },
+            { tile: { letter: 'e', points: 2 }, coords: { x: 4, y: 2 } },
+            { tile: { letter: 'y', points: 2 }, coords: { x: 5, y: 2 } },
         ];
         board[4][5] = { letter: 'a', points: 0 };
         board[4][6] = { letter: 'a', points: 0 };
@@ -42,49 +42,56 @@ describe('WordValidationService', () => {
 
         expect(service.validateWords(board, newTiles)).toBe(true);
     });
+    it('should not validate a word placed outside the board', () => {
+        const newTiles: TileCoords[] = [
+            { tile: { letter: 'a', points: 0 }, coords: { x: 13, y: 2 } },
+            { tile: { letter: 'a', points: 2 }, coords: { x: 14, y: 2 } },
+            { tile: { letter: 's', points: 2 }, coords: { x: 15, y: 2 } },
+        ];
+        expect(service.validateWords(board, newTiles)).toBe(false);
+    });
     it('should not validate a word that isnt in the dictionnary', () => {
         const newTiles: TileCoords[] = [
-            { tile: { letter: 't', points: 0 }, x: 2, y: 11 },
-            { tile: { letter: 'e', points: 2 }, x: 2, y: 12 },
-            { tile: { letter: 'e', points: 2 }, x: 2, y: 13 },
-            { tile: { letter: 't', points: 0 }, x: 2, y: 14 },
+            { tile: { letter: 't', points: 0 }, coords: { x: 2, y: 11 } },
+            { tile: { letter: 'e', points: 2 }, coords: { x: 2, y: 12 } },
+            { tile: { letter: 'e', points: 2 }, coords: { x: 2, y: 13 } },
+            { tile: { letter: 't', points: 0 }, coords: { x: 2, y: 14 } },
         ];
 
         expect(service.validateWords(board, newTiles)).toBe(false);
     });
-    //  Testing removeAccents
     it('should remove accents', () => {
         const newTiles: TileCoords[] = new Array();
-        newTiles.push({ tile: { letter: 'é', points: 0 }, x: 1, y: 2 });
+        newTiles.push({ tile: { letter: 'é', points: 0 }, coords: { x: 1, y: 2 } });
         service.removeAccents(newTiles);
         const result = 'e';
         expect(newTiles[0].tile.letter).toBe(result);
     });
     it('should return false for invalid letters', () => {
         const newTiles: TileCoords[] = [
-            { tile: { letter: 'a', points: 0 }, x: 1, y: 2 },
-            { tile: { letter: 'a', points: 2 }, x: 2, y: 2 },
-            { tile: { letter: 's', points: 2 }, x: 3, y: 2 },
-            { tile: { letter: '-', points: 2 }, x: 4, y: 2 },
+            { tile: { letter: 'a', points: 0 }, coords: { x: 1, y: 2 } },
+            { tile: { letter: 'a', points: 2 }, coords: { x: 2, y: 2 } },
+            { tile: { letter: 's', points: 2 }, coords: { x: 3, y: 2 } },
+            { tile: { letter: '-', points: 2 }, coords: { x: 4, y: 2 } },
         ];
         expect(service.validateWords(board, newTiles)).toBe(false);
     });
     it('should not validate a word where tiles overlap', () => {
         const newTiles: TileCoords[] = [
-            { tile: { letter: 'a', points: 0 }, x: 1, y: 2 },
-            { tile: { letter: 'a', points: 2 }, x: 2, y: 2 },
-            { tile: { letter: 's', points: 2 }, x: 3, y: 2 },
-            { tile: { letter: 'a', points: 2 }, x: 1, y: 2 },
+            { tile: { letter: 'a', points: 0 }, coords: { x: 1, y: 2 } },
+            { tile: { letter: 'a', points: 2 }, coords: { x: 2, y: 2 } },
+            { tile: { letter: 's', points: 2 }, coords: { x: 3, y: 2 } },
+            { tile: { letter: 'a', points: 2 }, coords: { x: 1, y: 2 } },
         ];
         expect(service.validateWords(board, newTiles)).toBe(false);
     });
     it('should return true when all the new tiles have adjacent tiles', () => {
         const newTiles: TileCoords[] = [
-            { tile: { letter: 'a', points: 0 }, x: 1, y: 2 },
-            { tile: { letter: 'b', points: 2 }, x: 2, y: 2 },
-            { tile: { letter: 'b', points: 2 }, x: 3, y: 2 },
-            { tile: { letter: 'b', points: 2 }, x: 2, y: 1 },
-            { tile: { letter: 'b', points: 2 }, x: 2, y: 3 },
+            { tile: { letter: 'a', points: 0 }, coords: { x: 1, y: 2 } },
+            { tile: { letter: 'b', points: 2 }, coords: { x: 2, y: 2 } },
+            { tile: { letter: 'b', points: 2 }, coords: { x: 3, y: 2 } },
+            { tile: { letter: 'b', points: 2 }, coords: { x: 2, y: 1 } },
+            { tile: { letter: 'b', points: 2 }, coords: { x: 2, y: 3 } },
         ];
         board[1][2] = newTiles[0].tile;
         board[2][2] = newTiles[1].tile;
@@ -95,10 +102,10 @@ describe('WordValidationService', () => {
     });
     it('should return false when at least one new tile has no adjacent tiles', () => {
         const newTiles: TileCoords[] = [
-            { tile: { letter: 'a', points: 0 }, x: 1, y: 2 },
-            { tile: { letter: 'a', points: 2 }, x: 2, y: 2 },
-            { tile: { letter: 's', points: 2 }, x: 3, y: 2 },
-            { tile: { letter: 'c', points: 2 }, x: 6, y: 6 },
+            { tile: { letter: 'a', points: 0 }, coords: { x: 1, y: 2 } },
+            { tile: { letter: 'a', points: 2 }, coords: { x: 2, y: 2 } },
+            { tile: { letter: 's', points: 2 }, coords: { x: 3, y: 2 } },
+            { tile: { letter: 'c', points: 2 }, coords: { x: 6, y: 6 } },
         ];
         expect(service.validateWords(board, newTiles)).toBe(false);
     });

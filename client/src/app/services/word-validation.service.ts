@@ -102,6 +102,9 @@ export class WordValidationService {
 
     placeNewTiles(newTiles: TileCoords[], board: Tile[][]) {
         for (const aTile of newTiles) {
+            if (aTile.coords.x >= BOARD_SIZE || aTile.coords.y >= BOARD_SIZE) {
+                return false;
+            }
             if (board[aTile.coords.x][aTile.coords.y].letter === '') {
                 board[aTile.coords.x][aTile.coords.y] = aTile.tile;
             } else {
