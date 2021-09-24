@@ -3,7 +3,7 @@ import { GameConfig } from '@app/classes/game-config';
 import { Player } from '@app/classes/player';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { FIRST_PLAYER_COIN_FLIP, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
+import { FIRST_PLAYER_COIN_FLIP, RANDOM_PLAYER_NAMES, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
 import { timer } from 'rxjs';
 import { BoardService } from './board.service';
 import { PlayerService } from './player.service';
@@ -15,14 +15,16 @@ import { ReserveService } from './reserve.service';
 export class GameManagerService {
     turnDuration: number;
     currentTurnDurationLeft: number;
+    randomPlayerNameIndex: number;
 
     constructor(private board: BoardService, private reserve: ReserveService, private players: PlayerService) {}
 
     initialize(gameConfig: GameConfig) {
         this.turnDuration = gameConfig.duration;
         this.currentTurnDurationLeft = gameConfig.duration;
+        this.randomPlayerNameIndex = Math.floor(Math.random() * RANDOM_PLAYER_NAMES.length);
 
-        this.initializePlayers([gameConfig.playerName1, gameConfig.playerName2]);
+        this.initializePlayers([gameConfig.playerName1, RANDOM_PLAYER_NAMES[this.randomPlayerNameIndex]]);
 
         this.startTimer();
     }
@@ -57,6 +59,19 @@ export class GameManagerService {
         player.easel.addTiles(tiles);
     }
 
+    skipTurn() {
+        this.players.incrementSkipCounter();
+        this.switchPlayers();
+    }
+
+    // TODO skipCounter to reset when place or exchange command excuted
+
+    // TODO implement stopTimer() to end the game after 6 skipTurn
+
+    reset() {
+        this.players.clear();
+    }
+
     exchangeTiles(tiles: string, player: Player) {
         if (this.players.current !== player) {
             // not player turn
@@ -69,6 +84,7 @@ export class GameManagerService {
             player.easel.addTiles(this.reserve.getLetters(tiles.length));
         }
     }
+
     // eslint-disable-next-line no-unused-vars
     placeTiles(word: string, coord: Vec2, vertical: boolean, player: Player) {
         // verify if its the first play of the game (should be in H8)

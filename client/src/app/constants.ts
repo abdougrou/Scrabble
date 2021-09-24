@@ -7,6 +7,10 @@ export const MIN_USERNAME_LENGTH = 2;
 export const DIALOG_HEIGHT = '80%';
 export const DIALOG_WIDTH = '60%';
 
+// Player Info
+export const RANDOM_PLAYER_NAMES = ['Nikolay', 'Sami', 'Augustin'];
+export const MAX_SKIP_COUNT = 6;
+
 // Game Manager constants
 export const FIRST_PLAYER_COIN_FLIP = 0.5;
 export const STARTING_TILE_AMOUNT = 7;

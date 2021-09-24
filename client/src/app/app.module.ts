@@ -15,6 +15,7 @@ import { GameConfigPageComponent } from './components/game-config-page/game-conf
 import { ModeSelectionComponent } from './components/mode-selection/mode-selection.component';
 import { ChatBoxComponent } from './components/chat-box/chat-box.component';
 import { EaselComponent } from './components/easel/easel.component';
+import { PlayerInfoComponent } from './components/player-info/player-info.component';
 
 /**
  * Main module that is used in main.ts.
@@ -34,6 +35,7 @@ import { EaselComponent } from './components/easel/easel.component';
         GameConfigPageComponent,
         ChatBoxComponent,
         EaselComponent,
+        PlayerInfoComponent,
     ],
     imports: [AppMaterialModule, AppRoutingModule, BrowserAnimationsModule, BrowserModule, FormsModule, ReactiveFormsModule, HttpClientModule],
     providers: [],
