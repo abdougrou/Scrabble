@@ -1,6 +1,6 @@
 import { Component, HostListener } from '@angular/core';
 import { ChatMessage } from '@app/classes/message';
-import { SYSTEM_NAME } from '@app/constants';
+import { COMMAND_RESULT, SYSTEM_NAME } from '@app/constants';
 import { CommandHandlerService } from '@app/services/command-handler.service';
 import { GameManagerService } from '@app/services/game-manager.service';
 @Component({
@@ -13,7 +13,11 @@ export class ChatBoxComponent {
     message = '';
     chatMessage: ChatMessage = { user: '', body: '' };
 
-    constructor(public gameManagerService: GameManagerService, public commandHandlerService: CommandHandlerService) {}
+    constructor(public gameManager: GameManagerService, public commandHandler: CommandHandlerService) {
+        this.gameManager.commandResult.subscribe((message) => {
+            this.showMessage(message);
+        });
+    }
     @HostListener('keydown', ['$event'])
     buttonDetect(event: KeyboardEvent) {
         this.buttonPressed = event.key;
@@ -25,11 +29,10 @@ export class ChatBoxComponent {
             throw new Error('message-input error in the chatbox');
         } else {
             if (input.value !== '') {
-                this.chatMessage.user = this.gameManagerService.mainPlayerName;
+                this.chatMessage.user = this.gameManager.mainPlayerName;
                 this.chatMessage.body = this.message;
-                // console.log(this.chatMessage);
                 this.showMessage(this.chatMessage);
-                this.checkCommand(this.chatMessage);
+                this.showMessage(this.checkCommand(this.chatMessage));
             }
             input.value = '';
         }
@@ -37,16 +40,22 @@ export class ChatBoxComponent {
 
     showMessage(message: ChatMessage): void {
         const newMessage = document.createElement('p');
-        newMessage.innerHTML = message.user + ': ' + message.body;
         switch (message.user) {
             case SYSTEM_NAME:
+                newMessage.innerHTML = message.user + ': ' + message.body;
                 newMessage.style.color = 'red';
                 break;
-            case this.gameManagerService.mainPlayerName:
+            case this.gameManager.mainPlayerName:
+                newMessage.innerHTML = message.user + ': ' + message.body;
                 newMessage.style.color = 'gray';
                 break;
-            case this.gameManagerService.enemyPlayerName:
+            case this.gameManager.enemyPlayerName:
+                newMessage.innerHTML = message.user + ': ' + message.body;
                 newMessage.style.color = 'darkgoldenrod';
+                break;
+            case COMMAND_RESULT:
+                newMessage.innerHTML = message.body;
+                newMessage.style.color = 'gray';
                 break;
             default:
                 newMessage.style.color = 'gray';
@@ -70,23 +79,11 @@ export class ChatBoxComponent {
         }
     }
 
-    checkCommand(message: ChatMessage): void {
-        const systemMessage: ChatMessage = { user: SYSTEM_NAME, body: '' };
-        const msg = message.body.toLowerCase();
-        if (msg.startsWith('!')) {
-            if (msg.startsWith('!placer')) {
-                systemMessage.body = this.commandHandlerService.place(message.body);
-                this.showMessage(systemMessage);
-            } else if (msg.startsWith('!echanger') || msg.startsWith('!échanger')) {
-                systemMessage.body = this.commandHandlerService.exchange(message.body);
-                this.showMessage(systemMessage);
-            } else if (msg === '!passer') {
-                systemMessage.body = this.commandHandlerService.pass();
-                this.showMessage(systemMessage);
-            } else {
-                systemMessage.body = "La commande entrée n'est pas valide";
-                this.showMessage(systemMessage);
-            }
+    checkCommand(message: ChatMessage): ChatMessage {
+        let systemMessage: ChatMessage = { user: '', body: '' };
+        if (message.body.startsWith('!')) {
+            systemMessage = this.commandHandler.checkCommand(message);
         }
+        return systemMessage;
     }
 }

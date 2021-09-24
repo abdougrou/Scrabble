@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Easel } from '@app/classes/easel';
 import { GameConfig } from '@app/classes/game-config';
+import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
 import { Tile } from '@app/classes/tile';
-import { timer } from 'rxjs';
+import { COMMAND_RESULT } from '@app/constants';
+import { BehaviorSubject, timer } from 'rxjs';
 import { ReserveService } from './reserve.service';
 
 // const BOARD_DIMENSION = 15;
@@ -17,6 +19,8 @@ const SECOND_MD = 1000;
 export class GameManagerService {
     board: Tile[][] = [[]];
     reserve: ReserveService;
+
+    commandResult = new BehaviorSubject<ChatMessage>({ user: '', body: '' } as ChatMessage);
 
     mainPlayerName: string = '';
     enemyPlayerName: string = '';
@@ -87,4 +91,10 @@ export class GameManagerService {
     // TODO to be used by commands
     // exchangeTiles(tiles: Tile[]) {}
     // placeTiles(word: string, coord: Vec2, vertical: boolean) {}
+
+    placeTiles(message: ChatMessage): void {
+        message.user = COMMAND_RESULT;
+        message.body = 'Vous avez placer un mot !';
+        this.commandResult.next(message);
+    }
 }

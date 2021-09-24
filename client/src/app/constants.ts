@@ -39,3 +39,5 @@ Z,1,10
 
 // System name
 export const SYSTEM_NAME = 'Système';
+
+export const COMMAND_RESULT = 'Commande';
