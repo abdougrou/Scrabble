@@ -13,13 +13,6 @@ import { ReserveService } from './reserve.service';
     providedIn: 'root',
 })
 export class GameManagerService {
-<<<<<<< HEAD
-    tile: Tile = { letter: 'W', points: 2 };
-    board: Tile[][] = [[]];
-
-
-=======
->>>>>>> main
     turnDuration: number;
     currentTurnDurationLeft: number;
     randomPlayerNameIndex: number;

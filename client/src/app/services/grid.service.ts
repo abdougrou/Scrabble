@@ -3,9 +3,8 @@ import { Injectable } from '@angular/core';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
 import { BOARD_MULTIPLIER, COLS, CANVAS_HEIGHT, CANVAS_WIDTH, GRID_SIZE, TILE_COLORS, STEP, ROWS, TILE_TEXT_COLOR } from '@app/constants';
-import { GameManagerService } from './game-manager.service';
+import { BoardService } from './board.service';
 
-// TODO : Avoir un fichier séparé pour les constantes et ne pas les répéter
 @Injectable({
     providedIn: 'root',
 })
@@ -13,11 +12,12 @@ export class GridService {
     gridContext: CanvasRenderingContext2D;
     private canvasSize: Vec2 = { x: CANVAS_WIDTH, y: CANVAS_HEIGHT };
 
-    constructor(private gameManager: GameManagerService) {}
+    constructor(private board: BoardService) {}
 
     drawGridIds() {
         const startPositionX: Vec2 = { x: (-20 + STEP) / 2, y: CANVAS_HEIGHT - (-20 + STEP) };
         const startPositionY: Vec2 = { x: CANVAS_WIDTH - (20 + STEP) / 2, y: (20 + STEP) / 2 };
+        this.gridContext.fillStyle = 'black';
         this.gridContext.font = '20px system-ui';
         for (let i = 0; i < GRID_SIZE; i++) {
             this.gridContext.fillText(COLS[i].toString(), startPositionX.x + STEP * i, startPositionX.y);
@@ -69,7 +69,6 @@ export class GridService {
     }
 
     drawBoard() {
-        this.gameManager.board[0][0] = this.gameManager.tile;
         this.gridContext.beginPath();
         this.gridContext.rect(0, 0, CANVAS_HEIGHT - STEP, CANVAS_WIDTH - STEP);
         this.gridContext.fillStyle = 'black';
@@ -77,13 +76,8 @@ export class GridService {
         for (let i = 0; i < GRID_SIZE; i++) {
             for (let j = 0; j < GRID_SIZE; j++) {
                 const coord: Vec2 = { x: i, y: j };
-                // try {
-                //     this.drawTile(coord, this.gameManager.board[i][j]);
-                //     throw new Error('Something bad happened');
-                // } catch (e) {
-                //     this.drawMultiplierTile(coord, BOARD_MULTIPLIER[i][j]);
-                // }
-                if (this.gameManager.board[i][j]) this.drawTile(coord, this.gameManager.board[i][j]);
+                const tile: Tile | undefined = this.board.getTile(coord);
+                if (tile) this.drawTile(coord, tile);
                 else this.drawMultiplierTile(coord, BOARD_MULTIPLIER[i][j]);
             }
         }

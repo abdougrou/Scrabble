@@ -17,7 +17,7 @@ export enum MouseButton {
     styleUrls: ['./play-area.component.scss'],
 })
 export class PlayAreaComponent implements AfterViewInit {
-    @ViewChild('gridCanvas', { static: false }) private gridCanvas!: ElementRef<HTMLCanvasElement>;
+    @ViewChild('canvas', { static: false }) private gridCanvas!: ElementRef<HTMLCanvasElement>;
 
     mousePosition: Vec2 = { x: 0, y: 0 };
     buttonPressed = '';
@@ -32,8 +32,8 @@ export class PlayAreaComponent implements AfterViewInit {
 
     ngAfterViewInit(): void {
         this.gridService.gridContext = this.gridCanvas.nativeElement.getContext('2d') as CanvasRenderingContext2D;
-        this.gridService.drawGridIds();
         this.gridService.drawBoard();
+        this.gridService.drawGridIds();
         this.gridCanvas.nativeElement.focus();
     }
 
@@ -45,10 +45,10 @@ export class PlayAreaComponent implements AfterViewInit {
         return this.canvasSize.y;
     }
 
-    // TODO : déplacer ceci dans un service de gestion de la souris!
-    mouseHitDetect(event: MouseEvent) {
-        if (event.button === MouseButton.Left) {
-            this.mousePosition = { x: event.offsetX, y: event.offsetY };
-        }
-    }
+    // // TODO : déplacer ceci dans un service de gestion de la souris!
+    // mouseHitDetect(event: MouseEvent) {
+    //     if (event.button === MouseButton.Left) {
+    //         this.mousePosition = { x: event.offsetX, y: event.offsetY };
+    //     }
+    // }
 }
