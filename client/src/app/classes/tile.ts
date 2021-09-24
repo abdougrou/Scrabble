@@ -1,4 +1,4 @@
-import { Vec2 } from "./vec2";
+import { Vec2 } from './vec2';
 
 export interface Tile {
     letter: string;
