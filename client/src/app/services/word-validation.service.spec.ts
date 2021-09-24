@@ -13,7 +13,6 @@ describe('WordValidationService', () => {
         TestBed.configureTestingModule({ imports: [HttpClientTestingModule] });
         service = TestBed.inject(WordValidationService);
         TestBed.inject(HttpClient);
-
         board = new Array<Tile[]>();
         for (let y = 0; y < BOARD_SIZE; y++) {
             const row: Tile[] = new Array<Tile>();
@@ -22,76 +21,94 @@ describe('WordValidationService', () => {
             }
             board.push(row);
         }
+        service.dictionnary = ['aas', 'test', 'hey'];
     });
 
     it('should be created', () => {
         expect(service).toBeTruthy();
     });
+    it('should validate a correct word', () => {
+        const newTiles: TileCoords[] = [
+            { tile: { letter: 'a', points: 0 }, x: 12, y: 2 },
+            { tile: { letter: 'a', points: 2 }, x: 13, y: 2 },
+            { tile: { letter: 's', points: 2 }, x: 14, y: 2 },
+            { tile: { letter: 'h', points: 0 }, x: 3, y: 2 },
+            { tile: { letter: 'e', points: 2 }, x: 4, y: 2 },
+            { tile: { letter: 'y', points: 2 }, x: 5, y: 2 },
+        ];
+        board[4][5] = { letter: 'a', points: 0 };
+        board[4][6] = { letter: 'a', points: 0 };
+        board[4][7] = { letter: 's', points: 0 };
 
-    //  Testing the uniformLetters function
+        expect(service.validateWords(board, newTiles)).toBe(true);
+    });
+    it('should not validate a word that isnt in the dictionnary', () => {
+        const newTiles: TileCoords[] = [
+            { tile: { letter: 't', points: 0 }, x: 2, y: 11 },
+            { tile: { letter: 'e', points: 2 }, x: 2, y: 12 },
+            { tile: { letter: 'e', points: 2 }, x: 2, y: 13 },
+            { tile: { letter: 't', points: 0 }, x: 2, y: 14 },
+        ];
+
+        expect(service.validateWords(board, newTiles)).toBe(false);
+    });
+    //  Testing removeAccents
     it('should remove accents', () => {
-        const characterWithAccent = 'é';
-        const characterWithoutAccent = 'e';
-        expect(service.uniformLetters(characterWithAccent)).toBe(characterWithoutAccent);
+        const newTiles: TileCoords[] = new Array();
+        newTiles.push({ tile: { letter: 'é', points: 0 }, x: 1, y: 2 });
+        service.removeAccents(newTiles);
+        const result = 'e';
+        expect(newTiles[0].tile.letter).toBe(result);
     });
-    it('should not change characters that dont have accents', () => {
-        const normalCharacter = 'a';
-        expect(service.uniformLetters(normalCharacter)).toBe(normalCharacter);
+    it('should return false for invalid letters', () => {
+        const newTiles: TileCoords[] = [
+            { tile: { letter: 'a', points: 0 }, x: 1, y: 2 },
+            { tile: { letter: 'a', points: 2 }, x: 2, y: 2 },
+            { tile: { letter: 's', points: 2 }, x: 3, y: 2 },
+            { tile: { letter: '-', points: 2 }, x: 4, y: 2 },
+        ];
+        expect(service.validateWords(board, newTiles)).toBe(false);
     });
-    it('should not affect special characters that dont contain accents', () => {
-        const specialCharacters = '13#$<>-+=&;;":~`';
-        expect(service.uniformLetters(specialCharacters)).toBe(specialCharacters);
+    it('should not validate a word where tiles overlap', () => {
+        const newTiles: TileCoords[] = [
+            { tile: { letter: 'a', points: 0 }, x: 1, y: 2 },
+            { tile: { letter: 'a', points: 2 }, x: 2, y: 2 },
+            { tile: { letter: 's', points: 2 }, x: 3, y: 2 },
+            { tile: { letter: 'a', points: 2 }, x: 1, y: 2 },
+        ];
+        expect(service.validateWords(board, newTiles)).toBe(false);
     });
-    //  Testing the checkValidLetters function
-    it('should not validate a tile containing a hyphen or an apostrophe', () => {
-        const aTile: TileCoords = { tile: { letter: '-', points: 0 }, x: 0, y: 0 };
-        const bTile: TileCoords = { tile: { letter: "'", points: 0 }, x: 0, y: 0 };
-        expect(service.checkValidLetters(aTile)).toBe(false);
-        expect(service.checkValidLetters(bTile)).toBe(false);
+    it('should return true when all the new tiles have adjacent tiles', () => {
+        const newTiles: TileCoords[] = [
+            { tile: { letter: 'a', points: 0 }, x: 1, y: 2 },
+            { tile: { letter: 'b', points: 2 }, x: 2, y: 2 },
+            { tile: { letter: 'b', points: 2 }, x: 3, y: 2 },
+            { tile: { letter: 'b', points: 2 }, x: 2, y: 1 },
+            { tile: { letter: 'b', points: 2 }, x: 2, y: 3 },
+        ];
+        board[1][2] = newTiles[0].tile;
+        board[2][2] = newTiles[1].tile;
+        board[3][2] = newTiles[2].tile;
+        board[2][1] = newTiles[3].tile;
+        board[2][3] = newTiles[4].tile;
+        expect(service.noLoneTile(newTiles, board)).toBe(true);
     });
-    it('should validate characters that arent hyphens or apostrophes', () => {
-        const aTile: TileCoords = { tile: { letter: 'q', points: 0 }, x: 0, y: 0 };
-        expect(service.checkValidLetters(aTile)).toBe(true);
+    it('should return false when at least one new tile has no adjacent tiles', () => {
+        const newTiles: TileCoords[] = [
+            { tile: { letter: 'a', points: 0 }, x: 1, y: 2 },
+            { tile: { letter: 'a', points: 2 }, x: 2, y: 2 },
+            { tile: { letter: 's', points: 2 }, x: 3, y: 2 },
+            { tile: { letter: 'c', points: 2 }, x: 6, y: 6 },
+        ];
+        expect(service.validateWords(board, newTiles)).toBe(false);
     });
-    //  Testing tilePositionIsEmpty function
-    it('should not validate a position taken up by another tile', () => {
-        board[1][0].letter = 'a';
-        const aTile: TileCoords = { tile: { letter: 'b', points: 0 }, x: 1, y: 0 };
-        expect(service.tilePositionIsEmpty(aTile, board)).toBe(false);
-    });
-    it('should validate an empty position', () => {
-        board[1][0].letter = 'a';
-        const aTile: TileCoords = { tile: { letter: 'b', points: 0 }, x: 2, y: 2 };
-        expect(service.tilePositionIsEmpty(aTile, board)).toBe(true);
-    });
-    //  Testing findWordsFromBoard function
-    it('should find words on the board', () => {
-        board[0][1].letter = 'a';
-        board[0][2].letter = 'b';
-        board[1][1].letter = 'c';
-        const result: string[] = ['ab', 'ac'];
-        expect(service.findWordsFromBoard(board)).toEqual(result);
-    });
-    it('should not return words containing less than 2 letters', () => {
-        board[4][4].letter = 'c';
-        const result: string[] = [];
-        expect(service.findWordsFromBoard(board)).toEqual(result);
-    });
-    it('should not merge words from diferent lines of the board', () => {
-        board[0][13].letter = 'a';
-        board[0][14].letter = 'b';
-        board[1][0].letter = 'c';
-        const result: string[] = ['ab'];
-        expect(service.findWordsFromBoard(board)).toEqual(result);
-    });
-    //  Testing hasAdjacentLetters function
-    it('should return true when the parameter tile has adjacent tiles', () => {
-        board[0][0].letter = 'a';
-        const aTile: TileCoords = { tile: { letter: 'b', points: 0 }, x: 0, y: 1 };
-        expect(service.hasAdjacentLetters(board, aTile)).toBe(true);
-    });
-    it('should return false when the parameter tile has no adjacent tiles', () => {
-        const aTile: TileCoords = { tile: { letter: 'a', points: 0 }, x: 4, y: 4 };
-        expect(service.hasAdjacentLetters(board, aTile)).toBe(false);
+    it('should validate a word made up of old and new tiles', () => {
+        const newTiles: TileCoords[] = [
+            { tile: { letter: 'a', points: 0 }, x: 12, y: 2 },
+            { tile: { letter: 's', points: 2 }, x: 14, y: 2 },
+        ];
+        board[13][2] = { letter: 'a', points: 0 };
+
+        expect(service.validateWords(board, newTiles)).toBe(true);
     });
 });
