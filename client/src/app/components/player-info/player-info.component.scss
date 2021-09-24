@@ -1,0 +1,28 @@
+.card {
+    max-width: 400px;
+    margin-bottom: 8px;
+    background-color: rgb(204, 166, 116);
+}
+mat-card-title {
+  color: black;
+}
+
+mat-card-subtitle {
+  font-size: large;
+}
+
+.mat-raised-button {
+  background-color: burlywood;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.justified {
+  display: flex;
+  justify-content: center;
+}
+
+.justified-right {
+  display: flex;
+  justify-content: flex-end;
+}
