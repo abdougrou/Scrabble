@@ -16,7 +16,7 @@ export class GameManagerService {
     turnDuration: number;
     currentTurnDurationLeft: number;
 
-    constructor(board: BoardService, private reserve: ReserveService, private players: PlayerService) {}
+    constructor(private board: BoardService, private reserve: ReserveService, private players: PlayerService) {}
 
     initialize(gameConfig: GameConfig) {
         this.turnDuration = gameConfig.duration;
@@ -79,17 +79,29 @@ export class GameManagerService {
         // } else
         if (vertical) {
             for (let i = 0; i < word.length; i++) {
-                this.board[coord.x][coord.y + i] = {
-                    letter: word[i],
-                    points: 0,
-                };
+                this.board.placeTile(
+                    {
+                        x: coord.x,
+                        y: coord.y + i,
+                    },
+                    {
+                        letter: word[i],
+                        points: 0,
+                    },
+                );
             }
         } else {
             for (let i = 0; i < word.length; i++) {
-                this.board[coord.x + i][coord.y] = {
-                    letter: word[i],
-                    points: 0,
-                };
+                this.board.placeTile(
+                    {
+                        x: coord.x + i,
+                        y: coord.y,
+                    },
+                    {
+                        letter: word[i],
+                        points: 0,
+                    },
+                );
             }
         }
     }

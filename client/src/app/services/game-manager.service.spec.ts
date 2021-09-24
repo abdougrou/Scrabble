@@ -6,15 +6,23 @@ import { ReserveService } from './reserve.service';
 import { Tile } from '@app/classes/tile';
 import { Player } from '@app/classes/player';
 import { Easel } from '@app/classes/easel';
+import { BoardService } from './board.service';
 
 describe('GameManagerService', () => {
     let service: GameManagerService;
+    let board: BoardService;
+    let playerService: PlayerService;
+    let reserve: ReserveService;
 
     beforeEach(() => {
+        board = new BoardService();
+        reserve = new ReserveService();
+        playerService = new PlayerService();
         TestBed.configureTestingModule({
             providers: [
-                { provide: ReserveService, useValue: new ReserveService() },
-                { provide: PlayerService, useValue: new PlayerService() },
+                { provide: BoardService, useValue: board },
+                { provide: ReserveService, useValue: reserve },
+                { provide: PlayerService, useValue: playerService },
             ],
         });
         service = TestBed.inject(GameManagerService);
@@ -34,12 +42,12 @@ describe('GameManagerService', () => {
     });
 
     it('placeTiles should place the tiles in the board', () => {
-        const word = 'word';
+        const word = 'WORD';
         const coord = {
             x: 1,
             y: 1,
         };
-        const direction = false;
+        const vertical = false;
         const tiles: Tile[] = [
             { letter: 'W', points: 0 },
             { letter: 'O', points: 0 },
@@ -51,10 +59,9 @@ describe('GameManagerService', () => {
             score: 0,
             easel: new Easel(tiles),
         };
-        service.placeTiles(word, coord, direction, player);
-        // for (let i = 0; i < word.length; i++) {
-        //     console.log(service.board[coord.x + i][coord.y].letter, word[i]);
-        //     // expect(service.board[coord.x + i][coord.y].letter).toBe(word[i]);
-        // }
+        service.placeTiles(word, coord, vertical, player);
+        for (let i = 0; i < word.length; i++) {
+            expect(board.getTile({ x: coord.x + i, y: coord.y })).toEqual(tiles[i]);
+        }
     });
 });
