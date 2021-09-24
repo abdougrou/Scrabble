@@ -11,7 +11,9 @@ import { ReserveService } from './reserve.service';
     providedIn: 'root',
 })
 export class GameManagerService {
+    tile: Tile = { letter: 'W', points: 2 };
     board: Tile[][] = [[]];
+
 
     turnDuration: number;
     currentTurnDurationLeft: number;
