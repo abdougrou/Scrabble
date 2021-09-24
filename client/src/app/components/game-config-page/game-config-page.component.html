@@ -1,0 +1,36 @@
+<form [formGroup]="gameConfigForm">
+<div class="container justified">
+  <h2 mat-dialog-title>Paramètres de la partie</h2>
+
+    <div class="justified">
+      <mat-form-field appearance="outline">
+        <mat-label>Username</mat-label>
+        <input type="text" formControlName="name" matInput>
+      </mat-form-field>
+    
+      <mat-form-field appearance="outline">
+        <mat-label>Minuterie (en secondes):</mat-label>
+        <input type="number" name="points"  value="60" step="30" min="0" max="300" formControlName="duration"  matInput>
+      </mat-form-field>
+    
+      <mat-checkbox formControlName="bonusEnabled"> Bonus Aléatoire
+      </mat-checkbox>
+      
+      <mat-form-field appearance="outline">
+        <mat-label>Dictionnaire</mat-label>
+        <mat-select formControlName="dictionary" >
+          <mat-option value=0>Français</mat-option>
+          <mat-option value=1>Anglais</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div class="horizontal">
+        <button mat-raised-button class="button"  (click)="back()">Retour</button>
+        <button mat-raised-button class="button" [disabled]="!this.gameConfigForm.valid" (click)="play()" [routerLink]="['/game']">Jouer</button>   
+      </div>
+    </div> 
+    <div>
+      <p> {{ this.gameConfigForm.value | json }} </p>
+      <p> {{ this.data.config | json }} </p>
+    </div>
+</div>
+</form>
