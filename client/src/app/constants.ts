@@ -7,10 +7,20 @@ export const MIN_USERNAME_LENGTH = 2;
 export const DIALOG_HEIGHT = '80%';
 export const DIALOG_WIDTH = '60%';
 
+// Player Info
+export const RANDOM_PLAYER_NAMES = ['Nikolay', 'Sami', 'Augustin'];
+export const MAX_SKIP_COUNT = 6;
+
 // Game Manager constants
 export const FIRST_PLAYER_COIN_FLIP = 0.5;
 export const STARTING_TILE_AMOUNT = 7;
 export const SECOND_MD = 1000;
+
+export const COMMANDS = {
+    exchange: '!exchange',
+    place: '!place',
+    pass: '!pass',
+};
 
 // Reserve constants
 export const MIN_EXCHANGE_RESERVE_COUNT = 7;
