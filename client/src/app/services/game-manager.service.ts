@@ -65,18 +65,21 @@ export class GameManagerService {
         } else if (!player.easel.containsTiles(tiles)) {
             // player dosent have tiles in easel
         } else {
-            this.reserve.returnLetters(player.easel.getTiles(tiles));
-            player.easel.addTiles(this.reserve.getLetters(tiles.length));
+            // eslint-disable-next-line no-console
+            console.log('ok');
+            const easelTiles: Tile[] = player.easel.getTiles(tiles);
+            const reserveTiles: Tile[] = this.reserve.getLetters(tiles.length);
+            player.easel.addTiles(reserveTiles);
+            this.reserve.returnLetters(easelTiles); // getTiles remove and get the tiles at the same time
         }
     }
     // eslint-disable-next-line no-unused-vars
     placeTiles(word: string, coord: Vec2, vertical: boolean, player: Player) {
-        // verify if its the first play of the game (should be in H8)
-        // if (this.players.current !== player) {
+        // if (this.players.current !== player){
         //     // not player turn
         // } else if (!player.easel.containsTiles(word)) {
         //     // player doesn't have tiles in easel
-        // } else
+        // } // verify if word is in the board
         if (vertical) {
             for (let i = 0; i < word.length; i++) {
                 this.board.placeTile(
