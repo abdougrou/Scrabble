@@ -2,7 +2,21 @@
 import { Injectable } from '@angular/core';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { BOARD_MULTIPLIER, COLS, CANVAS_HEIGHT, CANVAS_WIDTH, GRID_SIZE, TILE_COLORS, STEP, ROWS, TILE_TEXT_COLOR } from '@app/constants';
+import {
+    BOARD_MULTIPLIER,
+    COLS,
+    CANVAS_HEIGHT,
+    CANVAS_WIDTH,
+    GRID_SIZE,
+    TILE_COLORS,
+    STEP,
+    ROWS,
+    TILE_TEXT_COLOR,
+    LETTER_OFFSET,
+    INDEX_OFFSET,
+    BASE_LETTER_FONT_SIZE,
+    BASE_INDEX_FONT_SIZE,
+} from '@app/constants';
 import { BoardService } from './board.service';
 
 @Injectable({
@@ -15,9 +29,11 @@ export class GridService {
     constructor(private board: BoardService) {}
 
     drawGridIds() {
-        const startPositionX: Vec2 = { x: (-20 + STEP) / 2, y: CANVAS_HEIGHT - (-20 + STEP) };
-        const startPositionY: Vec2 = { x: CANVAS_WIDTH - (20 + STEP) / 2, y: (20 + STEP) / 2 };
+        const startPositionX: Vec2 = { x: STEP / 2, y: CANVAS_HEIGHT - STEP / 2 };
+        const startPositionY: Vec2 = { x: CANVAS_WIDTH - STEP / 2, y: STEP / 2 };
         this.gridContext.fillStyle = 'black';
+        this.gridContext.textBaseline = 'middle';
+        this.gridContext.textAlign = 'center';
         this.gridContext.font = '20px system-ui';
         for (let i = 0; i < GRID_SIZE; i++) {
             this.gridContext.fillText(COLS[i].toString(), startPositionX.x + STEP * i, startPositionX.y);
@@ -35,37 +51,50 @@ export class GridService {
         this.gridContext.fill();
     }
 
+    drawMultiplierText(coord: Vec2, multiplierType: string, multiplier: number) {
+        this.gridContext.font = 'bold 10px system-ui';
+        this.gridContext.fillStyle = 'black';
+        this.gridContext.textBaseline = 'bottom';
+        this.gridContext.textAlign = 'center';
+        this.gridContext.fillText(multiplierType, coord.x * STEP + LETTER_OFFSET, coord.y * STEP + LETTER_OFFSET);
+        this.gridContext.textBaseline = 'top';
+        this.gridContext.fillText('x ' + multiplier.toString(), coord.x * STEP + LETTER_OFFSET, coord.y * STEP + LETTER_OFFSET);
+    }
+
     drawMultiplierTile(coord: Vec2, multiplier: number) {
         switch (multiplier) {
             case 0:
                 this.colorTile(coord, TILE_COLORS.tile);
                 break;
-            case 1:
+            case 1: {
                 this.colorTile(coord, TILE_COLORS.l2);
+                this.drawMultiplierText(coord, 'LETTRE', 2);
                 break;
+            }
             case 2:
                 this.colorTile(coord, TILE_COLORS.l3);
+                this.drawMultiplierText(coord, 'LETTRE', 3);
                 break;
             case 3:
                 this.colorTile(coord, TILE_COLORS.w2);
+                this.drawMultiplierText(coord, 'MOT', 2);
                 break;
             case 4:
                 this.colorTile(coord, TILE_COLORS.w3);
+                this.drawMultiplierText(coord, 'MOT', 3);
                 break;
         }
     }
 
-    drawTile(coord: Vec2, tile: Tile) {
+    drawTile(coord: Vec2, tile: Tile, letterFontSize: number, indexFontSize: number) {
         this.colorTile(coord, 'burlywood');
-        let offsetX = STEP - 11;
-        let offsetY = STEP - 5;
-        this.gridContext.font = '14px system-ui';
+        this.gridContext.textBaseline = 'middle';
+        this.gridContext.textAlign = 'center';
         this.gridContext.fillStyle = 'black';
-        this.gridContext.fillText(tile.points.toString(), coord.x * STEP + offsetX, coord.y * STEP + offsetY);
-        this.gridContext.font = 'bold 25px system-ui';
-        offsetX = STEP - 28;
-        offsetY = STEP - 15;
-        this.gridContext.fillText(tile.letter.toString(), coord.x * STEP + offsetX, coord.y * STEP + offsetY);
+        this.gridContext.font = 'bold ' + letterFontSize.toString() + 'px system-ui';
+        this.gridContext.fillText(tile.letter.toString(), coord.x * STEP + LETTER_OFFSET, coord.y * STEP + LETTER_OFFSET);
+        this.gridContext.font = indexFontSize.toString() + 'px system-ui';
+        this.gridContext.fillText(tile.points.toString(), coord.x * STEP + INDEX_OFFSET, coord.y * STEP + INDEX_OFFSET);
     }
 
     drawBoard() {
@@ -77,7 +106,7 @@ export class GridService {
             for (let j = 0; j < GRID_SIZE; j++) {
                 const coord: Vec2 = { x: i, y: j };
                 const tile: Tile | undefined = this.board.getTile(coord);
-                if (tile) this.drawTile(coord, tile);
+                if (tile) this.drawTile(coord, tile, BASE_LETTER_FONT_SIZE, BASE_INDEX_FONT_SIZE);
                 else this.drawMultiplierTile(coord, BOARD_MULTIPLIER[i][j]);
             }
         }

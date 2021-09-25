@@ -2,19 +2,19 @@ import { TestBed } from '@angular/core/testing';
 import { CanvasTestHelper } from '@app/classes/canvas-test-helper';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { CANVAS_HEIGHT, CANVAS_WIDTH, STEP, TILE_COLORS } from '@app/constants';
+import { BASE_INDEX_FONT_SIZE, BASE_LETTER_FONT_SIZE, CANVAS_HEIGHT, CANVAS_WIDTH, STEP, TILE_COLORS } from '@app/constants';
 import { GridService } from '@app/services/grid.service';
-//import { GameManagerService } from './game-manager.service';
+// import { GameManagerService } from './game-manager.service';
 
 describe('GridService', () => {
     let service: GridService;
     let ctxStub: CanvasRenderingContext2D;
-    //let manager: GameManagerService;
+    // let manager: GameManagerService;
 
     beforeEach(() => {
         TestBed.configureTestingModule({});
         service = TestBed.inject(GridService);
-        //manager = TestBed.inject(GameManagerService);
+        // manager = TestBed.inject(GameManagerService);
         ctxStub = CanvasTestHelper.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT).getContext('2d') as CanvasRenderingContext2D;
         service.gridContext = ctxStub;
     });
@@ -111,7 +111,7 @@ describe('GridService', () => {
         const matrixCoord: Vec2 = { x: 20, y: 20 };
         const tile: Tile = { letter: 'A', points: 10 };
         const spy = spyOn(ctxStub, 'fillText').and.callThrough();
-        service.drawTile(matrixCoord, tile);
+        service.drawTile(matrixCoord, tile, BASE_LETTER_FONT_SIZE, BASE_INDEX_FONT_SIZE);
 
         expect(spy).toHaveBeenCalledTimes(2);
     });
@@ -120,7 +120,7 @@ describe('GridService', () => {
         const matrixCoord: Vec2 = { x: 20, y: 20 };
         const tile: Tile = { letter: 'A', points: 10 };
         const spy = spyOn(service, 'colorTile').and.callThrough();
-        service.drawTile(matrixCoord, tile);
+        service.drawTile(matrixCoord, tile, BASE_LETTER_FONT_SIZE, BASE_INDEX_FONT_SIZE);
 
         expect(spy).toHaveBeenCalledTimes(1);
     });
