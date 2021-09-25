@@ -32,7 +32,7 @@ export class ChatBoxComponent {
             throw new Error('message-input error in the chatbox');
         } else {
             if (input.value !== '') {
-                this.chatMessage.user = this.playerService.current.name;
+                this.chatMessage.user = this.gameManager.mainPlayerName;
                 this.chatMessage.body = this.message;
                 this.showMessage(this.chatMessage);
                 this.showMessage(this.checkCommand(this.chatMessage));

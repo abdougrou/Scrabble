@@ -13,9 +13,9 @@ export const STARTING_TILE_AMOUNT = 7;
 export const SECOND_MD = 1000;
 
 export const COMMANDS = {
-    exchange: '!exchange',
-    place: '!place',
-    pass: '!pass',
+    exchange: '!échanger',
+    place: '!placer',
+    pass: '!passer',
 };
 
 // Reserve constants

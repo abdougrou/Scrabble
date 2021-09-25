@@ -26,7 +26,7 @@ export class CommandHandlerService {
 
     exchange(command: string, player: Player): ChatMessage {
         const commandResult: ChatMessage = { user: '', body: '' };
-        const regex = new RegExp(/^!exchange ([a-z]|\*){0,7}/g);
+        const regex = new RegExp(/^!échanger ([a-z]|\*){0,7}/g);
         if (regex.test(command)) {
             commandResult.body = this.gameManager.exchangeTiles(command.split(' ')[1], player);
             commandResult.user = COMMAND_RESULT;
@@ -39,15 +39,16 @@ export class CommandHandlerService {
 
     place(command: string, player: Player): ChatMessage {
         const commandResult: ChatMessage = { user: '', body: '' };
-        const regex = new RegExp(/^!place ([a-o]([1-9]|1[0-5])(h|v)) ([a-zA-Z]){2,15}$/g);
+        const regex = new RegExp(/^!placer ([a-o]([1-9]|1[0-5])(h|v)) ([a-zA-Z]){2,15}$/g);
         if (regex.test(command)) {
             const minus1 = -1;
             const direction = command.split(' ')[1].slice(minus1);
             const coord = command.split(' ')[1].slice(0, command.length - 1);
-            this.gameManager.placeTiles(command.split(' ')[2], this.getCoordinateFromString(coord), direction[2] === 'v', player);
+            window.alert('les coords sont : ' + coord + ' et la direction est : ' + direction);
+            this.gameManager.placeTiles(command.split(' ')[2], this.getCoordinateFromString(coord), direction === 'v', player);
             commandResult.user = COMMAND_RESULT;
             let directionString = '';
-            if (direction[2] === 'v') directionString = 'verticale';
+            if (direction === 'v') directionString = 'verticale';
             else directionString = 'horizontale';
             commandResult.body =
                 player.name +
