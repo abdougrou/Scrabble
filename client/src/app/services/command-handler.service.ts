@@ -44,7 +44,6 @@ export class CommandHandlerService {
             const minus1 = -1;
             const direction = command.split(' ')[1].slice(minus1);
             const coord = command.split(' ')[1].slice(0, command.length - 1);
-            window.alert('les coords sont : ' + coord + ' et la direction est : ' + direction);
             this.gameManager.placeTiles(command.split(' ')[2], this.getCoordinateFromString(coord), direction === 'v', player);
             commandResult.user = COMMAND_RESULT;
             let directionString = '';
