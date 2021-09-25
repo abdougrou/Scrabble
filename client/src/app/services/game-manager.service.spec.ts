@@ -1,7 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Easel } from '@app/classes/easel';
 import { Dictionary, GameMode } from '@app/classes/game-config';
-import { Player } from '@app/classes/player';
 import { Tile } from '@app/classes/tile';
 import { BoardService } from './board.service';
 import { GameManagerService } from './game-manager.service';
@@ -42,26 +41,44 @@ describe('GameManagerService', () => {
     });
 
     it('placeTiles should place the tiles in the board', () => {
-        const word = 'WORD';
+        const word = 'word';
         const coord = {
             x: 1,
             y: 1,
         };
         const vertical = false;
         const tiles: Tile[] = [
-            { letter: 'W', points: 0 },
-            { letter: 'O', points: 0 },
-            { letter: 'R', points: 0 },
-            { letter: 'D', points: 0 },
+            { letter: 'w', points: 0 },
+            { letter: 'o', points: 0 },
+            { letter: 'r', points: 0 },
+            { letter: 'd', points: 0 },
         ];
-        const player: Player = {
-            name: 'player',
-            score: 0,
-            easel: new Easel(tiles),
-        };
-        service.placeTiles(word, coord, vertical, player);
+        playerService.current.easel = new Easel(tiles);
+        service.placeTiles(word, coord, vertical, playerService.current);
         for (let i = 0; i < word.length; i++) {
-            expect(board.getTile({ x: coord.x + i, y: coord.y })).toEqual(tiles[i]);
+            expect(board.getTile({ x: coord.x + i, y: coord.y })?.letter).toEqual(word[i]);
+        }
+    });
+    it('placeTiles should place the tiles in the board', () => {
+        const word = 'bonjour';
+        const coord = {
+            x: 1,
+            y: 1,
+        };
+        const vertical = false;
+        const tiles: Tile[] = [
+            { letter: 'b', points: 0 },
+            { letter: 'n', points: 0 },
+            { letter: 'o', points: 0 },
+            { letter: 'r', points: 0 },
+        ];
+        playerService.current.easel = new Easel(tiles);
+        board.placeTile({ x: 2, y: 1 }, { letter: 'o', points: 0 });
+        board.placeTile({ x: 4, y: 1 }, { letter: 'j', points: 0 });
+        board.placeTile({ x: 6, y: 1 }, { letter: 'u', points: 0 });
+        service.placeTiles(word, coord, vertical, playerService.current);
+        for (let i = 0; i < word.length; i++) {
+            expect(board.getTile({ x: coord.x + i, y: coord.y })?.letter).toEqual(word[i]);
         }
     });
 
@@ -80,6 +97,7 @@ describe('GameManagerService', () => {
         service.exchangeTiles('allo', playerService.current);
         expect(playerService.current.easel.toString()).toBe('aaaa');
     });
+
     it('reserve should get tiles from easel after successful exchange', () => {
         const tiles: Tile[] = [
             { letter: 'a', points: 0 },
@@ -100,6 +118,7 @@ describe('GameManagerService', () => {
         }
         expect(test).toBe('alo');
     });
+
     it('exchangeTiles should not exchange letters with reserve if not enough tiles in reserve', () => {
         const tiles: Tile[] = [
             { letter: 'a', points: 0 },
@@ -115,6 +134,7 @@ describe('GameManagerService', () => {
         service.exchangeTiles('allo', playerService.current);
         expect(playerService.current.easel.toString()).toBe('allo');
     });
+
     it('exchangeTiles should not exchange letters when they are not in the easel', () => {
         const tiles: Tile[] = [
             { letter: 'a', points: 0 },
@@ -130,6 +150,7 @@ describe('GameManagerService', () => {
         service.exchangeTiles('bonj', playerService.current);
         expect(playerService.current.easel.toString()).toBe('allo');
     });
+
     it('exchangeTiles should not exchange letters when they are not in the easel', () => {
         const tiles: Tile[] = [
             { letter: 'a', points: 0 },
