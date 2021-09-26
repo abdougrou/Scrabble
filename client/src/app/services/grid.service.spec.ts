@@ -28,7 +28,7 @@ describe('GridService', () => {
     });
 
     it('height should return the height of the grid canvas', () => {
-        expect(service.width).toEqual(CANVAS_HEIGHT);
+        expect(service.height).toEqual(CANVAS_HEIGHT);
     });
 
     it('drawGridIds should call fillText() 30 times', () => {
