@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
-import { Vec2 } from '@app/classes/vec2';
 import { COMMANDS, COMMAND_RESULT, SYSTEM_NAME } from '@app/constants';
 import { GameManagerService } from './game-manager.service';
 
@@ -26,10 +25,10 @@ export class CommandHandlerService {
 
     exchange(command: string, player: Player): ChatMessage {
         const commandResult: ChatMessage = { user: '', body: '' };
-        const regex = new RegExp(/^!échanger ([a-z]|\*){0,7}/g);
+        const regex = new RegExp(/^!echanger ([a-z]|\*){0,7}/g);
         if (regex.test(command)) {
-            commandResult.body = this.gameManager.exchangeTiles(command.split(' ')[1], player);
             commandResult.user = COMMAND_RESULT;
+            commandResult.body = this.gameManager.exchangeTiles(command.split(' ')[1], player);
         } else {
             commandResult.user = SYSTEM_NAME;
             commandResult.body = 'Erreur de syntaxe, pour échanger des lettres, il faut suivre le format suivant : !échanger (lettre)...';
@@ -43,32 +42,15 @@ export class CommandHandlerService {
         if (regex.test(command)) {
             const minus1 = -1;
             const direction = command.split(' ')[1].slice(minus1);
-            const coord = command.split(' ')[1].slice(0, command.length - 1);
-            this.gameManager.placeTiles(command.split(' ')[2], this.getCoordinateFromString(coord), direction === 'v', player);
+            const coordStrDir = command.split(' ')[1];
+            const coordStr = coordStrDir.slice(0, coordStrDir.length - 1);
             commandResult.user = COMMAND_RESULT;
-            let directionString = '';
-            if (direction === 'v') directionString = 'verticale';
-            else directionString = 'horizontale';
-            commandResult.body =
-                player.name +
-                ' a placé le mot : (' +
-                command.split(' ')[2] +
-                ') dans la direction ' +
-                directionString +
-                ' qui débute à la case ' +
-                coord;
+            commandResult.body = this.gameManager.placeTiles(command.split(' ')[2], coordStr, direction === 'v', player);
         } else {
             commandResult.user = SYSTEM_NAME;
             commandResult.body = 'Erreur de syntaxe, pour placer un mot, il faut suivre le format suivant : !placer (ligne)(colonne)(h | v) (mot)';
         }
         return commandResult;
-    }
-
-    getCoordinateFromString(coordStr: string): Vec2 {
-        const CHAR_OFFSET = 'a'.charCodeAt(0);
-        const coordX = coordStr[0].toLowerCase().charCodeAt(0) - CHAR_OFFSET;
-        const coordY = parseInt(coordStr.substr(1, coordStr.length), 10) - 1;
-        return { x: coordX, y: coordY } as Vec2;
     }
 
     pass(): ChatMessage {

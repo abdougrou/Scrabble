@@ -83,8 +83,8 @@ export class GameManagerService {
             return "Ce n'est pas votre tour";
         } else if (!this.reserve.isExchangePossible(tiles.length)) {
             return "Il n'y a pas assez de tuiles dans la réserve";
-            // } else if (!player.easel.containsTiles(tiles)) {
-            //     return 'Votre chevalet ne contient pas les lettres nécessaires';
+        } else if (!player.easel.containsTiles(tiles)) {
+            return 'Votre chevalet ne contient pas les lettres nécessaires';
         } else {
             const easelTiles: Tile[] = player.easel.getTiles(tiles);
             const reserveTiles: Tile[] = this.reserve.getLetters(tiles.length);
@@ -94,53 +94,42 @@ export class GameManagerService {
         }
     }
 
-    placeTiles(word: string, coord: Vec2, vertical: boolean, player: Player) {
+    placeTiles(word: string, coordStr: string, vertical: boolean, player: Player): string {
+        const coord: Vec2 = this.getCoordinateFromString(coordStr);
+        if (this.players.current !== player) return "Ce n'est pas votre tour";
+
         //  check if word can fit on board
-        if (this.players.current !== player) {
-            //  return error message to chatbox saying not players turn
-            return;
-        }
         if (vertical) {
-            if (coord.y + word.length > GRID_SIZE) {
-                //  return error message to chatbox saying word is outside of board
-                return;
-            }
+            if (coord.y + word.length > GRID_SIZE) return 'Commande impossible a realise';
         } else {
-            if (coord.x + word.length > GRID_SIZE) {
-                //  return error message to chatbox saying word is outside of board
-                return;
-            }
+            if (coord.x + word.length > GRID_SIZE) return 'Commande impossible a realise';
         }
+
         const coords: Vec2[] = new Array();
         let counter = 0;
-        const wordLenght = word.length;
-        for (let i = 0; i < wordLenght; i++) {
+        let neededLetters = word;
+        for (let i = 0; i < word.length; i++) {
             let nextCoord: Vec2;
             if (!vertical) {
                 nextCoord = { x: coord.x + i, y: coord.y };
             } else {
                 nextCoord = { x: coord.x, y: coord.y + i };
             }
-            if (this.board.getTile(nextCoord) !== undefined) {
-                if (this.board.getTile(nextCoord)?.letter !== word.charAt(counter)) {
-                    //  return error message to chatbox saying word cant be placed
-                    return;
+            const tile: Tile | undefined = this.board.getTile(nextCoord);
+            if (tile) {
+                if (tile.letter !== word.charAt(counter)) {
+                    return 'Commande impossible a realise';
                 } else {
-                    word = word.slice(0, counter) + word.slice(counter + 1);
+                    neededLetters = neededLetters.slice(0, counter) + neededLetters.slice(counter + 1);
                 }
             } else {
                 coords.push(nextCoord);
                 counter++;
             }
         }
-        if (word.length === 0) {
-            //  return error message to chatbox saying no tiles to place
-            return;
-        }
-        if (!player.easel.containsTiles(word)) {
-            //  return error message to chatbox saying player doesnt have tiles
-            return;
-        } // player doesn't have tiles in easel
+
+        if (neededLetters.length === 0) return 'Vous ne pouvez pas placer le mot';
+        else if (!player.easel.containsTiles(neededLetters)) return 'Votre chevalet ne contient pas les lettres nécessaires';
 
         //  valider avant de placer
         for (let i = 0; i < word.length; i++) {
@@ -155,5 +144,13 @@ export class GameManagerService {
                 },
             );
         }
+        return `${player.name} a placé le mot "${word}" ${vertical ? 'verticale' : 'horizentale'}ment à la case ${coordStr}`;
+    }
+
+    getCoordinateFromString(coordStr: string): Vec2 {
+        const CHAR_OFFSET = 'a'.charCodeAt(0);
+        const coordX = coordStr[0].toLowerCase().charCodeAt(0) - CHAR_OFFSET;
+        const coordY = parseInt(coordStr.substr(1, coordStr.length), 10) - 1;
+        return { x: coordX, y: coordY } as Vec2;
     }
 }

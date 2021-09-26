@@ -1,6 +1,6 @@
 import { Component, HostListener } from '@angular/core';
 import { ChatMessage } from '@app/classes/message';
-import { COMMAND_RESULT, SYSTEM_NAME } from '@app/constants';
+import { SYSTEM_NAME } from '@app/constants';
 import { CommandHandlerService } from '@app/services/command-handler.service';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { PlayerService } from '@app/services/player.service';
@@ -15,11 +15,7 @@ export class ChatBoxComponent {
     message = '';
     chatMessage: ChatMessage = { user: '', body: '' };
 
-    constructor(public gameManager: GameManagerService, public playerService: PlayerService, public commandHandler: CommandHandlerService) {
-        this.gameManager.commandResult.subscribe((message) => {
-            this.showMessage(message);
-        });
-    }
+    constructor(public gameManager: GameManagerService, public playerService: PlayerService, public commandHandler: CommandHandlerService) {}
 
     @HostListener('keydown', ['$event'])
     buttonDetect(event: KeyboardEvent) {
@@ -45,22 +41,19 @@ export class ChatBoxComponent {
         const newMessage = document.createElement('p');
         switch (message.user) {
             case SYSTEM_NAME:
-                newMessage.innerHTML = message.user + ': ' + message.body;
+                newMessage.innerHTML = `${message.user} : ${message.body}`;
                 newMessage.style.color = 'red';
                 break;
             case this.gameManager.mainPlayerName:
-                newMessage.innerHTML = message.user + ': ' + message.body;
+                newMessage.innerHTML = `${message.user} : ${message.body}`;
                 newMessage.style.color = 'gray';
                 break;
             case this.gameManager.enemyPlayerName:
-                newMessage.innerHTML = message.user + ': ' + message.body;
+                newMessage.innerHTML = `${message.user} : ${message.body}`;
                 newMessage.style.color = 'darkgoldenrod';
                 break;
-            case COMMAND_RESULT:
-                newMessage.innerHTML = message.body;
-                newMessage.style.color = 'gray';
-                break;
             default:
+                newMessage.innerHTML = message.body;
                 newMessage.style.color = 'gray';
                 break;
         }
