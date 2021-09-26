@@ -54,6 +54,8 @@ Z,1,10
 *,2,0`;
 
 // Grid Service
+export const MAX_FONT_MULTIPLIER = 2;
+export const MIN_FONT_MULTIPLIER = -2;
 export const INDEX_FONT_SIZE_MODIFIER = 1;
 export const LETTER_FONT_SIZE_MODIFIER = 2;
 export const BASE_LETTER_FONT_SIZE = 25;
