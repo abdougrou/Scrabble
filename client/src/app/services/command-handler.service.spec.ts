@@ -59,4 +59,15 @@ describe('CommandHandlerService', () => {
         expect(commandHandler.getCoordinateFromString(coordStr2)).toEqual(coordVec2);
         expect(commandHandler.getCoordinateFromString(coordStr3)).toEqual(coordVec3);
     });
+
+    it('command should call the appropriate function', () => {
+        const placeCommand = '!place a1v hello';
+        const placeCommand1 = '!place c13h good';
+        const exchangeCommand = '!exchange abc';
+        const wrongCommand = 'exchange aaa';
+        expect(commandHandler.handleCommand(placeCommand, player)).toBe(true);
+        expect(commandHandler.handleCommand(placeCommand1, player)).toBe(true);
+        expect(commandHandler.handleCommand(exchangeCommand, player)).toBe(true);
+        expect(commandHandler.handleCommand(wrongCommand, player)).toBe(false);
+    });
 });
