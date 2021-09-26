@@ -17,9 +17,9 @@ export const STARTING_TILE_AMOUNT = 7;
 export const SECOND_MD = 1000;
 
 export const COMMANDS = {
-    exchange: '!exchange',
-    place: '!place',
-    pass: '!pass',
+    exchange: '!echanger',
+    place: '!placer',
+    pass: '!passer',
 };
 
 // Reserve constants
@@ -52,6 +52,10 @@ X,1,10
 Y,1,10
 Z,1,10
 *,2,0`;
+
+// System name
+export const SYSTEM_NAME = 'Système';
+export const COMMAND_RESULT = 'Commande';
 
 // Grid Service
 export const MAX_FONT_MULTIPLIER = 2;

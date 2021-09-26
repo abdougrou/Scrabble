@@ -26,6 +26,11 @@ export class PlayerService {
         this.players.reverse();
     }
 
+    getPlayerByName(name: string): Player {
+        if (this.players[1].name === name) return this.players[1];
+        else return this.players[0];
+    }
+
     incrementSkipCounter() {
         this.skipCounter++;
     }

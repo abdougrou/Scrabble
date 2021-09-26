@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Easel } from '@app/classes/easel';
 import { Dictionary, GameMode } from '@app/classes/game-config';
 import { Tile } from '@app/classes/tile';
+import { Vec2 } from '@app/classes/vec2';
 import { BoardService } from './board.service';
 import { GameManagerService } from './game-manager.service';
 import { PlayerService } from './player.service';
@@ -17,6 +18,8 @@ describe('GameManagerService', () => {
         board = new BoardService();
         reserve = new ReserveService();
         playerService = new PlayerService();
+    });
+    beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [
                 { provide: BoardService, useValue: board },
@@ -41,26 +44,8 @@ describe('GameManagerService', () => {
     });
 
     it('placeTiles should place the tiles in the board', () => {
-        const word = 'word';
-        const coord = {
-            x: 1,
-            y: 1,
-        };
-        const vertical = false;
-        const tiles: Tile[] = [
-            { letter: 'w', points: 0 },
-            { letter: 'o', points: 0 },
-            { letter: 'r', points: 0 },
-            { letter: 'd', points: 0 },
-        ];
-        playerService.current.easel = new Easel(tiles);
-        service.placeTiles(word, coord, vertical, playerService.current);
-        for (let i = 0; i < word.length; i++) {
-            expect(board.getTile({ x: coord.x + i, y: coord.y })?.letter).toEqual(word[i]);
-        }
-    });
-    it('placeTiles should place the tiles in the board', () => {
         const word = 'bonjour';
+        const coordStr = 'b2';
         const coord = {
             x: 1,
             y: 1,
@@ -76,7 +61,7 @@ describe('GameManagerService', () => {
         board.placeTile({ x: 2, y: 1 }, { letter: 'o', points: 0 });
         board.placeTile({ x: 4, y: 1 }, { letter: 'j', points: 0 });
         board.placeTile({ x: 6, y: 1 }, { letter: 'u', points: 0 });
-        service.placeTiles(word, coord, vertical, playerService.current);
+        service.placeTiles(word, coordStr, vertical, playerService.current);
         for (let i = 0; i < word.length; i++) {
             expect(board.getTile({ x: coord.x + i, y: coord.y })?.letter).toEqual(word[i]);
         }
@@ -165,5 +150,17 @@ describe('GameManagerService', () => {
         reserve.tileCount = 8;
         service.exchangeTiles('allo', playerService.players[1]);
         expect(playerService.players[1].easel.toString()).toBe('allo');
+    });
+
+    it('getCoordinateFromString works as expected', () => {
+        const coordStr1 = 'a1';
+        const coordStr2 = 'o15v';
+        const coordStr3 = 'z2';
+        const coordVec1: Vec2 = { x: 0, y: 0 };
+        const coordVec2: Vec2 = { x: 14, y: 14 };
+        const coordVec3: Vec2 = { x: 25, y: 1 };
+        expect(service.getCoordinateFromString(coordStr1)).toEqual(coordVec1);
+        expect(service.getCoordinateFromString(coordStr2)).toEqual(coordVec2);
+        expect(service.getCoordinateFromString(coordStr3)).toEqual(coordVec3);
     });
 });
