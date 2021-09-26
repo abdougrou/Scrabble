@@ -17,7 +17,7 @@ export class CommandHandlerService {
             case COMMANDS.place:
                 return this.place(command, player);
             case COMMANDS.pass:
-                return this.pass();
+                return this.pass(command, player);
             default:
                 return { user: SYSTEM_NAME, body: "La commande entrée n'est pas valide" } as ChatMessage;
         }
@@ -53,10 +53,18 @@ export class CommandHandlerService {
         return commandResult;
     }
 
-    pass(): ChatMessage {
-        // if it's the player's turn, call switchPlayer() from gamemanagerservice
-        const msg: ChatMessage = { user: COMMAND_RESULT, body: 'Vous avez passé votre tour' };
-        return msg;
+    pass(command: string, player: Player): ChatMessage {
+        const commandResult: ChatMessage = { user: '', body: '' };
+        const regex = new RegExp(/^!passer$/g);
+        if (regex.test(command)) {
+            this.gameManager.skipTurn();
+            commandResult.user = COMMAND_RESULT;
+            commandResult.body = `${player.name} a passer son tour`;
+        } else {
+            commandResult.user = SYSTEM_NAME;
+            commandResult.body = 'Erreur de syntaxe';
+        }
+        return commandResult;
     }
 
     // debug(): ChatMessage {

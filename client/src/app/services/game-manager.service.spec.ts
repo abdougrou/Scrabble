@@ -18,6 +18,8 @@ describe('GameManagerService', () => {
         board = new BoardService();
         reserve = new ReserveService();
         playerService = new PlayerService();
+    });
+    beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [
                 { provide: BoardService, useValue: board },
