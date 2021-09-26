@@ -16,6 +16,7 @@ export class GameManagerService {
     turnDuration: number;
     currentTurnDurationLeft: number;
     randomPlayerNameIndex: number;
+    isFirstTurn: boolean = true;
 
     constructor(private board: BoardService, private reserve: ReserveService, private players: PlayerService) {}
 
