@@ -1,5 +1,5 @@
 <div id="grid-container">
-    <canvas id="canvas" #gridCanvas (click)="mouseHitDetect($event)" [attr.width]="width" [attr.height]="height"></canvas>
+    <canvas id="canvas" [attr.width]="width" [attr.height]="height" #canvas></canvas>
     <app-easel id="easel"></app-easel>
     <!--
     <div id="mouse-position-display">

@@ -24,7 +24,7 @@ p {
     overflow-x: hidden;
     display: flex;
     flex-direction: column-reverse;
-    word-break: break-all;
+    overflow-wrap: break-word;
     font-size: 12px;
     background-color: rgb(204, 166, 116);
 }
