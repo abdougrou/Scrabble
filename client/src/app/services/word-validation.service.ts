@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Tile, TileCoords } from '@app/classes/tile';
+import { TileCoords } from '@app/classes/tile';
 import { HttpClient } from '@angular/common/http';
+import { BoardService } from './board.service';
 
 const BOARD_SIZE = 15;
 
@@ -10,12 +11,12 @@ const BOARD_SIZE = 15;
 export class WordValidationService {
     dictionnary: string[];
 
-    constructor(private httpClient: HttpClient) {
+    constructor(private httpClient: HttpClient, private boardService: BoardService) {
         this.getDictionnary();
     }
 
-    validateWords(board: Tile[][], newTiles: TileCoords[]): boolean {
-        const wordsBefore: string[] = this.findWordsFromBoard(board);
+    validateWords(newTiles: TileCoords[]): boolean {
+        const wordsBefore: string[] = this.findWordsFromBoard();
         //  Removing the accents from the new tiles and adding them to a temporary copy of the board
         this.removeAccents(newTiles);
 
@@ -25,16 +26,16 @@ export class WordValidationService {
         }
 
         //  Checks that no tiles overlapse before placing them on the board
-        if (!this.placeNewTiles(newTiles, board)) {
+        if (!this.placeNewTiles(newTiles)) {
             return false;
         }
         //  checking That all tiles have at least one adjacent tile
-        if (!this.noLoneTile(newTiles, board)) {
+        if (!this.noLoneTile(newTiles)) {
             return false;
         }
 
         //  Getting all the words from the board and only keeping the newly formed ones
-        let wordsAfter: string[] = this.findWordsFromBoard(board);
+        let wordsAfter: string[] = this.findWordsFromBoard();
         for (const wordA of wordsAfter) {
             for (const wordB of wordsBefore) {
                 if (JSON.stringify(wordA) === JSON.stringify(wordB)) {
@@ -50,13 +51,13 @@ export class WordValidationService {
         return true;
     }
 
-    findWordsFromBoard(board: Tile[][]): string[] {
+    findWordsFromBoard(): string[] {
         const boardWords: string[] = new Array();
         for (let i = 0; i < BOARD_SIZE; i++) {
             let currentWord = '';
             for (let j = 0; j < BOARD_SIZE; j++) {
-                if (board[i][j].letter !== '') {
-                    currentWord += board[i][j].letter;
+                if (this.boardService.getTile({ x: i, y: j }) !== undefined) {
+                    currentWord += this.boardService.getTile({ x: i, y: j })?.letter;
                 } else {
                     if (currentWord.length > 1) {
                         boardWords.push(currentWord);
@@ -69,8 +70,8 @@ export class WordValidationService {
             }
             currentWord = '';
             for (let j = 0; j < BOARD_SIZE; j++) {
-                if (board[j][i].letter !== '') {
-                    currentWord += board[j][i].letter;
+                if (this.boardService.getTile({ x: j, y: i }) !== undefined) {
+                    currentWord += this.boardService.getTile({ x: j, y: i })?.letter;
                 } else {
                     if (currentWord.length > 1) {
                         boardWords.push(currentWord);
@@ -100,10 +101,13 @@ export class WordValidationService {
         return true;
     }
 
-    placeNewTiles(newTiles: TileCoords[], board: Tile[][]) {
+    placeNewTiles(newTiles: TileCoords[]) {
         for (const aTile of newTiles) {
-            if (board[aTile.x][aTile.y].letter === '') {
-                board[aTile.x][aTile.y] = aTile.tile;
+            if (aTile.coords.x >= BOARD_SIZE || aTile.coords.y >= BOARD_SIZE) {
+                return false;
+            }
+            if (this.boardService.getTile(aTile.coords) === undefined) {
+                this.boardService.placeTile(aTile.coords, aTile.tile);
             } else {
                 return false;
             }
@@ -111,26 +115,26 @@ export class WordValidationService {
         return true;
     }
 
-    noLoneTile(newTiles: TileCoords[], board: Tile[][]): boolean {
+    noLoneTile(newTiles: TileCoords[]): boolean {
         for (const aTile of newTiles) {
             let hasAdjacent = false;
-            if (aTile.x !== 0) {
-                if (board[aTile.x - 1][aTile.y].letter !== '') {
+            if (aTile.coords.x !== 0) {
+                if (this.boardService.getTile({ x: aTile.coords.x - 1, y: aTile.coords.y }) !== undefined) {
                     hasAdjacent = true;
                 }
             }
-            if (aTile.x < BOARD_SIZE - 1) {
-                if (board[aTile.x + 1][aTile.y].letter !== '') {
+            if (aTile.coords.x < BOARD_SIZE - 1) {
+                if (this.boardService.getTile({ x: aTile.coords.x + 1, y: aTile.coords.y }) !== undefined) {
                     hasAdjacent = true;
                 }
             }
-            if (aTile.y !== 0) {
-                if (board[aTile.x][aTile.y - 1].letter !== '') {
+            if (aTile.coords.y !== 0) {
+                if (this.boardService.getTile({ x: aTile.coords.x, y: aTile.coords.y - 1 }) !== undefined) {
                     hasAdjacent = true;
                 }
             }
-            if (aTile.y < BOARD_SIZE - 1) {
-                if (board[aTile.x][aTile.y + 1].letter !== '') {
+            if (aTile.coords.y < BOARD_SIZE - 1) {
+                if (this.boardService.getTile({ x: aTile.coords.x, y: aTile.coords.y + 1 }) !== undefined) {
                     hasAdjacent = true;
                 }
             }
