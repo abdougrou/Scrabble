@@ -1,10 +1,13 @@
 import { TestBed } from '@angular/core/testing';
+import { CanvasTestHelper } from '@app/classes/canvas-test-helper';
 import { Easel } from '@app/classes/easel';
 import { Dictionary, GameMode } from '@app/classes/game-config';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from '@app/constants';
 import { BoardService } from './board.service';
 import { GameManagerService } from './game-manager.service';
+import { GridService } from './grid.service';
 import { PlayerService } from './player.service';
 import { ReserveService } from './reserve.service';
 
@@ -13,11 +16,16 @@ describe('GameManagerService', () => {
     let board: BoardService;
     let playerService: PlayerService;
     let reserve: ReserveService;
+    let grid: GridService;
+    let ctxStub: CanvasRenderingContext2D;
 
     beforeEach(() => {
         board = new BoardService();
         reserve = new ReserveService();
         playerService = new PlayerService();
+        grid = new GridService(board);
+        ctxStub = CanvasTestHelper.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT).getContext('2d') as CanvasRenderingContext2D;
+        grid.gridContext = ctxStub;
     });
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -25,6 +33,7 @@ describe('GameManagerService', () => {
                 { provide: BoardService, useValue: board },
                 { provide: ReserveService, useValue: reserve },
                 { provide: PlayerService, useValue: playerService },
+                { provide: GridService, useValue: grid },
             ],
         });
         service = TestBed.inject(GameManagerService);

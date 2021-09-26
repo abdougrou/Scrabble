@@ -6,6 +6,7 @@ import { Vec2 } from '@app/classes/vec2';
 import { GRID_SIZE, RANDOM_PLAYER_NAMES, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
 import { timer } from 'rxjs';
 import { BoardService } from './board.service';
+import { GridService } from './grid.service';
 import { PlayerService } from './player.service';
 import { ReserveService } from './reserve.service';
 
@@ -21,7 +22,7 @@ export class GameManagerService {
     mainPlayerName: string;
     enemyPlayerName: string;
 
-    constructor(private board: BoardService, private reserve: ReserveService, private players: PlayerService) {}
+    constructor(private board: BoardService, private reserve: ReserveService, private players: PlayerService, private gridService: GridService) {}
 
     initialize(gameConfig: GameConfig) {
         this.mainPlayerName = gameConfig.playerName1;
@@ -31,6 +32,7 @@ export class GameManagerService {
         this.randomPlayerNameIndex = Math.floor(Math.random() * RANDOM_PLAYER_NAMES.length);
 
         this.initializePlayers([gameConfig.playerName1, RANDOM_PLAYER_NAMES[this.randomPlayerNameIndex]]);
+        this.players.mainPlayer = this.players.players[0];
 
         this.startTimer();
     }
@@ -129,6 +131,7 @@ export class GameManagerService {
         for (let i = 0; i < neededLetters.length; i++) {
             this.board.placeTile(coords[i], neededTiles[i]);
         }
+        this.gridService.drawBoard();
         return `${player.name} a placé le mot "${word}" ${vertical ? 'verticale' : 'horizentale'}ment à la case ${coordStr}`;
     }
 
