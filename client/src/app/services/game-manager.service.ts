@@ -33,8 +33,6 @@ export class GameManagerService {
         this.initializePlayers([gameConfig.playerName1, RANDOM_PLAYER_NAMES[this.randomPlayerNameIndex]]);
 
         this.startTimer();
-
-        this.placeTiles('word', { x: 5, y: 5 }, true, this.players.current);
     }
 
     startTimer() {
