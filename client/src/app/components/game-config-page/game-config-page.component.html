@@ -28,9 +28,5 @@
         <button mat-raised-button class="button" [disabled]="!this.gameConfigForm.valid" (click)="play()" [routerLink]="['/game']">Jouer</button>   
       </div>
     </div> 
-    <div>
-      <p> {{ this.gameConfigForm.value | json }} </p>
-      <p> {{ this.data.config | json }} </p>
-    </div>
 </div>
 </form>

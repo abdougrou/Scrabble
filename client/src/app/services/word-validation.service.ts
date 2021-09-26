@@ -102,8 +102,11 @@ export class WordValidationService {
 
     placeNewTiles(newTiles: TileCoords[], board: Tile[][]) {
         for (const aTile of newTiles) {
-            if (board[aTile.x][aTile.y].letter === '') {
-                board[aTile.x][aTile.y] = aTile.tile;
+            if (aTile.coords.x >= BOARD_SIZE || aTile.coords.y >= BOARD_SIZE) {
+                return false;
+            }
+            if (board[aTile.coords.x][aTile.coords.y].letter === '') {
+                board[aTile.coords.x][aTile.coords.y] = aTile.tile;
             } else {
                 return false;
             }
@@ -114,23 +117,23 @@ export class WordValidationService {
     noLoneTile(newTiles: TileCoords[], board: Tile[][]): boolean {
         for (const aTile of newTiles) {
             let hasAdjacent = false;
-            if (aTile.x !== 0) {
-                if (board[aTile.x - 1][aTile.y].letter !== '') {
+            if (aTile.coords.x !== 0) {
+                if (board[aTile.coords.x - 1][aTile.coords.y].letter !== '') {
                     hasAdjacent = true;
                 }
             }
-            if (aTile.x < BOARD_SIZE - 1) {
-                if (board[aTile.x + 1][aTile.y].letter !== '') {
+            if (aTile.coords.x < BOARD_SIZE - 1) {
+                if (board[aTile.coords.x + 1][aTile.coords.y].letter !== '') {
                     hasAdjacent = true;
                 }
             }
-            if (aTile.y !== 0) {
-                if (board[aTile.x][aTile.y - 1].letter !== '') {
+            if (aTile.coords.y !== 0) {
+                if (board[aTile.coords.x][aTile.coords.y - 1].letter !== '') {
                     hasAdjacent = true;
                 }
             }
-            if (aTile.y < BOARD_SIZE - 1) {
-                if (board[aTile.x][aTile.y + 1].letter !== '') {
+            if (aTile.coords.y < BOARD_SIZE - 1) {
+                if (board[aTile.coords.x][aTile.coords.y + 1].letter !== '') {
                     hasAdjacent = true;
                 }
             }

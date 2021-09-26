@@ -1,0 +1,27 @@
+<mat-card class="card">
+    <mat-card-title > Timer : {{ this.timer }}</mat-card-title>
+</mat-card>
+
+<div *ngFor="let player of players">
+    <mat-card class="card">
+        <mat-card-title-group>
+          <mat-card-title>{{ player.name }}</mat-card-title>
+          <mat-card-subtitle>Score : {{ player.score }}</mat-card-subtitle>
+          <mat-card-subtitle>Tiles : {{ player.easel.count }}</mat-card-subtitle>
+          <img mat-card-sm-image src="../../../assets/profile-pic.jpg" >
+        </mat-card-title-group>
+    </mat-card>
+</div>
+
+<div>
+    <mat-card class="card justified">
+        <button mat-raised-button>-</button>
+        <span>(fZixe) px</span>
+        <button mat-raised-button>+</button>
+    </mat-card>
+</div>
+
+<div class="justified-right">
+    <button mat-raised-button (click)= "skipTurn()">Passer le tour</button>
+    <button mat-raised-button [routerLink]="['/home']" (click)="quit()">Quitter</button>
+</div>

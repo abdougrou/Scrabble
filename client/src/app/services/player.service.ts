@@ -8,6 +8,7 @@ import { Tile } from '@app/classes/tile';
 })
 export class PlayerService {
     players: Player[] = [];
+    skipCounter = 0;
     get current(): Player {
         return this.players[0];
     }
@@ -23,6 +24,10 @@ export class PlayerService {
 
     switchPlayers() {
         this.players.reverse();
+    }
+
+    incrementSkipCounter() {
+        this.skipCounter++;
     }
 
     clear() {
