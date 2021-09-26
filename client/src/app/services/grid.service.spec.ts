@@ -147,4 +147,12 @@ describe('GridService', () => {
     //     expect(spyPlaced).toHaveBeenCalledTimes(numberOfPlacedTilesExpected);
     //     expect(spyVirgin).toHaveBeenCalledTimes(numberOfVirginTilesExpected);
     // });
+
+    it('clearBoard() should clear board by calling clearRect', () => {
+        const boardSize = CANVAS_WIDTH - STEP;
+        const spy = spyOn(ctxStub, 'clearRect').and.callThrough();
+        service.clearBoard();
+
+        expect(spy).toHaveBeenCalledWith(0, 0, boardSize, boardSize);
+    });
 });

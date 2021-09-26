@@ -3,6 +3,7 @@ import { Player } from '@app/classes/player';
 import { PlayerService } from '@app/services/player.service';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { MAX_SKIP_COUNT } from '@app/constants';
+import { GridService } from '@app/services/grid.service';
 
 @Component({
     selector: 'app-player-info',
@@ -10,12 +11,31 @@ import { MAX_SKIP_COUNT } from '@app/constants';
     styleUrls: ['./player-info.component.scss'],
 })
 export class PlayerInfoComponent {
+    size: number = 0;
     players: Player[] = [];
-    constructor(private playerService: PlayerService, private gameManager: GameManagerService) {
+
+    constructor(private playerService: PlayerService, private gameManager: GameManagerService, private gridService: GridService) {
         this.players = this.playerService.players;
     }
     get timer() {
         return this.gameManager.currentTurnDurationLeft;
+    }
+
+    // TODO implement code for font size manipulation
+    increaseFont() {
+        if (this.size < 2) {
+            this.size++;
+            this.gridService.clearBoard();
+            this.gridService.drawBoard(this.size);
+        }
+    }
+
+    decreaseFont() {
+        if (this.size > -2) {
+            this.size--;
+            this.gridService.clearBoard();
+            this.gridService.drawBoard(this.size);
+        }
     }
 
     skipTurn() {
@@ -30,6 +50,4 @@ export class PlayerInfoComponent {
     quit() {
         this.gameManager.reset();
     }
-
-    // TODO implement code for font size manipulation
 }

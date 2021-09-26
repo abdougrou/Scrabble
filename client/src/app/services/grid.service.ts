@@ -16,6 +16,8 @@ import {
     INDEX_OFFSET,
     BASE_LETTER_FONT_SIZE,
     BASE_INDEX_FONT_SIZE,
+    LETTER_FONT_SIZE_MODIFIER,
+    INDEX_FONT_SIZE_MODIFIER,
 } from '@app/constants';
 import { BoardService } from './board.service';
 
@@ -97,16 +99,22 @@ export class GridService {
         this.gridContext.fillText(tile.points.toString(), coord.x * STEP + INDEX_OFFSET, coord.y * STEP + INDEX_OFFSET);
     }
 
-    drawBoard() {
+    clearBoard() {
+        this.gridContext.clearRect(0, 0, CANVAS_WIDTH - STEP, CANVAS_HEIGHT - STEP);
+    }
+
+    drawBoard(fontSizeModifier: number = 0) {
+        const letterFont = BASE_LETTER_FONT_SIZE + fontSizeModifier * LETTER_FONT_SIZE_MODIFIER;
+        const indexFont = BASE_INDEX_FONT_SIZE + fontSizeModifier * INDEX_FONT_SIZE_MODIFIER;
         this.gridContext.beginPath();
-        this.gridContext.rect(0, 0, CANVAS_HEIGHT - STEP, CANVAS_WIDTH - STEP);
+        this.gridContext.rect(0, 0, CANVAS_WIDTH - STEP, CANVAS_HEIGHT - STEP);
         this.gridContext.fillStyle = 'black';
         this.gridContext.fill();
         for (let i = 0; i < GRID_SIZE; i++) {
             for (let j = 0; j < GRID_SIZE; j++) {
                 const coord: Vec2 = { x: i, y: j };
                 const tile: Tile | undefined = this.board.getTile(coord);
-                if (tile) this.drawTile(coord, tile, BASE_LETTER_FONT_SIZE, BASE_INDEX_FONT_SIZE);
+                if (tile) this.drawTile(coord, tile, letterFont, indexFont);
                 else this.drawMultiplierTile(coord, BOARD_MULTIPLIER[i][j]);
             }
         }
