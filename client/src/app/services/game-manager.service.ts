@@ -3,9 +3,10 @@ import { GameConfig } from '@app/classes/game-config';
 import { Player } from '@app/classes/player';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { FIRST_PLAYER_COIN_FLIP, GRID_SIZE, RANDOM_PLAYER_NAMES, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
+import { GRID_SIZE, RANDOM_PLAYER_NAMES, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
 import { timer } from 'rxjs';
 import { BoardService } from './board.service';
+import { GridService } from './grid.service';
 import { PlayerService } from './player.service';
 import { ReserveService } from './reserve.service';
 
@@ -21,7 +22,7 @@ export class GameManagerService {
     mainPlayerName: string;
     enemyPlayerName: string;
 
-    constructor(private board: BoardService, private reserve: ReserveService, private players: PlayerService) {}
+    constructor(private board: BoardService, private reserve: ReserveService, private players: PlayerService, private gridService: GridService) {}
 
     initialize(gameConfig: GameConfig) {
         this.mainPlayerName = gameConfig.playerName1;
@@ -51,7 +52,7 @@ export class GameManagerService {
     initializePlayers(playerNames: string[]) {
         this.players.createPlayer(playerNames[0], this.reserve.getLetters(STARTING_TILE_AMOUNT));
         this.players.createPlayer(playerNames[1], this.reserve.getLetters(STARTING_TILE_AMOUNT));
-        if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
+        // if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
     }
 
     switchPlayers() {
@@ -106,25 +107,18 @@ export class GameManagerService {
         }
 
         const coords: Vec2[] = new Array();
-        let counter = 0;
-        let neededLetters = word;
+        let neededLetters = '';
         for (let i = 0; i < word.length; i++) {
             let nextCoord: Vec2;
-            if (!vertical) {
-                nextCoord = { x: coord.x + i, y: coord.y };
-            } else {
-                nextCoord = { x: coord.x, y: coord.y + i };
-            }
+            if (!vertical) nextCoord = { x: coord.x + i, y: coord.y };
+            else nextCoord = { x: coord.x, y: coord.y + i };
+
             const tile: Tile | undefined = this.board.getTile(nextCoord);
             if (tile) {
-                if (tile.letter !== word.charAt(counter)) {
-                    return 'Commande impossible a realise';
-                } else {
-                    neededLetters = neededLetters.slice(0, counter) + neededLetters.slice(counter + 1);
-                }
+                if (tile.letter !== word.charAt(i)) return 'Commande impossible a realise';
             } else {
+                neededLetters += word.charAt(i);
                 coords.push(nextCoord);
-                counter++;
             }
         }
 
@@ -132,18 +126,11 @@ export class GameManagerService {
         else if (!player.easel.containsTiles(neededLetters)) return 'Votre chevalet ne contient pas les lettres nécessaires';
 
         //  valider avant de placer
-        for (let i = 0; i < word.length; i++) {
-            this.board.placeTile(
-                {
-                    x: coords[i].x,
-                    y: coords[i].y,
-                },
-                {
-                    letter: player.easel.getTiles(word[i])[0].letter,
-                    points: 0,
-                },
-            );
+        const neededTiles = player.easel.getTiles(neededLetters);
+        for (let i = 0; i < neededLetters.length; i++) {
+            this.board.placeTile(coords[i], neededTiles[i]);
         }
+        this.gridService.drawBoard();
         return `${player.name} a placé le mot "${word}" ${vertical ? 'verticale' : 'horizentale'}ment à la case ${coordStr}`;
     }
 
