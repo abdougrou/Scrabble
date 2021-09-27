@@ -75,4 +75,9 @@ describe('CommandHandlerService', () => {
         service.pass(passBad, player);
         expect(gameManagerSpy.skipTurn).toHaveBeenCalledTimes(1);
     });
+
+    it('should return an error message when the command is invalid', () => {
+        const invalidCmdExchange = 'echanger abcccccas';
+        expect(service.handleCommand(invalidCmdExchange, player).body).toBe("La commande entrée n'est pas valide");
+    });
 });

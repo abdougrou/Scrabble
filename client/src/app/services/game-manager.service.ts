@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { GameConfig } from '@app/classes/game-config';
 import { Player } from '@app/classes/player';
-import { Tile, TileCoords} from '@app/classes/tile'; 
+import { Tile, TileCoords } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
 import { GRID_SIZE, RANDOM_PLAYER_NAMES, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
 import { timer } from 'rxjs';
@@ -18,7 +18,6 @@ export class GameManagerService {
     turnDuration: number;
     currentTurnDurationLeft: number;
     randomPlayerNameIndex: number;
-    isFirstTurn: boolean = true;
 
     mainPlayerName: string;
     enemyPlayerName: string;
@@ -107,29 +106,11 @@ export class GameManagerService {
         if (this.players.current !== player) return "Ce n'est pas votre tour";
 
         //  check if word can fit on board
-        if(!this.wordFitsOnBoard(vertical, word, coord)) {
-            console.log('ok');
-            return 'Commande impossible a realise';
-        }
+        if (!this.wordFitsOnBoard(vertical, word, coord)) return 'Commande impossible a realise';
+        // chek first turn
         const coords: Vec2[] = new Array();
-        let neededLetters = '';
-        for (let i = 0; i < word.length; i++) {
-            let nextCoord: Vec2;
-            if (!vertical) nextCoord = { x: coord.x + i, y: coord.y };
-            else nextCoord = { x: coord.x, y: coord.y + i };
-
-            const tile: Tile | undefined = this.board.getTile(nextCoord);
-            if (tile !== undefined) {
-                if (tile.letter !== word.charAt(i)) {
-                    console.log(tile.letter);
-                    console.log(this.board.board);
-                     return 'Commande impossible a realise';
-                }
-            } else if (word.charAt(i)) {
-                neededLetters += word.charAt(i);
-                coords.push(nextCoord);
-            }
-        }
+        const neededLetters = this.findNeededLetters(word, coord, coords, vertical);
+        if (neededLetters === 'Commande impossible a realise') return 'Commande impossible a realise';
         if (neededLetters.length === 0) return 'Vous ne pouvez pas placer le mot';
         else if (!player.easel.containsTiles(neededLetters)) return 'Votre chevalet ne contient pas les lettres nécessaires';
 
@@ -208,5 +189,23 @@ export class GameManagerService {
             if (coord.x + word.length > GRID_SIZE) return false;
         }
         return true;
+    }
+
+    private findNeededLetters(word: string, coord: Vec2, coordsNeeded: Vec2[], vertical: boolean): string {
+        let neededLetters = '';
+        for (let i = 0; i < word.length; i++) {
+            let nextCoord: Vec2;
+            if (!vertical) nextCoord = { x: coord.x + i, y: coord.y };
+            else nextCoord = { x: coord.x, y: coord.y + i };
+
+            const tile: Tile | undefined = this.board.getTile(nextCoord);
+            if (tile !== undefined) {
+                if (tile.letter !== word.charAt(i)) return 'Commande impossible a realise';
+            } else if (word.charAt(i)) {
+                neededLetters += word.charAt(i);
+                coordsNeeded.push(nextCoord);
+            }
+        }
+        return neededLetters;
     }
 }
