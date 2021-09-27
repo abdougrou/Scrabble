@@ -20,10 +20,10 @@ describe('CommandHandlerService', () => {
         });
         service = TestBed.inject(CommandHandlerService);
         tiles = [
-            { letter: 'A', points: 0 },
-            { letter: 'B', points: 0 },
-            { letter: 'C', points: 0 },
-            { letter: 'D', points: 0 },
+            { letter: 'a', points: 0 },
+            { letter: 'b', points: 0 },
+            { letter: 'c', points: 0 },
+            { letter: 'd', points: 0 },
         ];
         player = {
             name: 'player',

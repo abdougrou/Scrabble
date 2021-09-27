@@ -91,10 +91,10 @@ export class GridService {
         this.gridContext.textBaseline = 'middle';
         this.gridContext.textAlign = 'center';
         this.gridContext.fillStyle = 'black';
-        this.gridContext.font = 'bold ' + letterFontSize.toString() + 'px system-ui';
-        this.gridContext.fillText(tile.letter.toString(), coord.x * STEP + LETTER_OFFSET, coord.y * STEP + LETTER_OFFSET);
-        this.gridContext.font = indexFontSize.toString() + 'px system-ui';
-        this.gridContext.fillText(tile.points.toString(), coord.x * STEP + INDEX_OFFSET, coord.y * STEP + INDEX_OFFSET);
+        this.gridContext.font = `bold ${letterFontSize}px system-ui`;
+        this.gridContext.fillText(tile.letter.toUpperCase(), coord.x * STEP + LETTER_OFFSET, coord.y * STEP + LETTER_OFFSET);
+        this.gridContext.font = `${indexFontSize}px system-ui`;
+        this.gridContext.fillText(tile.points.toString().toUpperCase(), coord.x * STEP + INDEX_OFFSET, coord.y * STEP + INDEX_OFFSET);
     }
 
     drawBoard() {

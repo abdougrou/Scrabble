@@ -16,22 +16,23 @@ export class WordValidationService {
     }
 
     validateWords(newTiles: TileCoords[]): boolean {
+        let isValid = true;
         const wordsBefore: string[] = this.findWordsFromBoard();
         //  Removing the accents from the new tiles and adding them to a temporary copy of the board
         this.removeAccents(newTiles);
 
         //  End validation if the player entered an invalid character or placed a tile on top of another
         if (!this.checkValidLetters(newTiles)) {
-            return false;
+            isValid = false;
         }
 
         //  Checks that no tiles overlapse before placing them on the board
         if (!this.placeNewTiles(newTiles)) {
-            return false;
+            isValid = false;
         }
         //  checking That all tiles have at least one adjacent tile
         if (!this.noLoneTile(newTiles)) {
-            return false;
+            isValid = false;
         }
 
         //  Getting all the words from the board and only keeping the newly formed ones
@@ -46,9 +47,13 @@ export class WordValidationService {
 
         //  check if all the new words are contained in the dictionary
         if (!this.wordInDictionnary(wordsAfter)) {
-            return false;
+            isValid = false;
         }
-        return true;
+        //  Resetting the board after validation
+        for (const aTile of newTiles) {
+            this.boardService.board.delete(this.boardService.coordToKey(aTile.coords));
+        }
+        return isValid;
     }
 
     findWordsFromBoard(): string[] {

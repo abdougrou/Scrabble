@@ -1,10 +1,13 @@
 import { TestBed } from '@angular/core/testing';
+import { CanvasTestHelper } from '@app/classes/canvas-test-helper';
 import { Easel } from '@app/classes/easel';
 import { Dictionary, GameMode } from '@app/classes/game-config';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from '@app/constants';
 import { BoardService } from './board.service';
 import { GameManagerService } from './game-manager.service';
+import { GridService } from './grid.service';
 import { PlayerService } from './player.service';
 import { ReserveService } from './reserve.service';
 
@@ -13,11 +16,16 @@ describe('GameManagerService', () => {
     let board: BoardService;
     let playerService: PlayerService;
     let reserve: ReserveService;
+    let ctxStub: CanvasRenderingContext2D;
+    let gridService: GridService;
 
     beforeEach(() => {
         board = new BoardService();
         reserve = new ReserveService();
         playerService = new PlayerService();
+        ctxStub = CanvasTestHelper.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT).getContext('2d') as CanvasRenderingContext2D;
+        gridService = new GridService(board);
+        gridService.gridContext = ctxStub;
     });
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -25,6 +33,7 @@ describe('GameManagerService', () => {
                 { provide: BoardService, useValue: board },
                 { provide: ReserveService, useValue: reserve },
                 { provide: PlayerService, useValue: playerService },
+                { provide: GridService, useValue: gridService },
             ],
         });
         service = TestBed.inject(GameManagerService);
@@ -156,11 +165,14 @@ describe('GameManagerService', () => {
         const coordStr1 = 'a1';
         const coordStr2 = 'o15v';
         const coordStr3 = 'z2';
+        const coordStr4 = 'a7';
         const coordVec1: Vec2 = { x: 0, y: 0 };
         const coordVec2: Vec2 = { x: 14, y: 14 };
-        const coordVec3: Vec2 = { x: 25, y: 1 };
+        const coordVec3: Vec2 = { x: 1, y: 25 };
+        const coordVec4: Vec2 = { x: 6, y: 0 };
         expect(service.getCoordinateFromString(coordStr1)).toEqual(coordVec1);
         expect(service.getCoordinateFromString(coordStr2)).toEqual(coordVec2);
         expect(service.getCoordinateFromString(coordStr3)).toEqual(coordVec3);
+        expect(service.getCoordinateFromString(coordStr4)).toEqual(coordVec4);
     });
 });
