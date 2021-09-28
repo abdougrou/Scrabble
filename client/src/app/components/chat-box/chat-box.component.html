@@ -1,18 +1,17 @@
-<div class="container">
-    <div class="chat-container">
-        <div class="chat-body" id="messages">
-            <p id="default-message"></p>
-        </div>
-        <div class="message-box">
-            <input
-                [(ngModel)]="message"
-                type="text"
-                id="message-input"
-                (keydown.enter)="submitInput()"
-                placeholder="Enter your message..."
-                maxlength="512"
-                autofocus
-            />
-        </div>
+<div class="chat-container">
+    <div class="chat-body" id="messages">
+        <p id="default-message"></p>
+    </div>
+    <div class="message-box">
+        <input
+            [(ngModel)]="message"
+            type="text"
+            id="message-input"
+            (keydown.enter)="submitInput()"
+            placeholder="Enter your message..."
+            maxlength="512"
+            autofocus
+        />
+        <button mat-raised-button (click)="submitInput()">Enter</button>
     </div>
 </div>

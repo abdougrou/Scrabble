@@ -11,8 +11,10 @@ import { MAX_SKIP_COUNT } from '@app/constants';
 })
 export class PlayerInfoComponent {
     players: Player[] = [];
+    realPlayerName: string;
     constructor(private playerService: PlayerService, private gameManager: GameManagerService) {
         this.players = this.playerService.players;
+        this.realPlayerName = this.gameManager.realPlayerName;
     }
     get timer() {
         return this.gameManager.currentTurnDurationLeft;
@@ -20,9 +22,7 @@ export class PlayerInfoComponent {
 
     skipTurn() {
         if (this.playerService.skipCounter === MAX_SKIP_COUNT - 1) {
-            // TODO replace this block of code
-            // eslint-disable-next-line no-console
-            console.log('Game Normally Ended');
+            this.gameManager.stopTimer();
         }
         this.gameManager.skipTurn();
     }

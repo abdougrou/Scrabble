@@ -1,5 +1,10 @@
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
 .card {
-    max-width: 400px;
     margin-bottom: 8px;
     background-color: rgb(204, 166, 116);
 }
@@ -13,6 +18,10 @@ mat-card-subtitle {
 
 .mat-raised-button {
   background-color: burlywood;
+  margin-left: 1em;
+}
+
+.font-size-button {
   margin-right: 10px;
   margin-left: 10px;
 }
@@ -25,4 +34,17 @@ mat-card-subtitle {
 .justified-right {
   display: flex;
   justify-content: flex-end;
+  margin-right: 1em;
+}
+
+.first {
+  background-color: #592a0c;
+}
+
+.first mat-card-title {
+  color:white;
+}
+
+.first mat-card-subtitle {
+  color: white;
 }

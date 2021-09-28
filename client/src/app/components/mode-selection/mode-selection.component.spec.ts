@@ -1,19 +1,25 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormBuilder } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { of } from 'rxjs';
 import { ModeSelectionComponent } from './mode-selection.component';
 
 describe('ModeSelectionComponent', () => {
     let component: ModeSelectionComponent;
     let fixture: ComponentFixture<ModeSelectionComponent>;
 
+    const dialogMock = {
+        close: () => {
+            // Do nothing
+        },
+    };
+
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [MatDialogModule],
+            imports: [MatDialogModule, BrowserAnimationsModule],
             declarations: [ModeSelectionComponent],
-            providers: [
-                { provide: MAT_DIALOG_DATA, useValue: {} },
-                { provide: MatDialogRef, useValue: {} },
-            ],
+            providers: [FormBuilder, { provide: MAT_DIALOG_DATA, useValue: {} }, { provide: MatDialogRef, useValue: dialogMock }],
         }).compileComponents();
     });
 
@@ -25,5 +31,36 @@ describe('ModeSelectionComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should open game config popup', () => {
+        // const expectedHeader = 'vous jouez contre';
+        const spy = spyOn(component.dialog, 'open').and.callThrough();
+
+        component.playSolo();
+        fixture.detectChanges();
+        // const popupHeader = document.getElementsByTagName('p')[0] as HTMLHeadElement;
+
+        expect(spy).toHaveBeenCalled();
+    });
+
+    it('should close after back()', () => {
+        const spy = spyOn(component.dialogRef, 'close').and.callThrough();
+        component.back();
+        expect(spy).toHaveBeenCalled();
+    });
+
+    it("should 'Retour' button call back()", () => {
+        const spy = spyOn(component, 'back').and.callThrough();
+        const button = fixture.debugElement.nativeElement.querySelector('#back');
+        button.click();
+        expect(spy).toHaveBeenCalled();
+    });
+
+    it('should be closed if afterClosed returned true', () => {
+        spyOn(component.dialog, 'open').and.returnValue({ afterClosed: () => of(true) } as MatDialogRef<ModeSelectionComponent>);
+        const spy = spyOn(component.dialogRef, 'close').and.callThrough();
+        component.playSolo();
+        expect(spy).toHaveBeenCalled();
     });
 });

@@ -3,8 +3,8 @@ import { GameConfig } from '@app/classes/game-config';
 import { Player } from '@app/classes/player';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { FIRST_PLAYER_COIN_FLIP, RANDOM_PLAYER_NAMES, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
-import { timer } from 'rxjs';
+import { FIRST_PLAYER_COIN_FLIP, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
+import { Subscription, timer } from 'rxjs';
 import { BoardService } from './board.service';
 import { PlayerService } from './player.service';
 import { ReserveService } from './reserve.service';
@@ -15,28 +15,28 @@ import { ReserveService } from './reserve.service';
 export class GameManagerService {
     turnDuration: number;
     currentTurnDurationLeft: number;
-    randomPlayerNameIndex: number;
+    subscription: Subscription;
+    realPlayerName: string;
 
     constructor(private board: BoardService, private reserve: ReserveService, private players: PlayerService) {}
 
     initialize(gameConfig: GameConfig) {
         this.turnDuration = gameConfig.duration;
         this.currentTurnDurationLeft = gameConfig.duration;
-        this.randomPlayerNameIndex = Math.floor(Math.random() * RANDOM_PLAYER_NAMES.length);
+        this.realPlayerName = gameConfig.playerName1;
 
-        this.initializePlayers([gameConfig.playerName1, RANDOM_PLAYER_NAMES[this.randomPlayerNameIndex]]);
+        this.initializePlayers([gameConfig.playerName1, gameConfig.playerName2]);
 
         this.startTimer();
     }
 
     startTimer() {
         const source = timer(0, SECOND_MD);
-        source.subscribe((seconds) => {
+        this.subscription = source.subscribe((seconds) => {
             this.currentTurnDurationLeft = this.turnDuration - (seconds % this.turnDuration) - 1;
             if (this.currentTurnDurationLeft === 0) {
                 this.currentTurnDurationLeft = this.turnDuration;
                 this.switchPlayers();
-
                 // TODO send player switch event
             }
         });
@@ -50,7 +50,12 @@ export class GameManagerService {
 
     switchPlayers() {
         this.players.switchPlayers();
+        if (this.subscription === undefined) {
+            return;
+        }
+        this.subscription.unsubscribe();
         this.currentTurnDurationLeft = this.turnDuration;
+        this.startTimer();
         // Send player switch event
     }
 
@@ -68,7 +73,12 @@ export class GameManagerService {
 
     // TODO implement stopTimer() to end the game after 6 skipTurn
 
+    stopTimer() {
+        this.subscription.unsubscribe();
+    }
+
     reset() {
+        this.subscription.unsubscribe();
         this.players.clear();
     }
 

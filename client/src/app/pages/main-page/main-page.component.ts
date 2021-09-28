@@ -30,15 +30,10 @@ export class MainPageComponent {
 
     // Set the game mode then open the first popup
     start(gameMode: GameMode) {
-        const dialogRef = this.dialog.open(ModeSelectionComponent, {
+        this.dialog.open(ModeSelectionComponent, {
             height: DIALOG_HEIGHT,
             width: DIALOG_WIDTH,
             data: { mode: gameMode },
-        });
-
-        dialogRef.afterClosed().subscribe(() => {
-            // eslint-disable-next-line no-console
-            console.log('Game Starts');
         });
     }
 }
