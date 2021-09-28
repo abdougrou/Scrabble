@@ -52,6 +52,8 @@ export class ReserveService {
             const reserveTile = this.tiles.get(tile.letter);
             if (reserveTile !== undefined) {
                 reserveTile.count++;
+            } else {
+                this.tiles.set(tile.letter, { tile, count: 1 });
             }
         });
         this.tileCount += tiles.length;

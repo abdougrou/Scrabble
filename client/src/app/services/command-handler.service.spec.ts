@@ -2,17 +2,23 @@ import { TestBed } from '@angular/core/testing';
 import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
 import { Tile } from '@app/classes/tile';
-import { Vec2 } from '@app/classes/vec2';
 import { CommandHandlerService } from './command-handler.service';
+import { GameManagerService } from './game-manager.service';
 
 describe('CommandHandlerService', () => {
-    let commandHandler: CommandHandlerService;
+    let service: CommandHandlerService;
+    let gameManagerSpy: jasmine.SpyObj<GameManagerService>;
     let tiles: Tile[];
     let player: Player;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({});
-        commandHandler = TestBed.inject(CommandHandlerService);
+        gameManagerSpy = jasmine.createSpyObj<GameManagerService>('GameManagerService', ['exchangeTiles', 'placeTiles', 'skipTurn']);
+    });
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [{ provide: GameManagerService, useValue: gameManagerSpy }],
+        });
+        service = TestBed.inject(CommandHandlerService);
         tiles = [
             { letter: 'A', points: 0 },
             { letter: 'B', points: 0 },
@@ -27,36 +33,46 @@ describe('CommandHandlerService', () => {
     });
 
     it('should be created', () => {
-        expect(commandHandler).toBeTruthy();
+        expect(service).toBeTruthy();
     });
 
-    it('different command case exchange', () => {
-        const exchangeGood = '!exchange abcde*';
-        const exchangeGoodStar = '!exchange abcdef';
-        const exchangeWrong = 'exchange q';
-        expect(commandHandler.exchange(exchangeGood, player)).toBe(true);
-        expect(commandHandler.exchange(exchangeGoodStar, player)).toBe(true);
-        expect(commandHandler.exchange(exchangeWrong, player)).toBe(false);
+    it('should call the right functions when the command is valid', () => {
+        const exchange = '!echanger abcdef';
+        const place = '!placer a10v abcdef';
+        const pass = '!passer';
+        service.handleCommand(exchange, player);
+        service.handleCommand(place, player);
+        service.handleCommand(pass, player);
+        expect(gameManagerSpy.exchangeTiles).toHaveBeenCalledTimes(1);
+        expect(gameManagerSpy.placeTiles).toHaveBeenCalledTimes(1);
+        expect(gameManagerSpy.skipTurn).toHaveBeenCalledTimes(1);
     });
 
-    it('different command case place', () => {
-        const placeGood = '!place a10v uwu';
-        const placeCapital = '!place c2h uWu';
-        const placeWrong = '!place p10h UwUuWu';
-        expect(commandHandler.place(placeGood, player)).toBe(true);
-        expect(commandHandler.place(placeCapital, player)).toBe(true);
-        expect(commandHandler.place(placeWrong, player)).toBe(false);
+    it('should call GameManager exchangeTiles when the command is valid', () => {
+        const exchangeGood = '!echanger abcdef';
+        const exchangeGoodStar = '!echanger abcde*';
+        const exchangeBad = 'echanger q';
+        service.exchange(exchangeGood, player);
+        service.exchange(exchangeGoodStar, player);
+        service.exchange(exchangeBad, player);
+        expect(gameManagerSpy.exchangeTiles).toHaveBeenCalledTimes(2);
     });
 
-    it('getCoordinateFromString works as expected', () => {
-        const coordStr1 = 'a1';
-        const coordStr2 = 'o15v';
-        const coordStr3 = 'z2';
-        const coordVec1: Vec2 = { x: 0, y: 0 };
-        const coordVec2: Vec2 = { x: 14, y: 14 };
-        const coordVec3: Vec2 = { x: 25, y: 1 };
-        expect(commandHandler.getCoordinateFromString(coordStr1)).toEqual(coordVec1);
-        expect(commandHandler.getCoordinateFromString(coordStr2)).toEqual(coordVec2);
-        expect(commandHandler.getCoordinateFromString(coordStr3)).toEqual(coordVec3);
+    it('should call GameManager placeTiles when command is valid', () => {
+        const placeGood = '!placer a10v abcdef';
+        const placeCapital = '!placer c2h abcDef';
+        const placeBad = '!placer p10h abcd';
+        service.place(placeGood, player);
+        service.place(placeCapital, player);
+        service.place(placeBad, player);
+        expect(gameManagerSpy.placeTiles).toHaveBeenCalledTimes(2);
+    });
+
+    it('should call GameManager skipTurn when command is valid', () => {
+        const passGood = '!passer';
+        const passBad = '!passer a';
+        service.pass(passGood, player);
+        service.pass(passBad, player);
+        expect(gameManagerSpy.skipTurn).toHaveBeenCalledTimes(1);
     });
 });

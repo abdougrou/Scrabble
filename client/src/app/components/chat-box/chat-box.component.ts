@@ -1,6 +1,8 @@
 import { Component, HostListener } from '@angular/core';
 import { ChatMessage } from '@app/classes/message';
+import { SYSTEM_NAME } from '@app/constants';
 import { CommandHandlerService } from '@app/services/command-handler.service';
+import { GameManagerService } from '@app/services/game-manager.service';
 import { PlayerService } from '@app/services/player.service';
 
 @Component({
@@ -13,7 +15,7 @@ export class ChatBoxComponent {
     message = '';
     chatMessage: ChatMessage = { user: '', body: '' };
 
-    constructor(public playerService: PlayerService, public commandHandlerService: CommandHandlerService) {}
+    constructor(public gameManager: GameManagerService, public playerService: PlayerService, public commandHandler: CommandHandlerService) {}
 
     @HostListener('keydown', ['$event'])
     buttonDetect(event: KeyboardEvent) {
@@ -23,13 +25,13 @@ export class ChatBoxComponent {
     submitInput(): void {
         const input = document.getElementById('message-input') as HTMLInputElement;
         if (input === null) {
-            // console.log('message-input error');
+            throw new Error('message-input error in the chatbox');
         } else {
             if (input.value !== '') {
-                this.chatMessage.user = this.playerService.current.name;
+                this.chatMessage.user = this.gameManager.mainPlayerName;
                 this.chatMessage.body = this.message;
-                // console.log(this.chatMessage);
                 this.showMessage(this.chatMessage);
+                this.showMessage(this.checkCommand(this.chatMessage));
             }
             input.value = '';
         }
@@ -37,25 +39,27 @@ export class ChatBoxComponent {
 
     showMessage(message: ChatMessage): void {
         const newMessage = document.createElement('p');
-        // change "user : " when u get the message class
-        newMessage.innerHTML = message.user + ': ' + message.body;
         switch (message.user) {
-            case 'System':
+            case SYSTEM_NAME:
+                newMessage.innerHTML = `${message.user} : ${message.body}`;
                 newMessage.style.color = 'red';
                 break;
-            case this.playerService.players[0].name:
+            case this.gameManager.mainPlayerName:
+                newMessage.innerHTML = `${message.user} : ${message.body}`;
                 newMessage.style.color = 'gray';
                 break;
-            case this.playerService.players[1].name:
+            case this.gameManager.enemyPlayerName:
+                newMessage.innerHTML = `${message.user} : ${message.body}`;
                 newMessage.style.color = 'darkgoldenrod';
                 break;
             default:
+                newMessage.innerHTML = message.body;
                 newMessage.style.color = 'gray';
                 break;
         }
         const parentMessage = document.getElementById('default-message');
         if (parentMessage === null) {
-            // console.log('message can not be shown');
+            throw new Error('the message sent can not be shown');
         } else {
             parentMessage.appendChild(newMessage);
         }
@@ -65,9 +69,17 @@ export class ChatBoxComponent {
     scrollDown(): void {
         const chatBody = document.getElementById('messages');
         if (chatBody === null) {
-            // console.log('can not scroll down in the chat box');
+            throw new Error('can not scroll down in the chat box');
         } else {
             chatBody.scrollTop = 0;
         }
+    }
+
+    checkCommand(message: ChatMessage): ChatMessage {
+        let systemMessage: ChatMessage = { user: '', body: '' };
+        if (message.body.startsWith('!')) {
+            systemMessage = this.commandHandler.handleCommand(message.body, this.playerService.getPlayerByName(message.user));
+        }
+        return systemMessage;
     }
 }

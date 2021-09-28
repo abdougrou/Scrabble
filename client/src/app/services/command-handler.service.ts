@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
+import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
-import { Vec2 } from '@app/classes/vec2';
-import { COMMANDS } from '@app/constants';
+import { COMMANDS, COMMAND_RESULT, SYSTEM_NAME } from '@app/constants';
 import { GameManagerService } from './game-manager.service';
 
 @Injectable({
@@ -9,41 +9,65 @@ import { GameManagerService } from './game-manager.service';
 })
 export class CommandHandlerService {
     constructor(private gameManager: GameManagerService) {}
-    handleCommand(command: string, player: Player): boolean {
+
+    handleCommand(command: string, player: Player): ChatMessage {
         switch (command.split(' ')[0]) {
             case COMMANDS.exchange:
                 return this.exchange(command, player);
             case COMMANDS.place:
                 return this.place(command, player);
+            case COMMANDS.pass:
+                return this.pass(command, player);
+            default:
+                return { user: SYSTEM_NAME, body: "La commande entrée n'est pas valide" } as ChatMessage;
         }
-        return false;
     }
 
-    exchange(command: string, player: Player): boolean {
-        const regex = new RegExp(/^!exchange ([a-z]|\*){0,7}/g);
+    exchange(command: string, player: Player): ChatMessage {
+        const commandResult: ChatMessage = { user: '', body: '' };
+        const regex = new RegExp(/^!echanger ([a-z]|\*){0,7}/g);
         if (regex.test(command)) {
-            this.gameManager.exchangeTiles(command.split(' ')[1], player);
-            return true;
+            commandResult.user = COMMAND_RESULT;
+            commandResult.body = this.gameManager.exchangeTiles(command.split(' ')[1], player);
+        } else {
+            commandResult.user = SYSTEM_NAME;
+            commandResult.body = 'Erreur de syntaxe, pour échanger des lettres, il faut suivre le format suivant : !échanger (lettre)...';
         }
-        return false;
+        return commandResult;
     }
 
-    place(command: string, player: Player): boolean {
-        const regex = new RegExp(/^!place ([a-o]([1-9]|1[0-5])(h|v)) ([a-zA-Z]){2,15}$/g);
+    place(command: string, player: Player): ChatMessage {
+        const commandResult: ChatMessage = { user: '', body: '' };
+        const regex = new RegExp(/^!placer ([a-o]([1-9]|1[0-5])(h|v)) ([a-zA-Z]){2,15}$/g);
         if (regex.test(command)) {
             const minus1 = -1;
             const direction = command.split(' ')[1].slice(minus1);
-            const coord = command.split(' ')[1].slice(0, command.length - 1);
-            this.gameManager.placeTiles(command.split(' ')[2], this.getCoordinateFromString(coord), direction[2] === 'v', player);
-            return true;
+            const coordStrDir = command.split(' ')[1];
+            const coordStr = coordStrDir.slice(0, coordStrDir.length - 1);
+            commandResult.user = COMMAND_RESULT;
+            commandResult.body = this.gameManager.placeTiles(command.split(' ')[2], coordStr, direction === 'v', player);
+        } else {
+            commandResult.user = SYSTEM_NAME;
+            commandResult.body = 'Erreur de syntaxe, pour placer un mot, il faut suivre le format suivant : !placer (ligne)(colonne)(h | v) (mot)';
         }
-        return false;
+        return commandResult;
     }
 
-    getCoordinateFromString(coordStr: string): Vec2 {
-        const CHAR_OFFSET = 'a'.charCodeAt(0);
-        const coordX = coordStr[0].toLowerCase().charCodeAt(0) - CHAR_OFFSET;
-        const coordY = parseInt(coordStr.substr(1, coordStr.length), 10) - 1;
-        return { x: coordX, y: coordY } as Vec2;
+    pass(command: string, player: Player): ChatMessage {
+        const commandResult: ChatMessage = { user: '', body: '' };
+        const regex = new RegExp(/^!passer$/g);
+        if (regex.test(command)) {
+            this.gameManager.skipTurn();
+            commandResult.user = COMMAND_RESULT;
+            commandResult.body = `${player.name} a passer son tour`;
+        } else {
+            commandResult.user = SYSTEM_NAME;
+            commandResult.body = 'Erreur de syntaxe';
+        }
+        return commandResult;
     }
+
+    // debug(): ChatMessage {
+    //     this.gameManager.debug();
+    // }
 }

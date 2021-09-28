@@ -3,8 +3,8 @@ import { GameConfig } from '@app/classes/game-config';
 import { Player } from '@app/classes/player';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { FIRST_PLAYER_COIN_FLIP, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
-import { Subscription, timer } from 'rxjs';
+import { GRID_SIZE, RANDOM_PLAYER_NAMES, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
+import { Subscription,timer } from 'rxjs';
 import { BoardService } from './board.service';
 import { PlayerService } from './player.service';
 import { ReserveService } from './reserve.service';
@@ -17,10 +17,17 @@ export class GameManagerService {
     currentTurnDurationLeft: number;
     subscription: Subscription;
     realPlayerName: string;
+    randomPlayerNameIndex: number;
+    isFirstTurn: boolean = true;
+
+    mainPlayerName: string;
+    enemyPlayerName: string;
 
     constructor(private board: BoardService, private reserve: ReserveService, private players: PlayerService) {}
 
     initialize(gameConfig: GameConfig) {
+        this.mainPlayerName = gameConfig.playerName1;
+        this.enemyPlayerName = gameConfig.playerName2;
         this.turnDuration = gameConfig.duration;
         this.currentTurnDurationLeft = gameConfig.duration;
         this.realPlayerName = gameConfig.playerName1;
@@ -45,7 +52,7 @@ export class GameManagerService {
     initializePlayers(playerNames: string[]) {
         this.players.createPlayer(playerNames[0], this.reserve.getLetters(STARTING_TILE_AMOUNT));
         this.players.createPlayer(playerNames[1], this.reserve.getLetters(STARTING_TILE_AMOUNT));
-        if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
+        // if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
     }
 
     switchPlayers() {
@@ -82,53 +89,64 @@ export class GameManagerService {
         this.players.clear();
     }
 
-    exchangeTiles(tiles: string, player: Player) {
+    exchangeTiles(tiles: string, player: Player): string {
         if (this.players.current !== player) {
-            // not player turn
+            return "Ce n'est pas votre tour";
         } else if (!this.reserve.isExchangePossible(tiles.length)) {
-            // cant exchange, not enough tiles in reserve
+            return "Il n'y a pas assez de tuiles dans la réserve";
         } else if (!player.easel.containsTiles(tiles)) {
-            // player dosent have tiles in easel
+            return 'Votre chevalet ne contient pas les lettres nécessaires';
         } else {
-            this.reserve.returnLetters(player.easel.getTiles(tiles));
-            player.easel.addTiles(this.reserve.getLetters(tiles.length));
+            const easelTiles: Tile[] = player.easel.getTiles(tiles);
+            const reserveTiles: Tile[] = this.reserve.getLetters(tiles.length);
+            player.easel.addTiles(reserveTiles);
+            this.reserve.returnLetters(easelTiles);
+            return `${player.name} a échangé les lettres ${tiles}`;
         }
     }
 
-    // eslint-disable-next-line no-unused-vars
-    placeTiles(word: string, coord: Vec2, vertical: boolean, player: Player) {
-        // verify if its the first play of the game (should be in H8)
-        // if (this.players.current !== player) {
-        //     // not player turn
-        // } else if (!player.easel.containsTiles(word)) {
-        //     // player doesn't have tiles in easel
-        // } else
+    placeTiles(word: string, coordStr: string, vertical: boolean, player: Player): string {
+        const coord: Vec2 = this.getCoordinateFromString(coordStr);
+        if (this.players.current !== player) return "Ce n'est pas votre tour";
+
+        //  check if word can fit on board
         if (vertical) {
-            for (let i = 0; i < word.length; i++) {
-                this.board.placeTile(
-                    {
-                        x: coord.x,
-                        y: coord.y + i,
-                    },
-                    {
-                        letter: word[i],
-                        points: 0,
-                    },
-                );
-            }
+            if (coord.y + word.length > GRID_SIZE) return 'Commande impossible a realise';
         } else {
-            for (let i = 0; i < word.length; i++) {
-                this.board.placeTile(
-                    {
-                        x: coord.x + i,
-                        y: coord.y,
-                    },
-                    {
-                        letter: word[i],
-                        points: 0,
-                    },
-                );
+            if (coord.x + word.length > GRID_SIZE) return 'Commande impossible a realise';
+        }
+
+        const coords: Vec2[] = new Array();
+        let neededLetters = '';
+        for (let i = 0; i < word.length; i++) {
+            let nextCoord: Vec2;
+            if (!vertical) nextCoord = { x: coord.x + i, y: coord.y };
+            else nextCoord = { x: coord.x, y: coord.y + i };
+
+            const tile: Tile | undefined = this.board.getTile(nextCoord);
+            if (tile) {
+                if (tile.letter !== word.charAt(i)) return 'Commande impossible a realise';
+            } else {
+                neededLetters += word.charAt(i);
+                coords.push(nextCoord);
             }
         }
+
+        if (neededLetters.length === 0) return 'Vous ne pouvez pas placer le mot';
+        else if (!player.easel.containsTiles(neededLetters)) return 'Votre chevalet ne contient pas les lettres nécessaires';
+
+        //  valider avant de placer
+        const neededTiles = player.easel.getTiles(neededLetters);
+        for (let i = 0; i < neededLetters.length; i++) {
+            this.board.placeTile(coords[i], neededTiles[i]);
+        }
+        return `${player.name} a placé le mot "${word}" ${vertical ? 'verticale' : 'horizentale'}ment à la case ${coordStr}`;
+    }
+
+    getCoordinateFromString(coordStr: string): Vec2 {
+        const CHAR_OFFSET = 'a'.charCodeAt(0);
+        const coordX = coordStr[0].toLowerCase().charCodeAt(0) - CHAR_OFFSET;
+        const coordY = parseInt(coordStr.substr(1, coordStr.length), 10) - 1;
+        return { x: coordX, y: coordY } as Vec2;
     }
 }
