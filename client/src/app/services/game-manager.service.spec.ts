@@ -22,6 +22,7 @@ describe('GameManagerService', () => {
     let gridService: GridService;
     let ctxStub: CanvasRenderingContext2D;
     let wordValidationMock: SpyObj<WordValidationService>;
+    let TILES: Tile[];
 
     beforeEach(() => {
         boardService = new BoardService();
@@ -32,6 +33,12 @@ describe('GameManagerService', () => {
         gridService.gridContext = ctxStub;
         wordValidationMock = jasmine.createSpyObj(WordValidationService, ['validateWords']);
         wordValidationMock.validateWords.and.returnValue(true);
+        TILES = [
+            { letter: 'a', points: 0 },
+            { letter: 'l', points: 0 },
+            { letter: 'l', points: 0 },
+            { letter: 'o', points: 0 },
+        ];
     });
 
     beforeEach(() => {
@@ -85,14 +92,7 @@ describe('GameManagerService', () => {
     });
 
     it('exchangeTiles should exchange letters with reserve', () => {
-        const tiles: Tile[] = [
-            { letter: 'a', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'o', points: 0 },
-        ];
-
-        playerService.current.easel = new Easel(tiles);
+        playerService.current.easel = new Easel(TILES);
         reserveService.tiles.clear();
         reserveService.tiles.set('a', { tile: { letter: 'a', points: 2 }, count: 7 });
         reserveService.tileCount = 7;
@@ -101,14 +101,7 @@ describe('GameManagerService', () => {
     });
 
     it('reserve should get tiles from easel after successful exchange', () => {
-        const tiles: Tile[] = [
-            { letter: 'a', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'o', points: 0 },
-        ];
-
-        playerService.current.easel = new Easel(tiles);
+        playerService.current.easel = new Easel(TILES);
         reserveService.tiles.clear();
         reserveService.tiles.set('a', { tile: { letter: 'a', points: 2 }, count: 7 });
         reserveService.tileCount = 7;
@@ -122,14 +115,7 @@ describe('GameManagerService', () => {
     });
 
     it('exchangeTiles should not exchange letters with reserve if not enough tiles in reserve', () => {
-        const tiles: Tile[] = [
-            { letter: 'a', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'o', points: 0 },
-        ];
-
-        playerService.current.easel = new Easel(tiles);
+        playerService.current.easel = new Easel(TILES);
         reserveService.tiles.clear();
         reserveService.tiles.set('a', { tile: { letter: 'a', points: 2 }, count: 2 });
         reserveService.tileCount = 2;
@@ -138,14 +124,7 @@ describe('GameManagerService', () => {
     });
 
     it('exchangeTiles should not exchange letters when they are not in the easel', () => {
-        const tiles: Tile[] = [
-            { letter: 'a', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'o', points: 0 },
-        ];
-
-        playerService.current.easel = new Easel(tiles);
+        playerService.current.easel = new Easel(TILES);
         reserveService.tiles.clear();
         reserveService.tiles.set('a', { tile: { letter: 'a', points: 2 }, count: 8 });
         reserveService.tileCount = 8;
@@ -154,14 +133,7 @@ describe('GameManagerService', () => {
     });
 
     it('exchangeTiles should not exchange letters when they are not in the easel', () => {
-        const tiles: Tile[] = [
-            { letter: 'a', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'o', points: 0 },
-        ];
-
-        playerService.players[1].easel = new Easel(tiles);
+        playerService.players[1].easel = new Easel(TILES);
         reserveService.tiles.clear();
         reserveService.tiles.set('a', { tile: { letter: 'a', points: 2 }, count: 8 });
         reserveService.tileCount = 8;
@@ -185,65 +157,30 @@ describe('GameManagerService', () => {
     });
 
     it('placeTiles should not allow player to play ', () => {
-        const tiles: Tile[] = [
-            { letter: 'a', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'o', points: 0 },
-        ];
-        playerService.players[1].easel = new Easel(tiles);
+        playerService.players[1].easel = new Easel(TILES);
         expect(service.placeTiles('allo', 'h8', true, playerService.players[1])).toBe("Ce n'est pas votre tour");
     });
 
     it('placeTiles should not allow player to place a tile outside of the board', () => {
-        const tiles: Tile[] = [
-            { letter: 'a', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'o', points: 0 },
-        ];
-        playerService.current.easel = new Easel(tiles);
-        expect(service.placeTiles('allo', 'o15', true, playerService.current)).toBe('Commande impossible a realise');
+        playerService.current.easel = new Easel(TILES);
+        expect(service.placeTiles('allo', 'o15', true, playerService.current)).toBe('Commande invalide');
     });
 
     it('placetiles should not allow player to place tiles if each letters on the board dosent match the words wanted', () => {
-        const tiles: Tile[] = [
-            { letter: 'a', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'o', points: 0 },
-        ];
         const singleTile: Tile = {
             letter: 'b',
             points: 0,
         };
-        playerService.current.easel = new Easel(tiles);
+        playerService.current.easel = new Easel(TILES);
         boardService.placeTile({ x: 7, y: 9 }, singleTile);
         expect(service.placeTiles('allo', 'h8', true, playerService.current)).toBe('Commande impossible a realise');
     });
 
-    it('should not allow player to place a word that is not contained in the dictionnary', () => {
-        wordValidationMock.validateWords.and.returnValue(false);
-        const tiles: Tile[] = [
-            { letter: 'a', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'o', points: 0 },
-        ];
-        playerService.current.easel = new Easel(tiles);
-        expect(service.placeTiles('allo', 'h8', true, playerService.current)).toBe('le mot nest pas dans le dictionnaire');
-        expect(playerService.current.easel.toString()).toBe('allo');
-    });
-
     it('should not allow a player to place a word outside of the center of the board on the first turn', () => {
         wordValidationMock.validateWords.and.returnValue(false);
-        const tiles: Tile[] = [
-            { letter: 'a', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'o', points: 0 },
-        ];
-        playerService.current.easel = new Easel(tiles);
+        playerService.current.easel = new Easel(TILES);
         expect(service.placeTiles('allo', 'g7', true, playerService.current)).toBe('la position de votre mot nest pas valide');
+        expect(service.placeTiles('allo', 'h8', true, playerService.current)).toBe('le mot nest pas dans le dictionnaire');
+        expect(playerService.current.easel.toString()).toBe('allo');
     });
 });

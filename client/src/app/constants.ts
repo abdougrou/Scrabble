@@ -96,3 +96,10 @@ export const BOARD_MULTIPLIER = [
     [0, 3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 3, 0],
     [4, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 4],
 ];
+
+export const WRONG_PLAYER = "Ce n'est pas votre tour";
+export const EMPTY_RESERVE = "Il n'y a pas assez de tuiles dans la réserve";
+export const NOT_ON_EASEL = 'Votre chevalet ne contient pas les lettres nécessaires';
+export const WORD_EXISTS = 'Le mot que vous tentez de placer se trouve deja sur le tableau';
+export const NOT_IN_DICTIONNARY = 'le mot nest pas dans le dictionnaire';
+export const INVALID_WORD_POSITION = 'la position de votre mot nest pas valide';

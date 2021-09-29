@@ -1,7 +1,10 @@
 import { TestBed } from '@angular/core/testing';
+import { Easel } from '@app/classes/easel';
+import { Player } from '@app/classes/player';
 import { TileCoords } from '@app/classes/tile';
-
 import { CalculatePointsService } from './calculate-points.service';
+
+let player: Player;
 
 describe('CalculatePoitnsService', () => {
     let service: CalculatePointsService;
@@ -9,6 +12,7 @@ describe('CalculatePoitnsService', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({});
         service = TestBed.inject(CalculatePointsService);
+        player = { name: 'test', score: 0, easel: new Easel() };
     });
 
     it('should be created', () => {
@@ -74,9 +78,11 @@ describe('CalculatePoitnsService', () => {
 
         for (let i = 0; i < numNewTiles; i++) {
             newTiles.push(tiles[0][i]);
+            // eslint-disable-next-line no-console
+            console.log(newTiles.length);
         }
         const points = 48;
-        expect(service.calculatePoints(tiles, newTiles)).toBe(points);
+        expect(service.calculatePoints(tiles, newTiles, player)).toBe(points);
     });
     it('should add the 50 point bonus if the player places 7 tiles', () => {
         const tiles: TileCoords[][] = new Array();
@@ -93,6 +99,6 @@ describe('CalculatePoitnsService', () => {
             newTiles.push(tiles[0][i]);
         }
         const points = 98;
-        expect(service.calculatePoints(tiles, newTiles)).toBe(points);
+        expect(service.calculatePoints(tiles, newTiles, player)).toBe(points);
     });
 });

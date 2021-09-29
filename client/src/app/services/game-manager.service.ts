@@ -104,24 +104,25 @@ export class GameManagerService {
     placeTiles(word: string, coordStr: string, vertical: boolean, player: Player): string {
         const coord: Vec2 = this.getCoordinateFromString(coordStr);
         if (this.players.current !== player) return "Ce n'est pas votre tour";
-
         //  check if word can fit on board
-        if (!this.wordFitsOnBoard(vertical, word, coord)) return 'Commande impossible a realise';
-        // chek first turn
+        if (!this.wordFitsOnBoard(vertical, word, coord)) return 'Commande invalide';
         const coords: Vec2[] = new Array();
         const neededLetters = this.findNeededLetters(word, coord, coords, vertical);
         if (neededLetters === 'Commande impossible a realise') return 'Commande impossible a realise';
-        if (neededLetters.length === 0) return 'Vous ne pouvez pas placer le mot';
+        if (neededLetters.length === 0) return 'Le mot que vous tentez de placer se trouve deja sur le tableau';
         else if (!player.easel.containsTiles(neededLetters)) return 'Votre chevalet ne contient pas les lettres nécessaires';
 
         //  valider avant de place
         const neededTiles = player.easel.getTiles(neededLetters);
+        const letterTiles = this.manageBlankTiles(neededTiles, coords, word, coord, vertical);
+        console.log(neededTiles);
+        console.log(letterTiles);
         if (this.validWordPosition(word, coords, vertical)) {
-            if (this.validateWordsWrapper(coords, neededTiles)) {
-                for (let i = 0; i < neededLetters.length; i++) {
-                    this.board.placeTile(coords[i], { letter: neededTiles[i].letter, points: neededTiles[i].points });
+            if (this.validateWordsWrapper(coords, letterTiles, player)) {
+                for (let i = 0; i < letterTiles.length; i++) {
+                    this.board.placeTile(coords[i], { letter: letterTiles[i].letter, points: letterTiles[i].points });
                 }
-                player.easel.addTiles(this.reserve.getLetters(neededTiles.length));
+                player.easel.addTiles(this.reserve.getLetters(letterTiles.length));
             } else {
                 player.easel.addTiles(neededTiles);
                 return 'le mot nest pas dans le dictionnaire';
@@ -142,6 +143,7 @@ export class GameManagerService {
     }
 
     private validWordPosition(word: string, coords: Vec2[], vertical: boolean): boolean {
+        //  if first turn, the word must touch the center of the board
         if (this.board.board.size === 0) return this.wordInCenterOfBoard(coords);
         // if the size of coords is inferior to the size of word, the word is made up of tiles from the board and the easel
         if (coords.length < word.length) return true;
@@ -158,36 +160,24 @@ export class GameManagerService {
 
     private notALoneWord(word: string, coords: Vec2[], vertical: boolean): boolean {
         let isTouching = false;
-        let firstCoord: Vec2;
-        let secondCoord: Vec2;
         for (const coord of coords) {
-            if (vertical) {
-                firstCoord = { x: coord.x + 1, y: coord.y };
-                secondCoord = { x: coord.x + 1, y: coord.y };
-            } else {
-                firstCoord = { x: coord.x + 1, y: coord.y };
-                secondCoord = { x: coord.x + 1, y: coord.y };
-            }
-            if (this.board.getTile(firstCoord) !== undefined || this.board.getTile(secondCoord) !== undefined) {
-                isTouching = true;
-            }
+            const firstCoord = vertical ? { x: coord.x + 1, y: coord.y } : { x: coord.x, y: coord.y + 1 };
+            const secondCoord = vertical ? { x: coord.x - 1, y: coord.y } : { x: coord.x, y: coord.y - 1 };
+            if (this.board.getTile(firstCoord) !== undefined || this.board.getTile(secondCoord) !== undefined) isTouching = true;
         }
         return isTouching;
     }
-    private validateWordsWrapper(coordsLetterNeeded: Vec2[], neededTiles: Tile[]): boolean {
+    private validateWordsWrapper(coordsLetterNeeded: Vec2[], neededTiles: Tile[], player: Player): boolean {
         const tileCoords: TileCoords[] = new Array();
         for (let i = 0; i < coordsLetterNeeded.length; i++) {
             tileCoords.push({ tile: neededTiles[i], coords: coordsLetterNeeded[i] });
         }
-        return this.wordValidation.validateWords(tileCoords);
+        return this.wordValidation.validateWords(tileCoords, player);
     }
 
     private wordFitsOnBoard(vertical: boolean, word: string, coord: Vec2): boolean {
-        if (vertical) {
-            if (coord.y + word.length > GRID_SIZE) return false;
-        } else {
-            if (coord.x + word.length > GRID_SIZE) return false;
-        }
+        if (coord.y + word.length > GRID_SIZE && vertical) return false;
+        if (coord.x + word.length > GRID_SIZE && !vertical) return false;
         return true;
     }
 
@@ -202,10 +192,26 @@ export class GameManagerService {
             if (tile !== undefined) {
                 if (tile.letter !== word.charAt(i)) return 'Commande impossible a realise';
             } else if (word.charAt(i)) {
-                neededLetters += word.charAt(i);
+                if (word.charAt(i) === word.charAt(i).toUpperCase()) {
+                    neededLetters += '*';
+                } else {
+                    neededLetters += word.charAt(i);
+                }
                 coordsNeeded.push(nextCoord);
             }
         }
         return neededLetters;
+    }
+    private manageBlankTiles(neededTiles: Tile[], coords: Vec2[], word: string, coord: Vec2, vertical: boolean): Tile[] {
+        const letterTiles: Tile[] = new Array();
+        for (let i = 0; i < neededTiles.length; i++) {
+            if (neededTiles[i].letter === '*') {
+                const letter = vertical ? word.charAt(coords[i].y - coord.y) : word.charAt(coords[i].x - coord.x);
+                letterTiles.push({ letter: letter.toLowerCase(), points: neededTiles[i].points });
+            } else {
+                letterTiles.push(neededTiles[i]);
+            }
+        }
+        return letterTiles;
     }
 }
