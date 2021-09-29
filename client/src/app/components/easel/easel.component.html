@@ -1,7 +1,7 @@
 <mat-card id="easel">
   <mat-card class="tile" *ngFor="let tile of tiles">
     <div class="letter">
-      {{tile.letter}}
+      {{tile.letter | uppercase}}
     </div>
     <div class="points">
       {{tile.points}}

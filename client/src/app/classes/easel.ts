@@ -40,7 +40,6 @@ export class Easel {
                 tileOccurrences.set(letter, 1);
             }
         });
-
         for (const letter of tilesStr) {
             const occurrences = tileOccurrences.get(letter);
             if (occurrences && occurrences > 0) {
@@ -49,7 +48,6 @@ export class Easel {
                 return false;
             }
         }
-
         return true;
     }
 
