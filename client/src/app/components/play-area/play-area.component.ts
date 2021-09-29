@@ -1,7 +1,9 @@
 import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from '@app/constants';
 import { GridService } from '@app/services/grid.service';
+import { PlayerService } from '@app/services/player.service';
 
 export enum MouseButton {
     Left = 0,
@@ -19,11 +21,12 @@ export enum MouseButton {
 export class PlayAreaComponent implements AfterViewInit {
     @ViewChild('canvas', { static: false }) private gridCanvas!: ElementRef<HTMLCanvasElement>;
 
+    tiles: Tile[] = [];
     mousePosition: Vec2 = { x: 0, y: 0 };
     buttonPressed = '';
     private canvasSize = { x: CANVAS_WIDTH, y: CANVAS_HEIGHT };
 
-    constructor(private readonly gridService: GridService) {}
+    constructor(private readonly gridService: GridService, readonly playerService: PlayerService) {}
 
     @HostListener('keydown', ['$event'])
     buttonDetect(event: KeyboardEvent) {
@@ -31,6 +34,8 @@ export class PlayAreaComponent implements AfterViewInit {
     }
 
     ngAfterViewInit(): void {
+        this.tiles = this.playerService.mainPlayer.easel.tiles;
+
         this.gridService.gridContext = this.gridCanvas.nativeElement.getContext('2d') as CanvasRenderingContext2D;
         this.gridService.drawBoard();
         this.gridService.drawGridIds();

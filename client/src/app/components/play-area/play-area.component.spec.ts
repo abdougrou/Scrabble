@@ -1,16 +1,27 @@
 // import { ComponentFixture, TestBed } from '@angular/core/testing';
-// import { Vec2 } from '@app/classes/vec2';
 // import { PlayAreaComponent } from '@app/components/play-area/play-area.component';
 // import { EaselComponent } from '@app/components/easel/easel.component';
+// import { PlayerService } from '@app/services/player.service';
+// import { GridService } from '@app/services/grid.service';
+// import { BoardService } from '@app/services/board.service';
 
 // describe('PlayAreaComponent', () => {
 //     let component: PlayAreaComponent;
 //     let fixture: ComponentFixture<PlayAreaComponent>;
-//     let mouseEvent: MouseEvent;
+//     let playerService: PlayerService;
+//     let board: BoardService;
+//     let grid: GridService;
 
 //     beforeEach(async () => {
+//         board = new BoardService();
+//         grid = new GridService(board);
+//         playerService = new PlayerService();
 //         await TestBed.configureTestingModule({
 //             declarations: [PlayAreaComponent, EaselComponent],
+//             providers: [
+//                 { provider: PlayerService, useValue: playerService },
+//                 { provider: GridService, useValue: grid },
+//             ],
 //         }).compileComponents();
 //     });
 
@@ -22,38 +33,5 @@
 
 //     it('should create', () => {
 //         expect(component).toBeTruthy();
-//     });
-
-//     it('mouseHitDetect should assign the mouse position to mousePosition variable', () => {
-//         const expectedPosition: Vec2 = { x: 100, y: 200 };
-//         mouseEvent = {
-//             offsetX: expectedPosition.x,
-//             offsetY: expectedPosition.y,
-//             button: 0,
-//         } as MouseEvent;
-//         component.mouseHitDetect(mouseEvent);
-//         expect(component.mousePosition).toEqual(expectedPosition);
-//     });
-
-//     /* eslint-disable @typescript-eslint/no-magic-numbers -- Add reason */
-//     it('mouseHitDetect should not change the mouse position if it is not a left click', () => {
-//         const expectedPosition: Vec2 = { x: 0, y: 0 };
-//         mouseEvent = {
-//             offsetX: expectedPosition.x + 10,
-//             offsetY: expectedPosition.y + 10,
-//             button: 1,
-//         } as MouseEvent;
-//         component.mouseHitDetect(mouseEvent);
-//         expect(component.mousePosition).not.toEqual({ x: mouseEvent.offsetX, y: mouseEvent.offsetY });
-//         expect(component.mousePosition).toEqual(expectedPosition);
-//     });
-
-//     it('buttonDetect should modify the buttonPressed variable', () => {
-//         const expectedKey = 'a';
-//         const buttonEvent = {
-//             key: expectedKey,
-//         } as KeyboardEvent;
-//         component.buttonDetect(buttonEvent);
-//         expect(component.buttonPressed).toEqual(expectedKey);
 //     });
 // });

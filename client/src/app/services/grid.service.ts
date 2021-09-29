@@ -13,9 +13,11 @@ import {
     ROWS,
     TILE_TEXT_COLOR,
     LETTER_OFFSET,
-    INDEX_OFFSET,
+    POINT_OFFSET,
     BASE_LETTER_FONT_SIZE,
-    BASE_INDEX_FONT_SIZE,
+    BASE_POINT_FONT_SIZE,
+    LETTER_FONT_SIZE_MODIFIER,
+    POINT_FONT_SIZE_MODIFIER,
 } from '@app/constants';
 import { BoardService } from './board.service';
 
@@ -86,27 +88,37 @@ export class GridService {
         }
     }
 
-    drawTile(coord: Vec2, tile: Tile, letterFontSize: number, indexFontSize: number) {
+    drawTile(coord: Vec2, tile: Tile, fontSizeModifier: number) {
+        const letterFont = BASE_LETTER_FONT_SIZE + fontSizeModifier * LETTER_FONT_SIZE_MODIFIER;
+        const pointFont = BASE_POINT_FONT_SIZE + fontSizeModifier * POINT_FONT_SIZE_MODIFIER;
         this.colorTile(coord, 'burlywood');
+        this.gridContext.fillStyle = 'black';
+
         this.gridContext.textBaseline = 'middle';
         this.gridContext.textAlign = 'center';
-        this.gridContext.fillStyle = 'black';
-        this.gridContext.font = 'bold ' + letterFontSize.toString() + 'px system-ui';
+        this.gridContext.font = `${letterFont}px system-ui`;
         this.gridContext.fillText(tile.letter.toString(), coord.x * STEP + LETTER_OFFSET, coord.y * STEP + LETTER_OFFSET);
-        this.gridContext.font = indexFontSize.toString() + 'px system-ui';
-        this.gridContext.fillText(tile.points.toString(), coord.x * STEP + INDEX_OFFSET, coord.y * STEP + INDEX_OFFSET);
+
+        this.gridContext.textBaseline = 'bottom';
+        this.gridContext.textAlign = 'right';
+        this.gridContext.font = `${pointFont}px system-ui`;
+        this.gridContext.fillText(tile.points.toString(), coord.x * STEP + POINT_OFFSET, coord.y * STEP + POINT_OFFSET);
     }
 
-    drawBoard() {
+    clearBoard() {
+        this.gridContext.clearRect(0, 0, CANVAS_WIDTH - STEP, CANVAS_HEIGHT - STEP);
+    }
+
+    drawBoard(fontSizeModifier: number = 0) {
         this.gridContext.beginPath();
-        this.gridContext.rect(0, 0, CANVAS_HEIGHT - STEP, CANVAS_WIDTH - STEP);
+        this.gridContext.rect(0, 0, CANVAS_WIDTH - STEP, CANVAS_HEIGHT - STEP);
         this.gridContext.fillStyle = 'black';
         this.gridContext.fill();
         for (let i = 0; i < GRID_SIZE; i++) {
             for (let j = 0; j < GRID_SIZE; j++) {
                 const coord: Vec2 = { x: i, y: j };
                 const tile: Tile | undefined = this.board.getTile(coord);
-                if (tile) this.drawTile(coord, tile, BASE_LETTER_FONT_SIZE, BASE_INDEX_FONT_SIZE);
+                if (tile) this.drawTile(coord, tile, fontSizeModifier);
                 else this.drawMultiplierTile(coord, BOARD_MULTIPLIER[i][j]);
             }
         }
