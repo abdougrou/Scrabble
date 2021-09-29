@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
 import { GameConfig } from '@app/classes/game-config';
-import { Player } from '@app/classes/player';
-import { Tile } from '@app/classes/tile';
+import { PlayAction, Player } from '@app/classes/player';
+import { PlaceTilesInfo, Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
+import { VirtualPlayer } from '@app/classes/virtual-player';
 import { GRID_SIZE, RANDOM_PLAYER_NAMES, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
 import { timer } from 'rxjs';
 import { BoardService } from './board.service';
 import { PlayerService } from './player.service';
 import { ReserveService } from './reserve.service';
+import { WordValidationService } from './word-validation.service';
 
 @Injectable({
     providedIn: 'root',
@@ -16,16 +18,23 @@ export class GameManagerService {
     turnDuration: number;
     currentTurnDurationLeft: number;
     randomPlayerNameIndex: number;
+    isMultiPlayer: boolean;
     isFirstTurn: boolean = true;
 
     mainPlayerName: string;
     enemyPlayerName: string;
 
-    constructor(private board: BoardService, private reserve: ReserveService, private players: PlayerService) {}
+    constructor(
+        private board: BoardService,
+        private reserve: ReserveService,
+        private players: PlayerService,
+        private validation: WordValidationService,
+    ) {}
 
     initialize(gameConfig: GameConfig) {
         this.mainPlayerName = gameConfig.playerName1;
         this.enemyPlayerName = gameConfig.playerName2;
+        this.isMultiPlayer = gameConfig.isMultiPlayer;
         this.turnDuration = gameConfig.duration;
         this.currentTurnDurationLeft = gameConfig.duration;
         this.randomPlayerNameIndex = Math.floor(Math.random() * RANDOM_PLAYER_NAMES.length);
@@ -50,14 +59,46 @@ export class GameManagerService {
 
     initializePlayers(playerNames: string[]) {
         this.players.createPlayer(playerNames[0], this.reserve.getLetters(STARTING_TILE_AMOUNT));
-        this.players.createPlayer(playerNames[1], this.reserve.getLetters(STARTING_TILE_AMOUNT));
+        if (this.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getLetters(STARTING_TILE_AMOUNT));
+        else this.players.createVirtualPlayer(playerNames[1], this.reserve.getLetters(STARTING_TILE_AMOUNT));
         // if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
+        this.switchPlayers();
     }
 
     switchPlayers() {
         this.players.switchPlayers();
         this.currentTurnDurationLeft = this.turnDuration;
-        // Send player switch event
+
+        if (this.players.current instanceof VirtualPlayer) this.playVirtualPlayer();
+    }
+
+    playVirtualPlayer() {
+        console.log("Bot's turn");
+        const vPlayer: VirtualPlayer = this.players.current as VirtualPlayer;
+        vPlayer.play().subscribe((action) => {
+            switch (action) {
+                case PlayAction.ExchangeTiles: {
+                    const tilesToExchange = vPlayer.exchange();
+                    console.log(`Bot exchanges the letters ${tilesToExchange}`);
+                    if (this.reserve.isExchangePossible(tilesToExchange.length)) this.exchangeTiles(tilesToExchange, vPlayer);
+                    break;
+                }
+                case PlayAction.PlaceTiles: {
+                    const placeTilesInfo: PlaceTilesInfo = vPlayer.place(this.validation);
+                    console.log(
+                        `Bot places the word "${placeTilesInfo.word}" ${placeTilesInfo.vertical ? 'vertical' : 'horizontal'}ly at ${
+                            placeTilesInfo.coordStr
+                        }`,
+                    );
+                    this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer);
+                    break;
+                }
+                default:
+                    console.log('Bot skipped his turn');
+                    break;
+            }
+        });
+        this.skipTurn();
     }
 
     giveTiles(player: Player, amount: number) {

@@ -14,3 +14,9 @@ export interface TileCoords {
     tile: Tile;
     coords: Vec2;
 }
+
+export interface PlaceTilesInfo {
+    word: string;
+    coordStr: string;
+    vertical: boolean;
+}
