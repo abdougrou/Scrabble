@@ -134,21 +134,24 @@ export class GameManagerService {
         const retrievedTiles: Tile[] = player.easel.getTiles(this.getStringToRetrieve(lettersToRetrieve));
         //  Get the tiles to be placed on the board
         const tilesToPlace: TileCoords[] = this.getTilesToPlace(lettersToRetrieve, retrievedTiles, word, coord, vertical);
-        console.log(tilesToPlace);
 
         //  Check that the position of the word is valid
         if (this.validWordPosition(word, tilesToPlace, vertical)) {
             //  check that the word itself is valid
             if (this.wordValidation.validateWords(tilesToPlace, player)) {
+                //  We place the tiles on the board and give the player new tiles if the word and position are valid
                 for (const aTile of tilesToPlace) {
                     this.board.placeTile(aTile.coords, aTile.tile);
                 }
-                player.easel.addTiles(this.reserve.getLetters(tilesToPlace.length));
+                const numTiles = this.reserve.tileCount < tilesToPlace.length ? this.reserve.tileCount : tilesToPlace.length;
+                player.easel.addTiles(this.reserve.getLetters(numTiles));
             } else {
+                //  we give the player his tiles back if the position of his word is invalid
                 player.easel.addTiles(retrievedTiles);
                 return 'le mot nest pas dans le dictionnaire';
             }
         } else {
+            //  We give the player his tiles back if the word is invalid
             player.easel.addTiles(retrievedTiles);
             return 'placement de mot invalide';
         }
