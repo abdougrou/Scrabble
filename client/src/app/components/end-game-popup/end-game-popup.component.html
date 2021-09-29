@@ -1,0 +1,8 @@
+<div>
+    <h2>La partie est terminée!</h2>
+    <div>
+        <p>Félicitations</p>
+        <p *ngIf="isEqual;else other_content">Égalité des deux joueurs : {{ this.players[0].name }} et {{ this.players[1].name }}</p>
+        <ng-template #other_content><p>Le gagnant: {{ this.players[0].name }}</p></ng-template>
+    </div>
+</div>

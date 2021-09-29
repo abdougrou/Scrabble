@@ -10,7 +10,7 @@
             <mat-card-subtitle>Score : {{ player.score }}</mat-card-subtitle>
             <mat-card-subtitle>Tiles : {{ player.easel.count }}</mat-card-subtitle>
             <div>
-                <mat-icon *ngIf="player.name === this.realPlayerName">person</mat-icon>
+                <mat-icon *ngIf="player.name === this.mainPlayerName">person</mat-icon>
             <img *ngIf="isFirst;else other_content" mat-card-sm-image src="../../../assets/profile-pic-first-brown.jpg" >
             <ng-template #other_content><img  mat-card-sm-image src="../../../assets/profile-pic.jpg" ></ng-template>
             </div>
@@ -21,14 +21,15 @@
     <div>
         <mat-card class="card justified">
             <button mat-raised-button (click)="decreaseFont()">-</button>
-            <span>(fZixe) px</span>
+            <span class="font-size-display">Taille: {{ size }}</span>
             <button mat-raised-button (click)="increaseFont()">+</button>
         </mat-card>
     </div>
 
     <div class="justified-right">
-        <button mat-raised-button [disabled]="this.players[0].name !== this.realPlayerName" (click)= "skipTurn()">Passer le tour</button>
-        <button mat-raised-button >Abandonner</button>
-        <button mat-raised-button [routerLink]="['/home']" (click)="quit()">Quitter</button>
+        <button mat-raised-button [disabled]="this.players[0].name !== this.mainPlayerName || this.isEnded" (click)= "skipTurn()">Passer le tour</button>
+        <button mat-raised-button *ngIf="!this.isEnded" (click)="endGame()" class="warn">Abandonner</button>
+        <button mat-raised-button *ngIf="this.isEnded" [routerLink]="['/home']" (click)="quit()" class="warn">Quitter</button>
     </div>
+    <app-end-game-popup *ngIf="this.isEnded" [players]="players"></app-end-game-popup>
 </div>

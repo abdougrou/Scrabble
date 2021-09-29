@@ -29,6 +29,7 @@ mat-card-subtitle {
 .justified {
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .justified-right {
@@ -46,5 +47,15 @@ mat-card-subtitle {
 }
 
 .first mat-card-subtitle {
+  color: white;
+}
+
+.font-size-display {
+  font-weight: bold;
+  margin-left: 1em;
+}
+
+.warn {
+  background-color: #cf000f;
   color: white;
 }

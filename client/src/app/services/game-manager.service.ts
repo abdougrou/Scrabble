@@ -3,7 +3,7 @@ import { GameConfig } from '@app/classes/game-config';
 import { Player } from '@app/classes/player';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { GRID_SIZE, RANDOM_PLAYER_NAMES, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
+import { FIRST_PLAYER_COIN_FLIP, GRID_SIZE, MAX_SKIP_COUNT, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
 import { Subscription, timer } from 'rxjs';
 import { BoardService } from './board.service';
 import { GridService } from './grid.service';
@@ -17,24 +17,28 @@ export class GameManagerService {
     turnDuration: number;
     currentTurnDurationLeft: number;
     subscription: Subscription;
-    realPlayerName: string;
     randomPlayerNameIndex: number;
     isFirstTurn: boolean = true;
+    isEnded: boolean;
 
     mainPlayerName: string;
     enemyPlayerName: string;
 
     constructor(private board: BoardService, private reserve: ReserveService, private players: PlayerService, private gridService: GridService) {}
 
+    emptyReserve() {
+        return this.reserve.tileCount === 0;
+    }
+
     initialize(gameConfig: GameConfig) {
         this.mainPlayerName = gameConfig.playerName1;
         this.enemyPlayerName = gameConfig.playerName2;
         this.turnDuration = gameConfig.duration;
         this.currentTurnDurationLeft = gameConfig.duration;
-        this.realPlayerName = gameConfig.playerName1;
+        this.isEnded = false;
 
-        this.initializePlayers([gameConfig.playerName1, RANDOM_PLAYER_NAMES[this.randomPlayerNameIndex]]);
-        this.players.mainPlayer = this.players.players[0];
+        this.initializePlayers([this.mainPlayerName, this.enemyPlayerName]);
+        this.players.mainPlayer = this.players.getPlayerByName(this.mainPlayerName);
 
         this.startTimer();
     }
@@ -54,7 +58,7 @@ export class GameManagerService {
     initializePlayers(playerNames: string[]) {
         this.players.createPlayer(playerNames[0], this.reserve.getLetters(STARTING_TILE_AMOUNT));
         this.players.createPlayer(playerNames[1], this.reserve.getLetters(STARTING_TILE_AMOUNT));
-        // if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
+        if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
     }
 
     switchPlayers() {
@@ -74,15 +78,22 @@ export class GameManagerService {
     }
 
     skipTurn() {
+        if (this.players.skipCounter >= MAX_SKIP_COUNT - 1) {
+            this.endGame();
+        }
         this.players.incrementSkipCounter();
         this.switchPlayers();
     }
 
     // TODO skipCounter to reset when place or exchange command excuted
+    resetSkipCounter() {
+        this.players.skipCounter = 0;
+    }
 
     // TODO implement stopTimer() to end the game after 6 skipTurn
     endGame() {
         this.stopTimer();
+        this.isEnded = true;
     }
 
     stopTimer() {

@@ -27,6 +27,7 @@ export class CommandHandlerService {
         const commandResult: ChatMessage = { user: '', body: '' };
         const regex = new RegExp(/^!echanger ([a-z]|\*){0,7}/g);
         if (regex.test(command)) {
+            this.gameManager.resetSkipCounter();
             commandResult.user = COMMAND_RESULT;
             commandResult.body = this.gameManager.exchangeTiles(command.split(' ')[1], player);
         } else {
@@ -40,6 +41,7 @@ export class CommandHandlerService {
         const commandResult: ChatMessage = { user: '', body: '' };
         const regex = new RegExp(/^!placer ([a-o]([1-9]|1[0-5])(h|v)) ([a-zA-Z]){2,15}$/g);
         if (regex.test(command)) {
+            this.gameManager.resetSkipCounter();
             const minus1 = -1;
             const direction = command.split(' ')[1].slice(minus1);
             const coordStrDir = command.split(' ')[1];
