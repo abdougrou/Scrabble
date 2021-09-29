@@ -11,10 +11,10 @@ import { AppComponent } from '@app/pages/app/app.component';
 import { GamePageComponent } from '@app/pages/game-page/game-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { MaterialPageComponent } from '@app/pages/material-page/material-page.component';
-import { GameConfigPageComponent } from './components/game-config-page/game-config-page.component';
-import { ModeSelectionComponent } from './components/mode-selection/mode-selection.component';
 import { ChatBoxComponent } from './components/chat-box/chat-box.component';
 import { EaselComponent } from './components/easel/easel.component';
+import { GameConfigPageComponent } from './components/game-config-page/game-config-page.component';
+import { ModeSelectionComponent } from './components/mode-selection/mode-selection.component';
 import { PlayerInfoComponent } from './components/player-info/player-info.component';
 
 /**
@@ -36,6 +36,7 @@ import { PlayerInfoComponent } from './components/player-info/player-info.compon
         ChatBoxComponent,
         EaselComponent,
         PlayerInfoComponent,
+        HttpClientModule,
     ],
     imports: [AppMaterialModule, AppRoutingModule, BrowserAnimationsModule, BrowserModule, FormsModule, ReactiveFormsModule, HttpClientModule],
     providers: [],

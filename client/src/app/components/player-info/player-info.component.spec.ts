@@ -1,5 +1,5 @@
+import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { PlayerInfoComponent } from './player-info.component';
 
 describe('PlayerInfoComponent', () => {
@@ -8,6 +8,7 @@ describe('PlayerInfoComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
+            imports: [HttpClientModule],
             declarations: [PlayerInfoComponent],
         }).compileComponents();
     });
