@@ -18,7 +18,7 @@ describe('BoardService', () => {
 
     it('placeTile places the tile in the board, returns true if no tile exists at coord', () => {
         const coord: Vec2 = { x: 3, y: 3 };
-        const tile: Tile = { letter: 'X', points: 0 };
+        const tile: Tile = { letter: 'x', points: 0 };
         service.placeTile(coord, tile);
         expect(service.getTile(coord)).toEqual(tile);
         expect(service.getTile({ x: 3, y: 3 })).toEqual(tile);
@@ -26,7 +26,7 @@ describe('BoardService', () => {
 
     it('getTile returns true if tile exist at coord, undefined otherwise', () => {
         const coord: Vec2 = { x: 3, y: 3 };
-        const tile: Tile = { letter: 'X', points: 0 };
+        const tile: Tile = { letter: 'x', points: 0 };
         service.placeTile(coord, tile);
         expect(service.getTile(coord)).toEqual(tile);
         expect(service.getTile({ x: 3, y: 3 })).toEqual(tile);
