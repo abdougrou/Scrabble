@@ -27,6 +27,10 @@ export class PlayerInfoComponent {
         this.gameManager.skipTurn();
     }
 
+    endGame() {
+        this.gameManager.endGame();
+    }
+
     quit() {
         this.gameManager.reset();
     }

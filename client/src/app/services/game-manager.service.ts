@@ -3,8 +3,8 @@ import { GameConfig } from '@app/classes/game-config';
 import { Player } from '@app/classes/player';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { GRID_SIZE, RANDOM_PLAYER_NAMES, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
-import { Subscription,timer } from 'rxjs';
+import { GRID_SIZE, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
+import { Subscription, timer } from 'rxjs';
 import { BoardService } from './board.service';
 import { PlayerService } from './player.service';
 import { ReserveService } from './reserve.service';
@@ -79,13 +79,16 @@ export class GameManagerService {
     // TODO skipCounter to reset when place or exchange command excuted
 
     // TODO implement stopTimer() to end the game after 6 skipTurn
+    endGame() {
+        this.stopTimer();
+    }
 
     stopTimer() {
         this.subscription.unsubscribe();
     }
 
     reset() {
-        this.subscription.unsubscribe();
+        this.stopTimer();
         this.players.clear();
     }
 
