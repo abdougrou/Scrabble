@@ -20,3 +20,8 @@ export interface PlaceTilesInfo {
     coordStr: string;
     vertical: boolean;
 }
+
+export interface LetterCoords {
+    letter: string;
+    coords: Vec2;
+}
