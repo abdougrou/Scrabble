@@ -67,30 +67,6 @@ describe('GameManagerService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('placeTiles should place the tiles in the board', () => {
-        const word = 'bonjour';
-        const coordStr = 'h8';
-        const coord = {
-            x: 7,
-            y: 7,
-        };
-        const vertical = false;
-        const tiles: Tile[] = [
-            { letter: 'b', points: 0 },
-            { letter: 'n', points: 0 },
-            { letter: 'o', points: 0 },
-            { letter: 'r', points: 0 },
-        ];
-        playerService.current.easel = new Easel(tiles);
-        boardService.placeTile({ x: 8, y: 7 }, { letter: 'o', points: 0 });
-        boardService.placeTile({ x: 10, y: 7 }, { letter: 'j', points: 0 });
-        boardService.placeTile({ x: 12, y: 7 }, { letter: 'u', points: 0 });
-        service.placeTiles(word, coordStr, vertical, playerService.current);
-        for (let i = 0; i < word.length; i++) {
-            expect(boardService.getTile({ x: coord.x + i, y: coord.y })?.letter).toEqual(word[i]);
-        }
-    });
-
     it('exchangeTiles should exchange letters with reserve', () => {
         playerService.current.easel = new Easel(TILES);
         reserveService.tiles.clear();
@@ -156,31 +132,74 @@ describe('GameManagerService', () => {
         expect(service.getCoordinateFromString(coordStr4)).toEqual(coordVec4);
     });
 
-    it('placeTiles should not allow player to play ', () => {
+    //  PlaceTiles function tests
+    it('Should not place a word outside of the board', () => {
+        const word = 'allo';
+        playerService.current.easel = new Easel(TILES);
+        expect(service.placeTiles(word, 'a15h', false, playerService.current)).toBe('placement de mot invalide');
+        expect(boardService.getTile(service.getCoordinateFromString('a15h'))).toBe(undefined);
+    });
+
+    it('should not place a word that is not in contact with another one after the first turn', () => {
+        const word = 'allo';
+        playerService.current.easel = new Easel(TILES);
+        boardService.placeTile({ x: 7, y: 7 }, { letter: 'a', points: 2 });
+        expect(service.placeTiles(word, 'c4v', true, playerService.current)).toBe('placement de mot invalide');
+        expect(boardService.getTile(service.getCoordinateFromString('c4v'))).toBe(undefined);
+    });
+
+    it('Should only validate a word placement on the first turn if a letter is placed on the center of the board', () => {
+        const word = 'allo';
+        playerService.current.easel = new Easel(TILES);
+        expect(service.placeTiles(word, 'c4v', true, playerService.current)).toBe('placement de mot invalide');
+        playerService.current.easel = new Easel(TILES);
+        service.placeTiles(word, 'h8v', true, playerService.current);
+        expect(boardService.getTile(service.getCoordinateFromString('h8v'))?.letter).toBe('a');
+    });
+
+    it('should only validate a placement if it is the players turn to play', () => {
+        const word = 'allo';
         playerService.players[1].easel = new Easel(TILES);
-        expect(service.placeTiles('allo', 'h8', true, playerService.players[1])).toBe("Ce n'est pas votre tour");
+        expect(service.placeTiles(word, 'h8v', true, playerService.players[1])).toBe("Ce n'est pas votre tour");
     });
 
-    it('placeTiles should not allow player to place a tile outside of the board', () => {
+    it('should remove tiles from the easel after placing them', () => {
+        const word = 'allo';
         playerService.current.easel = new Easel(TILES);
-        expect(service.placeTiles('allo', 'o15', true, playerService.current)).toBe('Commande invalide');
+        service.placeTiles(word, 'h8v', true, playerService.current);
+        const oldTiles: Tile[] = [
+            { letter: 'a', points: 0 },
+            { letter: 'l', points: 0 },
+            { letter: 'l', points: 0 },
+            { letter: 'o', points: 0 },
+        ];
+        expect(JSON.stringify(playerService.current.easel.tiles) === JSON.stringify(oldTiles)).toBeFalse();
     });
 
-    it('placetiles should not allow player to place tiles if each letters on the board dosent match the words wanted', () => {
-        const singleTile: Tile = {
-            letter: 'b',
-            points: 0,
-        };
-        playerService.current.easel = new Easel(TILES);
-        boardService.placeTile({ x: 7, y: 9 }, singleTile);
-        expect(service.placeTiles('allo', 'h8', true, playerService.current)).toBe('Commande impossible a realise');
-    });
-
-    it('should not allow a player to place a word outside of the center of the board on the first turn', () => {
+    it('should not place a word which is not in the dictionary', () => {
         wordValidationMock.validateWords.and.returnValue(false);
+        const word = 'allo';
         playerService.current.easel = new Easel(TILES);
-        expect(service.placeTiles('allo', 'g7', true, playerService.current)).toBe('la position de votre mot nest pas valide');
-        expect(service.placeTiles('allo', 'h8', true, playerService.current)).toBe('le mot nest pas dans le dictionnaire');
-        expect(playerService.current.easel.toString()).toBe('allo');
+        expect(service.placeTiles(word, 'h8v', true, playerService.current)).toBe('le mot nest pas dans le dictionnaire');
+    });
+
+    it('should place a word made up of tiles from the easel and the board', () => {
+        const word = 'test';
+        const coord = {
+            x: 7,
+            y: 7,
+        };
+        const vertical = false;
+        const tiles: Tile[] = [
+            { letter: 't', points: 0 },
+            { letter: 's', points: 0 },
+        ];
+        playerService.current.easel = new Easel(tiles);
+        boardService.placeTile({ x: 8, y: 7 }, { letter: 'e', points: 0 });
+        boardService.placeTile({ x: 10, y: 7 }, { letter: 't', points: 0 });
+        service.placeTiles(word, 'h8h', vertical, playerService.current);
+        for (let i = 0; i < word.length; i++) {
+            expect(boardService.getTile({ x: coord.x + i, y: coord.y })?.letter).toEqual(word[i]);
+        }
     });
 });
