@@ -5,3 +5,9 @@ export interface Player {
     score: number;
     easel: Easel;
 }
+
+export enum PlayAction {
+    Pass,
+    ExchangeTiles,
+    PlaceTiles,
+}
