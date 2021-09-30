@@ -3,10 +3,10 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { Easel } from './easel';
 import { PlayAction, Player } from './player';
-import { PlaceTilesInfo } from './tile';
+import { BoardWord, PlaceTilesInfo } from './tile';
 
-const PASS_CHANCE = 0.3;
-const EXCHANGE_CHANCE = 0.6;
+// const PASS_CHANCE = 0.1;
+// const EXCHANGE_CHANCE = 0.2;
 const IDLE_TIME_MS = 3000;
 
 export class VirtualPlayer implements Player {
@@ -21,13 +21,15 @@ export class VirtualPlayer implements Player {
     }
 
     play(): Observable<PlayAction> {
-        const random = Math.random();
-        let action: PlayAction = PlayAction.Pass;
-        if (random < PASS_CHANCE) action = PlayAction.Pass;
-        else if (random < EXCHANGE_CHANCE) action = PlayAction.ExchangeTiles;
-        else action = PlayAction.PlaceTiles;
+        // const random = Math.random();
+        // let action: PlayAction = PlayAction.Pass;
+        // if (random < PASS_CHANCE) action = PlayAction.Pass;
+        // else if (random < EXCHANGE_CHANCE) action = PlayAction.ExchangeTiles;
+        // else action = PlayAction.PlaceTiles;
 
-        return new BehaviorSubject<PlayAction>(action).pipe(delay(IDLE_TIME_MS));
+        // return new BehaviorSubject<PlayAction>(action).pipe(delay(IDLE_TIME_MS));
+
+        return new BehaviorSubject<PlayAction>(PlayAction.PlaceTiles).pipe(delay(IDLE_TIME_MS));
     }
 
     exchange(): string {
@@ -37,10 +39,30 @@ export class VirtualPlayer implements Player {
 
     // eslint-disable-next-line no-unused-vars
     place(validation: WordValidationService): PlaceTilesInfo {
+        const possiblePermutations: BoardWord[] = validation.getPossibleWords(this.easel.tiles);
+        console.log(possiblePermutations);
+        const validPermutations: BoardWord[] = [];
+
+        for (const permutation of possiblePermutations) {
+            if (validPermutations.length > 3) break;
+            if (permutation.tileCoords.length > 2) {
+                const points = validation.validateWords(permutation.tileCoords);
+                console.log(points);
+                if (points > 0) {
+                    validPermutations.push(permutation);
+                }
+            }
+        }
+        // console.log(validPermutations);
+
         return {
             word: 'word',
             coordStr: 'h8',
             vertical: false,
         };
     }
+
+    // coordToStringCoord(coord: Vec2): string {
+
+    // };
 }

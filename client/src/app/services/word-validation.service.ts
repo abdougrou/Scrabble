@@ -1,7 +1,7 @@
+/* eslint-disable complexity */
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Player } from '@app/classes/player';
-import { Tile, TileCoords } from '@app/classes/tile';
+import { BoardWord, Tile, TileCoords } from '@app/classes/tile';
 import { BoardService } from './board.service';
 import { CalculatePointsService } from './calculate-points.service';
 
@@ -23,24 +23,32 @@ export class WordValidationService {
      * @param player the player which has placed the tiles
      * @returns true if validation is complete, otherwise it returns false
      */
-    validateWords(newTiles: TileCoords[], player: Player): boolean {
-        let isValid = true;
+    validateWords(newTiles: TileCoords[]): number {
+        let isValid = 1;
         const wordsBefore: string[] = this.findWordsFromBoard();
         //  Removing the accents from the new tiles and adding them to a temporary copy of the board
         this.removeAccents(newTiles);
 
         //  End validation if the player entered an invalid character or placed a tile on top of another
         if (!this.checkValidLetters(newTiles)) {
-            isValid = false;
+            isValid = 0;
         }
-
+        let emptyBoard = false;
+        if (this.boardService.board.size === 0) {
+            emptyBoard = true;
+        }
         //  Checks that no tiles overlapse before placing them on the board
         if (!this.placeNewTiles(newTiles)) {
-            isValid = false;
+            isValid = 0;
         }
+
+        if (emptyBoard) {
+            if (!this.boardService.getTile({ x: 7, y: 7 })) isValid = 0;
+        }
+
         //  checking That all tiles have at least one adjacent tile
         if (!this.noLoneTile(newTiles)) {
-            isValid = false;
+            isValid = 0;
         }
 
         //  Getting all the words from the board and only keeping the newly formed ones
@@ -55,16 +63,127 @@ export class WordValidationService {
 
         //  check if all the new words are contained in the dictionary
         if (!this.wordInDictionnary(wordsAfter)) {
-            isValid = false;
+            isValid = 0;
         }
         //  Resetting the board after validation
         for (const aTile of newTiles) {
             this.boardService.board.delete(this.boardService.coordToKey(aTile.coords));
         }
         if (isValid) {
-            this.calculatePointsService.calculatePoints(this.newWordTiles, newTiles, player);
+            return this.calculatePointsService.calculatePoints(this.newWordTiles, newTiles);
         }
         return isValid;
+    }
+
+    getPossibleWords(tiles: Tile[]): BoardWord[] {
+        const possibleWords: BoardWord[] = [];
+        const tileMap: Map<string, Tile> = new Map();
+        tiles.forEach((tile) => {
+            tileMap.set(tile.letter, tile);
+        });
+        const easelTilesStr = Array.from(tileMap.keys()).filter((str) => str !== '*');
+        const possibleEaselPermutations: string[] = this.getTilePermutations(easelTilesStr);
+        for (const possibleWord of possibleEaselPermutations) {
+            for (let i = 0; i < BOARD_SIZE; i++) {
+                for (let j = 0; j < BOARD_SIZE; j++) {
+                    const boardWordH: BoardWord = { word: '', tileCoords: [], vertical: false, points: 0 };
+
+                    // Horizontal
+                    let offset = 0;
+                    for (let x = 0; x < BOARD_SIZE; x++) {
+                        const tile: Tile | undefined = this.boardService.getTile({ x: i + x + offset, y: j });
+                        if (tile) {
+                            boardWordH.word += tile.letter;
+                            offset++;
+                            x--;
+                        } else {
+                            if (x < possibleWord.length) {
+                                boardWordH.word += possibleWord[x];
+                                boardWordH.tileCoords.push({
+                                    tile: tileMap.get(possibleWord[x]) as Tile,
+                                    coords: {
+                                        x: i + x + offset,
+                                        y: j,
+                                    },
+                                });
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    if (this.noLoneTile(boardWordH.tileCoords) && boardWordH.word.length > 1) possibleWords.push(boardWordH);
+
+                    const boardWordV: BoardWord = { word: '', tileCoords: [], vertical: false, points: 0 };
+                    // Vertical
+                    offset = 0;
+                    for (let x = 0; x < BOARD_SIZE; x++) {
+                        const tile: Tile | undefined = this.boardService.getTile({ x: i, y: j + x + offset });
+                        if (tile) {
+                            boardWordV.word += tile.letter;
+                            offset++;
+                            x--;
+                        } else {
+                            if (x < possibleWord.length) {
+                                boardWordV.word += possibleWord[x];
+                                boardWordV.tileCoords.push({
+                                    tile: tileMap.get(possibleWord[x]) as Tile,
+                                    coords: {
+                                        x: i + x + offset,
+                                        y: j,
+                                    },
+                                });
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    if (this.noLoneTile(boardWordV.tileCoords) && boardWordV.word.length > 1) possibleWords.push(boardWordV);
+                }
+            }
+        }
+        return possibleWords;
+    }
+
+    getTilePermutations(tiles: string[]): string[] {
+        const permutations: string[] = [];
+
+        if (tiles.length === 1) return tiles;
+        for (const k of tiles) {
+            this.getTilePermutations(tiles.join('').replace(k, '').split(''))
+                .concat('')
+                .map((subtree) => {
+                    permutations.push(k.concat(subtree));
+                });
+        }
+
+        return permutations;
+    }
+
+    noLoneTile(newTiles: TileCoords[]): boolean {
+        let hasAdjacentTile = false;
+        for (const aTile of newTiles) {
+            if (aTile.coords.x !== 0) {
+                if (this.boardService.getTile({ x: aTile.coords.x - 1, y: aTile.coords.y }) !== undefined) {
+                    hasAdjacentTile = true;
+                }
+            }
+            if (aTile.coords.x < BOARD_SIZE - 1) {
+                if (this.boardService.getTile({ x: aTile.coords.x + 1, y: aTile.coords.y }) !== undefined) {
+                    hasAdjacentTile = true;
+                }
+            }
+            if (aTile.coords.y !== 0) {
+                if (this.boardService.getTile({ x: aTile.coords.x, y: aTile.coords.y - 1 }) !== undefined) {
+                    hasAdjacentTile = true;
+                }
+            }
+            if (aTile.coords.y < BOARD_SIZE - 1) {
+                if (this.boardService.getTile({ x: aTile.coords.x, y: aTile.coords.y + 1 }) !== undefined) {
+                    hasAdjacentTile = true;
+                }
+            }
+        }
+        return hasAdjacentTile;
     }
 
     private findWordsFromBoard(): string[] {
@@ -144,36 +263,6 @@ export class WordValidationService {
             if (this.boardService.getTile(aTile.coords) === undefined) {
                 this.boardService.placeTile(aTile.coords, aTile.tile);
             } else {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private noLoneTile(newTiles: TileCoords[]): boolean {
-        for (const aTile of newTiles) {
-            let hasAdjacent = false;
-            if (aTile.coords.x !== 0) {
-                if (this.boardService.getTile({ x: aTile.coords.x - 1, y: aTile.coords.y }) !== undefined) {
-                    hasAdjacent = true;
-                }
-            }
-            if (aTile.coords.x < BOARD_SIZE - 1) {
-                if (this.boardService.getTile({ x: aTile.coords.x + 1, y: aTile.coords.y }) !== undefined) {
-                    hasAdjacent = true;
-                }
-            }
-            if (aTile.coords.y !== 0) {
-                if (this.boardService.getTile({ x: aTile.coords.x, y: aTile.coords.y - 1 }) !== undefined) {
-                    hasAdjacent = true;
-                }
-            }
-            if (aTile.coords.y < BOARD_SIZE - 1) {
-                if (this.boardService.getTile({ x: aTile.coords.x, y: aTile.coords.y + 1 }) !== undefined) {
-                    hasAdjacent = true;
-                }
-            }
-            if (!hasAdjacent) {
                 return false;
             }
         }

@@ -38,7 +38,7 @@ export class MainPageComponent {
 
         dialogRef.afterClosed().subscribe(() => {
             // eslint-disable-next-line no-console
-            console.log('Game Starts');
+            // console.log('Game Starts');
         });
     }
 }

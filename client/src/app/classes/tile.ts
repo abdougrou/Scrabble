@@ -25,3 +25,10 @@ export interface LetterCoords {
     letter: string;
     coords: Vec2;
 }
+
+export interface BoardWord {
+    word: '';
+    tileCoords: TileCoords[];
+    vertical: boolean;
+    points: number;
+}

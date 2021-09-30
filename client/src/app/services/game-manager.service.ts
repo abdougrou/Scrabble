@@ -65,7 +65,7 @@ export class GameManagerService {
         if (this.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getLetters(STARTING_TILE_AMOUNT));
         else this.players.createVirtualPlayer(playerNames[1], this.reserve.getLetters(STARTING_TILE_AMOUNT));
         // if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
-        this.switchPlayers();
+        // this.switchPlayers();
     }
 
     switchPlayers() {
@@ -78,6 +78,7 @@ export class GameManagerService {
     playVirtualPlayer() {
         console.log("Bot's turn");
         const vPlayer: VirtualPlayer = this.players.current as VirtualPlayer;
+        console.log(vPlayer.easel.toString());
         vPlayer.play().subscribe((action) => {
             switch (action) {
                 case PlayAction.ExchangeTiles: {
@@ -98,10 +99,10 @@ export class GameManagerService {
                 }
                 default:
                     console.log('Bot skipped his turn');
+                    this.skipTurn();
                     break;
             }
         });
-        this.skipTurn();
     }
 
     giveTiles(player: Player, amount: number) {
@@ -134,6 +135,7 @@ export class GameManagerService {
             const reserveTiles: Tile[] = this.reserve.getLetters(tiles.length);
             player.easel.addTiles(reserveTiles);
             this.reserve.returnLetters(easelTiles);
+            this.skipTurn();
             return `${player.name} a échangé les lettres ${tiles}`;
         }
     }
@@ -174,7 +176,7 @@ export class GameManagerService {
         //  Check that the position of the word is valid
         if (this.validWordPosition(word, tilesToPlace, vertical)) {
             //  check that the word itself is valid
-            if (this.wordValidation.validateWords(tilesToPlace, player)) {
+            if (this.wordValidation.validateWords(tilesToPlace)) {
                 //  We place the tiles on the board and give the player new tiles if the word and position are valid
                 for (const aTile of tilesToPlace) {
                     this.board.placeTile(aTile.coords, aTile.tile);
@@ -192,6 +194,7 @@ export class GameManagerService {
             return 'placement de mot invalide';
         }
         this.gridService.drawBoard();
+        this.skipTurn();
         return `${player.name} a placé le mot "${word}" ${vertical ? 'verticale' : 'horizentale'}ment à la case ${coordStr}`;
     }
 
