@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 // import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
 // import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
@@ -32,11 +33,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 const modules = [
     // MatAutocompleteModule,
+    MatBadgeModule,
     MatButtonModule,
     // MatButtonToggleModule,
     MatCardModule,
     MatCheckboxModule,
-    // MatCheckboxModule,
     // MatChipsModule,
     // MatDatepickerModule,
     MatDialogModule,

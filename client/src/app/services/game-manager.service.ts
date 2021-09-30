@@ -21,10 +21,11 @@ export class GameManagerService {
     subscription: Subscription;
     randomPlayerNameIndex: number;
     isFirstTurn: boolean = true;
-    isEnded: boolean;
-
     mainPlayerName: string;
     enemyPlayerName: string;
+
+    isEnded: boolean;
+    endGameMessage: string = '';
 
     constructor(
         private board: BoardService,
@@ -38,6 +39,10 @@ export class GameManagerService {
         return this.reserve.tileCount === 0;
     }
 
+    get reserveCount() {
+        return this.reserve.tileCount;
+    }
+
     initialize(gameConfig: GameConfig) {
         this.mainPlayerName = gameConfig.playerName1;
         this.enemyPlayerName = gameConfig.playerName2;
@@ -47,6 +52,9 @@ export class GameManagerService {
 
         this.initializePlayers([this.mainPlayerName, this.enemyPlayerName]);
         this.players.mainPlayer = this.players.getPlayerByName(this.mainPlayerName);
+        this.endGameMessage = `La partie est terminée!\n
+            chevalet de ${this.players.getPlayerByName(this.mainPlayerName).name}: ${this.players.getPlayerByName(this.mainPlayerName).easel}.\n
+            chevalet de ${this.players.getPlayerByName(this.enemyPlayerName).name}: ${this.players.getPlayerByName(this.enemyPlayerName).easel}.`;
 
         this.startTimer();
     }
@@ -125,6 +133,8 @@ export class GameManagerService {
             const reserveTiles: Tile[] = this.reserve.getLetters(tiles.length);
             player.easel.addTiles(reserveTiles);
             this.reserve.returnLetters(easelTiles);
+            this.skipTurn();
+            this.resetSkipCounter();
             return `${player.name} a échangé les lettres ${tiles}`;
         }
     }
@@ -183,6 +193,8 @@ export class GameManagerService {
             return 'placement de mot invalide';
         }
         this.gridService.drawBoard();
+        this.skipTurn();
+        this.resetSkipCounter();
         return `${player.name} a placé le mot "${word}" ${vertical ? 'verticale' : 'horizentale'}ment à la case ${coordStr}`;
     }
 

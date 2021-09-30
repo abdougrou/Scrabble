@@ -8,5 +8,6 @@ import { Player } from '@app/classes/player';
 })
 export class EndGamePopupComponent {
     @Input() players: Player[];
-    isEqual = true;
+    @Input() winnerName: string;
+    @Input() isEqual: boolean;
 }

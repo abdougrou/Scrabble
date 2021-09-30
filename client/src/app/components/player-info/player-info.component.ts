@@ -25,6 +25,14 @@ export class PlayerInfoComponent implements DoCheck {
         return this.gameManager.currentTurnDurationLeft;
     }
 
+    get winner() {
+        return this.players[0].score > this.players[1].score ? this.players[0].name : this.players[1].name;
+    }
+
+    get reserveCount() {
+        return this.gameManager.reserveCount;
+    }
+
     ngDoCheck() {
         if (this.players[0].easel.count === 0 || this.players[1].easel.count === 0) {
             if (this.gameManager.emptyReserve()) this.endGame();

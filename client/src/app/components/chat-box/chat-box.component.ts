@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, DoCheck, HostListener } from '@angular/core';
 import { ChatMessage } from '@app/classes/message';
 import { SYSTEM_NAME } from '@app/constants';
 import { CommandHandlerService } from '@app/services/command-handler.service';
@@ -10,7 +10,7 @@ import { PlayerService } from '@app/services/player.service';
     templateUrl: './chat-box.component.html',
     styleUrls: ['./chat-box.component.scss'],
 })
-export class ChatBoxComponent {
+export class ChatBoxComponent implements DoCheck {
     buttonPressed = '';
     message = '';
     chatMessage: ChatMessage = { user: '', body: '' };
@@ -20,6 +20,13 @@ export class ChatBoxComponent {
     @HostListener('keydown', ['$event'])
     buttonDetect(event: KeyboardEvent) {
         this.buttonPressed = event.key;
+    }
+
+    ngDoCheck() {
+        if (this.gameManager.isEnded === true) {
+            const message = { user: SYSTEM_NAME, body: this.gameManager.endGameMessage } as ChatMessage;
+            this.showMessage(message);
+        }
     }
 
     submitInput(): void {
@@ -42,7 +49,7 @@ export class ChatBoxComponent {
         switch (message.user) {
             case SYSTEM_NAME:
                 newMessage.innerHTML = `${message.user} : ${message.body}`;
-                newMessage.style.color = 'red';
+                newMessage.style.color = '#cf000f';
                 break;
             case this.gameManager.mainPlayerName:
                 newMessage.innerHTML = `${message.user} : ${message.body}`;
