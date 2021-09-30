@@ -54,13 +54,18 @@ export class GridService {
     }
 
     drawMultiplierText(coord: Vec2, multiplierType: string, multiplier: number) {
-        this.gridContext.font = 'bold 10px system-ui';
-        this.gridContext.fillStyle = 'black';
-        this.gridContext.textBaseline = 'bottom';
-        this.gridContext.textAlign = 'center';
-        this.gridContext.fillText(multiplierType, coord.x * STEP + LETTER_OFFSET, coord.y * STEP + LETTER_OFFSET);
-        this.gridContext.textBaseline = 'top';
-        this.gridContext.fillText('x ' + multiplier.toString(), coord.x * STEP + LETTER_OFFSET, coord.y * STEP + LETTER_OFFSET);
+        const middle: Vec2 = { x: 7, y: 7 };
+        if (coord.x === middle.x && coord.y === middle.y) {
+            this.drawStarCenter();
+        } else {
+            this.gridContext.font = 'bold 10px system-ui';
+            this.gridContext.fillStyle = 'black';
+            this.gridContext.textBaseline = 'bottom';
+            this.gridContext.textAlign = 'center';
+            this.gridContext.fillText(multiplierType, coord.x * STEP + LETTER_OFFSET, coord.y * STEP + LETTER_OFFSET);
+            this.gridContext.textBaseline = 'top';
+            this.gridContext.fillText('x ' + multiplier.toString(), coord.x * STEP + LETTER_OFFSET, coord.y * STEP + LETTER_OFFSET);
+        }
     }
 
     drawMultiplierTile(coord: Vec2, multiplier: number) {
@@ -107,6 +112,26 @@ export class GridService {
 
     clearBoard() {
         this.gridContext.clearRect(0, 0, CANVAS_WIDTH - STEP, CANVAS_HEIGHT - STEP);
+    }
+
+    drawStarCenter() {
+        this.gridContext.globalAlpha = 0.7;
+        this.gridContext.fillStyle = 'black';
+        this.gridContext.beginPath();
+        this.gridContext.moveTo(7 * STEP + STEP / 2, 7 * STEP);
+        this.gridContext.lineTo(7 * STEP + (4 * STEP) / 10, 7 * STEP + (3 * STEP) / 8);
+        this.gridContext.lineTo(7 * STEP, 7 * STEP + (3 * STEP) / 8);
+        this.gridContext.lineTo(7 * STEP + (3 * STEP) / 10, 7 * STEP + (5 * STEP) / 8);
+        this.gridContext.lineTo(7 * STEP + (2 * STEP) / 10, 7 * STEP + STEP);
+        this.gridContext.lineTo(7 * STEP + STEP / 2, 7 * STEP + (6 * STEP) / 8);
+        this.gridContext.lineTo(7 * STEP + (8 * STEP) / 10, 7 * STEP + STEP);
+        this.gridContext.lineTo(7 * STEP + (7 * STEP) / 10, 7 * STEP + (5 * STEP) / 8);
+        this.gridContext.lineTo(7 * STEP + STEP, 7 * STEP + (3 * STEP) / 8);
+        this.gridContext.lineTo(7 * STEP + (6 * STEP) / 10, 7 * STEP + (3 * STEP) / 8);
+        this.gridContext.lineTo(7 * STEP + STEP / 2, 7 * STEP);
+        this.gridContext.closePath();
+        this.gridContext.fill();
+        this.gridContext.globalAlpha = 1;
     }
 
     drawBoard(fontSizeModifier: number = 0) {
