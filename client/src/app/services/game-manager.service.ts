@@ -5,7 +5,7 @@ import { PlayAction, Player } from '@app/classes/player';
 import { PlaceTilesInfo, Tile, TileCoords } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
 import { VirtualPlayer } from '@app/classes/virtual-player';
-import { GRID_SIZE, LETTER_POINTS, RANDOM_PLAYER_NAMES, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
+import { GRID_SIZE, LETTER_POINTS, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
 import { timer } from 'rxjs';
 import { BoardService } from './board.service';
 import { CalculatePointsService } from './calculate-points.service';
@@ -43,9 +43,9 @@ export class GameManagerService {
         this.isMultiPlayer = gameConfig.isMultiPlayer;
         this.turnDuration = gameConfig.duration;
         this.currentTurnDurationLeft = gameConfig.duration;
-        this.randomPlayerNameIndex = Math.floor(Math.random() * RANDOM_PLAYER_NAMES.length);
 
-        this.initializePlayers([gameConfig.playerName1, RANDOM_PLAYER_NAMES[this.randomPlayerNameIndex]]);
+        this.initializePlayers([gameConfig.playerName1, gameConfig.playerName2]);
+        this.players.mainPlayer = this.players.players[0];
 
         this.startTimer();
     }

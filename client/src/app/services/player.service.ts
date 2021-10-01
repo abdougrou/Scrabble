@@ -13,6 +13,7 @@ export class PlayerService {
     get current(): Player {
         return this.players[0];
     }
+    mainPlayer: Player;
 
     createPlayer(name: string, tiles: Tile[]) {
         const player: Player = {

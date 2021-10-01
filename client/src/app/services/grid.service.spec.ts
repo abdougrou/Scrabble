@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { CanvasTestHelper } from '@app/classes/canvas-test-helper';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { BASE_INDEX_FONT_SIZE, BASE_LETTER_FONT_SIZE, CANVAS_HEIGHT, CANVAS_WIDTH, STEP, TILE_COLORS } from '@app/constants';
+import { CANVAS_HEIGHT, CANVAS_WIDTH, STEP, TILE_COLORS, LETTER_FONT_SIZE_MODIFIER } from '@app/constants';
 import { GridService } from '@app/services/grid.service';
 // import { GameManagerService } from './game-manager.service';
 
@@ -28,7 +28,7 @@ describe('GridService', () => {
     });
 
     it('height should return the height of the grid canvas', () => {
-        expect(service.width).toEqual(CANVAS_HEIGHT);
+        expect(service.height).toEqual(CANVAS_HEIGHT);
     });
 
     it('drawGridIds should call fillText() 30 times', () => {
@@ -111,7 +111,7 @@ describe('GridService', () => {
         const matrixCoord: Vec2 = { x: 20, y: 20 };
         const tile: Tile = { letter: 'A', points: 10 };
         const spy = spyOn(ctxStub, 'fillText').and.callThrough();
-        service.drawTile(matrixCoord, tile, BASE_LETTER_FONT_SIZE, BASE_INDEX_FONT_SIZE);
+        service.drawTile(matrixCoord, tile, LETTER_FONT_SIZE_MODIFIER);
 
         expect(spy).toHaveBeenCalledTimes(2);
     });
@@ -120,7 +120,7 @@ describe('GridService', () => {
         const matrixCoord: Vec2 = { x: 20, y: 20 };
         const tile: Tile = { letter: 'A', points: 10 };
         const spy = spyOn(service, 'colorTile').and.callThrough();
-        service.drawTile(matrixCoord, tile, BASE_LETTER_FONT_SIZE, BASE_INDEX_FONT_SIZE);
+        service.drawTile(matrixCoord, tile, LETTER_FONT_SIZE_MODIFIER);
 
         expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -147,4 +147,40 @@ describe('GridService', () => {
     //     expect(spyPlaced).toHaveBeenCalledTimes(numberOfPlacedTilesExpected);
     //     expect(spyVirgin).toHaveBeenCalledTimes(numberOfVirginTilesExpected);
     // });
+
+    it('clearBoard() should clear board by calling clearRect', () => {
+        const boardSize = CANVAS_WIDTH - STEP;
+        const spy = spyOn(ctxStub, 'clearRect').and.callThrough();
+        service.clearBoard();
+
+        expect(spy).toHaveBeenCalledWith(0, 0, boardSize, boardSize);
+    });
+
+    it('drawMultiplierText should draw a star in the middle of the board', () => {
+        const middleCoord: Vec2 = { x: 7, y: 7 };
+        const multiplierType = 'MOT';
+        const multiplier = 2;
+        const spy = spyOn(service, 'drawStarCenter').and.callThrough();
+        service.drawMultiplierText(middleCoord, multiplierType, multiplier);
+
+        expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('drawMultiplierText should draw a star in the middle of the board', () => {
+        const middleCoord: Vec2 = { x: 7, y: 7 };
+        const multiplierType = 'MOT';
+        const multiplier = 2;
+        const spy = spyOn(service, 'drawStarCenter').and.callThrough();
+        service.drawMultiplierText(middleCoord, multiplierType, multiplier);
+
+        expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('Multiplicator tiles should be drawn everywhere except the middle', () => {
+        const numberCalled = 120;
+        const spy = spyOn(ctxStub, 'fillText').and.callThrough();
+        service.drawBoard();
+
+        expect(spy).toHaveBeenCalledTimes(numberCalled);
+    });
 });
