@@ -86,22 +86,28 @@ export class GameManagerService {
             switch (action) {
                 case PlayAction.ExchangeTiles: {
                     const tilesToExchange = vPlayer.exchange();
-                    // console.log(`Bot exchanges the letters ${tilesToExchange}`);
+                    console.log(`Bot exchanges the letters ${tilesToExchange}`);
                     if (this.reserve.isExchangePossible(tilesToExchange.length)) this.exchangeTiles(tilesToExchange, vPlayer);
+                    else this.skipTurn();
                     break;
                 }
                 case PlayAction.PlaceTiles: {
-                    const placeTilesInfo: PlaceTilesInfo = vPlayer.place(this.wordValidation, this.calculatePoints);
+                    const placeTilesInfo: PlaceTilesInfo = vPlayer.place(this.wordValidation, this.calculatePoints, this.board);
                     // console.log(
                     //     `Bot places the word "${placeTilesInfo.word}" ${placeTilesInfo.vertical ? 'vertical' : 'horizontal'}ly at ${
                     //         placeTilesInfo.coordStr
                     //     }`,
                     // );
-                    this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer);
+                    if (placeTilesInfo.word.length > 0) {
+                        console.log(placeTilesInfo);
+                        console.log(this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer));
+                    } else {
+                        this.skipTurn();
+                    }
                     break;
                 }
                 default:
-                    //  console.log('Bot skipped his turn');
+                    console.log('Bot skipped his turn');
                     this.skipTurn();
                     break;
             }

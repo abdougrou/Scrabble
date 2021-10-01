@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 //  import { BoardWord, Tile, TileCoords } from '@app/classes/tile';
@@ -111,9 +112,10 @@ export class WordValidationService {
                             }
                         }
                     }
-                    if (this.noLoneTile(boardWordH.tileCoords) && boardWordH.word.length > 1) possibleWords.push(boardWordH);
+                    if (this.noLoneTile(boardWordH.tileCoords) && boardWordH.word.length > 1 && this.wordInDictionnary(boardWordH.word))
+                        possibleWords.push(boardWordH);
 
-                    const boardWordV: BoardWord = { word: '', tileCoords: [], vertical: false, points: 0 };
+                    const boardWordV: BoardWord = { word: '', tileCoords: [], vertical: true, points: 0 };
                     // Vertical
                     offset = 0;
                     for (let x = 0; x < GRID_SIZE; x++) {
@@ -128,8 +130,8 @@ export class WordValidationService {
                                 boardWordV.tileCoords.push({
                                     tile: tileMap.get(possibleWord[x]) as Tile,
                                     coords: {
-                                        x: i + x + offset,
-                                        y: j,
+                                        x: i,
+                                        y: j + x + offset,
                                     },
                                 });
                             } else {
@@ -137,7 +139,8 @@ export class WordValidationService {
                             }
                         }
                     }
-                    if (this.noLoneTile(boardWordV.tileCoords) && boardWordV.word.length > 1) possibleWords.push(boardWordV);
+                    if (this.noLoneTile(boardWordV.tileCoords) && boardWordV.word.length > 1 && this.wordInDictionnary(boardWordV.word))
+                        possibleWords.push(boardWordV);
                 }
             }
         }
@@ -157,6 +160,14 @@ export class WordValidationService {
         }
 
         return permutations;
+    }
+
+    /**
+     * @param word string we want to validate
+     * @returns boolean value corresponding to whether or not the word is in the dictionnary
+     */
+    wordInDictionnary(word: string): boolean {
+        return this.dictionnary.includes(word);
     }
 
     /**
@@ -202,14 +213,6 @@ export class WordValidationService {
             }
         }
         return boardWords;
-    }
-
-    /**
-     * @param word string we want to validate
-     * @returns boolean value corresponding to whether or not the word is in the dictionnary
-     */
-    private wordInDictionnary(word: string): boolean {
-        return this.dictionnary.includes(word);
     }
 
     /**
