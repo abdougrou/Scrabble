@@ -54,35 +54,39 @@ describe('ChatBoxComponent', () => {
     it('should add the system message in red in the chat', () => {
         const parentMessage = document.getElementById('default-message');
         const systemMessage = { user: SYSTEM_NAME, body: 'system Message' } as ChatMessage;
-        const systemHtmlMessage = '<p style="color: red;">Système : system Message</p>';
+        const systemHtmlMessage = 'Système : system Message';
         component.showMessage(systemMessage);
-        expect(parentMessage?.innerHTML).toEqual(systemHtmlMessage);
+        expect(parentMessage?.innerText).toEqual(systemHtmlMessage);
+        expect(parentMessage?.innerHTML.split('color: ')[1].split(';')[0]).toEqual('red');
     });
 
     it('should add main player message in gray in the chat', () => {
         const parentMessage = document.getElementById('default-message');
         component.mainPlayerName = 'Player';
         const mainPlayerMessage = { user: 'Player', body: 'main player message' } as ChatMessage;
-        const mainPlayerHtmlMessage = '<p style="color: gray;">Player : main player message</p>';
+        const mainPlayerHtmlMessage = 'Player : main player message';
         component.showMessage(mainPlayerMessage);
-        expect(parentMessage?.innerHTML).toEqual(mainPlayerHtmlMessage);
+        expect(parentMessage?.innerText).toEqual(mainPlayerHtmlMessage);
+        expect(parentMessage?.innerHTML.split('color: ')[1].split(';')[0]).toEqual('gray');
     });
 
     it('should add enemy player message in darkgoldenrod color in the chat', () => {
         const parentMessage = document.getElementById('default-message');
         component.enemyPlayerName = 'EnemyPlayer';
         const enemyPlayerMessage = { user: 'EnemyPlayer', body: 'enemy player message' } as ChatMessage;
-        const enemyPlayerHtmlMessage = '<p style="color: darkgoldenrod;">EnemyPlayer : enemy player message</p>';
+        const enemyPlayerHtmlMessage = 'EnemyPlayer : enemy player message';
         component.showMessage(enemyPlayerMessage);
-        expect(parentMessage?.innerHTML).toEqual(enemyPlayerHtmlMessage);
+        expect(parentMessage?.innerText).toEqual(enemyPlayerHtmlMessage);
+        expect(parentMessage?.innerHTML.split('color: ')[1].split(';')[0]).toEqual('darkgoldenrod');
     });
 
     it('should add command results in gray in the chat', () => {
         const parentMessage = document.getElementById('default-message');
         const commandResult = { user: 'Commande', body: 'this is a result of a command' } as ChatMessage;
-        const commandResultHtmlMessage = '<p style="color: gray;">this is a result of a command</p>';
+        const commandResultHtmlMessage = 'this is a result of a command';
         component.showMessage(commandResult);
-        expect(parentMessage?.innerHTML).toEqual(commandResultHtmlMessage);
+        expect(parentMessage?.innerText).toEqual(commandResultHtmlMessage);
+        expect(parentMessage?.innerHTML.split('color: ')[1].split(';')[0]).toEqual('gray');
     });
 
     it('should scrollDown in the chat', () => {
