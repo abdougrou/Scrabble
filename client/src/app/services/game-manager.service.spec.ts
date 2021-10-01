@@ -80,6 +80,8 @@ describe('GameManagerService', () => {
         reserveService.tiles.set('a', { tile: { letter: 'a', points: 2 }, count: 7 });
         reserveService.tileCount = 7;
         service.exchangeTiles('allo', playerService.current);
+        //  Switch players back
+        playerService.switchPlayers();
         expect(playerService.current.easel.toString()).toBe('aaaa');
     });
 
@@ -208,5 +210,36 @@ describe('GameManagerService', () => {
         for (let i = 0; i < word.length; i++) {
             expect(boardService.getTile({ x: coord.x + i, y: coord.y })?.letter).toEqual(word[i]);
         }
+    });
+
+    it('placeTile should detect upper case letters as white letters', () => {
+        const word = 'allo';
+        const coord = {
+            x: 7,
+            y: 7,
+        };
+        const tiles: Tile[] = [
+            { letter: 'a', points: 0 },
+            { letter: 'l', points: 0 },
+            { letter: 'l', points: 0 },
+            { letter: '*', points: 0 },
+        ];
+        playerService.current.easel = new Easel(tiles);
+        service.placeTiles('allO', 'h8v', true, playerService.current);
+        for (let i = 0; i < word.length; i++) {
+            expect(boardService.getTile({ x: coord.x, y: coord.y + i })?.letter).toEqual(word[i]);
+        }
+    });
+
+    it('placeTile should not allow a word to be placed if the letter of the tile on the board dont match the letter of the word', () => {
+        const tiles: Tile[] = [
+            { letter: 'l', points: 0 },
+            { letter: 'z', points: 0 },
+            { letter: 's', points: 0 },
+            { letter: 'a', points: 0 },
+        ];
+        playerService.current.easel = new Easel(tiles);
+        service.placeTiles('le', 'h8v', true, playerService.current);
+        expect(service.placeTiles('sa', 'i8h', false, playerService.current)).toBe('placement de mot invalide');
     });
 });

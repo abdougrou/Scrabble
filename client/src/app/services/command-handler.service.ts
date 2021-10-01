@@ -42,8 +42,8 @@ export class CommandHandlerService {
         const commandResult: ChatMessage = { user: '', body: '' };
         const regex = new RegExp(/^!placer ([a-o]([1-9]|1[0-5])(h|v)) ([a-zA-Z]){2,15}$/g);
         if (regex.test(command)) {
-            const minus1 = -1;
-            const direction = command.split(' ')[1].slice(minus1);
+            const indexLastChar = -1;
+            const direction = command.split(' ')[1].slice(indexLastChar);
             const coordStrDir = command.split(' ')[1];
             const coordStr = coordStrDir.slice(0, coordStrDir.length - 1);
             commandResult.user = COMMAND_RESULT;
