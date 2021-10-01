@@ -34,7 +34,6 @@ export class PlayAreaComponent implements AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        console.log(this.playerService);
         this.tiles = this.playerService.mainPlayer.easel.tiles;
 
         this.gridService.gridContext = this.gridCanvas.nativeElement.getContext('2d') as CanvasRenderingContext2D;

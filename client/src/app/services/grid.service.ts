@@ -105,7 +105,7 @@ export class GridService {
         this.gridContext.textBaseline = 'middle';
         this.gridContext.textAlign = 'center';
         this.gridContext.font = `${letterFont}px system-ui`;
-        this.gridContext.fillText(tile.letter.toString(), coord.x * STEP + LETTER_OFFSET, coord.y * STEP + LETTER_OFFSET);
+        this.gridContext.fillText(tile.letter.toUpperCase(), coord.x * STEP + LETTER_OFFSET, coord.y * STEP + LETTER_OFFSET);
 
         this.gridContext.textBaseline = 'bottom';
         this.gridContext.textAlign = 'right';
