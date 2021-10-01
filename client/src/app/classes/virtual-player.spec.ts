@@ -1,4 +1,3 @@
-import { CalculatePointsService } from '@app/services/calculate-points.service';
 import { WordValidationService } from '@app/services/word-validation.service';
 import { Easel } from './easel';
 import { VirtualPlayer } from './virtual-player';
@@ -6,7 +5,6 @@ import { VirtualPlayer } from './virtual-player';
 describe('VirtualPlayer', () => {
     let virtualPlayer: VirtualPlayer;
     let wordValidationMock: jasmine.SpyObj<WordValidationService>;
-    let calculatePoints: CalculatePointsService;
 
     beforeEach(() => {
         virtualPlayer = new VirtualPlayer('virtual', new Easel());
@@ -19,10 +17,5 @@ describe('VirtualPlayer', () => {
     });
     it('should create an instance', () => {
         expect(new VirtualPlayer('virtual', new Easel())).toBeTruthy();
-    });
-
-    it('test 2', () => {
-        virtualPlayer.place(wordValidationMock, calculatePoints);
-        expect(wordValidationMock.validateWords).toHaveBeenCalledTimes(1);
     });
 });

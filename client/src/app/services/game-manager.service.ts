@@ -126,20 +126,24 @@ export class GameManagerService {
     }
 
     exchangeTiles(tiles: string, player: Player): string {
+        let successfulExchange = false;
+        let message = '';
         if (this.players.current !== player) {
-            return "Ce n'est pas votre tour";
+            message = "Ce n'est pas votre tour";
         } else if (!this.reserve.isExchangePossible(tiles.length)) {
-            return "Il n'y a pas assez de tuiles dans la réserve";
+            message = "Il n'y a pas assez de tuiles dans la réserve";
         } else if (!player.easel.containsTiles(tiles)) {
-            return 'Votre chevalet ne contient pas les lettres nécessaires';
+            message = 'Votre chevalet ne contient pas les lettres nécessaires';
         } else {
             const easelTiles: Tile[] = player.easel.getTiles(tiles); // getTiles remove and get the tiles
             const reserveTiles: Tile[] = this.reserve.getLetters(tiles.length);
             player.easel.addTiles(reserveTiles);
             this.reserve.returnLetters(easelTiles);
-            this.skipTurn();
-            return `${player.name} a échangé les lettres ${tiles}`;
+            message = `${player.name} a échangé les lettres ${tiles}`;
+            successfulExchange = true;
         }
+        if (successfulExchange) this.switchPlayers();
+        return message;
     }
 
     placeTiles(word: string, coordStr: string, vertical: boolean, player: Player): string {
