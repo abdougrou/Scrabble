@@ -195,11 +195,56 @@ describe('GameManagerService', () => {
             { letter: 's', points: 0 },
         ];
         playerService.current.easel = new Easel(tiles);
-        boardService.placeTile({ x: 8, y: 7 }, { letter: 'e', points: 0 });
+        boardService.placeTile({ x: 8, y: 7 }, { letter: 'z', points: 0 });
         boardService.placeTile({ x: 10, y: 7 }, { letter: 't', points: 0 });
         service.placeTiles(word, 'h8h', vertical, playerService.current);
         for (let i = 0; i < word.length; i++) {
             expect(boardService.getTile({ x: coord.x + i, y: coord.y })?.letter).toEqual(word[i]);
         }
+    });
+
+    it('placeTile should detect upper case letters as white letters', () => {
+        const word = 'allo';
+        const coord = {
+            x: 7,
+            y: 7,
+        };
+        const tiles: Tile[] = [
+            { letter: 'a', points: 0 },
+            { letter: 'l', points: 0 },
+            { letter: 'l', points: 0 },
+            { letter: '*', points: 0 },
+        ];
+        playerService.current.easel = new Easel(tiles);
+        service.placeTiles('allO', 'h8v', true, playerService.current);
+        for (let i = 0; i < word.length; i++) {
+            expect(boardService.getTile({ x: coord.x, y: coord.y + i })?.letter).toEqual(word[i]);
+        }
+    });
+
+    it('placeTile should not allow a word to be placed if the letter of the tile on the board dont match the letter of the word', () => {
+        const tiles: Tile[] = [
+            { letter: 'l', points: 0 },
+            { letter: 'z', points: 0 },
+            { letter: 's', points: 0 },
+            { letter: 'a', points: 0 },
+        ];
+        playerService.current.easel = new Easel(tiles);
+        service.placeTiles('le', 'h8v', true, playerService.current);
+        expect(service.placeTiles('sa', 'i8h', false, playerService.current)).toBe('Commande impossible a realise');
+    });
+
+    it('placeTile should give as much as tiles needed after validation even if it has less tiles than the tiles placed on board', () => {
+        reserveService.tiles.clear();
+        reserveService.tileCount = 0;
+        reserveService.tiles.set('z', { tile: { letter: 'z', points: 0 }, count: 2 });
+        reserveService.tileCount = 2;
+        console.log(reserveService.tiles);
+        service.placeTiles('allo', 'h8v', true, playerService.current);
+        console.log(reserveService.tiles);
+        console.log(playerService.current.easel);
+        expect(playerService.current.easel.tiles[0].letter).toBe('z');
+        expect(playerService.current.easel.tiles[1].letter).toBe('z');
+        expect(playerService.current.easel.count).toBe(2);
     });
 });
