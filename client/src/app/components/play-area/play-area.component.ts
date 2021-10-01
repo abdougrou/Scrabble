@@ -19,7 +19,7 @@ export enum MouseButton {
     styleUrls: ['./play-area.component.scss'],
 })
 export class PlayAreaComponent implements AfterViewInit {
-    @ViewChild('canvas', { static: false }) private gridCanvas!: ElementRef<HTMLCanvasElement>;
+    @ViewChild('canvas', { static: false }) gridCanvas!: ElementRef<HTMLCanvasElement>;
 
     tiles: Tile[] = [];
     mousePosition: Vec2 = { x: 0, y: 0 };
@@ -34,6 +34,7 @@ export class PlayAreaComponent implements AfterViewInit {
     }
 
     ngAfterViewInit(): void {
+        console.log(this.playerService);
         this.tiles = this.playerService.mainPlayer.easel.tiles;
 
         this.gridService.gridContext = this.gridCanvas.nativeElement.getContext('2d') as CanvasRenderingContext2D;

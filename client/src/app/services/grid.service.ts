@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { Injectable } from '@angular/core';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
@@ -18,6 +17,10 @@ import {
     BASE_POINT_FONT_SIZE,
     LETTER_FONT_SIZE_MODIFIER,
     POINT_FONT_SIZE_MODIFIER,
+    TILE_MULTIPLIER,
+    TILE_TYPE,
+    GRID_WIDTH,
+    GRID_HEIGHT,
 } from '@app/constants';
 import { BoardService } from './board.service';
 
@@ -70,25 +73,25 @@ export class GridService {
 
     drawMultiplierTile(coord: Vec2, multiplier: number) {
         switch (multiplier) {
-            case 0:
+            case TILE_TYPE.noBonus:
                 this.colorTile(coord, TILE_COLORS.tile);
                 break;
-            case 1: {
+            case TILE_TYPE.letterX2: {
                 this.colorTile(coord, TILE_COLORS.l2);
-                this.drawMultiplierText(coord, 'LETTRE', 2);
+                this.drawMultiplierText(coord, 'LETTRE', TILE_MULTIPLIER.l2);
                 break;
             }
-            case 2:
+            case TILE_TYPE.letterX3:
                 this.colorTile(coord, TILE_COLORS.l3);
-                this.drawMultiplierText(coord, 'LETTRE', 3);
+                this.drawMultiplierText(coord, 'LETTRE', TILE_MULTIPLIER.l3);
                 break;
-            case 3:
+            case TILE_TYPE.wordX2:
                 this.colorTile(coord, TILE_COLORS.w2);
-                this.drawMultiplierText(coord, 'MOT', 2);
+                this.drawMultiplierText(coord, 'MOT', TILE_MULTIPLIER.w2);
                 break;
-            case 4:
+            case TILE_TYPE.wordX3:
                 this.colorTile(coord, TILE_COLORS.w3);
-                this.drawMultiplierText(coord, 'MOT', 3);
+                this.drawMultiplierText(coord, 'MOT', TILE_MULTIPLIER.w3);
                 break;
         }
     }
@@ -115,23 +118,30 @@ export class GridService {
     }
 
     drawStarCenter() {
-        this.gridContext.globalAlpha = 0.7;
+        const x = GRID_WIDTH / 2 - 1;
+        const y = GRID_HEIGHT / 2 + 1;
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        const r = STEP / 4.0;
+        const inset = 2;
+        const n = 5;
+        const rotation = 120;
+
         this.gridContext.fillStyle = 'black';
+        this.gridContext.save();
+        this.gridContext.globalAlpha = 0.7;
         this.gridContext.beginPath();
-        this.gridContext.moveTo(7 * STEP + STEP / 2, 7 * STEP);
-        this.gridContext.lineTo(7 * STEP + (4 * STEP) / 10, 7 * STEP + (3 * STEP) / 8);
-        this.gridContext.lineTo(7 * STEP, 7 * STEP + (3 * STEP) / 8);
-        this.gridContext.lineTo(7 * STEP + (3 * STEP) / 10, 7 * STEP + (5 * STEP) / 8);
-        this.gridContext.lineTo(7 * STEP + (2 * STEP) / 10, 7 * STEP + STEP);
-        this.gridContext.lineTo(7 * STEP + STEP / 2, 7 * STEP + (6 * STEP) / 8);
-        this.gridContext.lineTo(7 * STEP + (8 * STEP) / 10, 7 * STEP + STEP);
-        this.gridContext.lineTo(7 * STEP + (7 * STEP) / 10, 7 * STEP + (5 * STEP) / 8);
-        this.gridContext.lineTo(7 * STEP + STEP, 7 * STEP + (3 * STEP) / 8);
-        this.gridContext.lineTo(7 * STEP + (6 * STEP) / 10, 7 * STEP + (3 * STEP) / 8);
-        this.gridContext.lineTo(7 * STEP + STEP / 2, 7 * STEP);
+        this.gridContext.translate(x, y);
+        this.gridContext.rotate(rotation);
+        this.gridContext.moveTo(0, 0 - r);
+        for (let i = 0; i < n; i++) {
+            this.gridContext.rotate(Math.PI / n);
+            this.gridContext.lineTo(0, 0 - r * inset);
+            this.gridContext.rotate(Math.PI / n);
+            this.gridContext.lineTo(0, 0 - r);
+        }
         this.gridContext.closePath();
         this.gridContext.fill();
-        this.gridContext.globalAlpha = 1;
+        this.gridContext.restore();
     }
 
     drawBoard(fontSizeModifier: number = 0) {
