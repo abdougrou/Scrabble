@@ -65,6 +65,7 @@ describe('MainPageComponent', () => {
         const popupHeader = document.getElementsByTagName('h2')[0] as HTMLHeadElement;
 
         expect(popupHeader.innerText).toEqual(expectedHeader);
+        component.dialog.closeAll();
     });
 
     /*

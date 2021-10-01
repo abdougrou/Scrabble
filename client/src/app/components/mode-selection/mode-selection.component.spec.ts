@@ -1,3 +1,4 @@
+import { HttpClient, HttpHandler } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -19,7 +20,13 @@ describe('ModeSelectionComponent', () => {
         await TestBed.configureTestingModule({
             imports: [MatDialogModule, BrowserAnimationsModule],
             declarations: [ModeSelectionComponent],
-            providers: [FormBuilder, { provide: MAT_DIALOG_DATA, useValue: {} }, { provide: MatDialogRef, useValue: dialogMock }],
+            providers: [
+                FormBuilder,
+                { provide: MAT_DIALOG_DATA, useValue: {} },
+                { provide: MatDialogRef, useValue: dialogMock },
+                HttpClient,
+                HttpHandler,
+            ],
         }).compileComponents();
     });
 
@@ -42,6 +49,7 @@ describe('ModeSelectionComponent', () => {
         // const popupHeader = document.getElementsByTagName('p')[0] as HTMLHeadElement;
 
         expect(spy).toHaveBeenCalled();
+        component.dialog.closeAll();
     });
 
     it('should close after back()', () => {

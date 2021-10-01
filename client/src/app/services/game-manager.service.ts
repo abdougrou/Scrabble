@@ -35,10 +35,6 @@ export class GameManagerService {
         private wordValidation: WordValidationService,
     ) {}
 
-    emptyReserve() {
-        return this.reserve.tileCount === 0;
-    }
-
     get reserveCount() {
         return this.reserve.tileCount;
     }
@@ -52,8 +48,8 @@ export class GameManagerService {
 
         this.initializePlayers([this.mainPlayerName, this.enemyPlayerName]);
         this.players.mainPlayer = this.players.getPlayerByName(this.mainPlayerName);
-        this.endGameMessage = `La partie est terminée!\n
-            chevalet de ${this.players.getPlayerByName(this.mainPlayerName).name}: ${this.players.getPlayerByName(this.mainPlayerName).easel}.\n
+        this.endGameMessage = `La partie est terminée! <br>
+            chevalet de ${this.players.getPlayerByName(this.mainPlayerName).name}: ${this.players.getPlayerByName(this.mainPlayerName).easel}.<br>
             chevalet de ${this.players.getPlayerByName(this.enemyPlayerName).name}: ${this.players.getPlayerByName(this.enemyPlayerName).easel}.`;
 
         this.startTimer();
@@ -94,11 +90,12 @@ export class GameManagerService {
     }
 
     skipTurn() {
-        if (this.players.skipCounter >= MAX_SKIP_COUNT - 1) {
+        this.players.skipCounter++;
+        if (this.players.skipCounter >= MAX_SKIP_COUNT) {
             this.endGame();
+        } else {
+            this.switchPlayers();
         }
-        this.players.incrementSkipCounter();
-        this.switchPlayers();
     }
 
     // TODO skipCounter to reset when place or exchange command excuted

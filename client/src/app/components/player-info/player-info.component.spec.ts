@@ -3,30 +3,21 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAX_SKIP_COUNT } from '@app/constants';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { PlayerService } from '@app/services/player.service';
-
 import { PlayerInfoComponent } from './player-info.component';
-import Spy = jasmine.Spy;
+import SpyObj = jasmine.SpyObj;
 
 describe('PlayerInfoComponent', () => {
     let component: PlayerInfoComponent;
     let fixture: ComponentFixture<PlayerInfoComponent>;
-    const gameManagerService = jasmine.createSpyObj(
-        'GameManagerService',
-        {
-            ['skipTurn']: () => {
-                // do nothing
-            },
-            ['reset']: () => {
-                // do nothing
-            },
-            ['stopTimer']: () => {
-                // do nothing
-            },
-        },
-        {},
-    );
-    const playerService = jasmine.createSpyObj('PlayerService', {}, { ['skipCounter']: 1 });
+    let gameManagerService: SpyObj<GameManagerService>;
+    let playerService: PlayerService;
 
+    beforeEach(() => {
+        playerService = new PlayerService();
+        playerService.createPlayer('player', []);
+        playerService.createPlayer('playerTwo', []);
+        gameManagerService = jasmine.createSpyObj('GameManagerService', ['skipTurn', 'reset', 'stopTimer', 'endGame']);
+    });
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [HttpClientModule],
@@ -48,6 +39,13 @@ describe('PlayerInfoComponent', () => {
         expect(component).toBeTruthy();
     });
 
+    it('should have winner', () => {
+        playerService.players[0].score = 0;
+        playerService.players[1].score = 10;
+
+        expect(component.winner).toEqual(playerService.players[1].name);
+    });
+
     it('#getTimer should return currentTurnDurationLeft', () => {
         expect(component.timer).toEqual(gameManagerService.currentTurnDurationLeft);
     });
@@ -59,10 +57,14 @@ describe('PlayerInfoComponent', () => {
     });
 
     it('should call stop timer if turn skipped six times continuously', () => {
-        (Object.getOwnPropertyDescriptor(playerService, 'skipCounter')?.get as Spy<() => number>).and.returnValue(MAX_SKIP_COUNT - 1);
-
+        playerService.skipCounter = MAX_SKIP_COUNT - 1;
+        gameManagerService.skipTurn.and.callFake(() => {
+            playerService.skipCounter++;
+            if (playerService.skipCounter >= MAX_SKIP_COUNT) gameManagerService.stopTimer();
+        });
         component.skipTurn();
-        expect(playerService.skipCounter).toEqual(MAX_SKIP_COUNT - 1);
+        expect(gameManagerService.skipTurn).toHaveBeenCalled();
+        expect(playerService.skipCounter).toEqual(MAX_SKIP_COUNT);
         expect(gameManagerService.stopTimer).toHaveBeenCalled();
     });
 

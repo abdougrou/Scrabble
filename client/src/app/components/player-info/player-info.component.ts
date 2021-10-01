@@ -34,8 +34,9 @@ export class PlayerInfoComponent implements DoCheck {
     }
 
     ngDoCheck() {
+        if (this.players === undefined) return;
         if (this.players[0].easel.count === 0 || this.players[1].easel.count === 0) {
-            if (this.gameManager.emptyReserve()) this.endGame();
+            if (this.gameManager.reserveCount === 0) this.endGame();
         }
     }
 

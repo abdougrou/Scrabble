@@ -19,8 +19,8 @@ describe('PlayAreaComponent', () => {
         await TestBed.configureTestingModule({
             declarations: [PlayAreaComponent, EaselComponent],
             providers: [
-                { provider: PlayerService, useValue: playerService },
-                { provider: GridService, useValue: grid },
+                { provide: PlayerService, useValue: playerService },
+                { provide: GridService, useValue: grid },
             ],
         }).compileComponents();
     });

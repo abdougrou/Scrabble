@@ -1,7 +1,7 @@
 import { Component, DoCheck, Inject } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { GameConfig } from '@app/classes/game-config';
+import { Dictionary, GameConfig } from '@app/classes/game-config';
 import { DURATION_INIT, MAX_USERNAME_LENGTH, MIN_USERNAME_LENGTH, RANDOM_PLAYER_NAMES } from '@app/constants';
 import { GameManagerService } from '@app/services/game-manager.service';
 
@@ -13,13 +13,8 @@ import { GameManagerService } from '@app/services/game-manager.service';
 })
 export class GameConfigPageComponent implements DoCheck {
     // Form Builder Group to collect data from inputs then assign it to gameConfig instance using ngModel in the template
-    // eslint-disable-next-line no-invalid-this
-    gameConfigForm = this.formBuilder.group({
-        name: ['', [Validators.required, Validators.minLength(MIN_USERNAME_LENGTH), Validators.maxLength(MAX_USERNAME_LENGTH)]],
-        duration: [DURATION_INIT],
-        bonusEnabled: [false],
-        dictionary: ['', Validators.required],
-    });
+    gameConfigForm: FormGroup;
+    dictionary: string;
 
     randomPlayerNameIndex: number;
     randomPlayerName: string;
@@ -32,6 +27,14 @@ export class GameConfigPageComponent implements DoCheck {
     ) {
         this.randomPlayerNameIndex = Math.floor(Math.random() * RANDOM_PLAYER_NAMES.length);
         this.randomPlayerName = RANDOM_PLAYER_NAMES[this.randomPlayerNameIndex];
+
+        this.gameConfigForm = this.formBuilder.group({
+            name: ['', [Validators.required, Validators.minLength(MIN_USERNAME_LENGTH), Validators.maxLength(MAX_USERNAME_LENGTH)]],
+            duration: [DURATION_INIT],
+            bonusEnabled: [false],
+            dictionary: [Dictionary.French, Validators.required],
+        });
+        this.dictionary = 'Francais';
     }
 
     ngDoCheck() {
