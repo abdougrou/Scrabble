@@ -90,16 +90,23 @@ export const SYSTEM_NAME = 'Système';
 export const COMMAND_RESULT = 'Commande';
 
 // Grid Service
-export const BASE_LETTER_FONT_SIZE = 25;
-export const BASE_INDEX_FONT_SIZE = 14;
+export const MAX_FONT_MULTIPLIER = 2;
+export const MIN_FONT_MULTIPLIER = 0;
+export const POINT_FONT_SIZE_MODIFIER = 1;
+export const LETTER_FONT_SIZE_MODIFIER = 2;
+export const BASE_LETTER_FONT_SIZE = 24;
+export const BASE_POINT_FONT_SIZE = 11;
 export const CANVAS_WIDTH = 600;
 export const CANVAS_HEIGHT = 600;
-export const GRID_WIDTH = 575;
-export const GRID_HEIGHT = 575;
+export const GRID_WIDTH = 563.5;
+export const GRID_HEIGHT = 563.5;
 export const NUMBER_LINES = 16;
 export const GRID_SIZE = 15;
 export const STEP = CANVAS_HEIGHT / (GRID_SIZE + 1);
 export const LETTER_OFFSET = STEP / 2;
+const POINT_NUM = 5.7;
+const POINT_DENUM = 6;
+export const POINT_OFFSET = STEP * (POINT_NUM / POINT_DENUM);
 
 //  les nombres permettant de creer la fraction equivalentes au offset
 const NUM = 5;
@@ -110,6 +117,19 @@ for (let i = 0; i <= GRID_SIZE; i++) {
     COLS.push(i);
 }
 export const ROWS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'];
+export const TILE_MULTIPLIER = {
+    l2: 2,
+    l3: 3,
+    w2: 2,
+    w3: 3,
+};
+export const TILE_TYPE = {
+    noBonus: 0,
+    letterX2: 1,
+    letterX3: 2,
+    wordX2: 3,
+    wordX3: 4,
+};
 export const TILE_COLORS = {
     tile: '#F5EACD',
     l2: '#b9e7e4',
