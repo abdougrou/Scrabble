@@ -146,6 +146,7 @@ export class GameManagerService {
         //  Check if it's the player's turn to play
         if (this.players.current !== player) return "Ce n'est pas votre tour";
 
+        //  Get the tiles and coordinates associated to the word
         const tileCoords: TileCoords[] = this.getTileCoords(word, coordStr, vertical);
 
         //  Compare the letter positions to the tiles on the board
@@ -154,14 +155,19 @@ export class GameManagerService {
         //  Check that the command will lead to tiles being placed
         if (tileCoords.length === 0) return 'Le mot que vous tentez de placer se trouve deja sur le tableau';
 
+        //  Manage blank letters
         const tilesToRetrieve: TileCoords[] = [];
         const tilesToPlace: TileCoords[] = [];
         for (const tileCoord of tileCoords) {
             if (tileCoord.tile.letter === tileCoord.tile.letter.toUpperCase()) {
                 tilesToRetrieve.push({ tile: { letter: '*', points: tileCoord.tile.points }, coords: tileCoord.coords });
                 tilesToPlace.push({ tile: { letter: tileCoord.tile.letter.toLowerCase(), points: tileCoord.tile.points }, coords: tileCoord.coords });
+            } else {
+                tilesToRetrieve.push(tileCoord);
+                tilesToPlace.push(tileCoord);
             }
         }
+
         //  Check that the easel contains all the needed letters
         if (!player.easel.containsTiles(this.getStringToRetrieve(tilesToRetrieve))) return 'Votre chevalet ne contient pas les lettres nécessaires';
 
@@ -245,9 +251,7 @@ export class GameManagerService {
                     isCenter = true;
                 }
             }
-            if (!isCenter) {
-                return false;
-            }
+            return isCenter;
         }
         // If size of tiles to be placed is inferior to size of word we can determine the word touches another one
         if (tilesToPlace.length < word.length) {
