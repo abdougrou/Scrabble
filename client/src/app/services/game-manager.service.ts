@@ -89,14 +89,12 @@ export class GameManagerService {
     }
 
     playVirtualPlayer() {
-        // console.log("Bot's turn");
         const vPlayer: VirtualPlayer = this.players.current as VirtualPlayer;
-        // console.log(vPlayer.easel.toString());
         vPlayer.play().subscribe((action) => {
             switch (action) {
                 case PlayAction.ExchangeTiles: {
                     const tilesToExchange = vPlayer.exchange();
-                    console.log(`Bot exchanges the letters ${tilesToExchange}`);
+                    // TODO message chatbox
                     if (this.reserve.isExchangePossible(tilesToExchange.length)) this.exchangeTiles(tilesToExchange, vPlayer);
                     else this.skipTurn();
                     break;
@@ -109,15 +107,17 @@ export class GameManagerService {
                     //     }`,
                     // );
                     if (placeTilesInfo.word.length > 0) {
-                        console.log(placeTilesInfo);
-                        console.log(this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer));
+                        // console.log(placeTilesInfo);
+                        // console.log(this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer));
+                        this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer);
                     } else {
                         this.skipTurn();
                     }
                     break;
                 }
                 default:
-                    console.log('Bot skipped his turn');
+                    // console.log('Bot skipped his turn');
+                    // TODO message chatbox
                     this.skipTurn();
                     break;
             }

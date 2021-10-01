@@ -5,7 +5,6 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { Easel } from './easel';
 import { PlayAction, Player } from './player';
-//  import { BoardWord, PlaceTilesInfo } from './tile';
 import { BoardWord, PlaceTilesInfo } from './tile';
 
 const PASS_CHANCE = 0.1;
@@ -63,8 +62,6 @@ export class VirtualPlayer implements Player {
         }
 
         const chosen: BoardWord = validPermutations[0];
-        console.log(validPermutations);
-        console.log(chosen);
         if (chosen) {
             return {
                 word: chosen.word,
