@@ -11,7 +11,7 @@ import { GridService } from '@app/services/grid.service';
     styleUrls: ['./player-info.component.scss'],
 })
 export class PlayerInfoComponent implements DoCheck {
-    size: number = 0;
+    fontSize: number = 0;
     players: Player[] = [];
     mainPlayerName: string;
     isEnded: boolean;
@@ -42,18 +42,18 @@ export class PlayerInfoComponent implements DoCheck {
 
     // TODO implement code for font size manipulation
     increaseFont() {
-        if (this.size < MAX_FONT_MULTIPLIER) {
-            this.size++;
+        if (this.fontSize < MAX_FONT_MULTIPLIER) {
+            this.fontSize++;
             this.gridService.clearBoard();
-            this.gridService.drawBoard(this.size);
+            this.gridService.drawBoard(this.fontSize);
         }
     }
 
     decreaseFont() {
-        if (this.size > MIN_FONT_MULTIPLIER) {
-            this.size--;
+        if (this.fontSize > MIN_FONT_MULTIPLIER) {
+            this.fontSize--;
             this.gridService.clearBoard();
-            this.gridService.drawBoard(this.size);
+            this.gridService.drawBoard(this.fontSize);
         }
     }
 

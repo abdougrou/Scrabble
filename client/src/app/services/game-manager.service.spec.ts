@@ -5,7 +5,7 @@ import { Easel } from '@app/classes/easel';
 import { Dictionary, GameMode } from '@app/classes/game-config';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { CANVAS_HEIGHT, CANVAS_WIDTH } from '@app/constants';
+import { CANVAS_HEIGHT, CANVAS_WIDTH, MAX_SKIP_COUNT } from '@app/constants';
 import { BoardService } from './board.service';
 import { GameManagerService } from './game-manager.service';
 import { GridService } from './grid.service';
@@ -65,6 +65,39 @@ describe('GameManagerService', () => {
     });
     it('should be created', () => {
         expect(service).toBeTruthy();
+    });
+
+    it('should get reserve count', () => {
+        expect(service.reserveCount).toEqual(reserveService.tileCount);
+    });
+
+    it("shoud add tiles to player's easel", () => {
+        const oldEaselSize = playerService.players[0].easel.count;
+        service.giveTiles(playerService.players[0], 2);
+        expect(playerService.players[0].easel.count).toEqual(oldEaselSize + 2);
+    });
+
+    it('should skip turn', () => {
+        const oldSkipCounter = playerService.skipCounter;
+        service.skipTurn();
+        expect(playerService.skipCounter).toEqual(oldSkipCounter + 1);
+    });
+
+    it('should end game if skip counter equal six', () => {
+        playerService.skipCounter = MAX_SKIP_COUNT - 1;
+        service.skipTurn();
+        expect(service.isEnded).toEqual(true);
+    });
+
+    it('should end game', () => {
+        service.endGame();
+        expect(service.endGameMessage).toContain('La partie est terminée');
+        expect(service.isEnded).toEqual(true);
+    });
+
+    it('reset should clear board', () => {
+        service.reset();
+        expect(boardService.board).toHaveSize(0);
     });
 
     it('activateDebug should give the expected results', () => {

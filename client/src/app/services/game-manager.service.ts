@@ -55,9 +55,6 @@ export class GameManagerService {
 
         this.initializePlayers([this.mainPlayerName, this.enemyPlayerName]);
         this.players.mainPlayer = this.players.getPlayerByName(this.mainPlayerName);
-        this.endGameMessage = `La partie est terminée! <br>
-            chevalet de ${this.players.getPlayerByName(this.mainPlayerName).name}: ${this.players.getPlayerByName(this.mainPlayerName).easel}.<br>
-            chevalet de ${this.players.getPlayerByName(this.enemyPlayerName).name}: ${this.players.getPlayerByName(this.enemyPlayerName).easel}.`;
 
         this.startTimer();
     }
@@ -83,9 +80,6 @@ export class GameManagerService {
 
     switchPlayers() {
         this.players.switchPlayers();
-        if (this.subscription === undefined) {
-            return;
-        }
         this.subscription.unsubscribe();
         this.currentTurnDurationLeft = this.turnDuration;
         this.startTimer();
@@ -138,13 +132,11 @@ export class GameManagerService {
         }
     }
 
-    // TODO skipCounter to reset when place or exchange command excuted
-    resetSkipCounter() {
-        this.players.skipCounter = 0;
-    }
-
     // TODO implement stopTimer() to end the game after 6 skipTurn
     endGame() {
+        this.endGameMessage = `La partie est terminée! <br>
+            chevalet de ${this.players.getPlayerByName(this.mainPlayerName).name}: ${this.players.getPlayerByName(this.mainPlayerName).easel}.<br>
+            chevalet de ${this.players.getPlayerByName(this.enemyPlayerName).name}: ${this.players.getPlayerByName(this.enemyPlayerName).easel}.`;
         this.stopTimer();
         this.isEnded = true;
     }
@@ -155,6 +147,7 @@ export class GameManagerService {
 
     reset() {
         this.stopTimer();
+        this.board.board = new Map();
         this.players.clear();
     }
 
@@ -185,7 +178,10 @@ export class GameManagerService {
             message = `${player.name} a échangé les lettres ${tiles}`;
             successfulExchange = true;
         }
-        if (successfulExchange) this.switchPlayers();
+        if (successfulExchange) {
+            this.players.skipCounter = 0;
+            this.switchPlayers();
+        }
         return message;
     }
 
@@ -258,6 +254,7 @@ export class GameManagerService {
         }
         this.gridService.drawBoard();
         this.switchPlayers();
+        this.players.skipCounter = 0;
         return `${player.name} a placé le mot "${word}" ${vertical ? 'verticale' : 'horizontale'}ment à la case ${coordStr}`;
     }
 
