@@ -18,21 +18,28 @@ import {
 export class CalculatePointsService {
     constructor(private boardService: BoardService) {}
 
+    /**
+     * @param newTiles an array of tileCoords that we would like to place on the board
+     * @returns the points that the player would gain by placing these tiles
+     */
     calculatePoints(newTiles: TileCoords[]): number {
         let points = 0;
+
         if (newTiles.length === TILE_NUM_BONUS) {
             points += FULL_EASEL_BONUS;
         }
-        const boardCopy: Map<number, Tile> = new Map(this.boardService.board);
-        for (const aTile of newTiles) {
-            boardCopy.delete(this.boardService.coordToKey(aTile.coords));
-        }
 
         //  Find the words that were on the board before the addition of the new tiles
-        const wordTilesBefore: TileCoords[][] = this.findWordTilesFromBoard(boardCopy);
+        const wordTilesBefore: TileCoords[][] = this.findWordTilesFromBoard(this.boardService.board);
+
+        //  Place the new tiles on a temporary copy of the board
+        const boardCopy: Map<number, Tile> = new Map(this.boardService.board);
+        for (const aTile of newTiles) {
+            boardCopy.set(this.boardService.coordToKey(aTile.coords), aTile.tile);
+        }
 
         //  Find the words on the board with the addition of the new tiles
-        let wordTilesAfter: TileCoords[][] = this.findWordTilesFromBoard(this.boardService.board);
+        let wordTilesAfter: TileCoords[][] = this.findWordTilesFromBoard(boardCopy);
 
         //  Keep only the words that were formed by the addition of the new tiles
         for (const wordA of wordTilesAfter) {
@@ -52,6 +59,11 @@ export class CalculatePointsService {
         return points;
     }
 
+    /**
+     * @param tiles all the tiles forming the new word
+     * @param newTiles the tiles in the word that have been placed this turn
+     * @returns the points associated to this word
+     */
     calculateWordPoint(tiles: TileCoords[], newTiles: TileCoords[]): number {
         let points = 0;
         let numNewPinkTiles = 0;
@@ -96,6 +108,11 @@ export class CalculatePointsService {
         return points;
     }
 
+    /**
+     * @param tile a tile currently on the board
+     * @param newTiles an array representing all the tiles placed on this turn
+     * @returns wether or not the tile has been placed on this turn
+     */
     private isNewTile(tile: TileCoords, newTiles: TileCoords[]): boolean {
         for (const aTile of newTiles) {
             if (JSON.stringify(tile) === JSON.stringify(aTile)) {
@@ -105,10 +122,18 @@ export class CalculatePointsService {
         return false;
     }
 
+    /**
+     * @param tile a tile currently on the board
+     * @returns the multiplier of that tile
+     */
     private getTileMultiplier(tile: TileCoords): number {
         return BOARD_MULTIPLIER[tile.coords.y][tile.coords.x];
     }
 
+    /**
+     * @param board a map of tile values and number keys
+     * @returns an array of TileCoords array where every array contains the tileCoords of a word
+     */
     private findWordTilesFromBoard(board: Map<number, Tile>): TileCoords[][] {
         const boardWords: TileCoords[][] = [[]];
 

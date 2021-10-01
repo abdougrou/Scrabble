@@ -178,12 +178,13 @@ export class GameManagerService {
         if (this.validWordPosition(word, tilesToPlace, vertical)) {
             //  check that the word itself is valid
             //  We place the tiles on the board and give the player new tiles if the word and position are valid
+            const scoreNewTiles = this.calculatePoints.calculatePoints(tilesToPlace);
             for (const aTile of tilesToPlace) {
                 this.board.placeTile(aTile.coords, aTile.tile);
             }
             this.gridService.drawBoard();
             if (this.wordValidation.validateWords(tilesToPlace)) {
-                player.score += this.calculatePoints.calculatePoints(tilesToPlace);
+                player.score += scoreNewTiles;
                 const numTiles = this.reserve.tileCount < tilesToPlace.length ? this.reserve.tileCount : tilesToPlace.length;
                 player.easel.addTiles(this.reserve.getLetters(numTiles));
             } else {
@@ -213,7 +214,7 @@ export class GameManagerService {
         return `${player.name} a placé le mot "${word}" ${vertical ? 'verticale' : 'horizentale'}ment à la case ${coordStr}`;
     }
 
-    wordCollides(tileCoords: TileCoords[]) {
+    wordCollides(tileCoords: TileCoords[]): boolean {
         for (let i = tileCoords.length - 1; i >= 0; i--) {
             if (this.board.getTile(tileCoords[i].coords)) {
                 if ((this.board.getTile(tileCoords[i].coords) as Tile).letter === tileCoords[i].tile.letter) {

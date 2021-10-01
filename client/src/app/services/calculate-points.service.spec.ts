@@ -22,15 +22,6 @@ describe('CalculatePoitnsService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('should add a the bonus points if the player placed 7 tiles in one turn', () => {
-        const BONUS_NUM = 7;
-        const BONUS_POINTS = 50;
-        for (let i = 0; i < BONUS_NUM; i++) {
-            newTiles.push({ tile: { letter: 'a', points: 0 }, coords: { x: i, y: 0 } });
-        }
-        expect(service.calculatePoints(newTiles)).toBe(BONUS_POINTS);
-    });
-
     //  Testing calculateWordPoint function
     it('should correctly calculate the points for a word containing tiles on light blue and red squares', () => {
         const tiles: TileCoords[] = new Array();
@@ -64,7 +55,6 @@ describe('CalculatePoitnsService', () => {
         const numTiles = 7;
         for (let i = 0; i < numTiles; i++) {
             newTiles.push({ tile: { letter: 'a', points: 1 }, coords: { x: i, y: 0 } });
-            boardService.placeTile({ x: i, y: 0 }, { letter: 'a', points: 1 });
         }
         //  5 tiles of 1 point on blank squares, 1 on red and 1 on light blue
         //  50 + (6 * 1 + 2) * 3 = 50 + 8 * 3 = 74
@@ -76,7 +66,6 @@ describe('CalculatePoitnsService', () => {
         const numTiles = 5;
         for (let i = GRID_SIZE - numTiles; i < GRID_SIZE; i++) {
             newTiles.push({ tile: { letter: 'a', points: 1 }, coords: { x: 0, y: i } });
-            boardService.placeTile({ x: 0, y: i }, { letter: 'a', points: 1 });
         }
         //  Tiles that should not be taken into account
         for (let i = GRID_SIZE - numTiles; i < GRID_SIZE; i++) {

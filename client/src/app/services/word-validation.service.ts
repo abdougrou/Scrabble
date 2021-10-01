@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 //  import { BoardWord, Tile, TileCoords } from '@app/classes/tile';
-import { Tile, TileCoords } from '@app/classes/tile';
+import { BoardWord, Tile, TileCoords } from '@app/classes/tile';
 import { GRID_SIZE } from '@app/constants';
 import { BoardService } from './board.service';
 
@@ -75,6 +75,90 @@ export class WordValidationService {
         return true;
     }
 
+    getPossibleWords(tiles: Tile[]): BoardWord[] {
+        const possibleWords: BoardWord[] = [];
+        const tileMap: Map<string, Tile> = new Map();
+        tiles.forEach((tile) => {
+            tileMap.set(tile.letter, tile);
+        });
+        const easelTilesStr = Array.from(tileMap.keys()).filter((str) => str !== '*');
+        const possibleEaselPermutations: string[] = this.getTilePermutations(easelTilesStr);
+        for (const possibleWord of possibleEaselPermutations) {
+            for (let i = 0; i < GRID_SIZE; i++) {
+                for (let j = 0; j < GRID_SIZE; j++) {
+                    const boardWordH: BoardWord = { word: '', tileCoords: [], vertical: false, points: 0 };
+
+                    // Horizontal
+                    let offset = 0;
+                    for (let x = 0; x < GRID_SIZE; x++) {
+                        const tile: Tile | undefined = this.boardService.getTile({ x: i + x + offset, y: j });
+                        if (tile) {
+                            boardWordH.word += tile.letter;
+                            offset++;
+                            x--;
+                        } else {
+                            if (x < possibleWord.length) {
+                                boardWordH.word += possibleWord[x];
+                                boardWordH.tileCoords.push({
+                                    tile: tileMap.get(possibleWord[x]) as Tile,
+                                    coords: {
+                                        x: i + x + offset,
+                                        y: j,
+                                    },
+                                });
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    if (this.noLoneTile(boardWordH.tileCoords) && boardWordH.word.length > 1) possibleWords.push(boardWordH);
+
+                    const boardWordV: BoardWord = { word: '', tileCoords: [], vertical: false, points: 0 };
+                    // Vertical
+                    offset = 0;
+                    for (let x = 0; x < GRID_SIZE; x++) {
+                        const tile: Tile | undefined = this.boardService.getTile({ x: i, y: j + x + offset });
+                        if (tile) {
+                            boardWordV.word += tile.letter;
+                            offset++;
+                            x--;
+                        } else {
+                            if (x < possibleWord.length) {
+                                boardWordV.word += possibleWord[x];
+                                boardWordV.tileCoords.push({
+                                    tile: tileMap.get(possibleWord[x]) as Tile,
+                                    coords: {
+                                        x: i + x + offset,
+                                        y: j,
+                                    },
+                                });
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    if (this.noLoneTile(boardWordV.tileCoords) && boardWordV.word.length > 1) possibleWords.push(boardWordV);
+                }
+            }
+        }
+        return possibleWords;
+    }
+
+    getTilePermutations(tiles: string[]): string[] {
+        const permutations: string[] = [];
+
+        if (tiles.length === 1) return tiles;
+        for (const k of tiles) {
+            this.getTilePermutations(tiles.join('').replace(k, '').split(''))
+                .concat('')
+                .map((subtree) => {
+                    permutations.push(k.concat(subtree));
+                });
+        }
+
+        return permutations;
+    }
+
     /**
      * @param board the board from which we want to retrieve words
      * @returns an array of strings containing all the words on the board
@@ -144,88 +228,4 @@ export class WordValidationService {
             this.dictionnary = JSON.parse(JSON.stringify(dictionnaryJson)).words;
         });
     }
-
-    // getPossibleWords(tiles: Tile[]): BoardWord[] {
-    //     const possibleWords: BoardWord[] = [];
-    //     const tileMap: Map<string, Tile> = new Map();
-    //     tiles.forEach((tile) => {
-    //         tileMap.set(tile.letter, tile);
-    //     });
-    //     const easelTilesStr = Array.from(tileMap.keys()).filter((str) => str !== '*');
-    //     const possibleEaselPermutations: string[] = this.getTilePermutations(easelTilesStr);
-    //     for (const possibleWord of possibleEaselPermutations) {
-    //         for (let i = 0; i < BOARD_SIZE; i++) {
-    //             for (let j = 0; j < BOARD_SIZE; j++) {
-    //                 const boardWordH: BoardWord = { word: '', tileCoords: [], vertical: false, points: 0 };
-
-    //                 // Horizontal
-    //                 let offset = 0;
-    //                 for (let x = 0; x < BOARD_SIZE; x++) {
-    //                     const tile: Tile | undefined = this.boardService.getTile({ x: i + x + offset, y: j });
-    //                     if (tile) {
-    //                         boardWordH.word += tile.letter;
-    //                         offset++;
-    //                         x--;
-    //                     } else {
-    //                         if (x < possibleWord.length) {
-    //                             boardWordH.word += possibleWord[x];
-    //                             boardWordH.tileCoords.push({
-    //                                 tile: tileMap.get(possibleWord[x]) as Tile,
-    //                                 coords: {
-    //                                     x: i + x + offset,
-    //                                     y: j,
-    //                                 },
-    //                             });
-    //                         } else {
-    //                             break;
-    //                         }
-    //                     }
-    //                 }
-    //                 if (this.noLoneTile(boardWordH.tileCoords) && boardWordH.word.length > 1) possibleWords.push(boardWordH);
-
-    //                 const boardWordV: BoardWord = { word: '', tileCoords: [], vertical: false, points: 0 };
-    //                 // Vertical
-    //                 offset = 0;
-    //                 for (let x = 0; x < BOARD_SIZE; x++) {
-    //                     const tile: Tile | undefined = this.boardService.getTile({ x: i, y: j + x + offset });
-    //                     if (tile) {
-    //                         boardWordV.word += tile.letter;
-    //                         offset++;
-    //                         x--;
-    //                     } else {
-    //                         if (x < possibleWord.length) {
-    //                             boardWordV.word += possibleWord[x];
-    //                             boardWordV.tileCoords.push({
-    //                                 tile: tileMap.get(possibleWord[x]) as Tile,
-    //                                 coords: {
-    //                                     x: i + x + offset,
-    //                                     y: j,
-    //                                 },
-    //                             });
-    //                         } else {
-    //                             break;
-    //                         }
-    //                     }
-    //                 }
-    //                 if (this.noLoneTile(boardWordV.tileCoords) && boardWordV.word.length > 1) possibleWords.push(boardWordV);
-    //             }
-    //         }
-    //     }
-    //     return possibleWords;
-    // }
-
-    // getTilePermutations(tiles: string[]): string[] {
-    //     const permutations: string[] = [];
-
-    //     if (tiles.length === 1) return tiles;
-    //     for (const k of tiles) {
-    //         this.getTilePermutations(tiles.join('').replace(k, '').split(''))
-    //             .concat('')
-    //             .map((subtree) => {
-    //                 permutations.push(k.concat(subtree));
-    //             });
-    //     }
-
-    //     return permutations;
-    // }
 }
