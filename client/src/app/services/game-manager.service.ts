@@ -5,14 +5,14 @@ import { PlayAction, Player } from '@app/classes/player';
 import { PlaceTilesInfo, Tile, TileCoords } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
 import { VirtualPlayer } from '@app/classes/virtual-player';
-import { GRID_SIZE, LETTER_POINTS, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
-import { timer } from 'rxjs';
+import { Subscription, timer } from 'rxjs';
+import { GRID_SIZE, LETTER_POINTS, MAX_SKIP_COUNT, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
 import { BoardService } from './board.service';
 import { CalculatePointsService } from './calculate-points.service';
-import { GridService } from './grid.service';
 import { PlayerService } from './player.service';
 import { ReserveService } from './reserve.service';
 import { WordValidationService } from './word-validation.service';
+import { GridService } from './grid.service';
 
 @Injectable({
     providedIn: 'root',
@@ -20,13 +20,17 @@ import { WordValidationService } from './word-validation.service';
 export class GameManagerService {
     turnDuration: number;
     currentTurnDurationLeft: number;
+    subscription: Subscription;
     randomPlayerNameIndex: number;
-    debug: boolean = false;
-    isMultiPlayer: boolean;
     isFirstTurn: boolean = true;
-
     mainPlayerName: string;
     enemyPlayerName: string;
+
+    isEnded: boolean;
+    endGameMessage: string = '';
+
+    debug: boolean = false;
+    isMultiPlayer: boolean;
 
     constructor(
         private board: BoardService,
@@ -37,27 +41,31 @@ export class GameManagerService {
         private calculatePoints: CalculatePointsService,
     ) {}
 
+    get reserveCount() {
+        return this.reserve.tileCount;
+    }
+
     initialize(gameConfig: GameConfig) {
         this.mainPlayerName = gameConfig.playerName1;
         this.enemyPlayerName = gameConfig.playerName2;
         this.isMultiPlayer = gameConfig.isMultiPlayer;
         this.turnDuration = gameConfig.duration;
         this.currentTurnDurationLeft = gameConfig.duration;
+        this.isEnded = false;
 
-        this.initializePlayers([gameConfig.playerName1, gameConfig.playerName2]);
-        this.players.mainPlayer = this.players.players[0];
+        this.initializePlayers([this.mainPlayerName, this.enemyPlayerName]);
+        this.players.mainPlayer = this.players.getPlayerByName(this.mainPlayerName);
 
         this.startTimer();
     }
 
     startTimer() {
         const source = timer(0, SECOND_MD);
-        source.subscribe((seconds) => {
+        this.subscription = source.subscribe((seconds) => {
             this.currentTurnDurationLeft = this.turnDuration - (seconds % this.turnDuration) - 1;
             if (this.currentTurnDurationLeft === 0) {
                 this.currentTurnDurationLeft = this.turnDuration;
                 this.switchPlayers();
-
                 // TODO send player switch event
             }
         });
@@ -68,12 +76,14 @@ export class GameManagerService {
         if (this.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getLetters(STARTING_TILE_AMOUNT));
         else this.players.createVirtualPlayer(playerNames[1], this.reserve.getLetters(STARTING_TILE_AMOUNT));
         // if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
-        // this.switchPlayers();
     }
 
     switchPlayers() {
         this.players.switchPlayers();
+        this.subscription.unsubscribe();
         this.currentTurnDurationLeft = this.turnDuration;
+        this.startTimer();
+        // Send player switch event
 
         if (this.players.current instanceof VirtualPlayer) this.playVirtualPlayer();
     }
@@ -114,15 +124,30 @@ export class GameManagerService {
     }
 
     skipTurn() {
-        this.players.incrementSkipCounter();
-        this.switchPlayers();
+        this.players.skipCounter++;
+        if (this.players.skipCounter >= MAX_SKIP_COUNT) {
+            this.endGame();
+        } else {
+            this.switchPlayers();
+        }
     }
 
-    // TODO skipCounter to reset when place or exchange command excuted
-
     // TODO implement stopTimer() to end the game after 6 skipTurn
+    endGame() {
+        this.endGameMessage = `La partie est terminée! <br>
+            chevalet de ${this.players.getPlayerByName(this.mainPlayerName).name}: ${this.players.getPlayerByName(this.mainPlayerName).easel}.<br>
+            chevalet de ${this.players.getPlayerByName(this.enemyPlayerName).name}: ${this.players.getPlayerByName(this.enemyPlayerName).easel}.`;
+        this.stopTimer();
+        this.isEnded = true;
+    }
+
+    stopTimer() {
+        this.subscription.unsubscribe();
+    }
 
     reset() {
+        this.stopTimer();
+        this.board.board = new Map();
         this.players.clear();
     }
 
@@ -153,7 +178,10 @@ export class GameManagerService {
             message = `${player.name} a échangé les lettres ${tiles}`;
             successfulExchange = true;
         }
-        if (successfulExchange) this.switchPlayers();
+        if (successfulExchange) {
+            this.players.skipCounter = 0;
+            this.switchPlayers();
+        }
         return message;
     }
 
@@ -226,6 +254,7 @@ export class GameManagerService {
         }
         this.gridService.drawBoard();
         this.switchPlayers();
+        this.players.skipCounter = 0;
         return `${player.name} a placé le mot "${word}" ${vertical ? 'verticale' : 'horizontale'}ment à la case ${coordStr}`;
     }
 

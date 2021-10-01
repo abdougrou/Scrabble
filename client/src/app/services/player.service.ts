@@ -38,10 +38,6 @@ export class PlayerService {
         else return this.players[0];
     }
 
-    incrementSkipCounter() {
-        this.skipCounter++;
-    }
-
     clear() {
         this.players = [];
     }

@@ -3,25 +3,16 @@ p {
     padding: 0;
 }
 
-.container {
-    display: grid;
-    position: relative;
-    margin-bottom: 20px;
-}
-
 .chat-container {
-    display: grid;
-    border: 1px solid rgb(197, 197, 197);
     width: 100%;
-    overflow-y: hidden;
-    grid-template-rows: 200px auto;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
 }
 
 .chat-body {
     height: 100%;
-    width: 430px;
-    overflow-y: auto;
-    overflow-x: hidden;
     display: flex;
     flex-direction: column-reverse;
     overflow-wrap: break-word;
@@ -29,23 +20,24 @@ p {
     background-color: rgb(204, 166, 116);
 }
 
+.message-box {
+    width: 100%;
+    display:flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+button {
+    background-color: burlywood;
+}
+
 #default-message {
     margin: 0%;
 }
 
-.message-box {
-    position: relative;
-    bottom: 0;
-    align-self: bottom;
-}
 #message-input {
-    width: 97%;
+    width: 98%;
     height: 25px;
-    padding: 4px;
     font-size: 12px;
-    margin-left: 2px;
-    border-radius: 5px;
-    border: 1px solid grey;
     outline: none;
     background-color: burlywood;
 }

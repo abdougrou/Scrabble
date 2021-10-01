@@ -95,7 +95,7 @@ export const MAX_FONT_MULTIPLIER = 2;
 export const MIN_FONT_MULTIPLIER = 0;
 export const POINT_FONT_SIZE_MODIFIER = 1;
 export const LETTER_FONT_SIZE_MODIFIER = 2;
-export const BASE_LETTER_FONT_SIZE = 24;
+export const BASE_LETTER_FONT_SIZE = 22;
 export const BASE_POINT_FONT_SIZE = 11;
 export const CANVAS_WIDTH = 600;
 export const CANVAS_HEIGHT = 600;
@@ -114,7 +114,7 @@ const NUM = 5;
 const DENUM = 6;
 export const INDEX_OFFSET = STEP * (NUM / DENUM);
 export const COLS: number[] = [];
-for (let i = 0; i <= GRID_SIZE; i++) {
+for (let i = 1; i <= GRID_SIZE; i++) {
     COLS.push(i);
 }
 export const ROWS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'];

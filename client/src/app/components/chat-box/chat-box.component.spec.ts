@@ -57,7 +57,7 @@ describe('ChatBoxComponent', () => {
         const systemHtmlMessage = 'Système : system Message';
         component.showMessage(systemMessage);
         expect(parentMessage?.innerText).toEqual(systemHtmlMessage);
-        expect(parentMessage?.innerHTML.split('color: ')[1].split(';')[0]).toEqual('red');
+        expect(parentMessage?.innerHTML.split('color: ')[1].split(';')[0]).toEqual('rgb(207, 0, 15)');
     });
 
     it('should add main player message in gray in the chat', () => {
