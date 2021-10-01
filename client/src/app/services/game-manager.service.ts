@@ -1,10 +1,11 @@
+/* eslint-disable complexity */
 import { Injectable } from '@angular/core';
 import { GameConfig } from '@app/classes/game-config';
 import { PlayAction, Player } from '@app/classes/player';
-import { PlaceTilesInfo, LetterCoords, Tile, TileCoords } from '@app/classes/tile';
+import { PlaceTilesInfo, Tile, TileCoords } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
 import { VirtualPlayer } from '@app/classes/virtual-player';
-import { GRID_SIZE, RANDOM_PLAYER_NAMES, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
+import { GRID_SIZE, RANDOM_PLAYER_NAMES, SECOND_MD, STARTING_TILE_AMOUNT, LETTER_POINTS } from '@app/constants';
 import { timer } from 'rxjs';
 import { BoardService } from './board.service';
 import { CalculatePointsService } from './calculate-points.service';
@@ -142,37 +143,30 @@ export class GameManagerService {
     }
 
     placeTiles(word: string, coordStr: string, vertical: boolean, player: Player): string {
-        //  Transform coordinates from string to vec2
-        const coord: Vec2 = this.getCoordinateFromString(coordStr);
-
         //  Check if it's the player's turn to play
         if (this.players.current !== player) return "Ce n'est pas votre tour";
 
-        //  Find the coordinates of each letter of the word
-        const lettersToRetrieve: LetterCoords[] = new Array();
-        for (let i = 0; i < word.length; i++) {
-            const letterCoord: Vec2 = vertical ? { x: coord.x, y: coord.y + i } : { x: coord.x + i, y: coord.y };
-            const currentLetter = word.charAt(i);
-            if (currentLetter === currentLetter.toUpperCase()) {
-                lettersToRetrieve.push({ letter: '*', coords: letterCoord });
-            } else {
-                lettersToRetrieve.push({ letter: currentLetter, coords: letterCoord });
-            }
-        }
+        const tileCoords: TileCoords[] = this.getTileCoords(word, coordStr, vertical);
 
         //  Compare the letter positions to the tiles on the board
-        if (this.lettersCollideWithBoardTiles(lettersToRetrieve)) return 'Commande impossible a realise';
+        if (this.wordCollides(tileCoords)) return 'Commande impossible a realise';
 
         //  Check that the command will lead to tiles being placed
-        if (lettersToRetrieve.length === 0) return 'Le mot que vous tentez de placer se trouve deja sur le tableau';
+        if (tileCoords.length === 0) return 'Le mot que vous tentez de placer se trouve deja sur le tableau';
 
+        const tilesToRetrieve: TileCoords[] = [];
+        const tilesToPlace: TileCoords[] = [];
+        for (const tileCoord of tileCoords) {
+            if (tileCoord.tile.letter === tileCoord.tile.letter.toUpperCase()) {
+                tilesToRetrieve.push({ tile: { letter: '*', points: tileCoord.tile.points }, coords: tileCoord.coords });
+                tilesToPlace.push({ tile: { letter: tileCoord.tile.letter.toLowerCase(), points: tileCoord.tile.points }, coords: tileCoord.coords });
+            }
+        }
         //  Check that the easel contains all the needed letters
-        if (!player.easel.containsTiles(this.getStringToRetrieve(lettersToRetrieve))) return 'Votre chevalet ne contient pas les lettres nécessaires';
+        if (!player.easel.containsTiles(this.getStringToRetrieve(tilesToRetrieve))) return 'Votre chevalet ne contient pas les lettres nécessaires';
 
-        //  Retrieve the correct tiles from the player's easel
-        const retrievedTiles: Tile[] = player.easel.getTiles(this.getStringToRetrieve(lettersToRetrieve));
-        //  Get the tiles to be placed on the board
-        const tilesToPlace: TileCoords[] = this.getTilesToPlace(lettersToRetrieve, retrievedTiles, word, coord, vertical);
+        //  Retrieve the tiles from the player's easel
+        const retrievedTiles: Tile[] = player.easel.getTiles(this.getStringToRetrieve(tilesToRetrieve));
 
         //  Check that the position of the word is valid
         if (this.validWordPosition(word, tilesToPlace, vertical)) {
@@ -187,20 +181,7 @@ export class GameManagerService {
                 const numTiles = this.reserve.tileCount < tilesToPlace.length ? this.reserve.tileCount : tilesToPlace.length;
                 player.easel.addTiles(this.reserve.getLetters(numTiles));
             } else {
-                //  we give the player his tiles back if the position of his word is invalid
-                let tilesPlacedBack = false;
-                const source = timer(0, SECOND_MD);
-                source.subscribe((seconds) => {
-                    const counter = 3 - (seconds % 3) - 1;
-                    if (counter === 0 && !tilesPlacedBack) {
-                        player.easel.addTiles(retrievedTiles);
-                        for (const aTile of tilesToPlace) {
-                            this.board.board.delete(this.board.coordToKey(aTile.coords));
-                        }
-                        this.gridService.drawBoard();
-                        tilesPlacedBack = true;
-                    }
-                });
+                player.easel.addTiles(retrievedTiles);
                 return 'le mot nest pas dans le dictionnaire';
             }
         } else {
@@ -213,20 +194,11 @@ export class GameManagerService {
         return `${player.name} a placé le mot "${word}" ${vertical ? 'verticale' : 'horizentale'}ment à la case ${coordStr}`;
     }
 
-    getCoordinateFromString(coordStr: string): Vec2 {
-        const CHAR_OFFSET = 'a'.charCodeAt(0);
-        const coordX = parseInt(coordStr.substr(1, coordStr.length), 10) - 1;
-        const coordY = coordStr[0].toLowerCase().charCodeAt(0) - CHAR_OFFSET;
-        return { x: coordX, y: coordY } as Vec2;
-    }
-
-    private lettersCollideWithBoardTiles(lettersToRetrieve: LetterCoords[]): boolean {
-        //  We iterate backwards in order to splice elements without having to break the loop
-        for (let i = lettersToRetrieve.length - 1; i >= 0; i--) {
-            const boardTile: Tile | undefined = this.board.getTile(lettersToRetrieve[i].coords);
-            if (boardTile !== undefined) {
-                if (boardTile.letter === lettersToRetrieve[i].letter) {
-                    lettersToRetrieve.splice(i, 1);
+    wordCollides(tileCoords: TileCoords[]) {
+        for (let i = tileCoords.length - 1; i >= 0; i--) {
+            if (this.board.getTile(tileCoords[i].coords)) {
+                if (this.board.getTile(tileCoords[i].coords)?.letter === tileCoords[i].tile.letter) {
+                    tileCoords.splice(i, 1);
                 } else {
                     return true;
                 }
@@ -234,25 +206,28 @@ export class GameManagerService {
         }
         return false;
     }
-    private getTilesToPlace(lettersToRetrieve: LetterCoords[], retrievedTiles: Tile[], word: string, coord: Vec2, vertical: boolean): TileCoords[] {
-        const tilesToPlace: TileCoords[] = new Array();
-        for (let i = 0; i < retrievedTiles.length; i++) {
-            if (retrievedTiles[i].letter !== '*') {
-                tilesToPlace.push({ tile: retrievedTiles[i], coords: lettersToRetrieve[i].coords });
-            } else {
-                const index = vertical ? lettersToRetrieve[i].coords.y - coord.y : lettersToRetrieve[i].coords.x - coord.x;
-                tilesToPlace.push({
-                    tile: { letter: word.charAt(index).toLowerCase(), points: retrievedTiles[i].points },
-                    coords: lettersToRetrieve[i].coords,
-                });
-            }
+
+    getTileCoords(word: string, coordStr: string, vertical: boolean): TileCoords[] {
+        const coords = this.getCoordinateFromString(coordStr);
+        const tileCoords: TileCoords[] = [];
+        for (let i = 0; i < word.length; i++) {
+            const coord: Vec2 = vertical ? { x: coords.x, y: coords.y + i } : { x: coords.x + i, y: coords.y };
+            tileCoords.push({ tile: { letter: word.charAt(i), points: LETTER_POINTS.get(word.charAt(i)) as number }, coords: coord });
         }
-        return tilesToPlace;
+        return tileCoords;
     }
-    private getStringToRetrieve(lettersToRetrieve: LetterCoords[]): string {
+
+    getCoordinateFromString(coordStr: string): Vec2 {
+        const CHAR_OFFSET = 'a'.charCodeAt(0);
+        const coordX = parseInt(coordStr.substr(1, coordStr.length), 10) - 1;
+        const coordY = coordStr[0].toLowerCase().charCodeAt(0) - CHAR_OFFSET;
+        return { x: coordX, y: coordY } as Vec2;
+    }
+
+    private getStringToRetrieve(tileCoords: TileCoords[]): string {
         let stringToRetrieve = '';
-        for (const aLetter of lettersToRetrieve) {
-            stringToRetrieve += aLetter.letter;
+        for (const aLetter of tileCoords) {
+            stringToRetrieve += aLetter.tile.letter;
         }
         return stringToRetrieve;
     }
@@ -270,7 +245,9 @@ export class GameManagerService {
                     isCenter = true;
                 }
             }
-            return isCenter;
+            if (!isCenter) {
+                return false;
+            }
         }
         // If size of tiles to be placed is inferior to size of word we can determine the word touches another one
         if (tilesToPlace.length < word.length) {

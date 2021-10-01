@@ -21,6 +21,7 @@ describe('CalculatePoitnsService', () => {
     it('should be created', () => {
         expect(service).toBeTruthy();
     });
+
     it('should add a the bonus points if the player placed 7 tiles in one turn', () => {
         const BONUS_NUM = 7;
         const BONUS_POINTS = 50;
@@ -29,6 +30,7 @@ describe('CalculatePoitnsService', () => {
         }
         expect(service.calculatePoints(newTiles)).toBe(BONUS_POINTS);
     });
+
     //  Testing calculateWordPoint function
     it('should correctly calculate the points for a word containing tiles on light blue and red squares', () => {
         const tiles: TileCoords[] = new Array();
@@ -43,6 +45,7 @@ describe('CalculatePoitnsService', () => {
         const points = 48;
         expect(service.calculateWordPoint(tiles, newTiles)).toBe(points);
     });
+
     it('should correctly calculate the points for a word containing tiles on dark blue and pink squares', () => {
         const tiles: TileCoords[] = new Array();
         const numTiles = 15;
@@ -56,6 +59,7 @@ describe('CalculatePoitnsService', () => {
         const points = 34;
         expect(service.calculateWordPoint(tiles, newTiles)).toBe(points);
     });
+
     it('should add the 50 point bonus if the player places 7 tiles', () => {
         const numTiles = 7;
         for (let i = 0; i < numTiles; i++) {
@@ -67,6 +71,7 @@ describe('CalculatePoitnsService', () => {
         const points = 74;
         expect(service.calculatePoints(newTiles)).toBe(points);
     });
+
     it('should not add the points of existing words to the points of the new words', () => {
         const numTiles = 5;
         for (let i = GRID_SIZE - numTiles; i < GRID_SIZE; i++) {
