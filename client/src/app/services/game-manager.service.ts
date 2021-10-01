@@ -214,7 +214,7 @@ export class GameManagerService {
             return 'placement de mot invalide';
         }
         this.gridService.drawBoard();
-        this.skipTurn();
+        this.switchPlayers();
         return `${player.name} a placé le mot "${word}" ${vertical ? 'verticale' : 'horizentale'}ment à la case ${coordStr}`;
     }
 
