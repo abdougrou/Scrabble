@@ -42,7 +42,7 @@ export class PlayerInfoComponent {
         if (this.playerService.skipCounter === MAX_SKIP_COUNT - 1) {
             // TODO replace this block of code
             // eslint-disable-next-line no-console
-            console.log('Game Normally Ended');
+            // console.log('Game Normally Ended');
         }
         this.gameManager.skipTurn();
     }
