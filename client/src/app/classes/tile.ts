@@ -14,3 +14,8 @@ export interface TileCoords {
     tile: Tile;
     coords: Vec2;
 }
+
+export interface LetterCoords {
+    letter: string;
+    coords: Vec2;
+}

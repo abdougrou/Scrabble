@@ -25,32 +25,32 @@ export const COMMANDS = {
 // Reserve constants
 export const MIN_EXCHANGE_RESERVE_COUNT = 7;
 export const FULL_RESERVE_COUNT = 102;
-export const CLASSIC_RESERVE = `A,9,1
-B,2,3
-C,2,3
-D,3,2
-E,15,1
-F,2,4
-G,2,2
-H,2,4
-I,8,1
-J,1,8
-K,1,10
-L,5,1
-M,3,2
-N,6,1
-O,6,1
-P,2,3
-Q,1,8
-R,6,1
-S,6,1
-T,6,1
-U,6,1
-V,2,4
-W,1,10
-X,1,10
-Y,1,10
-Z,1,10
+export const CLASSIC_RESERVE = `a,9,1
+b,2,3
+c,2,3
+d,3,2
+e,15,1
+f,2,4
+g,2,2
+h,2,4
+i,8,1
+j,1,8
+k,1,10
+l,5,1
+m,3,2
+n,6,1
+o,6,1
+p,2,3
+q,1,8
+r,6,1
+s,6,1
+t,6,1
+u,6,1
+v,2,4
+w,1,10
+x,1,10
+y,1,10
+z,1,10
 *,2,0`;
 
 // System name
@@ -113,3 +113,10 @@ export const BOARD_MULTIPLIER = [
     [0, 3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 3, 0],
     [4, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 4],
 ];
+
+export const WRONG_PLAYER = "Ce n'est pas votre tour";
+export const EMPTY_RESERVE = "Il n'y a pas assez de tuiles dans la réserve";
+export const NOT_ON_EASEL = 'Votre chevalet ne contient pas les lettres nécessaires';
+export const WORD_EXISTS = 'Le mot que vous tentez de placer se trouve deja sur le tableau';
+export const NOT_IN_DICTIONNARY = 'le mot nest pas dans le dictionnaire';
+export const INVALID_WORD_POSITION = 'la position de votre mot nest pas valide';
