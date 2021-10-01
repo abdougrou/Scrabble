@@ -161,7 +161,7 @@ export class GameManagerService {
         for (const tileCoord of tileCoords) {
             if (tileCoord.tile.letter === tileCoord.tile.letter.toUpperCase()) {
                 tilesToRetrieve.push({ tile: { letter: '*', points: tileCoord.tile.points }, coords: tileCoord.coords });
-                tilesToPlace.push({ tile: { letter: tileCoord.tile.letter.toLowerCase(), points: tileCoord.tile.points }, coords: tileCoord.coords });
+                tilesToPlace.push({ tile: { letter: tileCoord.tile.letter.toLowerCase(), points: 0 }, coords: tileCoord.coords });
             } else {
                 tilesToRetrieve.push(tileCoord);
                 tilesToPlace.push(tileCoord);
@@ -187,7 +187,20 @@ export class GameManagerService {
                 const numTiles = this.reserve.tileCount < tilesToPlace.length ? this.reserve.tileCount : tilesToPlace.length;
                 player.easel.addTiles(this.reserve.getLetters(numTiles));
             } else {
-                player.easel.addTiles(retrievedTiles);
+                let tilesPlacedBack = false;
+                const source = timer(0, SECOND_MD);
+                source.subscribe((seconds) => {
+                    const counter = 3 - (seconds % 3) - 1;
+                    if (counter === 0 && !tilesPlacedBack) {
+                        player.easel.addTiles(retrievedTiles);
+                        for (const aTile of tilesToPlace) {
+                            this.board.board.delete(this.board.coordToKey(aTile.coords));
+                        }
+                        this.gridService.drawBoard();
+                        tilesPlacedBack = true;
+                    }
+                });
+                this.gridService.drawBoard();
                 return 'le mot nest pas dans le dictionnaire';
             }
         } else {
@@ -203,7 +216,7 @@ export class GameManagerService {
     wordCollides(tileCoords: TileCoords[]) {
         for (let i = tileCoords.length - 1; i >= 0; i--) {
             if (this.board.getTile(tileCoords[i].coords)) {
-                if (this.board.getTile(tileCoords[i].coords)?.letter === tileCoords[i].tile.letter) {
+                if ((this.board.getTile(tileCoords[i].coords) as Tile).letter === tileCoords[i].tile.letter) {
                     tileCoords.splice(i, 1);
                 } else {
                     return true;
