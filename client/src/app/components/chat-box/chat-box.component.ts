@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, ElementRef, HostListener, Renderer2, ViewChild } from '@angular/core';
 import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
 import { SYSTEM_NAME } from '@app/constants';
@@ -12,6 +12,10 @@ import { PlayerService } from '@app/services/player.service';
     styleUrls: ['./chat-box.component.scss'],
 })
 export class ChatBoxComponent {
+    @ViewChild('messageInput') messageInput: ElementRef<HTMLInputElement>;
+    @ViewChild('defaultMessage') defaultMessage: ElementRef<HTMLElement>;
+    @ViewChild('chatBody') chatBody: ElementRef<HTMLElement>;
+
     buttonPressed = '';
     message = '';
     chatMessage: ChatMessage = { user: '', body: '' };
@@ -19,7 +23,12 @@ export class ChatBoxComponent {
     mainPlayerName: string;
     enemyPlayerName: string;
 
-    constructor(public gameManager: GameManagerService, public playerService: PlayerService, public commandHandler: CommandHandlerService) {
+    constructor(
+        public gameManager: GameManagerService,
+        public playerService: PlayerService,
+        public commandHandler: CommandHandlerService,
+        private renderer: Renderer2,
+    ) {
         this.mainPlayerName = this.gameManager.mainPlayerName;
         this.enemyPlayerName = this.gameManager.enemyPlayerName;
     }
@@ -30,19 +39,18 @@ export class ChatBoxComponent {
     }
 
     submitInput(): void {
-        const input = document.getElementById('message-input') as HTMLInputElement;
-        if (input && input.value !== '') {
+        if (this.messageInput.nativeElement.value !== '') {
             this.chatMessage.user = this.mainPlayerName;
             this.chatMessage.body = this.message;
             this.player = this.getPlayerByName(this.chatMessage.user);
             this.showMessage(this.chatMessage);
             this.showMessage(this.checkCommand(this.chatMessage, this.player));
-            input.value = '';
+            this.messageInput.nativeElement.value = '';
         }
     }
 
     showMessage(message: ChatMessage): void {
-        const newMessage = document.createElement('p');
+        const newMessage: HTMLParagraphElement = this.renderer.createElement('p');
         switch (message.user) {
             case SYSTEM_NAME:
                 newMessage.innerHTML = `${message.user} : ${message.body}`;
@@ -61,18 +69,12 @@ export class ChatBoxComponent {
                 newMessage.style.color = 'gray';
                 break;
         }
-        const parentMessage = document.getElementById('default-message');
-        if (parentMessage) {
-            parentMessage.appendChild(newMessage);
-        }
+        this.defaultMessage.nativeElement.appendChild(newMessage);
         this.scrollDown();
     }
 
     scrollDown(): void {
-        const chatBody = document.getElementById('messages');
-        if (chatBody) {
-            chatBody.scrollTop = 0;
-        }
+        this.chatBody.nativeElement.scrollTop = 0;
     }
 
     checkCommand(message: ChatMessage, player: Player): ChatMessage {
