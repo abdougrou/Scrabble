@@ -1,9 +1,11 @@
+import { CalculatePointsService } from '@app/services/calculate-points.service';
 import { WordValidationService } from '@app/services/word-validation.service';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { Easel } from './easel';
 import { PlayAction, Player } from './player';
-import { BoardWord, PlaceTilesInfo } from './tile';
+//  import { BoardWord, PlaceTilesInfo } from './tile';
+import { PlaceTilesInfo } from './tile';
 
 // const PASS_CHANCE = 0.1;
 // const EXCHANGE_CHANCE = 0.2;
@@ -38,21 +40,21 @@ export class VirtualPlayer implements Player {
     }
 
     // eslint-disable-next-line no-unused-vars
-    place(validation: WordValidationService): PlaceTilesInfo {
-        const possiblePermutations: BoardWord[] = validation.getPossibleWords(this.easel.tiles);
-        console.log(possiblePermutations);
-        const validPermutations: BoardWord[] = [];
+    place(validation: WordValidationService, calculatePoints: CalculatePointsService): PlaceTilesInfo {
+        // const possiblePermutations: BoardWord[] = validation.getPossibleWords(this.easel.tiles);
+        // //  console.log(possiblePermutations);
+        // const validPermutations: BoardWord[] = [];
 
-        for (const permutation of possiblePermutations) {
-            if (validPermutations.length > 3) break;
-            if (permutation.tileCoords.length > 2) {
-                const points = validation.validateWords(permutation.tileCoords);
-                console.log(points);
-                if (points > 0) {
-                    validPermutations.push(permutation);
-                }
-            }
-        }
+        // for (const permutation of possiblePermutations) {
+        //     if (validPermutations.length > 3) break;
+        //     if (permutation.tileCoords.length > 2) {
+        //         const points = calculatePoints.calculatePoints(permutation.tileCoords);
+        //         //  console.log(points);
+        //         if (points > 0) {
+        //             validPermutations.push(permutation);
+        //         }
+        //     }
+        // }
         // console.log(validPermutations);
 
         return {

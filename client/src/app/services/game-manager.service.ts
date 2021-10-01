@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 import { Injectable } from '@angular/core';
 import { GameConfig } from '@app/classes/game-config';
 import { PlayAction, Player } from '@app/classes/player';
@@ -8,6 +7,7 @@ import { VirtualPlayer } from '@app/classes/virtual-player';
 import { GRID_SIZE, RANDOM_PLAYER_NAMES, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
 import { timer } from 'rxjs';
 import { BoardService } from './board.service';
+import { CalculatePointsService } from './calculate-points.service';
 import { GridService } from './grid.service';
 import { PlayerService } from './player.service';
 import { ReserveService } from './reserve.service';
@@ -32,6 +32,7 @@ export class GameManagerService {
         private players: PlayerService,
         private gridService: GridService,
         private wordValidation: WordValidationService,
+        private calculatePoints: CalculatePointsService,
     ) {}
 
     initialize(gameConfig: GameConfig) {
@@ -76,29 +77,29 @@ export class GameManagerService {
     }
 
     playVirtualPlayer() {
-        console.log("Bot's turn");
+        // console.log("Bot's turn");
         const vPlayer: VirtualPlayer = this.players.current as VirtualPlayer;
-        console.log(vPlayer.easel.toString());
+        // console.log(vPlayer.easel.toString());
         vPlayer.play().subscribe((action) => {
             switch (action) {
                 case PlayAction.ExchangeTiles: {
                     const tilesToExchange = vPlayer.exchange();
-                    console.log(`Bot exchanges the letters ${tilesToExchange}`);
+                    // console.log(`Bot exchanges the letters ${tilesToExchange}`);
                     if (this.reserve.isExchangePossible(tilesToExchange.length)) this.exchangeTiles(tilesToExchange, vPlayer);
                     break;
                 }
                 case PlayAction.PlaceTiles: {
-                    const placeTilesInfo: PlaceTilesInfo = vPlayer.place(this.wordValidation);
-                    console.log(
-                        `Bot places the word "${placeTilesInfo.word}" ${placeTilesInfo.vertical ? 'vertical' : 'horizontal'}ly at ${
-                            placeTilesInfo.coordStr
-                        }`,
-                    );
+                    const placeTilesInfo: PlaceTilesInfo = vPlayer.place(this.wordValidation, this.calculatePoints);
+                    // console.log(
+                    //     `Bot places the word "${placeTilesInfo.word}" ${placeTilesInfo.vertical ? 'vertical' : 'horizontal'}ly at ${
+                    //         placeTilesInfo.coordStr
+                    //     }`,
+                    // );
                     this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer);
                     break;
                 }
                 default:
-                    console.log('Bot skipped his turn');
+                    //  console.log('Bot skipped his turn');
                     this.skipTurn();
                     break;
             }
@@ -176,16 +177,30 @@ export class GameManagerService {
         //  Check that the position of the word is valid
         if (this.validWordPosition(word, tilesToPlace, vertical)) {
             //  check that the word itself is valid
+            //  We place the tiles on the board and give the player new tiles if the word and position are valid
+            for (const aTile of tilesToPlace) {
+                this.board.placeTile(aTile.coords, aTile.tile);
+            }
+            this.gridService.drawBoard();
             if (this.wordValidation.validateWords(tilesToPlace)) {
-                //  We place the tiles on the board and give the player new tiles if the word and position are valid
-                for (const aTile of tilesToPlace) {
-                    this.board.placeTile(aTile.coords, aTile.tile);
-                }
+                player.score += this.calculatePoints.calculatePoints(tilesToPlace);
                 const numTiles = this.reserve.tileCount < tilesToPlace.length ? this.reserve.tileCount : tilesToPlace.length;
                 player.easel.addTiles(this.reserve.getLetters(numTiles));
             } else {
                 //  we give the player his tiles back if the position of his word is invalid
-                player.easel.addTiles(retrievedTiles);
+                let tilesPlacedBack = false;
+                const source = timer(0, SECOND_MD);
+                source.subscribe((seconds) => {
+                    const counter = 3 - (seconds % 3) - 1;
+                    if (counter === 0 && !tilesPlacedBack) {
+                        player.easel.addTiles(retrievedTiles);
+                        for (const aTile of tilesToPlace) {
+                            this.board.board.delete(this.board.coordToKey(aTile.coords));
+                        }
+                        this.gridService.drawBoard();
+                        tilesPlacedBack = true;
+                    }
+                });
                 return 'le mot nest pas dans le dictionnaire';
             }
         } else {

@@ -2,142 +2,124 @@ import { HttpClient } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { TileCoords } from '@app/classes/tile';
+import { Vec2 } from '@app/classes/vec2';
 import { BoardService } from './board.service';
-import { CalculatePointsService } from './calculate-points.service';
 import { WordValidationService } from './word-validation.service';
 
 describe('WordValidationService', () => {
     let service: WordValidationService;
-    let calculatePointsService: CalculatePointsService;
     let board: BoardService;
-
+    let newTiles: TileCoords[];
     beforeEach(() => {
         board = new BoardService();
-        calculatePointsService = new CalculatePointsService();
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule],
-            providers: [
-                { provide: BoardService, useValue: board },
-                { provide: CalculatePointsService, useValue: calculatePointsService },
-            ],
+            providers: [{ provide: BoardService, useValue: board }],
         });
         service = TestBed.inject(WordValidationService);
         TestBed.inject(HttpClient);
-        service.dictionnary = ['aas', 'test', 'hey'];
+        service.dictionnary = ['word', 'test', 'hey'];
+        newTiles = [];
     });
 
     it('should be created', () => {
         expect(service).toBeTruthy();
     });
+
     it('should validate a correct word', () => {
-        const newTiles: TileCoords[] = [
-            { tile: { letter: 'a', points: 4 }, coords: { x: 12, y: 2 } },
-            { tile: { letter: 'a', points: 4 }, coords: { x: 13, y: 2 } },
-            { tile: { letter: 's', points: 4 }, coords: { x: 14, y: 2 } },
-            { tile: { letter: 'h', points: 4 }, coords: { x: 3, y: 2 } },
-            { tile: { letter: 'e', points: 4 }, coords: { x: 4, y: 2 } },
-            { tile: { letter: 'y', points: 4 }, coords: { x: 5, y: 2 } },
-        ];
-        board.placeTile({ x: 4, y: 5 }, { letter: 'a', points: 4 });
-        board.placeTile({ x: 4, y: 6 }, { letter: 'a', points: 4 });
-        board.placeTile({ x: 4, y: 7 }, { letter: 's', points: 4 });
+        const word = 'hey';
+        const initialCoord: Vec2 = { x: 3, y: 2 };
+        for (let i = 0; i < word.length; i++) {
+            board.placeTile({ x: initialCoord.x + i, y: initialCoord.y }, { letter: word.charAt(i), points: 0 });
+            newTiles.push({ tile: { letter: word.charAt(i), points: 0 }, coords: { x: initialCoord.x + i, y: initialCoord.y } });
+        }
+        expect(service.validateWords(newTiles)).toBeTrue();
+    });
 
-        expect(service.validateWords(newTiles)).toBeGreaterThan(0);
-    });
-    it('should not validate a word placed outside the board', () => {
-        const newTiles: TileCoords[] = [
-            { tile: { letter: 'a', points: 0 }, coords: { x: 13, y: 2 } },
-            { tile: { letter: 'a', points: 2 }, coords: { x: 14, y: 2 } },
-            { tile: { letter: 's', points: 2 }, coords: { x: 15, y: 2 } },
-        ];
-        expect(service.validateWords(newTiles)).toEqual(0);
-    });
     it('should not validate a word that isnt in the dictionnary', () => {
-        const newTiles: TileCoords[] = [
-            { tile: { letter: 't', points: 0 }, coords: { x: 2, y: 11 } },
-            { tile: { letter: 'e', points: 2 }, coords: { x: 2, y: 12 } },
-            { tile: { letter: 'e', points: 2 }, coords: { x: 2, y: 13 } },
-            { tile: { letter: 't', points: 0 }, coords: { x: 2, y: 14 } },
-        ];
-
-        expect(service.validateWords(newTiles)).toEqual(0);
+        const word = 'fake';
+        const initialCoord: Vec2 = { x: 3, y: 2 };
+        for (let i = 0; i < word.length; i++) {
+            board.placeTile({ x: initialCoord.x + i, y: initialCoord.y }, { letter: word.charAt(i), points: 0 });
+            newTiles.push({ tile: { letter: word.charAt(i), points: 0 }, coords: { x: initialCoord.x + i, y: initialCoord.y } });
+        }
+        expect(service.validateWords(newTiles)).toBeFalse();
     });
+
     it('should remove accents', () => {
-        const newTiles: TileCoords[] = [
+        newTiles = [
             { tile: { letter: 't', points: 0 }, coords: { x: 2, y: 11 } },
             { tile: { letter: 'é', points: 2 }, coords: { x: 2, y: 12 } },
             { tile: { letter: 's', points: 2 }, coords: { x: 2, y: 13 } },
             { tile: { letter: 't', points: 0 }, coords: { x: 2, y: 14 } },
         ];
-        service.validateWords(newTiles);
-        const result = 'e';
-        expect(newTiles[1].tile.letter).toBe(result);
+        for (const newTile of newTiles) {
+            board.placeTile(newTile.coords, newTile.tile);
+        }
+        expect(service.validateWords(newTiles)).toBeTrue();
     });
+
     it('should return false for invalid letters', () => {
-        const newTiles: TileCoords[] = [
-            { tile: { letter: 'a', points: 0 }, coords: { x: 1, y: 2 } },
-            { tile: { letter: 'a', points: 2 }, coords: { x: 2, y: 2 } },
-            { tile: { letter: 's', points: 2 }, coords: { x: 3, y: 2 } },
-            { tile: { letter: '-', points: 2 }, coords: { x: 4, y: 2 } },
-        ];
-        expect(service.validateWords(newTiles)).toEqual(0);
+        service.dictionnary.push('hey-');
+        const word = 'hey-';
+        const initialCoord: Vec2 = { x: 3, y: 2 };
+        for (let i = 0; i < word.length; i++) {
+            board.placeTile({ x: initialCoord.x + i, y: initialCoord.y }, { letter: word.charAt(i), points: 0 });
+            newTiles.push({ tile: { letter: word.charAt(i), points: 0 }, coords: { x: initialCoord.x + i, y: initialCoord.y } });
+        }
+        expect(service.validateWords(newTiles)).toBeFalse();
     });
-    it('should not validate a word where tiles overlap', () => {
-        const newTiles: TileCoords[] = [
-            { tile: { letter: 'a', points: 0 }, coords: { x: 1, y: 2 } },
-            { tile: { letter: 'a', points: 2 }, coords: { x: 2, y: 2 } },
-            { tile: { letter: 's', points: 2 }, coords: { x: 3, y: 2 } },
-            { tile: { letter: 'a', points: 2 }, coords: { x: 1, y: 2 } },
-        ];
-        expect(service.validateWords(newTiles)).toEqual(0);
-    });
-    it('should return true when all the new tiles have adjacent tiles', () => {
-        const newTiles: TileCoords[] = [
-            { tile: { letter: 'a', points: 0 }, coords: { x: 1, y: 2 } },
-            { tile: { letter: 'b', points: 2 }, coords: { x: 2, y: 2 } },
-            { tile: { letter: 'b', points: 2 }, coords: { x: 3, y: 2 } },
-            { tile: { letter: 'b', points: 2 }, coords: { x: 2, y: 1 } },
-            { tile: { letter: 'b', points: 2 }, coords: { x: 2, y: 3 } },
-        ];
-        board.placeTile({ x: 1, y: 2 }, newTiles[0].tile);
-        board.placeTile({ x: 2, y: 2 }, newTiles[1].tile);
-        board.placeTile({ x: 3, y: 2 }, newTiles[2].tile);
-        board.placeTile({ x: 2, y: 1 }, newTiles[3].tile);
-        board.placeTile({ x: 2, y: 3 }, newTiles[4].tile);
 
-        expect(service.noLoneTile(newTiles)).toBe(true);
+    it('should return false if the player has placed a tile with no adjacent tiles', () => {
+        service.dictionnary.push('b');
+        newTiles = [
+            { tile: { letter: 'h', points: 0 }, coords: { x: 1, y: 2 } },
+            { tile: { letter: 'e', points: 2 }, coords: { x: 2, y: 2 } },
+            { tile: { letter: 'y', points: 2 }, coords: { x: 3, y: 2 } },
+            { tile: { letter: 'b', points: 2 }, coords: { x: 10, y: 10 } },
+        ];
+        for (const tile of newTiles) {
+            board.placeTile(tile.coords, tile.tile);
+        }
+        expect(service.validateWords(newTiles)).toBeFalse();
     });
-    // it('should return false when at least one new tile has no adjacent tiles', () => {
-    //     const newTiles: TileCoords[] = [
-    //         { tile: { letter: 'a', points: 0 }, coords: { x: 1, y: 2 } },
-    //         { tile: { letter: 'a', points: 2 }, coords: { x: 2, y: 2 } },
-    //         { tile: { letter: 's', points: 2 }, coords: { x: 3, y: 2 } },
-    //         { tile: { letter: 'c', points: 2 }, coords: { x: 6, y: 6 } },
-    //     ];
-    //     expect(service.validateWords(newTiles, player)).toBe(false);
-    // });
+
     it('should validate a word made up of old and new tiles', () => {
-        const newTiles: TileCoords[] = [
-            { tile: { letter: 'a', points: 4 }, coords: { x: 12, y: 2 } },
-            { tile: { letter: 's', points: 2 }, coords: { x: 14, y: 2 } },
+        newTiles = [
+            { tile: { letter: 'h', points: 4 }, coords: { x: 11, y: 2 } },
+            { tile: { letter: 'e', points: 2 }, coords: { x: 12, y: 2 } },
         ];
-        board.placeTile({ x: 13, y: 2 }, { letter: 'a', points: 4 });
-
-        console.log(service.validateWords(newTiles));
-        expect(service.validateWords(newTiles)).toBeGreaterThan(0);
+        for (const tile of newTiles) {
+            board.placeTile(tile.coords, tile.tile);
+        }
+        board.placeTile({ x: 13, y: 2 }, { letter: 'y', points: 4 });
+        expect(service.validateWords(newTiles)).toBeTrue();
     });
-
-    // it('test', () => {
-    //     const tiles: Tile[] = [
-    //         { letter: 'a', points: 0 },
-    //         { letter: 'b', points: 0 },
-    //         { letter: 'c', points: 0 },
-    //     ];
-    //     board.placeTile({ x: 7, y: 7 }, { letter: '*', points: 0 });
-    //     board.placeTile({ x: 8, y: 7 }, { letter: '*', points: 0 });
-    //     board.placeTile({ x: 10, y: 7 }, { letter: '*', points: 0 });
-    //     // const possibilities: BoardWord[] = service.getPossibleWords(tiles);
-
-    //     expect(service).toBeTruthy();
-    // });
+    it('should only validate a word created after adding the new tiles', () => {
+        newTiles = [
+            { tile: { letter: 'h', points: 4 }, coords: { x: 12, y: 2 } },
+            { tile: { letter: 'e', points: 2 }, coords: { x: 13, y: 2 } },
+            { tile: { letter: 'y', points: 2 }, coords: { x: 14, y: 2 } },
+        ];
+        for (const tile of newTiles) {
+            board.placeTile(tile.coords, tile.tile);
+        }
+        board.placeTile({ x: 1, y: 2 }, { letter: 'y', points: 4 });
+        board.placeTile({ x: 2, y: 2 }, { letter: 'y', points: 4 });
+        expect(service.validateWords(newTiles)).toBeTrue();
+    });
+    it('should validate horizontal and vertical words', () => {
+        newTiles = [
+            { tile: { letter: 'h', points: 4 }, coords: { x: 6, y: 7 } },
+            { tile: { letter: 'e', points: 2 }, coords: { x: 7, y: 7 } },
+            { tile: { letter: 'y', points: 2 }, coords: { x: 8, y: 7 } },
+            { tile: { letter: 't', points: 4 }, coords: { x: 7, y: 6 } },
+            { tile: { letter: 's', points: 2 }, coords: { x: 7, y: 8 } },
+            { tile: { letter: 't', points: 2 }, coords: { x: 7, y: 9 } },
+        ];
+        for (const tile of newTiles) {
+            board.placeTile(tile.coords, tile.tile);
+        }
+        expect(service.validateWords(newTiles)).toBeTrue();
+    });
 });

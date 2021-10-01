@@ -1,40 +1,52 @@
 import { Injectable } from '@angular/core';
-import { TileCoords } from '@app/classes/tile';
-//  r=red, e=empty, l=lightblue, p=pink, d=darkblue,
-const COLORS: string[] = [
-    'reeleeereeeleer',
-    'epeeedeeedeeepe',
-    'eepeeeleleeepee',
-    'leepeeeleeepeel',
-    'eeeepeeeeepeeee',
-    'edeeedeeedeeede',
-    'eeleeeleleeelee',
-    'reeleeepeeeleer',
-    'eeleeeleleeelee',
-    'edeeedeeedeeede',
-    'eeeepeeeeepeeee',
-    'leepeeeleeepeel',
-    'eepeeeleleeepee',
-    'epeeedeeedeeepe',
-    'reeleeereeeleer',
-];
-const TILE_NUM_BONUS = 7;
-const FULL_EASEL_BONUS = 50;
-const LIGHT_BLUE_MULTIPLIER = 2;
-const DARK_BLUE_MULTIPLIER = 3;
-const PINK_MULTIPLIER = 2;
-const RED_MULTIPLIER = 3;
+import { Tile, TileCoords } from '@app/classes/tile';
+import { BoardService } from './board.service';
+import {
+    GRID_SIZE,
+    TILE_NUM_BONUS,
+    FULL_EASEL_BONUS,
+    LIGHT_BLUE_MULTIPLIER,
+    DARK_BLUE_MULTIPLIER,
+    PINK_MULTIPLIER,
+    RED_MULTIPLIER,
+    BOARD_MULTIPLIER,
+} from '@app/constants';
 
 @Injectable({
     providedIn: 'root',
 })
 export class CalculatePointsService {
-    calculatePoints(tileCoords: TileCoords[][], newTiles: TileCoords[]): number {
+    constructor(private boardService: BoardService) {}
+
+    calculatePoints(newTiles: TileCoords[]): number {
         let points = 0;
         if (newTiles.length === TILE_NUM_BONUS) {
             points += FULL_EASEL_BONUS;
         }
-        for (const tile of tileCoords) {
+        const boardCopy: Map<number, Tile> = new Map(this.boardService.board);
+        for (const aTile of newTiles) {
+            boardCopy.delete(this.boardService.coordToKey(aTile.coords));
+        }
+
+        //  Find the words that were on the board before the addition of the new tiles
+        const wordTilesBefore: TileCoords[][] = this.findWordTilesFromBoard(boardCopy);
+
+        //  Find the words on the board with the addition of the new tiles
+        let wordTilesAfter: TileCoords[][] = this.findWordTilesFromBoard(this.boardService.board);
+
+        //  Keep only the words that were formed by the addition of the new tiles
+        for (const wordA of wordTilesAfter) {
+            for (const wordB of wordTilesBefore) {
+                if (wordA.length === wordB.length) {
+                    for (let i = 0; i < wordA.length; i++) {
+                        if (wordA[i].coords.x === wordB[i].coords.x && wordA[i].coords.y === wordB[i].coords.y) {
+                            wordTilesAfter = wordTilesAfter.filter((obj) => obj !== wordA);
+                        }
+                    }
+                }
+            }
+        }
+        for (const tile of wordTilesAfter) {
             points += this.calculateWordPoint(tile, newTiles);
         }
         return points;
@@ -44,26 +56,31 @@ export class CalculatePointsService {
         let points = 0;
         let numNewPinkTiles = 0;
         let numNewRedTiles = 0;
+        const blank = 0;
+        const lightBlue = 1;
+        const darkBlue = 2;
+        const pink = 3;
+        const red = 4;
         for (const tile of tiles) {
             if (!this.isNewTile(tile, newTiles)) {
                 points += tile.tile.points;
             } else {
-                const color = this.getTileColor(tile);
-                switch (color) {
-                    case 'e':
+                const multiplier = this.getTileMultiplier(tile);
+                switch (multiplier) {
+                    case blank:
                         points += tile.tile.points;
                         break;
-                    case 'l':
+                    case lightBlue:
                         points += LIGHT_BLUE_MULTIPLIER * tile.tile.points;
                         break;
-                    case 'd':
+                    case darkBlue:
                         points += DARK_BLUE_MULTIPLIER * tile.tile.points;
                         break;
-                    case 'p':
+                    case pink:
                         points += tile.tile.points;
                         numNewPinkTiles++;
                         break;
-                    case 'r':
+                    case red:
                         points += tile.tile.points;
                         numNewRedTiles++;
                         break;
@@ -79,7 +96,7 @@ export class CalculatePointsService {
         return points;
     }
 
-    isNewTile(tile: TileCoords, newTiles: TileCoords[]): boolean {
+    private isNewTile(tile: TileCoords, newTiles: TileCoords[]): boolean {
         for (const aTile of newTiles) {
             if (JSON.stringify(tile) === JSON.stringify(aTile)) {
                 return true;
@@ -88,7 +105,48 @@ export class CalculatePointsService {
         return false;
     }
 
-    getTileColor(tile: TileCoords): string {
-        return COLORS[tile.coords.y].charAt(tile.coords.x);
+    private getTileMultiplier(tile: TileCoords): number {
+        return BOARD_MULTIPLIER[tile.coords.y][tile.coords.x];
+    }
+
+    private findWordTilesFromBoard(board: Map<number, Tile>): TileCoords[][] {
+        const boardWords: TileCoords[][] = [[]];
+
+        //  Find all vertical words
+        for (let i = 0; i < GRID_SIZE; i++) {
+            let currentWordTiles: TileCoords[] = [];
+            for (let j = 0; j < GRID_SIZE; j++) {
+                if (board.get(this.boardService.coordToKey({ x: i, y: j }))) {
+                    currentWordTiles.push({ tile: board.get(this.boardService.coordToKey({ x: i, y: j })) as Tile, coords: { x: i, y: j } });
+                } else {
+                    if (currentWordTiles.length > 1) {
+                        boardWords.push(currentWordTiles);
+                    }
+                    currentWordTiles = [];
+                }
+            }
+
+            if (currentWordTiles.length > 1) {
+                boardWords.push(currentWordTiles);
+            }
+            currentWordTiles = [];
+
+            //  Find all horizontal words
+            for (let j = 0; j < GRID_SIZE; j++) {
+                if (board.get(this.boardService.coordToKey({ x: j, y: i }))) {
+                    currentWordTiles.push({ tile: board.get(this.boardService.coordToKey({ x: j, y: i })) as Tile, coords: { x: j, y: i } });
+                } else {
+                    if (currentWordTiles.length > 1) {
+                        boardWords.push(currentWordTiles);
+                    }
+                    currentWordTiles = [];
+                }
+            }
+
+            if (currentWordTiles.length > 1) {
+                boardWords.push(currentWordTiles);
+            }
+        }
+        return boardWords;
     }
 }

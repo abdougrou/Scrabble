@@ -32,7 +32,7 @@ describe('GameManagerService', () => {
         gridService = new GridService(boardService);
         gridService.gridContext = ctxStub;
         wordValidationMock = jasmine.createSpyObj(WordValidationService, ['validateWords']);
-        wordValidationMock.validateWords.and.returnValue(1);
+        wordValidationMock.validateWords.and.returnValue(true);
         TILES = [
             { letter: 'a', points: 0 },
             { letter: 'l', points: 0 },
@@ -177,7 +177,7 @@ describe('GameManagerService', () => {
     });
 
     it('should not place a word which is not in the dictionary', () => {
-        wordValidationMock.validateWords.and.returnValue(0);
+        wordValidationMock.validateWords.and.returnValue(false);
         const word = 'allo';
         playerService.current.easel = new Easel(TILES);
         expect(service.placeTiles(word, 'h8v', true, playerService.current)).toBe('le mot nest pas dans le dictionnaire');
