@@ -1,10 +1,11 @@
 <div class="container">
     <div class="chat-container">
-        <div class="chat-body" id="messages">
-            <p id="default-message"></p>
+        <div #chatBody class="chat-body" id="messages">
+            <p #defaultMessage id="default-message"></p>
         </div>
         <div class="message-box">
             <input
+                #messageInput
                 [(ngModel)]="message"
                 type="text"
                 id="message-input"

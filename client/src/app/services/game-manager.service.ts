@@ -19,6 +19,7 @@ export class GameManagerService {
     turnDuration: number;
     currentTurnDurationLeft: number;
     randomPlayerNameIndex: number;
+    debug: boolean = false;
 
     mainPlayerName: string;
     enemyPlayerName: string;
@@ -84,6 +85,16 @@ export class GameManagerService {
 
     reset() {
         this.players.clear();
+    }
+
+    activateDebug(): string {
+        if (this.debug) {
+            this.debug = false;
+            return 'affichages de débogage désactivés';
+        } else {
+            this.debug = true;
+            return 'affichages de débogage activés';
+        }
     }
 
     exchangeTiles(tiles: string, player: Player): string {
@@ -156,7 +167,7 @@ export class GameManagerService {
             return 'placement de mot invalide';
         }
         this.gridService.drawBoard();
-        return `${player.name} a placé le mot "${word}" ${vertical ? 'verticale' : 'horizentale'}ment à la case ${coordStr}`;
+        return `${player.name} a placé le mot "${word}" ${vertical ? 'verticale' : 'horizontale'}ment à la case ${coordStr}`;
     }
 
     getCoordinateFromString(coordStr: string): Vec2 {
