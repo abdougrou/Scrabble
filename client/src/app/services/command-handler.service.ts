@@ -18,6 +18,8 @@ export class CommandHandlerService {
                 return this.place(command, player);
             case COMMANDS.pass:
                 return this.pass(command, player);
+            case COMMANDS.debug:
+                return this.debug(command);
             default:
                 return { user: SYSTEM_NAME, body: "La commande entrée n'est pas valide" } as ChatMessage;
         }
@@ -31,7 +33,7 @@ export class CommandHandlerService {
             commandResult.body = this.gameManager.exchangeTiles(command.split(' ')[1], player);
         } else {
             commandResult.user = SYSTEM_NAME;
-            commandResult.body = 'Erreur de syntaxe, pour échanger des lettres, il faut suivre le format suivant : !échanger (lettre)...';
+            commandResult.body = 'Erreur de syntaxe, pour échanger des lettres, il faut suivre le format suivant : !echanger (lettre)...';
         }
         return commandResult;
     }
@@ -62,12 +64,22 @@ export class CommandHandlerService {
             commandResult.body = `${player.name} a passer son tour`;
         } else {
             commandResult.user = SYSTEM_NAME;
-            commandResult.body = 'Erreur de syntaxe';
+            commandResult.body = 'Erreur de syntaxe, pour passer son tour, il faut suivre le format suivant : !passer';
         }
         return commandResult;
     }
 
-    // debug(): ChatMessage {
-    //     this.gameManager.debug();
-    // }
+    debug(command: string): ChatMessage {
+        const commandResult: ChatMessage = { user: '', body: '' };
+        const regex = new RegExp(/^!debug$/g);
+        if (regex.test(command)) {
+            commandResult.user = COMMAND_RESULT;
+            commandResult.body = this.gameManager.activateDebug();
+        } else {
+            commandResult.user = SYSTEM_NAME;
+            commandResult.body =
+                'Erreur de syntaxe, pour activer ou désactiver les affichages de débogage, il faut suivre le format suivant : !debug';
+        }
+        return commandResult;
+    }
 }

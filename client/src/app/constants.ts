@@ -19,6 +19,7 @@ export const COMMANDS = {
     exchange: '!echanger',
     place: '!placer',
     pass: '!passer',
+    debug: '!debug',
 };
 
 // Reserve constants

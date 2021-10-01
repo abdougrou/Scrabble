@@ -67,6 +67,13 @@ describe('GameManagerService', () => {
         expect(service).toBeTruthy();
     });
 
+    it('activateDebug should give the expected results', () => {
+        service.debug = true;
+        expect(service.activateDebug()).toEqual('affichages de débogage désactivés');
+        service.debug = false;
+        expect(service.activateDebug()).toEqual('affichages de débogage activés');
+    });
+
     it('exchangeTiles should exchange letters with reserve', () => {
         playerService.current.easel = new Easel(TILES);
         reserveService.tiles.clear();

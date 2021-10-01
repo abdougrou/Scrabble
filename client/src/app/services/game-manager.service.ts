@@ -5,7 +5,7 @@ import { PlayAction, Player } from '@app/classes/player';
 import { PlaceTilesInfo, Tile, TileCoords } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
 import { VirtualPlayer } from '@app/classes/virtual-player';
-import { GRID_SIZE, SECOND_MD, STARTING_TILE_AMOUNT, LETTER_POINTS } from '@app/constants';
+import { GRID_SIZE, LETTER_POINTS, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
 import { timer } from 'rxjs';
 import { BoardService } from './board.service';
 import { CalculatePointsService } from './calculate-points.service';
@@ -21,6 +21,7 @@ export class GameManagerService {
     turnDuration: number;
     currentTurnDurationLeft: number;
     randomPlayerNameIndex: number;
+    debug: boolean = false;
     isMultiPlayer: boolean;
     isFirstTurn: boolean = true;
 
@@ -125,6 +126,16 @@ export class GameManagerService {
         this.players.clear();
     }
 
+    activateDebug(): string {
+        if (this.debug) {
+            this.debug = false;
+            return 'affichages de débogage désactivés';
+        } else {
+            this.debug = true;
+            return 'affichages de débogage activés';
+        }
+    }
+
     exchangeTiles(tiles: string, player: Player): string {
         let successfulExchange = false;
         let message = '';
@@ -215,7 +226,7 @@ export class GameManagerService {
         }
         this.gridService.drawBoard();
         this.switchPlayers();
-        return `${player.name} a placé le mot "${word}" ${vertical ? 'verticale' : 'horizentale'}ment à la case ${coordStr}`;
+        return `${player.name} a placé le mot "${word}" ${vertical ? 'verticale' : 'horizontale'}ment à la case ${coordStr}`;
     }
 
     wordCollides(tileCoords: TileCoords[]): boolean {
