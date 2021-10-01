@@ -155,4 +155,32 @@ describe('GridService', () => {
 
         expect(spy).toHaveBeenCalledWith(0, 0, boardSize, boardSize);
     });
+
+    it('drawMultiplierText should draw a star in the middle of the board', () => {
+        const middleCoord: Vec2 = { x: 7, y: 7 };
+        const multiplierType = 'MOT';
+        const multiplier = 2;
+        const spy = spyOn(service, 'drawStarCenter').and.callThrough();
+        service.drawMultiplierText(middleCoord, multiplierType, multiplier);
+
+        expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('drawMultiplierText should draw a star in the middle of the board', () => {
+        const middleCoord: Vec2 = { x: 7, y: 7 };
+        const multiplierType = 'MOT';
+        const multiplier = 2;
+        const spy = spyOn(service, 'drawStarCenter').and.callThrough();
+        service.drawMultiplierText(middleCoord, multiplierType, multiplier);
+
+        expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('Multiplicator tiles should be drawn everywhere except the middle', () => {
+        const numberCalled = 120;
+        const spy = spyOn(ctxStub, 'fillText').and.callThrough();
+        service.drawBoard();
+
+        expect(spy).toHaveBeenCalledTimes(numberCalled);
+    });
 });
