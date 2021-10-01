@@ -4,6 +4,10 @@ import { EaselComponent } from '@app/components/easel/easel.component';
 import { PlayerService } from '@app/services/player.service';
 import { GridService } from '@app/services/grid.service';
 import { BoardService } from '@app/services/board.service';
+import { Player } from '@app/classes/player';
+import { Easel } from '@app/classes/easel';
+import { CanvasTestHelper } from '@app/classes/canvas-test-helper';
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from '@app/constants';
 
 describe('PlayAreaComponent', () => {
     let component: PlayAreaComponent;
@@ -11,11 +15,20 @@ describe('PlayAreaComponent', () => {
     let playerService: PlayerService;
     let board: BoardService;
     let grid: GridService;
+    let player: Player;
+    let ctxStub: CanvasRenderingContext2D;
 
-    beforeEach(async () => {
+    beforeEach(() => {
         board = new BoardService();
         grid = new GridService(board);
+        ctxStub = CanvasTestHelper.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT).getContext('2d') as CanvasRenderingContext2D;
+        grid.gridContext = ctxStub;
         playerService = new PlayerService();
+        player = { name: 'player', score: 0, easel: new Easel() };
+        playerService.players.push(player);
+        playerService.mainPlayer = player;
+    });
+    beforeEach(async () => {
         await TestBed.configureTestingModule({
             declarations: [PlayAreaComponent, EaselComponent],
             providers: [
@@ -24,7 +37,6 @@ describe('PlayAreaComponent', () => {
             ],
         }).compileComponents();
     });
-
     beforeEach(() => {
         fixture = TestBed.createComponent(PlayAreaComponent);
         component = fixture.componentInstance;

@@ -1,5 +1,6 @@
 import { Component, DoCheck, HostListener } from '@angular/core';
 import { ChatMessage } from '@app/classes/message';
+import { Player } from '@app/classes/player';
 import { SYSTEM_NAME } from '@app/constants';
 import { CommandHandlerService } from '@app/services/command-handler.service';
 import { GameManagerService } from '@app/services/game-manager.service';
@@ -14,8 +15,14 @@ export class ChatBoxComponent implements DoCheck {
     buttonPressed = '';
     message = '';
     chatMessage: ChatMessage = { user: '', body: '' };
+    player: Player;
+    mainPlayerName: string;
+    enemyPlayerName: string;
 
-    constructor(public gameManager: GameManagerService, public playerService: PlayerService, public commandHandler: CommandHandlerService) {}
+    constructor(public gameManager: GameManagerService, public playerService: PlayerService, public commandHandler: CommandHandlerService) {
+        this.mainPlayerName = this.gameManager.mainPlayerName;
+        this.enemyPlayerName = this.gameManager.enemyPlayerName;
+    }
 
     @HostListener('keydown', ['$event'])
     buttonDetect(event: KeyboardEvent) {
@@ -31,15 +38,12 @@ export class ChatBoxComponent implements DoCheck {
 
     submitInput(): void {
         const input = document.getElementById('message-input') as HTMLInputElement;
-        if (input === null) {
-            throw new Error('message-input error in the chatbox');
-        } else {
-            if (input.value !== '') {
-                this.chatMessage.user = this.gameManager.mainPlayerName;
-                this.chatMessage.body = this.message;
-                this.showMessage(this.chatMessage);
-                this.showMessage(this.checkCommand(this.chatMessage));
-            }
+        if (input && input.value !== '') {
+            this.chatMessage.user = this.mainPlayerName;
+            this.chatMessage.body = this.message;
+            this.player = this.getPlayerByName(this.chatMessage.user);
+            this.showMessage(this.chatMessage);
+            this.showMessage(this.checkCommand(this.chatMessage, this.player));
             input.value = '';
         }
     }
@@ -51,11 +55,11 @@ export class ChatBoxComponent implements DoCheck {
                 newMessage.innerHTML = `${message.user} : ${message.body}`;
                 newMessage.style.color = '#cf000f';
                 break;
-            case this.gameManager.mainPlayerName:
+            case this.mainPlayerName:
                 newMessage.innerHTML = `${message.user} : ${message.body}`;
                 newMessage.style.color = 'gray';
                 break;
-            case this.gameManager.enemyPlayerName:
+            case this.enemyPlayerName:
                 newMessage.innerHTML = `${message.user} : ${message.body}`;
                 newMessage.style.color = 'darkgoldenrod';
                 break;
@@ -65,9 +69,7 @@ export class ChatBoxComponent implements DoCheck {
                 break;
         }
         const parentMessage = document.getElementById('default-message');
-        if (parentMessage === null) {
-            throw new Error('the message sent can not be shown');
-        } else {
+        if (parentMessage) {
             parentMessage.appendChild(newMessage);
         }
         this.scrollDown();
@@ -75,18 +77,20 @@ export class ChatBoxComponent implements DoCheck {
 
     scrollDown(): void {
         const chatBody = document.getElementById('messages');
-        if (chatBody === null) {
-            throw new Error('can not scroll down in the chat box');
-        } else {
+        if (chatBody) {
             chatBody.scrollTop = 0;
         }
     }
 
-    checkCommand(message: ChatMessage): ChatMessage {
+    checkCommand(message: ChatMessage, player: Player): ChatMessage {
         let systemMessage: ChatMessage = { user: '', body: '' };
         if (message.body.startsWith('!')) {
-            systemMessage = this.commandHandler.handleCommand(message.body, this.playerService.getPlayerByName(message.user));
+            systemMessage = this.commandHandler.handleCommand(message.body, player);
         }
         return systemMessage;
+    }
+
+    getPlayerByName(name: string): Player {
+        return this.playerService.getPlayerByName(name);
     }
 }

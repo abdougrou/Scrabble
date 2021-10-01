@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-magic-numbers */
 // Game Config constants
 export const DURATION_INIT = 60;
 export const MAX_USERNAME_LENGTH = 20;
@@ -20,6 +19,7 @@ export const COMMANDS = {
     exchange: '!echanger',
     place: '!placer',
     pass: '!passer',
+    debug: '!debug',
 };
 
 // Reserve constants
@@ -53,6 +53,39 @@ y,1,10
 z,1,10
 *,2,0`;
 
+//  le pointage associe aux tiles
+const F_POINTS = 4;
+const J_POINTS = 8;
+const K_POINTS = 10;
+export const LETTER_POINTS: Map<string, number> = new Map<string, number>([
+    ['a', 1],
+    ['b', 3],
+    ['c', 3],
+    ['d', 2],
+    ['e', 1],
+    ['f', F_POINTS],
+    ['g', 2],
+    ['h', F_POINTS],
+    ['i', 1],
+    ['j', J_POINTS],
+    ['k', K_POINTS],
+    ['l', 1],
+    ['m', 2],
+    ['n', 1],
+    ['o', 1],
+    ['p', 3],
+    ['q', J_POINTS],
+    ['r', 1],
+    ['s', 1],
+    ['t', 1],
+    ['u', 1],
+    ['v', F_POINTS],
+    ['w', K_POINTS],
+    ['x', K_POINTS],
+    ['y', K_POINTS],
+    ['z', K_POINTS],
+    ['*', 0],
+]);
 // System name
 export const SYSTEM_NAME = 'Système';
 export const COMMAND_RESULT = 'Commande';
@@ -66,15 +99,38 @@ export const BASE_LETTER_FONT_SIZE = 22;
 export const BASE_POINT_FONT_SIZE = 11;
 export const CANVAS_WIDTH = 600;
 export const CANVAS_HEIGHT = 600;
-export const GRID_WIDTH = 575;
-export const GRID_HEIGHT = 575;
+export const GRID_WIDTH = 563.5;
+export const GRID_HEIGHT = 563.5;
 export const NUMBER_LINES = 16;
 export const GRID_SIZE = 15;
 export const STEP = CANVAS_HEIGHT / (GRID_SIZE + 1);
 export const LETTER_OFFSET = STEP / 2;
-export const POINT_OFFSET = STEP * (5.7 / 6);
-export const COLS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+const POINT_NUM = 5.7;
+const POINT_DENUM = 6;
+export const POINT_OFFSET = STEP * (POINT_NUM / POINT_DENUM);
+
+//  les nombres permettant de creer la fraction equivalentes au offset
+const NUM = 5;
+const DENUM = 6;
+export const INDEX_OFFSET = STEP * (NUM / DENUM);
+export const COLS: number[] = [];
+for (let i = 0; i <= GRID_SIZE; i++) {
+    COLS.push(i);
+}
 export const ROWS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'];
+export const TILE_MULTIPLIER = {
+    l2: 2,
+    l3: 3,
+    w2: 2,
+    w3: 3,
+};
+export const TILE_TYPE = {
+    noBonus: 0,
+    letterX2: 1,
+    letterX3: 2,
+    wordX2: 3,
+    wordX3: 4,
+};
 export const TILE_COLORS = {
     tile: '#F5EACD',
     l2: '#b9e7e4',
@@ -83,27 +139,28 @@ export const TILE_COLORS = {
     w3: '#D84141',
 };
 export const TILE_TEXT_COLOR = '#060606';
+//  the index to tiles of red colors
+const RED_MULTIPLIER_INDEX = 4;
 export const BOARD_MULTIPLIER = [
-    [4, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 4],
+    [RED_MULTIPLIER_INDEX, 0, 0, 1, 0, 0, 0, RED_MULTIPLIER_INDEX, 0, 0, 0, 1, 0, 0, RED_MULTIPLIER_INDEX],
     [0, 3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 3, 0],
     [0, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 0, 3, 0, 0],
     [1, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 1],
     [0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0],
     [0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0],
     [0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0],
-    [4, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 1, 0, 0, 4],
+    [RED_MULTIPLIER_INDEX, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 1, 0, 0, RED_MULTIPLIER_INDEX],
     [0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0],
     [0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0],
     [0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0],
     [1, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 1],
     [0, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 0, 3, 0, 0],
     [0, 3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 3, 0],
-    [4, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 4],
+    [RED_MULTIPLIER_INDEX, 0, 0, 1, 0, 0, 0, RED_MULTIPLIER_INDEX, 0, 0, 0, 1, 0, 0, RED_MULTIPLIER_INDEX],
 ];
-
-export const WRONG_PLAYER = "Ce n'est pas votre tour";
-export const EMPTY_RESERVE = "Il n'y a pas assez de tuiles dans la réserve";
-export const NOT_ON_EASEL = 'Votre chevalet ne contient pas les lettres nécessaires';
-export const WORD_EXISTS = 'Le mot que vous tentez de placer se trouve deja sur le tableau';
-export const NOT_IN_DICTIONNARY = 'le mot nest pas dans le dictionnaire';
-export const INVALID_WORD_POSITION = 'la position de votre mot nest pas valide';
+export const TILE_NUM_BONUS = 7;
+export const FULL_EASEL_BONUS = 50;
+export const LIGHT_BLUE_MULTIPLIER = 2;
+export const DARK_BLUE_MULTIPLIER = 3;
+export const PINK_MULTIPLIER = 2;
+export const RED_MULTIPLIER = 3;

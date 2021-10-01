@@ -19,7 +19,7 @@ export enum MouseButton {
     styleUrls: ['./play-area.component.scss'],
 })
 export class PlayAreaComponent implements AfterViewInit {
-    @ViewChild('canvas', { static: false }) private gridCanvas!: ElementRef<HTMLCanvasElement>;
+    @ViewChild('canvas', { static: false }) gridCanvas!: ElementRef<HTMLCanvasElement>;
 
     tiles: Tile[] = [];
     mousePosition: Vec2 = { x: 0, y: 0 };
