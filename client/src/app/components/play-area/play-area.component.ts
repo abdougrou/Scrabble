@@ -26,7 +26,9 @@ export class PlayAreaComponent implements AfterViewInit {
     buttonPressed = '';
     private canvasSize = { x: CANVAS_WIDTH, y: CANVAS_HEIGHT };
 
-    constructor(private readonly gridService: GridService, readonly playerService: PlayerService) {}
+    constructor(private readonly gridService: GridService, readonly playerService: PlayerService) {
+        this.tiles = this.playerService.mainPlayer.easel.tiles;
+    }
 
     @HostListener('keydown', ['$event'])
     buttonDetect(event: KeyboardEvent) {

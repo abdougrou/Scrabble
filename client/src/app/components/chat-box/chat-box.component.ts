@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Renderer2, ViewChild } from '@angular/core';
+import { Component, DoCheck, ElementRef, HostListener, Renderer2, ViewChild } from '@angular/core';
 import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
 import { SYSTEM_NAME } from '@app/constants';
@@ -11,7 +11,7 @@ import { PlayerService } from '@app/services/player.service';
     templateUrl: './chat-box.component.html',
     styleUrls: ['./chat-box.component.scss'],
 })
-export class ChatBoxComponent {
+export class ChatBoxComponent implements DoCheck {
     @ViewChild('messageInput') messageInput: ElementRef<HTMLInputElement>;
     @ViewChild('defaultMessage') defaultMessage: ElementRef<HTMLElement>;
     @ViewChild('chatBody') chatBody: ElementRef<HTMLElement>;
@@ -38,6 +38,13 @@ export class ChatBoxComponent {
         this.buttonPressed = event.key;
     }
 
+    ngDoCheck() {
+        if (this.gameManager.isEnded === true) {
+            const message = { user: SYSTEM_NAME, body: this.gameManager.endGameMessage } as ChatMessage;
+            this.showMessage(message);
+        }
+    }
+
     submitInput(): void {
         if (this.messageInput.nativeElement.value !== '') {
             this.chatMessage.user = this.mainPlayerName;
@@ -54,7 +61,7 @@ export class ChatBoxComponent {
         switch (message.user) {
             case SYSTEM_NAME:
                 newMessage.innerHTML = `${message.user} : ${message.body}`;
-                newMessage.style.color = 'red';
+                newMessage.style.color = '#cf000f';
                 break;
             case this.mainPlayerName:
                 newMessage.innerHTML = `${message.user} : ${message.body}`;
