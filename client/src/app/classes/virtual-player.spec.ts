@@ -1,7 +1,9 @@
 import { BoardService } from '@app/services/board.service';
 import { CalculatePointsService } from '@app/services/calculate-points.service';
 import { WordValidationService } from '@app/services/word-validation.service';
+import { BehaviorSubject } from 'rxjs';
 import { Easel } from './easel';
+import { ChatMessage } from './message';
 import { VirtualPlayer } from './virtual-player';
 
 describe('VirtualPlayer', () => {
@@ -45,7 +47,9 @@ describe('VirtualPlayer', () => {
             { letter: 'n', points: 1 },
             { letter: 'o', points: 1 },
         ]);
-        const functionReturn = virtualPlayer.place(wordValidationMock, calculatePoints, board);
+        const commandMessage: BehaviorSubject<ChatMessage> = new BehaviorSubject({ user: '', body: '' });
+        const debug = false;
+        const functionReturn = virtualPlayer.place(wordValidationMock, calculatePoints, board, commandMessage, debug);
         expect(functionReturn).toBeTruthy();
     });
 
@@ -73,7 +77,9 @@ describe('VirtualPlayer', () => {
         ]);
         const spy = spyOn(virtualPlayer, 'place').and.callThrough();
         const spyPoints = spyOn(calculatePoints, 'calculatePoints').and.callThrough();
-        const functionReturn = virtualPlayer.place(wordValidationMock, calculatePoints, board);
+        const commandMessage: BehaviorSubject<ChatMessage> = new BehaviorSubject({ user: '', body: '' });
+        const debug = false;
+        const functionReturn = virtualPlayer.place(wordValidationMock, calculatePoints, board, commandMessage, debug);
         expect(spy).toHaveBeenCalled();
         expect(spyPoints).toHaveBeenCalled();
         expect(functionReturn).toBeTruthy();
@@ -103,7 +109,9 @@ describe('VirtualPlayer', () => {
         ]);
         const spy = spyOn(virtualPlayer, 'place').and.callThrough();
         const spyPoints = spyOn(calculatePoints, 'calculatePoints').and.callThrough();
-        const functionReturn = virtualPlayer.place(wordValidationMock, calculatePoints, board);
+        const commandMessage: BehaviorSubject<ChatMessage> = new BehaviorSubject({ user: '', body: '' });
+        const debug = false;
+        const functionReturn = virtualPlayer.place(wordValidationMock, calculatePoints, board, commandMessage, debug);
         expect(spy).toHaveBeenCalled();
         expect(spyPoints).toHaveBeenCalled();
         expect(functionReturn).toBeTruthy();

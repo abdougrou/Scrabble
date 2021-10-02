@@ -225,7 +225,6 @@ export class GameManagerService {
         }
         return message;
     }
-
     placeTiles(word: string, coordStr: string, vertical: boolean, player: Player): string {
         //  Check if it's the player's turn to play
         if (this.players.current !== player) return "Ce n'est pas votre tour";
@@ -247,13 +246,10 @@ export class GameManagerService {
                 tilesToPlace.push(tileCoord);
             }
         }
-
         //  Check that the easel contains all the needed letters
         if (!player.easel.containsTiles(this.getStringToRetrieve(tilesToRetrieve))) return 'Votre chevalet ne contient pas les lettres nécessaires';
-
         //  Retrieve the tiles from the player's easel
         const retrievedTiles: Tile[] = player.easel.getTiles(this.getStringToRetrieve(tilesToRetrieve));
-
         //  Check that the position of the word is valid
         if (this.validWordPosition(word, tilesToPlace, vertical)) {
             //  check that the word itself is valid
