@@ -79,7 +79,7 @@ export class VirtualPlayer implements Player {
 
         const chosen: BoardWord = validPermutations[0];
         if (chosen) {
-            result.next(msg);
+            if (debug) result.next(msg);
             return {
                 word: chosen.word,
                 coordStr: `${String.fromCharCode('a'.charCodeAt(0) + chosen.tileCoords[0].coords.y)}${chosen.tileCoords[0].coords.x + 1}`,
