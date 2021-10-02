@@ -5,7 +5,7 @@ import { Easel } from '@app/classes/easel';
 import { Dictionary, GameMode } from '@app/classes/game-config';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { CANVAS_HEIGHT, CANVAS_WIDTH, MAX_SKIP_COUNT } from '@app/constants';
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from '@app/constants';
 import { BoardService } from './board.service';
 import { GameManagerService } from './game-manager.service';
 import { GridService } from './grid.service';
@@ -65,46 +65,6 @@ describe('GameManagerService', () => {
     });
     it('should be created', () => {
         expect(service).toBeTruthy();
-    });
-
-    it('should get reserve count', () => {
-        expect(service.reserveCount).toEqual(reserveService.tileCount);
-    });
-
-    it("shoud add tiles to player's easel", () => {
-        const oldEaselSize = playerService.players[0].easel.count;
-        service.giveTiles(playerService.players[0], 2);
-        expect(playerService.players[0].easel.count).toEqual(oldEaselSize + 2);
-    });
-
-    it('should skip turn', () => {
-        const oldSkipCounter = playerService.skipCounter;
-        service.skipTurn();
-        expect(playerService.skipCounter).toEqual(oldSkipCounter + 1);
-    });
-
-    it('should end game if skip counter equal six', () => {
-        playerService.skipCounter = MAX_SKIP_COUNT - 1;
-        service.skipTurn();
-        expect(service.isEnded).toEqual(true);
-    });
-
-    it('should end game', () => {
-        service.endGame();
-        expect(service.endGameMessage).toContain('La partie est terminée');
-        expect(service.isEnded).toEqual(true);
-    });
-
-    it('reset should clear board', () => {
-        service.reset();
-        expect(boardService.board).toHaveSize(0);
-    });
-
-    it('activateDebug should give the expected results', () => {
-        service.debug = true;
-        expect(service.activateDebug()).toEqual('affichages de débogage désactivés');
-        service.debug = false;
-        expect(service.activateDebug()).toEqual('affichages de débogage activés');
     });
 
     it('exchangeTiles should exchange letters with reserve', () => {
@@ -209,13 +169,7 @@ describe('GameManagerService', () => {
         const word = 'allo';
         playerService.current.easel = new Easel(TILES);
         service.placeTiles(word, 'h8v', true, playerService.current);
-        const oldTiles: Tile[] = [
-            { letter: 'a', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'o', points: 0 },
-        ];
-        expect(JSON.stringify(playerService.current.easel.tiles) === JSON.stringify(oldTiles)).toBeFalse();
+        expect(JSON.stringify(playerService.current.easel.tiles) === JSON.stringify(TILES)).toBeFalse();
     });
 
     it('should not place a word which is not in the dictionary', () => {
@@ -274,5 +228,36 @@ describe('GameManagerService', () => {
         playerService.current.easel = new Easel(tiles);
         service.placeTiles('le', 'h8v', true, playerService.current);
         expect(service.placeTiles('sa', 'i8h', false, playerService.current)).toBe('placement de mot invalide');
+    });
+
+    it('placeTile should give as much tiles as possible if length of word placed is higher', () => {
+        reserveService.tiles.clear();
+        reserveService.tileCount = 0;
+        reserveService.tiles.set('a', { tile: { letter: 'a', points: 0 }, count: 1 });
+        const reserveTilesLength = reserveService.tiles.size;
+        reserveService.tileCount = 1;
+        const tiles: Tile[] = [
+            { letter: 'a', points: 0 },
+            { letter: 'l', points: 0 },
+            { letter: 'l', points: 0 },
+            { letter: 'o', points: 0 },
+        ];
+        playerService.current.easel = new Easel(tiles);
+        const previousPlayer = playerService.current;
+        service.placeTiles('allo', 'h8v', true, playerService.current);
+        expect(previousPlayer.easel.tiles.length).toBe(reserveTilesLength);
+        expect(previousPlayer.easel.tiles[0].letter).toBe('a');
+    });
+
+    it('placeTile not allow a word to be placed on top of another one', () => {
+        const tiles: Tile[] = [
+            { letter: 'l', points: 0 },
+            { letter: 'a', points: 0 },
+            { letter: 's', points: 0 },
+            { letter: 'a', points: 0 },
+        ];
+        playerService.current.easel = new Easel(tiles);
+        service.placeTiles('la', 'h8v', true, playerService.current);
+        expect(service.placeTiles('sa', 'i8v', true, playerService.current)).toBe('Commande impossible a realise');
     });
 });

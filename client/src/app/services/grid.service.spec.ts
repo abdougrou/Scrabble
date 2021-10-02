@@ -5,12 +5,10 @@ import { Vec2 } from '@app/classes/vec2';
 import { CANVAS_HEIGHT, CANVAS_WIDTH, STEP, TILE_COLORS, LETTER_FONT_SIZE_MODIFIER } from '@app/constants';
 import { GridService } from '@app/services/grid.service';
 import { BoardService } from './board.service';
-// import { GameManagerService } from './game-manager.service';
 
 describe('GridService', () => {
     let service: GridService;
     let ctxStub: CanvasRenderingContext2D;
-    // let manager: GameManagerService;
     let boardService: BoardService;
 
     beforeEach(() => {
