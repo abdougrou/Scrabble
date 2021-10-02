@@ -4,17 +4,19 @@ import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
 import { CANVAS_HEIGHT, CANVAS_WIDTH, STEP, TILE_COLORS, LETTER_FONT_SIZE_MODIFIER } from '@app/constants';
 import { GridService } from '@app/services/grid.service';
-// import { GameManagerService } from './game-manager.service';
+import { BoardService } from './board.service';
 
 describe('GridService', () => {
     let service: GridService;
     let ctxStub: CanvasRenderingContext2D;
-    // let manager: GameManagerService;
+    let boardService: BoardService;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({});
+        boardService = new BoardService();
+        TestBed.configureTestingModule({
+            providers: [{ provide: BoardService, useValue: boardService }],
+        });
         service = TestBed.inject(GridService);
-        // manager = TestBed.inject(GameManagerService);
         ctxStub = CanvasTestHelper.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT).getContext('2d') as CanvasRenderingContext2D;
         service.gridContext = ctxStub;
     });
@@ -136,17 +138,21 @@ describe('GridService', () => {
         expect(spyVirgin).toHaveBeenCalledTimes(numberOfVirginTilesExpected);
     });
 
-    // it('after drawing a 4 letter word, drawBoard should call 30 multiplier tiles and 0 placed tiles', () => {
-    //     const spyPlaced = spyOn(service, 'drawTile').and.callThrough();
-    //     const spyVirgin = spyOn(service, 'drawMultiplierTile').and.callThrough();
-    //     manager.placeTiles('word', { x: 5, y: 5 }, true, manager.players.current);
-    //     const numberOfPlacedTilesExpected = 4;
-    //     const numberOfVirginTilesExpected = 221;
-    //     service.drawBoard();
+    it('after drawing a 4 letter word, drawBoard should call 30 multiplier tiles and 0 placed tiles', () => {
+        const spyPlaced = spyOn(service, 'drawTile').and.callThrough();
+        const spyVirgin = spyOn(service, 'drawMultiplierTile').and.callThrough();
 
-    //     expect(spyPlaced).toHaveBeenCalledTimes(numberOfPlacedTilesExpected);
-    //     expect(spyVirgin).toHaveBeenCalledTimes(numberOfVirginTilesExpected);
-    // });
+        const numberOfPlacedTilesExpected = 4;
+        const numberOfVirginTilesExpected = 221;
+        boardService.placeTile({ x: 7, y: 7 }, { letter: 'a', points: 1 });
+        boardService.placeTile({ x: 7, y: 8 }, { letter: 'a', points: 1 });
+        boardService.placeTile({ x: 7, y: 9 }, { letter: 'a', points: 1 });
+        boardService.placeTile({ x: 7, y: 10 }, { letter: 'a', points: 1 });
+        service.drawBoard();
+
+        expect(spyPlaced).toHaveBeenCalledTimes(numberOfPlacedTilesExpected);
+        expect(spyVirgin).toHaveBeenCalledTimes(numberOfVirginTilesExpected);
+    });
 
     it('clearBoard() should clear board by calling clearRect', () => {
         const boardSize = CANVAS_WIDTH - STEP;

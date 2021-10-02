@@ -34,6 +34,13 @@ describe('GameConfigPageComponent', () => {
         expect(component).toBeTruthy();
     });
 
+    it('should change ennemy name when player names matchs', () => {
+        const oldEnnemyName = component.randomPlayerName;
+        component.gameConfigForm.get('name')?.setValue(component.randomPlayerName);
+        fixture.detectChanges();
+        expect(component.randomPlayerName).not.toEqual(oldEnnemyName);
+    });
+
     it('play should pick ennemy player name', () => {
         const testConfigForm = {
             name: 'player',

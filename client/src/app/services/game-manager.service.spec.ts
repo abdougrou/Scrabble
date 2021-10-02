@@ -1,11 +1,14 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { TestBed } from '@angular/core/testing';
+import { discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { CanvasTestHelper } from '@app/classes/canvas-test-helper';
 import { Easel } from '@app/classes/easel';
 import { Dictionary, GameMode } from '@app/classes/game-config';
+// import { PlayAction } from '@app/classes/player';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { CANVAS_HEIGHT, CANVAS_WIDTH, MAX_SKIP_COUNT } from '@app/constants';
+// import { VirtualPlayer } from '@app/classes/virtual-player';
+import { CANVAS_HEIGHT, CANVAS_WIDTH, MAX_SKIP_COUNT, SECOND_MD } from '@app/constants';
+// import { BehaviorSubject } from 'rxjs';
 import { BoardService } from './board.service';
 import { GameManagerService } from './game-manager.service';
 import { GridService } from './grid.service';
@@ -67,6 +70,13 @@ describe('GameManagerService', () => {
         expect(service).toBeTruthy();
     });
 
+    it('should switch players after turn duration ', fakeAsync(() => {
+        service.startTimer();
+        tick(service.turnDuration * SECOND_MD);
+        discardPeriodicTasks();
+        expect(playerService.players[0].name).toEqual('player2');
+    }));
+
     it('should get reserve count', () => {
         expect(service.reserveCount).toEqual(reserveService.tileCount);
     });
@@ -99,7 +109,23 @@ describe('GameManagerService', () => {
         service.reset();
         expect(boardService.board).toHaveSize(0);
     });
+    /*
+    it('virtual player should exchange tiles', () => {
+        const action = PlayAction.ExchangeTiles;
+        const vPlayer = new VirtualPlayer('virtual', new Easel());
+        vPlayer.play = jasmine.createSpy().and.returnValue(new BehaviorSubject<PlayAction>(action));
+        playerService.players[1] = vPlayer;
+        service.playVirtualPlayer();
+        expect(service.exchangeTiles).toHaveBeenCalled();
+    });
+    it('virtual player should pl tiles', () => {
+        const action = PlayAction.ExchangeTiles;
+    });
 
+    it('virtual player should exchange tiles', () => {
+        const action = PlayAction.ExchangeTiles;
+    }); 
+*/
     it('activateDebug should give the expected results', () => {
         service.debug = true;
         expect(service.activateDebug()).toEqual('affichages de débogage désactivés');
@@ -209,13 +235,7 @@ describe('GameManagerService', () => {
         const word = 'allo';
         playerService.current.easel = new Easel(TILES);
         service.placeTiles(word, 'h8v', true, playerService.current);
-        const oldTiles: Tile[] = [
-            { letter: 'a', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'o', points: 0 },
-        ];
-        expect(JSON.stringify(playerService.current.easel.tiles) === JSON.stringify(oldTiles)).toBeFalse();
+        expect(JSON.stringify(playerService.current.easel.tiles) === JSON.stringify(TILES)).toBeFalse();
     });
 
     it('should not place a word which is not in the dictionary', () => {
@@ -274,5 +294,36 @@ describe('GameManagerService', () => {
         playerService.current.easel = new Easel(tiles);
         service.placeTiles('le', 'h8v', true, playerService.current);
         expect(service.placeTiles('sa', 'i8h', false, playerService.current)).toBe('placement de mot invalide');
+    });
+
+    it('placeTile should give as much tiles as possible if length of word placed is higher', () => {
+        reserveService.tiles.clear();
+        reserveService.tileCount = 0;
+        reserveService.tiles.set('a', { tile: { letter: 'a', points: 0 }, count: 1 });
+        const reserveTilesLength = reserveService.tiles.size;
+        reserveService.tileCount = 1;
+        const tiles: Tile[] = [
+            { letter: 'a', points: 0 },
+            { letter: 'l', points: 0 },
+            { letter: 'l', points: 0 },
+            { letter: 'o', points: 0 },
+        ];
+        playerService.current.easel = new Easel(tiles);
+        const previousPlayer = playerService.current;
+        service.placeTiles('allo', 'h8v', true, playerService.current);
+        expect(previousPlayer.easel.tiles.length).toBe(reserveTilesLength);
+        expect(previousPlayer.easel.tiles[0].letter).toBe('a');
+    });
+
+    it('placeTile not allow a word to be placed on top of another one', () => {
+        const tiles: Tile[] = [
+            { letter: 'l', points: 0 },
+            { letter: 'a', points: 0 },
+            { letter: 's', points: 0 },
+            { letter: 'a', points: 0 },
+        ];
+        playerService.current.easel = new Easel(tiles);
+        service.placeTiles('la', 'h8v', true, playerService.current);
+        expect(service.placeTiles('sa', 'i8v', true, playerService.current)).toBe('Commande impossible a realise');
     });
 });
