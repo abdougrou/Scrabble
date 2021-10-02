@@ -154,6 +154,7 @@ export class GameManagerService {
     reset() {
         this.stopTimer();
         this.board.board = new Map();
+        this.reserve = new ReserveService();
         this.players.clear();
     }
 

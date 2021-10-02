@@ -1,11 +1,14 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { TestBed } from '@angular/core/testing';
+import { discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { CanvasTestHelper } from '@app/classes/canvas-test-helper';
 import { Easel } from '@app/classes/easel';
 import { Dictionary, GameMode } from '@app/classes/game-config';
+// import { PlayAction } from '@app/classes/player';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { CANVAS_HEIGHT, CANVAS_WIDTH } from '@app/constants';
+// import { VirtualPlayer } from '@app/classes/virtual-player';
+import { CANVAS_HEIGHT, CANVAS_WIDTH, MAX_SKIP_COUNT, SECOND_MD } from '@app/constants';
+// import { BehaviorSubject } from 'rxjs';
 import { BoardService } from './board.service';
 import { GameManagerService } from './game-manager.service';
 import { GridService } from './grid.service';
@@ -65,6 +68,69 @@ describe('GameManagerService', () => {
     });
     it('should be created', () => {
         expect(service).toBeTruthy();
+    });
+
+    it('should switch players after turn duration ', fakeAsync(() => {
+        service.startTimer();
+        tick(service.turnDuration * SECOND_MD);
+        discardPeriodicTasks();
+        expect(playerService.players[0].name).toEqual('player2');
+    }));
+
+    it('should get reserve count', () => {
+        expect(service.reserveCount).toEqual(reserveService.tileCount);
+    });
+
+    it("shoud add tiles to player's easel", () => {
+        const oldEaselSize = playerService.players[0].easel.count;
+        service.giveTiles(playerService.players[0], 2);
+        expect(playerService.players[0].easel.count).toEqual(oldEaselSize + 2);
+    });
+
+    it('should skip turn', () => {
+        const oldSkipCounter = playerService.skipCounter;
+        service.skipTurn();
+        expect(playerService.skipCounter).toEqual(oldSkipCounter + 1);
+    });
+
+    it('should end game if skip counter equal six', () => {
+        playerService.skipCounter = MAX_SKIP_COUNT - 1;
+        service.skipTurn();
+        expect(service.isEnded).toEqual(true);
+    });
+
+    it('should end game', () => {
+        service.endGame();
+        expect(service.endGameMessage).toContain('La partie est terminée');
+        expect(service.isEnded).toEqual(true);
+    });
+
+    it('reset should clear board', () => {
+        service.reset();
+        expect(boardService.board).toHaveSize(0);
+    });
+    /*
+    it('virtual player should exchange tiles', () => {
+        const action = PlayAction.ExchangeTiles;
+        const vPlayer = new VirtualPlayer('virtual', new Easel());
+        vPlayer.play = jasmine.createSpy().and.returnValue(new BehaviorSubject<PlayAction>(action));
+        playerService.players[1] = vPlayer;
+        service.playVirtualPlayer();
+        expect(service.exchangeTiles).toHaveBeenCalled();
+    });
+    it('virtual player should pl tiles', () => {
+        const action = PlayAction.ExchangeTiles;
+    });
+
+    it('virtual player should exchange tiles', () => {
+        const action = PlayAction.ExchangeTiles;
+    }); 
+*/
+    it('activateDebug should give the expected results', () => {
+        service.debug = true;
+        expect(service.activateDebug()).toEqual('affichages de débogage désactivés');
+        service.debug = false;
+        expect(service.activateDebug()).toEqual('affichages de débogage activés');
     });
 
     it('exchangeTiles should exchange letters with reserve', () => {
