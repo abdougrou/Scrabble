@@ -235,13 +235,7 @@ describe('GameManagerService', () => {
         const word = 'allo';
         playerService.current.easel = new Easel(TILES);
         service.placeTiles(word, 'h8v', true, playerService.current);
-        const oldTiles: Tile[] = [
-            { letter: 'a', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'l', points: 0 },
-            { letter: 'o', points: 0 },
-        ];
-        expect(JSON.stringify(playerService.current.easel.tiles) === JSON.stringify(oldTiles)).toBeFalse();
+        expect(JSON.stringify(playerService.current.easel.tiles) === JSON.stringify(TILES)).toBeFalse();
     });
 
     it('should not place a word which is not in the dictionary', () => {
@@ -300,5 +294,36 @@ describe('GameManagerService', () => {
         playerService.current.easel = new Easel(tiles);
         service.placeTiles('le', 'h8v', true, playerService.current);
         expect(service.placeTiles('sa', 'i8h', false, playerService.current)).toBe('placement de mot invalide');
+    });
+
+    it('placeTile should give as much tiles as possible if length of word placed is higher', () => {
+        reserveService.tiles.clear();
+        reserveService.tileCount = 0;
+        reserveService.tiles.set('a', { tile: { letter: 'a', points: 0 }, count: 1 });
+        const reserveTilesLength = reserveService.tiles.size;
+        reserveService.tileCount = 1;
+        const tiles: Tile[] = [
+            { letter: 'a', points: 0 },
+            { letter: 'l', points: 0 },
+            { letter: 'l', points: 0 },
+            { letter: 'o', points: 0 },
+        ];
+        playerService.current.easel = new Easel(tiles);
+        const previousPlayer = playerService.current;
+        service.placeTiles('allo', 'h8v', true, playerService.current);
+        expect(previousPlayer.easel.tiles.length).toBe(reserveTilesLength);
+        expect(previousPlayer.easel.tiles[0].letter).toBe('a');
+    });
+
+    it('placeTile not allow a word to be placed on top of another one', () => {
+        const tiles: Tile[] = [
+            { letter: 'l', points: 0 },
+            { letter: 'a', points: 0 },
+            { letter: 's', points: 0 },
+            { letter: 'a', points: 0 },
+        ];
+        playerService.current.easel = new Easel(tiles);
+        service.placeTiles('la', 'h8v', true, playerService.current);
+        expect(service.placeTiles('sa', 'i8v', true, playerService.current)).toBe('Commande impossible a realise');
     });
 });

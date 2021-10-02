@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 import { Injectable } from '@angular/core';
 import { GameConfig } from '@app/classes/game-config';
 import { PlayAction, Player } from '@app/classes/player';
@@ -21,6 +20,7 @@ export class GameManagerService {
     turnDuration: number;
     currentTurnDurationLeft: number;
     subscription: Subscription;
+    tilePlaceBackSubscription: Subscription;
     randomPlayerNameIndex: number;
     isFirstTurn: boolean = true;
     mainPlayerName: string;
@@ -238,17 +238,15 @@ export class GameManagerService {
                 const numTiles = this.reserve.tileCount < tilesToPlace.length ? this.reserve.tileCount : tilesToPlace.length;
                 player.easel.addTiles(this.reserve.getLetters(numTiles));
             } else {
-                let tilesPlacedBack = false;
                 const source = timer(0, SECOND_MD);
-                source.subscribe((seconds) => {
+                this.tilePlaceBackSubscription = source.subscribe((seconds) => {
                     const counter = 3 - (seconds % 3) - 1;
-                    if (counter === 0 && !tilesPlacedBack) {
+                    if (counter === 0) {
                         player.easel.addTiles(retrievedTiles);
-                        for (const aTile of tilesToPlace) {
-                            this.board.board.delete(this.board.coordToKey(aTile.coords));
-                        }
+                        for (const aTile of tilesToPlace) this.board.board.delete(this.board.coordToKey(aTile.coords));
+
                         this.gridService.drawBoard();
-                        tilesPlacedBack = true;
+                        this.tilePlaceBackSubscription.unsubscribe();
                     }
                 });
                 this.gridService.drawBoard();
