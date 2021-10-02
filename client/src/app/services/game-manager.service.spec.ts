@@ -95,7 +95,6 @@ describe('GameManagerService', () => {
     });
     it('should end game', () => {
         service.endGame();
-        expect(service.endGameMessage).toContain('La partie est terminée');
         expect(service.isEnded).toEqual(true);
     });
     it('reset should clear board', () => {

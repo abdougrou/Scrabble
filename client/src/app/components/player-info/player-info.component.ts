@@ -1,9 +1,9 @@
 import { Component, DoCheck } from '@angular/core';
 import { Player } from '@app/classes/player';
-import { PlayerService } from '@app/services/player.service';
 import { MAX_FONT_MULTIPLIER, MIN_FONT_MULTIPLIER } from '@app/constants';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { GridService } from '@app/services/grid.service';
+import { PlayerService } from '@app/services/player.service';
 
 @Component({
     selector: 'app-player-info',
@@ -58,7 +58,7 @@ export class PlayerInfoComponent implements DoCheck {
     }
 
     skipTurn() {
-        this.gameManager.skipTurn();
+        this.gameManager.buttonSkipTurn();
     }
 
     endGame() {
