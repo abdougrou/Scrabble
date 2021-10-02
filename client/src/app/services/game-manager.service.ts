@@ -1,23 +1,26 @@
 /* eslint-disable complexity */
 import { Injectable } from '@angular/core';
 import { GameConfig } from '@app/classes/game-config';
+import { ChatMessage } from '@app/classes/message';
 import { PlayAction, Player } from '@app/classes/player';
 import { PlaceTilesInfo, Tile, TileCoords } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
 import { VirtualPlayer } from '@app/classes/virtual-player';
-import { Subscription, timer } from 'rxjs';
-import { GRID_SIZE, LETTER_POINTS, MAX_SKIP_COUNT, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
+import { COMMAND_RESULT, GRID_SIZE, LETTER_POINTS, MAX_SKIP_COUNT, SECOND_MD, STARTING_TILE_AMOUNT, SYSTEM_NAME } from '@app/constants';
+import { BehaviorSubject, Subscription, timer } from 'rxjs';
 import { BoardService } from './board.service';
 import { CalculatePointsService } from './calculate-points.service';
+import { GridService } from './grid.service';
 import { PlayerService } from './player.service';
 import { ReserveService } from './reserve.service';
 import { WordValidationService } from './word-validation.service';
-import { GridService } from './grid.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class GameManagerService {
+    commandMessage: BehaviorSubject<ChatMessage> = new BehaviorSubject({ user: '', body: '' });
+
     turnDuration: number;
     currentTurnDurationLeft: number;
     subscription: Subscription;
@@ -123,6 +126,15 @@ export class GameManagerService {
         player.easel.addTiles(tiles);
     }
 
+    buttonSkipTurn(): void {
+        const msg: ChatMessage = {
+            user: COMMAND_RESULT,
+            body: `${this.players.current.name} a passé son tour`,
+        };
+        this.commandMessage.next(msg);
+        this.skipTurn();
+    }
+
     skipTurn() {
         this.players.skipCounter++;
         if (this.players.skipCounter >= MAX_SKIP_COUNT) {
@@ -134,9 +146,13 @@ export class GameManagerService {
 
     // TODO implement stopTimer() to end the game after 6 skipTurn
     endGame() {
-        this.endGameMessage = `La partie est terminée! <br>
+        const msg: ChatMessage = {
+            user: SYSTEM_NAME,
+            body: `La partie est terminée! <br>
             chevalet de ${this.players.getPlayerByName(this.mainPlayerName).name}: ${this.players.getPlayerByName(this.mainPlayerName).easel}.<br>
-            chevalet de ${this.players.getPlayerByName(this.enemyPlayerName).name}: ${this.players.getPlayerByName(this.enemyPlayerName).easel}.`;
+            chevalet de ${this.players.getPlayerByName(this.enemyPlayerName).name}: ${this.players.getPlayerByName(this.enemyPlayerName).easel}.`,
+        };
+        this.commandMessage.next(msg);
         this.stopTimer();
         this.isEnded = true;
     }

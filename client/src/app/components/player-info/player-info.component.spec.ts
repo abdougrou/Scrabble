@@ -18,7 +18,7 @@ describe('PlayerInfoComponent', () => {
         playerService = new PlayerService();
         playerService.createPlayer('player', []);
         playerService.createPlayer('playerTwo', []);
-        gameManagerService = jasmine.createSpyObj('GameManagerService', ['skipTurn', 'reset', 'stopTimer', 'endGame']);
+        gameManagerService = jasmine.createSpyObj('GameManagerService', ['buttonSkipTurn', 'reset', 'stopTimer', 'endGame']);
         gridService = jasmine.createSpyObj('GrideService', ['clearBoard', 'drawBoard']);
     });
     beforeEach(async () => {
@@ -73,17 +73,17 @@ describe('PlayerInfoComponent', () => {
     it('should call game manager skip turn function when turn skipped', () => {
         component.skipTurn();
         fixture.detectChanges();
-        expect(gameManagerService.skipTurn).toHaveBeenCalled();
+        expect(gameManagerService.buttonSkipTurn).toHaveBeenCalled();
     });
 
     it('should call stop timer if turn skipped six times continuously', () => {
         playerService.skipCounter = MAX_SKIP_COUNT - 1;
-        gameManagerService.skipTurn.and.callFake(() => {
+        gameManagerService.buttonSkipTurn.and.callFake(() => {
             playerService.skipCounter++;
             if (playerService.skipCounter >= MAX_SKIP_COUNT) gameManagerService.stopTimer();
         });
         component.skipTurn();
-        expect(gameManagerService.skipTurn).toHaveBeenCalled();
+        expect(gameManagerService.buttonSkipTurn).toHaveBeenCalled();
         expect(playerService.skipCounter).toEqual(MAX_SKIP_COUNT);
         expect(gameManagerService.stopTimer).toHaveBeenCalled();
     });

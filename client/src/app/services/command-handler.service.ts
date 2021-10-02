@@ -61,7 +61,7 @@ export class CommandHandlerService {
         if (regex.test(command)) {
             this.gameManager.skipTurn();
             commandResult.user = COMMAND_RESULT;
-            commandResult.body = `${player.name} a passer son tour`;
+            commandResult.body = `${player.name} a passé son tour`;
         } else {
             commandResult.user = SYSTEM_NAME;
             commandResult.body = 'Erreur de syntaxe, pour passer son tour, il faut suivre le format suivant : !passer';

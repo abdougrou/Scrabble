@@ -8,12 +8,15 @@ p {
     height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow-y: hidden;
     justify-content: end;
 }
 
 .chat-body {
     height: 100%;
     display: flex;
+    overflow-y: auto;
+    overflow-x: hidden;
     flex-direction: column-reverse;
     overflow-wrap: break-word;
     font-size: 12px;
@@ -22,12 +25,9 @@ p {
 
 .message-box {
     width: 100%;
-    display:flex;
+    display: flex;
     flex-direction: row;
     align-items: stretch;
-}
-button {
-    background-color: burlywood;
 }
 
 #default-message {
