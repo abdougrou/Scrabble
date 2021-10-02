@@ -12,6 +12,10 @@ describe('Easel', () => {
         expect(easel).toBeTruthy();
     });
 
+    it('should not return invalid tile', () => {
+        expect(easel.getTiles('4')).toEqual([]);
+    });
+
     it('addTiles adds tiles to the easel', () => {
         const tiles: Tile[] = [
             { letter: 'a', points: 0 },

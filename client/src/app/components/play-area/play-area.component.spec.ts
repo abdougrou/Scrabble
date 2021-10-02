@@ -46,4 +46,10 @@ describe('PlayAreaComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
+
+    it('should detect the button pressed', () => {
+        const mockButtonClick = new KeyboardEvent('keydown', { key: 'k' });
+        component.buttonDetect(mockButtonClick);
+        expect(component.buttonPressed).toBe('k');
+    });
 });

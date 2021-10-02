@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { TileCoords } from '@app/classes/tile';
+import { BoardWord, Tile, TileCoords } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
 import { BoardService } from './board.service';
 import { WordValidationService } from './word-validation.service';
@@ -18,7 +18,7 @@ describe('WordValidationService', () => {
         });
         service = TestBed.inject(WordValidationService);
         TestBed.inject(HttpClient);
-        service.dictionnary = ['word', 'test', 'hey'];
+        service.dictionnary = ['word', 'test', 'hey', 'za', 'az'];
         newTiles = [];
     });
 
@@ -121,5 +121,23 @@ describe('WordValidationService', () => {
             board.placeTile(tile.coords, tile.tile);
         }
         expect(service.validateWords(newTiles)).toBeTrue();
+    });
+
+    //  Testing getPossibleWords
+    it('getPossibleWord should be able to get the word possible to create with tiles on board', () => {
+        const tiles: Tile[] = [{ letter: 'a', points: 0 }];
+        const coord: Vec2 = { x: 7, y: 7 };
+        board.placeTile(coord, { letter: 'z', points: 0 });
+        const boardWords: BoardWord[] = service.getPossibleWords(tiles);
+        const pos = 4;
+        expect(boardWords.length).toBe(pos);
+    });
+
+    //  Testing getTilePermutations
+    it('should return the correct amount of permutations', () => {
+        const word: string[] = ['a', 'b', 'c'];
+        //  6(P(3, 3)) + 6(P(3, 2)) + 3(P(3, 1))
+        const numPerm = 15;
+        expect(service.getTilePermutations(word).length).toBe(numPerm);
     });
 });

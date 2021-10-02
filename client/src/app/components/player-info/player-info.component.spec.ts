@@ -48,6 +48,11 @@ describe('PlayerInfoComponent', () => {
         playerService.players[1].score = 10;
 
         expect(component.winner).toEqual(playerService.players[1].name);
+
+        playerService.players[0].score = 10;
+        playerService.players[1].score = 0;
+
+        expect(component.winner).toEqual(playerService.players[0].name);
     });
 
     it('should increase font', () => {
@@ -56,6 +61,9 @@ describe('PlayerInfoComponent', () => {
         expect(component.fontSize).toEqual(oldSize + 1);
         expect(gridService.clearBoard).toHaveBeenCalled();
         expect(gridService.drawBoard).toHaveBeenCalled();
+        component.fontSize = 3;
+        component.increaseFont();
+        expect(component.fontSize).toEqual(3);
     });
 
     it('should decrease font', () => {
@@ -64,6 +72,10 @@ describe('PlayerInfoComponent', () => {
         expect(component.fontSize).toEqual(0);
         expect(gridService.clearBoard).toHaveBeenCalled();
         expect(gridService.drawBoard).toHaveBeenCalled();
+        component.fontSize = -1;
+        component.decreaseFont();
+        const size = -1;
+        expect(component.fontSize).toEqual(size);
     });
 
     it('#getTimer should return currentTurnDurationLeft', () => {
