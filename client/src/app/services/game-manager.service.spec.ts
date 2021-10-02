@@ -3,9 +3,12 @@ import { discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/te
 import { CanvasTestHelper } from '@app/classes/canvas-test-helper';
 import { Easel } from '@app/classes/easel';
 import { Dictionary, GameMode } from '@app/classes/game-config';
+// import { PlayAction } from '@app/classes/player';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
+// import { VirtualPlayer } from '@app/classes/virtual-player';
 import { CANVAS_HEIGHT, CANVAS_WIDTH, MAX_SKIP_COUNT, SECOND_MD } from '@app/constants';
+// import { BehaviorSubject } from 'rxjs';
 import { BoardService } from './board.service';
 import { GameManagerService } from './game-manager.service';
 import { GridService } from './grid.service';
@@ -106,7 +109,23 @@ describe('GameManagerService', () => {
         service.reset();
         expect(boardService.board).toHaveSize(0);
     });
+    /*
+    it('virtual player should exchange tiles', () => {
+        const action = PlayAction.ExchangeTiles;
+        const vPlayer = new VirtualPlayer('virtual', new Easel());
+        vPlayer.play = jasmine.createSpy().and.returnValue(new BehaviorSubject<PlayAction>(action));
+        playerService.players[1] = vPlayer;
+        service.playVirtualPlayer();
+        expect(service.exchangeTiles).toHaveBeenCalled();
+    });
+    it('virtual player should pl tiles', () => {
+        const action = PlayAction.ExchangeTiles;
+    });
 
+    it('virtual player should exchange tiles', () => {
+        const action = PlayAction.ExchangeTiles;
+    }); 
+*/
     it('activateDebug should give the expected results', () => {
         service.debug = true;
         expect(service.activateDebug()).toEqual('affichages de débogage désactivés');
