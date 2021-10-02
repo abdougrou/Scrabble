@@ -27,7 +27,7 @@
     </div>
     <div class="justified-right">
         <button mat-raised-button [disabled]="this.players[0].name !== this.mainPlayerName || this.isEnded" (click)= "skipTurn()">Passer le tour</button>
-        <button mat-raised-button *ngIf="!this.isEnded" (click)="endGame()" class="warn">Abandonner</button>
+        <button mat-raised-button *ngIf="!this.isEnded" [routerLink]="['/home']" (click)="quit()" class="warn">Abandonner</button>
         <button mat-raised-button *ngIf="this.isEnded" [routerLink]="['/home']" (click)="quit()" class="warn">Quitter</button>
     </div>
     <div><span matBadge="{{this.reserveCount}}" matBadgeColor="warn" ><img src="../../../assets/reserve.png" width="8%" ></span></div>
