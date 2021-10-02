@@ -1,11 +1,14 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { TestBed } from '@angular/core/testing';
+import { discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { CanvasTestHelper } from '@app/classes/canvas-test-helper';
 import { Easel } from '@app/classes/easel';
 import { Dictionary, GameMode } from '@app/classes/game-config';
+// import { PlayAction } from '@app/classes/player';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { CANVAS_HEIGHT, CANVAS_WIDTH, MAX_SKIP_COUNT } from '@app/constants';
+// import { VirtualPlayer } from '@app/classes/virtual-player';
+import { CANVAS_HEIGHT, CANVAS_WIDTH, MAX_SKIP_COUNT, SECOND_MD } from '@app/constants';
+// import { BehaviorSubject } from 'rxjs';
 import { BoardService } from './board.service';
 import { GameManagerService } from './game-manager.service';
 import { GridService } from './grid.service';
@@ -67,6 +70,13 @@ describe('GameManagerService', () => {
         expect(service).toBeTruthy();
     });
 
+    it('should switch players after turn duration ', fakeAsync(() => {
+        service.startTimer();
+        tick(service.turnDuration * SECOND_MD);
+        discardPeriodicTasks();
+        expect(playerService.players[0].name).toEqual('player2');
+    }));
+
     it('should get reserve count', () => {
         expect(service.reserveCount).toEqual(reserveService.tileCount);
     });
@@ -98,7 +108,23 @@ describe('GameManagerService', () => {
         service.reset();
         expect(boardService.board).toHaveSize(0);
     });
+    /*
+    it('virtual player should exchange tiles', () => {
+        const action = PlayAction.ExchangeTiles;
+        const vPlayer = new VirtualPlayer('virtual', new Easel());
+        vPlayer.play = jasmine.createSpy().and.returnValue(new BehaviorSubject<PlayAction>(action));
+        playerService.players[1] = vPlayer;
+        service.playVirtualPlayer();
+        expect(service.exchangeTiles).toHaveBeenCalled();
+    });
+    it('virtual player should pl tiles', () => {
+        const action = PlayAction.ExchangeTiles;
+    });
 
+    it('virtual player should exchange tiles', () => {
+        const action = PlayAction.ExchangeTiles;
+    }); 
+*/
     it('activateDebug should give the expected results', () => {
         service.debug = true;
         expect(service.activateDebug()).toEqual('affichages de débogage désactivés');

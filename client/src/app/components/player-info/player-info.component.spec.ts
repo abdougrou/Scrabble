@@ -76,6 +76,12 @@ describe('PlayerInfoComponent', () => {
         expect(gameManagerService.buttonSkipTurn).toHaveBeenCalled();
     });
 
+    it('should end game', () => {
+        component.endGame();
+        fixture.detectChanges();
+        expect(gameManagerService.endGame).toHaveBeenCalled();
+    });
+
     it('should call stop timer if turn skipped six times continuously', () => {
         playerService.skipCounter = MAX_SKIP_COUNT - 1;
         gameManagerService.buttonSkipTurn.and.callFake(() => {
@@ -88,7 +94,7 @@ describe('PlayerInfoComponent', () => {
         expect(gameManagerService.stopTimer).toHaveBeenCalled();
     });
 
-    it('should rest the game when player quit', () => {
+    it('should reset the game when player quit', () => {
         component.quit();
         fixture.detectChanges();
         expect(gameManagerService.reset).toHaveBeenCalled();
