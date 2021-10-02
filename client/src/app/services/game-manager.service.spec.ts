@@ -260,12 +260,4 @@ describe('GameManagerService', () => {
         service.placeTiles('la', 'h8v', true, playerService.current);
         expect(service.placeTiles('sa', 'i8v', true, playerService.current)).toBe('Commande impossible a realise');
     });
-
-    // it('placeTile should give back tiles in easel after 3 seconde if words isnt in dictionnary', () => {
-    //     const tiles: Tile[] = [
-    //         { letter: 'l', points: 0 },
-    //         { letter: 's', points: 0 },
-    //     ];
-    //     playerService.current.easel = new Easel(tiles);
-    // });
 });
