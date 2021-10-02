@@ -24,6 +24,7 @@ export class GameManagerService {
     turnDuration: number;
     currentTurnDurationLeft: number;
     subscription: Subscription;
+    tilePlaceBackSubscription: Subscription;
     randomPlayerNameIndex: number;
     isFirstTurn: boolean = true;
     mainPlayerName: string;
@@ -74,6 +75,21 @@ export class GameManagerService {
         });
     }
 
+    startTilePLaceBackCountdown(player: Player, retrievedTiles: Tile[], tilesToPlace: TileCoords[]) {
+        const source = timer(0, SECOND_MD);
+        this.tilePlaceBackSubscription = source.subscribe((seconds) => {
+            const counter = 3 - (seconds % 3) - 1;
+            if (counter === 0) {
+                player.easel.addTiles(retrievedTiles);
+                for (const aTile of tilesToPlace) {
+                    this.board.board.delete(this.board.coordToKey(aTile.coords));
+                }
+                this.gridService.drawBoard();
+                this.tilePlaceBackSubscription.unsubscribe();
+            }
+        });
+    }
+
     initializePlayers(playerNames: string[]) {
         this.players.createPlayer(playerNames[0], this.reserve.getLetters(STARTING_TILE_AMOUNT));
         if (this.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getLetters(STARTING_TILE_AMOUNT));
@@ -92,29 +108,35 @@ export class GameManagerService {
     }
 
     playVirtualPlayer() {
-        // console.log("Bot's turn");
         const vPlayer: VirtualPlayer = this.players.current as VirtualPlayer;
-        // console.log(vPlayer.easel.toString());
         vPlayer.play().subscribe((action) => {
             switch (action) {
                 case PlayAction.ExchangeTiles: {
                     const tilesToExchange = vPlayer.exchange();
-                    // console.log(`Bot exchanges the letters ${tilesToExchange}`);
+                    // TODO message chatbox
                     if (this.reserve.isExchangePossible(tilesToExchange.length)) this.exchangeTiles(tilesToExchange, vPlayer);
+                    else this.skipTurn();
                     break;
                 }
                 case PlayAction.PlaceTiles: {
-                    const placeTilesInfo: PlaceTilesInfo = vPlayer.place(this.wordValidation, this.calculatePoints);
+                    const placeTilesInfo: PlaceTilesInfo = vPlayer.place(this.wordValidation, this.calculatePoints, this.board);
                     // console.log(
                     //     `Bot places the word "${placeTilesInfo.word}" ${placeTilesInfo.vertical ? 'vertical' : 'horizontal'}ly at ${
                     //         placeTilesInfo.coordStr
                     //     }`,
                     // );
-                    this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer);
+                    if (placeTilesInfo.word.length > 0) {
+                        // console.log(placeTilesInfo);
+                        // console.log(this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer));
+                        this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer);
+                    } else {
+                        this.skipTurn();
+                    }
                     break;
                 }
                 default:
-                    //  console.log('Bot skipped his turn');
+                    // console.log('Bot skipped his turn');
+                    // TODO message chatbox
                     this.skipTurn();
                     break;
             }
@@ -247,19 +269,7 @@ export class GameManagerService {
                 const numTiles = this.reserve.tileCount < tilesToPlace.length ? this.reserve.tileCount : tilesToPlace.length;
                 player.easel.addTiles(this.reserve.getLetters(numTiles));
             } else {
-                let tilesPlacedBack = false;
-                const source = timer(0, SECOND_MD);
-                source.subscribe((seconds) => {
-                    const counter = 3 - (seconds % 3) - 1;
-                    if (counter === 0 && !tilesPlacedBack) {
-                        player.easel.addTiles(retrievedTiles);
-                        for (const aTile of tilesToPlace) {
-                            this.board.board.delete(this.board.coordToKey(aTile.coords));
-                        }
-                        this.gridService.drawBoard();
-                        tilesPlacedBack = true;
-                    }
-                });
+                this.startTilePLaceBackCountdown(player, retrievedTiles, tilesToPlace);
                 this.gridService.drawBoard();
                 return 'le mot nest pas dans le dictionnaire';
             }
