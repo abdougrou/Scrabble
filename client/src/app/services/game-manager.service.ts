@@ -21,6 +21,7 @@ export class GameManagerService {
     turnDuration: number;
     currentTurnDurationLeft: number;
     subscription: Subscription;
+    tilePlaceBackSubscription: Subscription;
     randomPlayerNameIndex: number;
     isFirstTurn: boolean = true;
     mainPlayerName: string;
@@ -67,6 +68,21 @@ export class GameManagerService {
                 this.currentTurnDurationLeft = this.turnDuration;
                 this.switchPlayers();
                 // TODO send player switch event
+            }
+        });
+    }
+
+    startTilePLaceBackCountdown(player: Player, retrievedTiles: Tile[], tilesToPlace: TileCoords[]) {
+        const source = timer(0, SECOND_MD);
+        this.tilePlaceBackSubscription = source.subscribe((seconds) => {
+            const counter = 3 - (seconds % 3) - 1;
+            if (counter === 0) {
+                player.easel.addTiles(retrievedTiles);
+                for (const aTile of tilesToPlace) {
+                    this.board.board.delete(this.board.coordToKey(aTile.coords));
+                }
+                this.gridService.drawBoard();
+                this.tilePlaceBackSubscription.unsubscribe();
             }
         });
     }
@@ -237,19 +253,7 @@ export class GameManagerService {
                 const numTiles = this.reserve.tileCount < tilesToPlace.length ? this.reserve.tileCount : tilesToPlace.length;
                 player.easel.addTiles(this.reserve.getLetters(numTiles));
             } else {
-                let tilesPlacedBack = false;
-                const source = timer(0, SECOND_MD);
-                source.subscribe((seconds) => {
-                    const counter = 3 - (seconds % 3) - 1;
-                    if (counter === 0 && !tilesPlacedBack) {
-                        player.easel.addTiles(retrievedTiles);
-                        for (const aTile of tilesToPlace) {
-                            this.board.board.delete(this.board.coordToKey(aTile.coords));
-                        }
-                        this.gridService.drawBoard();
-                        tilesPlacedBack = true;
-                    }
-                });
+                this.startTilePLaceBackCountdown(player, retrievedTiles, tilesToPlace);
                 this.gridService.drawBoard();
                 return 'le mot nest pas dans le dictionnaire';
             }
