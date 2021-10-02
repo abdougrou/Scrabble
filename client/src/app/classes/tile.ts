@@ -27,7 +27,7 @@ export interface LetterCoords {
 }
 
 export interface BoardWord {
-    word: '';
+    word: string;
     tileCoords: TileCoords[];
     vertical: boolean;
     points: number;

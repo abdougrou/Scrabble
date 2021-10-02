@@ -107,6 +107,7 @@ export class GameManagerService {
                     //     }`,
                     // );
                     if (placeTilesInfo.word.length > 0) {
+                        console.log(placeTilesInfo.word);
                         // console.log(placeTilesInfo);
                         // console.log(this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer));
                         this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer);

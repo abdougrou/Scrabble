@@ -37,14 +37,13 @@ export class VirtualPlayer implements Player {
         return this.easel.toString().slice(0, randomLetters);
     }
 
-    // eslint-disable-next-line no-unused-vars
     place(validation: WordValidationService, calculatePoints: CalculatePointsService, boardService: BoardService): PlaceTilesInfo {
         const possiblePermutations: BoardWord[] = validation.getPossibleWords(this.easel.tiles);
         const validPermutations: BoardWord[] = [];
 
         for (const permutation of possiblePermutations) {
             if (validPermutations.length > 3) break;
-            if (permutation.tileCoords.length > 1) {
+            if (permutation.tileCoords.length > 0) {
                 const points = calculatePoints.calculatePoints(permutation.tileCoords);
                 if (points > 0) {
                     for (const aTile of permutation.tileCoords) {
