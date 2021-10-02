@@ -131,22 +131,4 @@ describe('VirtualPlayer', () => {
         const action = virtualPlayer.play();
         expect(action).toBeTruthy();
     });
-
-    it('PlaceTiles should not go through 2nd if', () => {
-        board.placeTile({ x: 3, y: 7 }, { letter: 'b', points: 1 });
-        board.placeTile({ x: 4, y: 7 }, { letter: 'o', points: 1 });
-        board.placeTile({ x: 5, y: 7 }, { letter: 'n', points: 1 });
-        board.placeTile({ x: 6, y: 7 }, { letter: 'j', points: 1 });
-        board.placeTile({ x: 7, y: 7 }, { letter: 'o', points: 1 });
-        board.placeTile({ x: 8, y: 7 }, { letter: 'u', points: 1 });
-        board.placeTile({ x: 9, y: 7 }, { letter: 'r', points: 1 });
-        virtualPlayer.easel.addTiles([{ letter: 'n', points: 1 }]);
-        const spy = spyOn(virtualPlayer, 'place').and.callThrough();
-        const spyPoints = spyOn(calculatePoints, 'calculatePoints').and.callThrough();
-        spyOn(wordValidationMock, 'validateWords').and.returnValue(false);
-        const functionReturn = virtualPlayer.place(wordValidationMock, calculatePoints, board);
-        expect(spy).toHaveBeenCalled();
-        expect(spyPoints).toHaveBeenCalled();
-        expect(functionReturn).toBeTruthy();
-    });
 });
