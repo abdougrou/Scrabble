@@ -71,6 +71,21 @@ export class GameManagerService {
         });
     }
 
+    startTilePLaceBackCountdown(player: Player, retrievedTiles: Tile[], tilesToPlace: TileCoords[]) {
+        const source = timer(0, SECOND_MD);
+        this.tilePlaceBackSubscription = source.subscribe((seconds) => {
+            const counter = 3 - (seconds % 3) - 1;
+            if (counter === 0) {
+                player.easel.addTiles(retrievedTiles);
+                for (const aTile of tilesToPlace) {
+                    this.board.board.delete(this.board.coordToKey(aTile.coords));
+                }
+                this.gridService.drawBoard();
+                this.tilePlaceBackSubscription.unsubscribe();
+            }
+        });
+    }
+
     initializePlayers(playerNames: string[]) {
         this.players.createPlayer(playerNames[0], this.reserve.getLetters(STARTING_TILE_AMOUNT));
         if (this.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getLetters(STARTING_TILE_AMOUNT));
@@ -107,7 +122,6 @@ export class GameManagerService {
                     //     }`,
                     // );
                     if (placeTilesInfo.word.length > 0) {
-                        console.log(placeTilesInfo.word);
                         // console.log(placeTilesInfo);
                         // console.log(this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer));
                         this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer);
@@ -239,17 +253,7 @@ export class GameManagerService {
                 const numTiles = this.reserve.tileCount < tilesToPlace.length ? this.reserve.tileCount : tilesToPlace.length;
                 player.easel.addTiles(this.reserve.getLetters(numTiles));
             } else {
-                const source = timer(0, SECOND_MD);
-                this.tilePlaceBackSubscription = source.subscribe((seconds) => {
-                    const counter = 3 - (seconds % 3) - 1;
-                    if (counter === 0) {
-                        player.easel.addTiles(retrievedTiles);
-                        for (const aTile of tilesToPlace) this.board.board.delete(this.board.coordToKey(aTile.coords));
-
-                        this.gridService.drawBoard();
-                        this.tilePlaceBackSubscription.unsubscribe();
-                    }
-                });
+                this.startTilePLaceBackCountdown(player, retrievedTiles, tilesToPlace);
                 this.gridService.drawBoard();
                 return 'le mot nest pas dans le dictionnaire';
             }
