@@ -1,9 +1,11 @@
+import { FULL_EASEL_BONUS, SYSTEM_NAME } from '@app/constants';
 import { BoardService } from '@app/services/board.service';
 import { CalculatePointsService } from '@app/services/calculate-points.service';
 import { WordValidationService } from '@app/services/word-validation.service';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { Easel } from './easel';
+import { ChatMessage } from './message';
 import { PlayAction, Player } from './player';
 import { BoardWord, PlaceTilesInfo } from './tile';
 
@@ -38,10 +40,16 @@ export class VirtualPlayer implements Player {
     }
 
     // eslint-disable-next-line no-unused-vars
-    place(validation: WordValidationService, calculatePoints: CalculatePointsService, boardService: BoardService): PlaceTilesInfo {
+    place(
+        validation: WordValidationService,
+        calculatePoints: CalculatePointsService,
+        boardService: BoardService,
+        result: BehaviorSubject<ChatMessage>,
+        debug: boolean,
+    ): PlaceTilesInfo {
         const possiblePermutations: BoardWord[] = validation.getPossibleWords(this.easel.tiles);
         const validPermutations: BoardWord[] = [];
-
+        const msg: ChatMessage = { user: SYSTEM_NAME, body: '<br>' };
         for (const permutation of possiblePermutations) {
             if (validPermutations.length > 3) break;
             if (permutation.tileCoords.length > 1) {
@@ -49,10 +57,18 @@ export class VirtualPlayer implements Player {
                 if (points > 0) {
                     for (const aTile of permutation.tileCoords) {
                         boardService.placeTile(aTile.coords, aTile.tile);
+                        if (debug) {
+                            msg.body += ` ${String.fromCharCode('a'.charCodeAt(0) + aTile.coords.y)}${aTile.coords.x + 1}`;
+                            msg.body += `:${aTile.tile.letter} `;
+                        }
                     }
                     if (validation.validateWords(permutation.tileCoords)) {
                         permutation.points = points;
                         validPermutations.push(permutation);
+                        if (debug) {
+                            msg.body += `(${points})<br>`;
+                            if (points >= FULL_EASEL_BONUS) msg.body += `Bingo! (${points})<br>`;
+                        }
                     }
                     for (const aTile of permutation.tileCoords) {
                         boardService.board.delete(boardService.coordToKey(aTile.coords));
@@ -63,6 +79,7 @@ export class VirtualPlayer implements Player {
 
         const chosen: BoardWord = validPermutations[0];
         if (chosen) {
+            result.next(msg);
             return {
                 word: chosen.word,
                 coordStr: `${String.fromCharCode('a'.charCodeAt(0) + chosen.tileCoords[0].coords.y)}${chosen.tileCoords[0].coords.x + 1}`,

@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 import { Injectable } from '@angular/core';
 import { GameConfig } from '@app/classes/game-config';
 import { ChatMessage } from '@app/classes/message';
@@ -20,7 +19,6 @@ import { WordValidationService } from './word-validation.service';
 })
 export class GameManagerService {
     commandMessage: BehaviorSubject<ChatMessage> = new BehaviorSubject({ user: '', body: '' });
-
     turnDuration: number;
     currentTurnDurationLeft: number;
     subscription: Subscription;
@@ -29,10 +27,8 @@ export class GameManagerService {
     isFirstTurn: boolean = true;
     mainPlayerName: string;
     enemyPlayerName: string;
-
     isEnded: boolean;
     endGameMessage: string = '';
-
     debug: boolean = false;
     isMultiPlayer: boolean;
 
@@ -56,10 +52,8 @@ export class GameManagerService {
         this.turnDuration = gameConfig.duration;
         this.currentTurnDurationLeft = gameConfig.duration;
         this.isEnded = false;
-
         this.initializePlayers([this.mainPlayerName, this.enemyPlayerName]);
         this.players.mainPlayer = this.players.getPlayerByName(this.mainPlayerName);
-
         this.startTimer();
     }
 
@@ -103,7 +97,6 @@ export class GameManagerService {
         this.currentTurnDurationLeft = this.turnDuration;
         this.startTimer();
         // Send player switch event
-
         if (this.players.current instanceof VirtualPlayer) this.playVirtualPlayer();
     }
 
@@ -113,13 +106,22 @@ export class GameManagerService {
             switch (action) {
                 case PlayAction.ExchangeTiles: {
                     const tilesToExchange = vPlayer.exchange();
-                    // TODO message chatbox
-                    if (this.reserve.isExchangePossible(tilesToExchange.length)) this.exchangeTiles(tilesToExchange, vPlayer);
-                    else this.skipTurn();
+                    if (this.reserve.isExchangePossible(tilesToExchange.length)) {
+                        const msg: ChatMessage = { user: this.enemyPlayerName, body: this.exchangeTiles(tilesToExchange, vPlayer) };
+                        this.commandMessage.next(msg);
+                    } else {
+                        this.buttonSkipTurn();
+                    }
                     break;
                 }
                 case PlayAction.PlaceTiles: {
-                    const placeTilesInfo: PlaceTilesInfo = vPlayer.place(this.wordValidation, this.calculatePoints, this.board);
+                    const placeTilesInfo: PlaceTilesInfo = vPlayer.place(
+                        this.wordValidation,
+                        this.calculatePoints,
+                        this.board,
+                        this.commandMessage,
+                        this.debug,
+                    );
                     // console.log(
                     //     `Bot places the word "${placeTilesInfo.word}" ${placeTilesInfo.vertical ? 'vertical' : 'horizontal'}ly at ${
                     //         placeTilesInfo.coordStr
@@ -128,16 +130,19 @@ export class GameManagerService {
                     if (placeTilesInfo.word.length > 0) {
                         // console.log(placeTilesInfo);
                         // console.log(this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer));
-                        this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer);
+                        const msg: ChatMessage = {
+                            user: this.enemyPlayerName,
+                            body: this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer),
+                        };
+                        this.commandMessage.next(msg);
                     } else {
-                        this.skipTurn();
+                        this.buttonSkipTurn();
                     }
                     break;
                 }
                 default:
                     // console.log('Bot skipped his turn');
-                    // TODO message chatbox
-                    this.skipTurn();
+                    this.buttonSkipTurn();
                     break;
             }
         });
@@ -149,10 +154,7 @@ export class GameManagerService {
     }
 
     buttonSkipTurn(): void {
-        const msg: ChatMessage = {
-            user: COMMAND_RESULT,
-            body: `${this.players.current.name} a passé son tour`,
-        };
+        const msg: ChatMessage = { user: COMMAND_RESULT, body: `${this.players.current.name} a passé son tour` };
         this.commandMessage.next(msg);
         this.skipTurn();
     }
@@ -226,16 +228,12 @@ export class GameManagerService {
     placeTiles(word: string, coordStr: string, vertical: boolean, player: Player): string {
         //  Check if it's the player's turn to play
         if (this.players.current !== player) return "Ce n'est pas votre tour";
-
         //  Get the tiles and coordinates associated to the word
         const tileCoords: TileCoords[] = this.getTileCoords(word, coordStr, vertical);
-
         //  Compare the letter positions to the tiles on the board
         if (this.wordCollides(tileCoords)) return 'Commande impossible a realise';
-
         //  Check that the command will lead to tiles being placed
         if (tileCoords.length === 0) return 'Le mot que vous tentez de placer se trouve deja sur le tableau';
-
         //  Manage blank letters
         const tilesToRetrieve: TileCoords[] = [];
         const tilesToPlace: TileCoords[] = [];
