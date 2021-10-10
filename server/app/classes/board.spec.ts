@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { describe } from 'mocha';
 import { Anchor } from './anchor';
 import { Board } from './board';
+import { Trie } from './trie';
 import { coordToKey } from './utils';
 
 const BOARD_SIZE = 15;
@@ -117,5 +118,15 @@ describe('Board', () => {
         ];
         const anchors = board.findAnchorsOneDimension(array, 0);
         expect(anchors).to.deep.equal(expectedAnchors);
+    });
+
+    it('generatePrefixes returns valid prefixes', () => {
+        const dictionary = new Trie(['aacbb', 'acbbc', 'bbcaa', 'ccabc']);
+        const easel = 'aab';
+        const limit = 3;
+        const expectedPrefixes = ['aa', 'a', 'b'];
+        const validated = board.generatePrefixes(easel, limit, dictionary);
+
+        expect(validated).to.have.deep.members(expectedPrefixes);
     });
 });

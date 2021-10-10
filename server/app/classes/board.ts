@@ -1,6 +1,7 @@
 import { BOARD_SIZE } from '@app/constants';
 import { Anchor } from './anchor';
-import { coordToKey } from './utils';
+import { Trie, TrieNode } from './trie';
+import { coordToKey, getStringCombinations } from './utils';
 import { Vec2 } from './vec2';
 
 export class Board {
@@ -114,4 +115,30 @@ export class Board {
         }
         return anchors;
     }
+
+    /**
+     * Finds all valid prefixes for the given parameters
+     *
+     * @param easel characters to find valid prefixes from
+     * @param limit max prefix length
+     */
+    generatePrefixes(easel: string, limit: number, dictionary: Trie): string[] {
+        const unvalidated: string[] = getStringCombinations(easel, limit);
+        const validated = unvalidated.filter((item) => dictionary.find(item).length > 0);
+        return validated;
+    }
+
+    // generateRightPart(prefix: string, node: TrieNode, ): string[] {
+    //     // this.generateRightPart();
+    //     // if (limit > 0) {
+    //     //     for (const edge of node.children) {
+    //     //         const [letter, newNode] = edge;
+    //     //         if (easel.includes(letter)) {
+    //     //             easel.replace(letter, '');
+    //     //             this.generateLeftPart(prefix + letter, anchor, newNode, limit - 1, easel);
+    //     //             easel.concat(letter);
+    //     //         }
+    //     //     }
+    //     // }
+    // }
 }

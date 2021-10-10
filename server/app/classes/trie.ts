@@ -1,6 +1,6 @@
 // Reference https://en.wikipedia.org/wiki/Trie
 
-interface TrieNode {
+export interface TrieNode {
     terminal: boolean;
     parent: TrieNode | null;
     value: string | null;
@@ -10,13 +10,16 @@ interface TrieNode {
 export class Trie {
     private root: TrieNode;
 
-    constructor() {
+    constructor(dictionary?: string[]) {
         this.root = {
             terminal: false,
             parent: null,
             value: null,
             children: new Map(),
         };
+        if (dictionary) {
+            for (const word of dictionary) this.insert(word);
+        }
     }
 
     /**

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { coordToKey, keyToCoord } from './utils';
+import { coordToKey, getStringCombinations, keyToCoord } from './utils';
 
 describe('Utils', () => {
     it('coordToKey returns correct string key', () => {
@@ -27,4 +27,19 @@ describe('Utils', () => {
         expect(keyToCoord(coord2)).to.deep.equal(expectedCoord2);
         expect(keyToCoord(coord3)).to.deep.equal(expectedCoord3);
     });
+
+    it('getStringCombinations returns all combinations of the given length', () => {
+        const str = 'abc';
+        const length = 2;
+        const expectedOutput = ['a', 'b', 'c', 'ab', 'ac', 'ba', 'bc', 'ca', 'cb'];
+
+        expect(getStringCombinations(str, length)).to.have.deep.members(expectedOutput);
+    });
+
+    it('getStringCombinations returns no duplicates', () => {
+        const str = 'aaaaaaa';
+        const expectedOutput = ['a', 'aa', 'aaa', 'aaaa', 'aaaaa', 'aaaaaa', 'aaaaaaa'];
+
+        expect(getStringCombinations(str, str.length)).to.have.deep.members(expectedOutput);
+    })
 });
