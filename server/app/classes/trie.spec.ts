@@ -1,0 +1,41 @@
+import { expect } from 'chai';
+import { describe } from 'mocha';
+import { Trie } from './trie';
+
+describe('Trie', () => {
+    let trie: Trie;
+
+    beforeEach(() => {
+        trie = new Trie();
+    });
+
+    it('insert() inserts the word into the trie', () => {
+        const word = 'word';
+        trie.insert(word);
+
+        expect(trie.contains(word)).to.equal(true);
+    });
+
+    it('contains() returns true if word is in trie, false otherwise', () => {
+        const words = ['abc', 'xyz', 'uwu'];
+
+        trie.insert(words[0]);
+        trie.insert(words[1]);
+
+        expect(trie.contains(words[0])).to.equal(true);
+        expect(trie.contains(words[1])).to.equal(true);
+        expect(trie.contains(words[2])).to.equal(false);
+    });
+
+    it('find() returns all possible words using a prefix', () => {
+        const words = ['abc', 'aabbcc', 'aabbaabb', 'aabcbc'];
+        trie.insert(words[0]);
+        trie.insert(words[1]);
+        trie.insert(words[2]);
+        trie.insert(words[3]);
+
+        const prefix = 'aab';
+        const expectedWords = ['aabbcc', 'aabbaabb', 'aabcbc'];
+        expect(trie.find(prefix)).to.deep.equal(expectedWords);
+    });
+});
