@@ -82,7 +82,7 @@ export class Board {
         const transposed = this.transpose();
         for (let i = 0; i < this.data.length; i++) {
             const transposedAnchors = this.findAnchorsOneDimension(transposed[i], i);
-            for (const tAnchor of transposedAnchors) anchors.push({ x: tAnchor.y, y: tAnchor.x });
+            for (const tAnchor of transposedAnchors) anchors.push({ x: tAnchor.y, y: tAnchor.x, leftLength: tAnchor.leftLength });
         }
         for (const anchor of anchors) {
             this.anchors.add(coordToKey(anchor));
@@ -102,9 +102,14 @@ export class Board {
         const anchors: Anchor[] = [];
         for (let i = 0; i < arr.length; i++) {
             if (arr[i]) continue;
-
             if (arr[i - 1] || arr[i + 1]) {
-                anchors.push({ x: rowNumber, y: i });
+                const lastElementIndex = -1;
+                const lastAnchor = anchors.slice(lastElementIndex)[0];
+                anchors.push({
+                    x: rowNumber,
+                    y: i,
+                    leftLength: lastAnchor ? i - lastAnchor.y - 1 : i,
+                });
             }
         }
         return anchors;
