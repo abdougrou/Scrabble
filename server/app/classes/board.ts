@@ -1,22 +1,32 @@
 import { BOARD_SIZE } from '@app/constants';
 import { Anchor } from './anchor';
+import { coordToKey } from './utils';
 import { Vec2 } from './vec2';
 
 export class Board {
+    /**
+     * 2d character array storing letters
+     */
     data: (string | null)[][] = [];
-    anchors: Anchor[] = [];
+    /**
+     * 2d array storing anchors
+     */
+    anchors: Set<string> = new Set();
 
     /**
-     * Creates and initializes a 15x15 null matrix
+     * Initializes a 15x15 null matrix
      */
-    constructor() {
+    initialize() {
         for (let x = 0; x < BOARD_SIZE; x++) {
             const row: (string | null)[] = [];
+            const anchorRow: boolean[] = [];
             for (let y = 0; y < BOARD_SIZE; y++) {
                 row.push(null);
+                anchorRow.push(false);
             }
             this.data.push(row);
         }
+        this.anchors.add(coordToKey({ x: 7, y: 7 }));
     }
 
     /**
@@ -37,7 +47,18 @@ export class Board {
      * @param letter the letter to place
      */
     setLetter(coord: Vec2, letter: string) {
-        this.data[coord.y][coord.x] = letter[0];
+        this.data[coord.x][coord.y] = letter;
+        this.anchors.delete(coordToKey(coord));
+    }
+
+    /**
+     * Get a letter at the provided coordinate
+     *
+     * @param coord letter coordinate
+     * @returns letter at coordinate if it null if it does not exist
+     */
+    getLetter(coord: Vec2): string | null {
+        return this.data[coord.x][coord.y];
     }
 
     /**
@@ -61,11 +82,10 @@ export class Board {
         const transposed = this.transpose();
         for (let i = 0; i < this.data.length; i++) {
             const transposedAnchors = this.findAnchorsOneDimension(transposed[i], i);
-            for (const tAnchor of transposedAnchors) {
-                const coord = tAnchor.coord;
-                tAnchor.coord = { x: coord.y, y: coord.x };
-            }
-            anchors = anchors.concat(transposedAnchors);
+            for (const tAnchor of transposedAnchors) anchors.push({ x: tAnchor.y, y: tAnchor.x });
+        }
+        for (const anchor of anchors) {
+            this.anchors.add(coordToKey(anchor));
         }
         return anchors;
     }
@@ -84,7 +104,7 @@ export class Board {
             if (arr[i]) continue;
 
             if (arr[i - 1] || arr[i + 1]) {
-                anchors.push({ coord: { x: rowNumber, y: i } });
+                anchors.push({ x: rowNumber, y: i });
             }
         }
         return anchors;

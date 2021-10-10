@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { describe } from 'mocha';
 import { Anchor } from './anchor';
 import { Board } from './board';
+import { coordToKey } from './utils';
 
 const BOARD_SIZE = 15;
 
@@ -13,11 +14,13 @@ describe('Board', () => {
     });
 
     it('board is 15 by 15', () => {
+        board.initialize();
         expect(board.data.length).to.equal(BOARD_SIZE);
         expect(board.data[0].length).to.equal(BOARD_SIZE);
     });
 
     it('new board is filled with null', () => {
+        board.initialize();
         const rows: string[] = [];
         for (let i = 0; i < BOARD_SIZE; i++) {
             rows.push(board.data[i].join(''));
@@ -26,7 +29,13 @@ describe('Board', () => {
         expect(boardString).to.equal('');
     });
 
-    it('getBoard should return a copy of the board', () => {
+    it('new board has one centered anchor', () => {
+        board.initialize();
+        expect(board.anchors.size).to.equal(1);
+        expect(board.anchors.has(coordToKey({ x: 7, y: 7 })));
+    });
+
+    it('clone should return a copy of the board', () => {
         board.data = [
             ['1', '2', '3'],
             ['4', '5', '6'],
@@ -35,6 +44,22 @@ describe('Board', () => {
         const clone = board.clone();
         expect(clone).to.not.equal(board.data);
         expect(clone).to.deep.equal(board.data);
+    });
+
+    it('setLetters places the letter in the board', () => {
+        board.initialize();
+        const letter = 'x';
+        const coord = { x: 3, y: 8 };
+        board.setLetter(coord, letter);
+        expect(board.data[coord.x][coord.y]).to.equal(letter);
+    });
+
+    it('getLetter returns the letter at coord if it exists, null otherwise', () => {
+        board.initialize();
+        const coord = { x: 5, y: 11 };
+        const letter = 'x';
+        board.setLetter(coord, letter);
+        expect(board.getLetter(coord)).to.equal(letter);
     });
 
     it('transpopse should return a transposed matrix', () => {
@@ -59,22 +84,34 @@ describe('Board', () => {
         ];
         board.data = matrix;
         const expectedAnchors: Anchor[] = [
-            { coord: { x: 0, y: 1 } },
-            { coord: { x: 1, y: 0 } },
-            { coord: { x: 1, y: 2 } },
-            { coord: { x: 2, y: 1 } },
+            { x: 0, y: 1 },
+            { x: 1, y: 0 },
+            { x: 1, y: 2 },
+            { x: 2, y: 1 },
         ];
         const anchors = board.findAnchors();
         expect(anchors).to.have.deep.members(expectedAnchors);
     });
 
+    it('findAnchors sets board anchors', () => {
+        const matrix = [
+            [null, null, null],
+            [null, 'x', null],
+            [null, null, null],
+        ];
+        board.data = matrix;
+        const expectedAnchorCount = 4;
+        board.findAnchors();
+        expect(board.anchors.size).to.equal(expectedAnchorCount);
+    });
+
     it('findAnchorsOneDimension returns all anchors in an array', () => {
         const array = [null, null, 'x', null, 'x', null, null, 'x'];
         const expectedAnchors: Anchor[] = [
-            { coord: { x: 0, y: 1 } },
-            { coord: { x: 0, y: 3 } },
-            { coord: { x: 0, y: 5 } },
-            { coord: { x: 0, y: 6 } },
+            { x: 0, y: 1 },
+            { x: 0, y: 3 },
+            { x: 0, y: 5 },
+            { x: 0, y: 6 },
         ];
         const anchors = board.findAnchorsOneDimension(array, 0);
         expect(anchors).to.deep.equal(expectedAnchors);
