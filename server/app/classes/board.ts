@@ -1,6 +1,5 @@
 import { BOARD_SIZE } from '@app/constants';
-import { Anchor } from './anchor';
-import { Trie, TrieNode } from './trie';
+import { Trie } from './trie';
 import { coordToKey, getStringCombinations } from './utils';
 import { Vec2 } from './vec2';
 
@@ -67,53 +66,6 @@ export class Board {
      */
     transpose(): (string | null)[][] {
         return this.data[0].map((_, colIndex) => this.data.map((row) => row[colIndex]));
-    }
-
-    /**
-     * Finds all anchors in the board
-     * An anchor is a null element adjacent to a non null element
-     *
-     * @returns array of anchors
-     */
-    findAnchors(): Anchor[] {
-        let anchors: Anchor[] = [];
-        for (let i = 0; i < this.data.length; i++) {
-            anchors = anchors.concat(this.findAnchorsOneDimension(this.data[i], i));
-        }
-        const transposed = this.transpose();
-        for (let i = 0; i < this.data.length; i++) {
-            const transposedAnchors = this.findAnchorsOneDimension(transposed[i], i);
-            for (const tAnchor of transposedAnchors) anchors.push({ x: tAnchor.y, y: tAnchor.x, leftLength: tAnchor.leftLength });
-        }
-        for (const anchor of anchors) {
-            this.anchors.add(coordToKey(anchor));
-        }
-        return anchors;
-    }
-
-    /**
-     * Finds all anchors for a given array
-     * An anchor is a null element adjacent to a non null element
-     *
-     * @param arr array of elements to find anchors in
-     * @param rowNumber to use in anchor coordinate
-     * @returns array of anchors
-     */
-    findAnchorsOneDimension(arr: (string | null)[], rowNumber: number): Anchor[] {
-        const anchors: Anchor[] = [];
-        for (let i = 0; i < arr.length; i++) {
-            if (arr[i]) continue;
-            if (arr[i - 1] || arr[i + 1]) {
-                const lastElementIndex = -1;
-                const lastAnchor = anchors.slice(lastElementIndex)[0];
-                anchors.push({
-                    x: rowNumber,
-                    y: i,
-                    leftLength: lastAnchor ? i - lastAnchor.y - 1 : i,
-                });
-            }
-        }
-        return anchors;
     }
 
     /**
