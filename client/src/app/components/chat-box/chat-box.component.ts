@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
 import { KEYBOARD_EVENT_RECEIVER, MouseButton, SYSTEM_NAME } from '@app/constants';
@@ -11,7 +11,7 @@ import { PlayerService } from '@app/services/player.service';
     templateUrl: './chat-box.component.html',
     styleUrls: ['./chat-box.component.scss'],
 })
-export class ChatBoxComponent {
+export class ChatBoxComponent implements OnChanges {
     @ViewChild('messageInput') messageInput: ElementRef<HTMLInputElement>;
 
     @Input() keyboardReceiver: string;
@@ -40,6 +40,14 @@ export class ChatBoxComponent {
     @HostListener('keydown', ['$event'])
     buttonDetect(event: KeyboardEvent) {
         this.buttonPressed = event.key;
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes.keyboardReceiver) {
+            if (this.keyboardReceiver === KEYBOARD_EVENT_RECEIVER.chatbox) {
+                // focus l'input du text
+            }
+        }
     }
 
     submitInput(): void {

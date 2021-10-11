@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { CANVAS_HEIGHT, CANVAS_WIDTH } from '@app/constants';
+import { CANVAS_HEIGHT, CANVAS_WIDTH, KEYBOARD_EVENT_RECEIVER } from '@app/constants';
 import { GridService } from '@app/services/grid.service';
 @Component({
     selector: 'app-play-area',
@@ -35,6 +35,13 @@ export class PlayAreaComponent implements AfterViewInit {
 
     get height(): number {
         return this.canvasSize.y;
+    }
+
+    clickOnBoard(event: MouseEvent) {
+        this.changeKeyboardReceiver(KEYBOARD_EVENT_RECEIVER.board);
+        this.clickedInside(true);
+        // eslint-disable-next-line no-console
+        console.log(`coordonnées sont x: ${event.offsetX} et ${event.offsetY}`);
     }
 
     changeKeyboardReceiver(newKeyboardReceiver: string) {

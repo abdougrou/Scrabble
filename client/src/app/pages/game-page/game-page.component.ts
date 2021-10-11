@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component } from '@angular/core';
 import { KEYBOARD_EVENT_RECEIVER, MouseButton } from '@app/constants';
 
 @Component({
@@ -14,7 +14,6 @@ export class GamePageComponent {
     // if the value gets to 2 or more, it means that we didnt click inside a keyboardreceiver
     clickInsideCounter = 1;
 
-    @HostListener('mousedown', ['$event'])
     mouseClick(event: MouseEvent) {
         if (event.button === MouseButton.Left || event.button === MouseButton.Right) {
             this.clickInsideCounter++;

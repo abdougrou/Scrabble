@@ -15,6 +15,8 @@ export class EaselComponent implements OnChanges {
     @Output() isInside = new EventEmitter<boolean>();
 
     tiles: EaselTile[] = [];
+    buttonPressed = '';
+
     constructor(readonly playerService: PlayerService, private mouseManager: MouseManagerService) {
         this.tiles = this.playerService.mainPlayer.easel.tiles;
         if (this.keyboardReceiver !== KEYBOARD_EVENT_RECEIVER.easel)
@@ -32,6 +34,27 @@ export class EaselComponent implements OnChanges {
         }
     }
 
+    @HostListener('document:keydown', ['$event'])
+    buttonDetect(event: KeyboardEvent) {
+        if (this.keyboardReceiver === KEYBOARD_EVENT_RECEIVER.easel) {
+            this.buttonPressed = event.key;
+            if (event.shiftKey && event.key === '*') {
+                this.buttonPressed = '*';
+            }
+            if (event.key === 'ArrowRight') this.moveRight();
+            else if (event.key === 'ArrowLeft') this.moveLeft();
+            else {
+                if (this.containsTile(event.key.toLowerCase())) {
+                    this.selectTileForManipulation(this.tileKeyboardClicked(event.key.toLowerCase()));
+                } else if (!event.shiftKey) {
+                    this.tiles.forEach((easelTile) => {
+                        if (easelTile.state === TileState.Manipulation) easelTile.state = TileState.None;
+                    });
+                }
+            }
+        }
+    }
+
     ngOnChanges(changes: SimpleChanges) {
         if (changes.keyboardReceiver) {
             if (this.keyboardReceiver !== KEYBOARD_EVENT_RECEIVER.easel) this.resetTileState();
@@ -44,42 +67,101 @@ export class EaselComponent implements OnChanges {
         });
     }
 
-    tileClicked(tile: EaselTile, event: MouseEvent): void {
-        if (this.mouseManager.easelMouseClicked(true, event) === TileState.Manipulation) {
-            switch (tile.state) {
-                case TileState.Manipulation:
-                    break;
-                // this code follows the project description PDF "scrabble"
-                case TileState.Exchange:
-                case TileState.None:
-                    this.tiles.forEach((easelTile) => {
-                        easelTile.state = TileState.None;
-                    });
-                    tile.state = TileState.Manipulation;
-                    break;
+    containsTile(tileLetter: string): boolean {
+        let found = false;
+        this.tiles.forEach((easelTile) => {
+            if (easelTile.tile.letter === tileLetter) {
+                found = true;
+            }
+        });
+        return found;
+    }
 
-                // // this code follows the issues description
-                // case TileState.Exchange:
-                //     break;
-                // case TileState.None:
-                //     this.tiles.forEach((easelTile) => {
-                //         if (easelTile.state === TileState.Manipulation) easelTile.state = TileState.None;
-                //     });
-                //     tile.state = TileState.Manipulation;
-                //     break;
+    tileKeyboardClicked(letter: string): EaselTile {
+        const NOT_PRESENT = -1;
+        let indexOfFirstOccuredTile = NOT_PRESENT;
+        let indexOfManipulatedTile = NOT_PRESENT;
+        let indexOfNextOccurance = NOT_PRESENT;
+        // We try to find the first occurance of the tile with the selected letter
+        this.tiles.forEach((easelTile) => {
+            if (easelTile.tile.letter === letter && indexOfFirstOccuredTile === NOT_PRESENT) {
+                indexOfFirstOccuredTile = this.tiles.indexOf(easelTile);
             }
-        }
-        if (this.mouseManager.easelMouseClicked(true, event) === TileState.Exchange) {
-            switch (tile.state) {
-                case TileState.Exchange:
-                    tile.state = TileState.None;
-                    break;
-                // if we want to respect the issues instead of the project description PDF "scrabble", we add a break in the manipulation case;
-                case TileState.Manipulation:
-                case TileState.None:
-                    tile.state = TileState.Exchange;
-                    break;
-            }
+        });
+        // We try to see if there is a tile already in manipulation state
+        this.tiles.forEach((easelTile) => {
+            if (easelTile.state === TileState.Manipulation && indexOfManipulatedTile === NOT_PRESENT)
+                indexOfManipulatedTile = this.tiles.indexOf(easelTile);
+        });
+        // we take the first occurance if there is no manipulated tile already
+        // or if the manipulated tile is not the same as the one we are looking for
+        if (
+            indexOfManipulatedTile === NOT_PRESENT ||
+            this.tiles[indexOfFirstOccuredTile].tile.letter !== this.tiles[indexOfManipulatedTile].tile.letter
+        ) {
+            return this.tiles[indexOfFirstOccuredTile];
+        } else {
+            this.tiles.forEach((easelTile) => {
+                if (easelTile.tile.letter === letter && indexOfNextOccurance === NOT_PRESENT) {
+                    indexOfNextOccurance = this.tiles.indexOf(easelTile, indexOfManipulatedTile + 1);
+                }
+            });
+            if (indexOfNextOccurance === NOT_PRESENT) return this.tiles[indexOfFirstOccuredTile];
+            else return this.tiles[indexOfNextOccurance];
         }
     }
+
+    tileClicked(tile: EaselTile, event: MouseEvent): void {
+        if (this.mouseManager.easelMouseClicked(true, event) === TileState.Manipulation) {
+            this.selectTileForManipulation(tile);
+        }
+        if (this.mouseManager.easelMouseClicked(true, event) === TileState.Exchange) {
+            this.selectTileForExchange(tile);
+        }
+    }
+
+    selectTileForManipulation(tile: EaselTile) {
+        switch (tile.state) {
+            case TileState.Manipulation:
+                break;
+            // this code follows the project description PDF "scrabble"
+            case TileState.Exchange:
+            case TileState.None:
+                this.tiles.forEach((easelTile) => {
+                    easelTile.state = TileState.None;
+                });
+                tile.state = TileState.Manipulation;
+                break;
+
+            // // this code follows the issues description
+            // case TileState.Exchange:
+            //     break;
+            // case TileState.None:
+            //     this.tiles.forEach((easelTile) => {
+            //         if (easelTile.state === TileState.Manipulation) easelTile.state = TileState.None;
+            //     });
+            //     tile.state = TileState.Manipulation;
+            //     break;
+        }
+    }
+
+    selectTileForExchange(tile: EaselTile) {
+        switch (tile.state) {
+            case TileState.Exchange:
+                tile.state = TileState.None;
+                break;
+            // if we want to respect the issues instead of the project description PDF "scrabble", we add a break in the manipulation case;
+            case TileState.Manipulation:
+            case TileState.None:
+                // check if current player turn
+                tile.state = TileState.Exchange;
+                break;
+        }
+    }
+
+    moveLeft() {}
+
+    moveRight() {}
+
+    // selectTileWithKeyboard(event: KeyboardEvent) {}
 }
