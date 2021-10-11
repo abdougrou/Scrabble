@@ -1,7 +1,7 @@
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild } from '@angular/core';
 import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
-import { SYSTEM_NAME } from '@app/constants';
+import { KEYBOARD_EVENT_RECEIVER, MouseButton, SYSTEM_NAME } from '@app/constants';
 import { CommandHandlerService } from '@app/services/command-handler.service';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { PlayerService } from '@app/services/player.service';
@@ -13,6 +13,10 @@ import { PlayerService } from '@app/services/player.service';
 })
 export class ChatBoxComponent {
     @ViewChild('messageInput') messageInput: ElementRef<HTMLInputElement>;
+
+    @Input() keyboardReceiver: string;
+    @Output() keyboardReceiverChange = new EventEmitter<string>();
+    @Output() isInside = new EventEmitter<boolean>();
 
     buttonPressed = '';
     message = '';
@@ -43,9 +47,9 @@ export class ChatBoxComponent {
             this.chatMessage.user = this.mainPlayerName;
             this.chatMessage.body = this.message;
             this.player = this.getPlayerByName(this.chatMessage.user);
+            this.messageInput.nativeElement.value = '';
             this.showMessage(this.chatMessage);
             this.showMessage(this.checkCommand(this.chatMessage, this.player));
-            this.messageInput.nativeElement.value = '';
         }
     }
 
@@ -93,5 +97,13 @@ export class ChatBoxComponent {
 
     getPlayerByName(name: string): Player {
         return this.playerService.getPlayerByName(name);
+    }
+
+    insideChatBox(event: MouseEvent) {
+        if (event.button === MouseButton.Left) {
+            this.keyboardReceiver = KEYBOARD_EVENT_RECEIVER.chatbox;
+            this.keyboardReceiverChange.emit(KEYBOARD_EVENT_RECEIVER.chatbox);
+            this.isInside.emit(true);
+        }
     }
 }

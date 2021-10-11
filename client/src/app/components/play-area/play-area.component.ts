@@ -1,18 +1,8 @@
-import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from '@app/constants';
 import { GridService } from '@app/services/grid.service';
-import { PlayerService } from '@app/services/player.service';
-
-export enum MouseButton {
-    Left = 0,
-    Middle = 1,
-    Right = 2,
-    Back = 3,
-    Forward = 4,
-}
-
 @Component({
     selector: 'app-play-area',
     templateUrl: './play-area.component.html',
@@ -21,23 +11,18 @@ export enum MouseButton {
 export class PlayAreaComponent implements AfterViewInit {
     @ViewChild('canvas', { static: false }) gridCanvas!: ElementRef<HTMLCanvasElement>;
 
+    @Input() keyboardReceiver: string;
+    @Output() keyboardReceiverChange = new EventEmitter<string>();
+    @Output() isInside = new EventEmitter<boolean>();
+
     tiles: Tile[] = [];
     mousePosition: Vec2 = { x: 0, y: 0 };
     buttonPressed = '';
     private canvasSize = { x: CANVAS_WIDTH, y: CANVAS_HEIGHT };
 
-    constructor(private readonly gridService: GridService, readonly playerService: PlayerService) {
-        this.tiles = this.playerService.mainPlayer.easel.tiles;
-    }
-
-    @HostListener('keydown', ['$event'])
-    buttonDetect(event: KeyboardEvent) {
-        this.buttonPressed = event.key;
-    }
+    constructor(private readonly gridService: GridService) {}
 
     ngAfterViewInit(): void {
-        this.tiles = this.playerService.mainPlayer.easel.tiles;
-
         this.gridService.gridContext = this.gridCanvas.nativeElement.getContext('2d') as CanvasRenderingContext2D;
         this.gridService.drawBoard();
         this.gridService.drawGridIds();
@@ -52,10 +37,12 @@ export class PlayAreaComponent implements AfterViewInit {
         return this.canvasSize.y;
     }
 
-    // // TODO : déplacer ceci dans un service de gestion de la souris!
-    // mouseHitDetect(event: MouseEvent) {
-    //     if (event.button === MouseButton.Left) {
-    //         this.mousePosition = { x: event.offsetX, y: event.offsetY };
-    //     }
-    // }
+    changeKeyboardReceiver(newKeyboardReceiver: string) {
+        this.keyboardReceiver = newKeyboardReceiver;
+        this.keyboardReceiverChange.emit(newKeyboardReceiver);
+    }
+
+    clickedInside(isInside: boolean) {
+        this.isInside.emit(isInside);
+    }
 }

@@ -22,6 +22,22 @@ export const COMMANDS = {
     debug: '!debug',
 };
 
+export const KEYBOARD_EVENT_RECEIVER = {
+    chatbox: 'chatbox',
+    easel: 'easel',
+    board: 'board',
+    none: 'none',
+};
+
+// Mouse Buttons
+export const enum MouseButton {
+    Left = 0,
+    Middle = 1,
+    Right = 2,
+    Back = 3,
+    Forward = 4,
+}
+
 // Reserve constants
 export const MIN_EXCHANGE_RESERVE_COUNT = 7;
 export const FULL_RESERVE_COUNT = 102;

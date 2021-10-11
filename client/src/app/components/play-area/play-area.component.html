@@ -1,6 +1,11 @@
-<div id="grid-container">
+<div id="grid-container" oncontextmenu="return false;">
     <canvas id="canvas" [attr.width]="width" [attr.height]="height" #canvas></canvas>
-    <app-easel id="easel" [tiles]='tiles'></app-easel>
+    <app-easel
+        [keyboardReceiver]="keyboardReceiver"
+        (isInside)="clickedInside($event)"
+        (keyboardReceiverChange)="changeKeyboardReceiver($event)"
+        id="easel"
+    ></app-easel>
     <!--
     <div id="mouse-position-display">
         <p>Cliquez sur la grille pour avoir la position de la souris</p>
@@ -10,5 +15,4 @@
         <p>Appuyez sur une touche du clavier pour la détecter</p>
         <p *ngIf="buttonPressed !== ''">Touche : {{ buttonPressed }}</p>
     </div>
--->
-</div>
+--></div>

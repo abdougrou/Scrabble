@@ -1,5 +1,11 @@
 import { Vec2 } from './vec2';
 
+export enum TileState {
+    None = 0,
+    Manipulation = 1,
+    Exchange = 2,
+}
+
 export interface Tile {
     letter: string;
     points: number;
@@ -8,6 +14,11 @@ export interface Tile {
 export interface ReserveTile {
     tile: Tile;
     count: number;
+}
+
+export interface EaselTile {
+    tile: Tile;
+    state: TileState;
 }
 
 export interface TileCoords {

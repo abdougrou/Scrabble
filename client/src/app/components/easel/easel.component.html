@@ -1,10 +1,15 @@
 <mat-card id="easel">
-  <mat-card class="tile" *ngFor="let tile of tiles">
-    <div class="letter">
-      {{tile.letter | uppercase}}
-    </div>
-    <div class="points">
-      {{tile.points}}
-    </div>
-  </mat-card>
+    <mat-card
+        class="tile"
+        (mousedown)="tileClicked(tile, $event)"
+        *ngFor="let tile of tiles"
+        [ngStyle]="{ 'background-color': tile.state === 1 ? 'red' : tile.state === 2 ? 'blue' : 'burlywood' }"
+    >
+        <div class="letter">
+            {{ tile.tile.letter | uppercase }}
+        </div>
+        <div class="points">
+            {{ tile.tile.points }}
+        </div>
+    </mat-card>
 </mat-card>
