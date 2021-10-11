@@ -26,13 +26,37 @@ export class CrossCheck {
         return INVALID_LETTER;
     }
 
-    addLetter(letter: string) {
-        // this.value &= 1 << CrossCheck.getLetterBitShift(letter[0]);
+    /**
+     * Adds a letter to the bit vector
+     *
+     * @param check bit vector
+     * @param letter letter to add to bit vector
+     */
+    static addLetter(check: CrossCheck, letter: string) {
+        check.value += this.getLetterValue(letter[0]);
+    }
 
-        let letterValue = 1;
-        const letterShift = CrossCheck.getLetterBitShift(letter[0]);
-        for (let i = 0; i < letterShift; i++) letterValue *= 2;
+    /**
+     * Removes a letter from the bit vector
+     *
+     * @param check bit vector
+     * @param letter letter to remove from the bit vector
+     */
+    static removeLetter(check: CrossCheck, letter: string) {
+        check.value -= this.getLetterValue(letter[0]);
+    }
 
-        this.value += letterValue;
+    /**
+     * Calculates the bit value for a given letter
+     *
+     * @param letter to calculate bit value
+     * @returns bit value
+     */
+    static getLetterValue(letter: string): number {
+        let value = 1;
+        const shift = CrossCheck.getLetterBitShift(letter[0]);
+        if (shift === INVALID_LETTER) return INVALID_LETTER;
+        for (let i = 0; i < shift; i++) value *= 2;
+        return value;
     }
 }
