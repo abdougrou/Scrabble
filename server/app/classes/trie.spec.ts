@@ -50,4 +50,15 @@ describe('Trie', () => {
         const expectedWords: string[] = [];
         expect(trie.find(prefix)).to.deep.equal(expectedWords);
     });
+
+    it('getNode returns node if word exists, undefined otherwise', () => {
+        const words = ['abc', 'xyz'];
+
+        trie.insert(words[0]);
+        trie.insert(words[1]);
+
+        expect(trie.getNode('ab')).to.not.be.an('undefined');
+        expect(trie.getNode('xy')).to.not.be.an('undefined');
+        expect(trie.getNode('uwu')).to.be.an('undefined');
+    });
 });

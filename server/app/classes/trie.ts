@@ -52,15 +52,8 @@ export class Trie {
      * @returns true if whole word exists, false otherwise
      */
     contains(word: string): boolean {
-        let node = this.root;
-
-        for (const char of word) {
-            const nextNode = node.children.get(char);
-            if (nextNode) node = nextNode;
-            else return false;
-        }
-
-        return node.terminal;
+        const node = this.getNode(word);
+        return node ? node.terminal : false;
     }
 
     /**
@@ -70,18 +63,28 @@ export class Trie {
      * @returns a string array containing all words starting with prefix
      */
     find(prefix: string): string[] {
-        let node = this.root;
         const output: string[] = [];
+        const node = this.getNode(prefix);
+        if (node) {
+            this.findAllWords(node, output);
+        }
+        return output;
+    }
 
-        for (const char of prefix) {
+    /**
+     * Get the node of the last character of a word
+     *
+     * @param word word to get the last node from
+     * @returns node found at the end of the word, null if word does not exist
+     */
+    getNode(word: string): TrieNode | undefined {
+        let node = this.root;
+        for (const char of word) {
             const nextNode = node.children.get(char);
             if (nextNode) node = nextNode;
-            else return output;
+            else return undefined;
         }
-
-        this.findAllWords(node, output);
-
-        return output;
+        return node;
     }
 
     private findAllWords(node: TrieNode, arr: string[]) {
