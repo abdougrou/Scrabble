@@ -1,7 +1,7 @@
 import { expect } from 'chai';
-import { coordToKey, getStringCombinations, keyToCoord } from './utils';
+import { coordToKey, getStringCombinations, keyToCoord, transpose, transposeCoord } from './board-utils';
 
-describe('Utils', () => {
+describe('BoardUtils', () => {
     it('coordToKey returns correct string key', () => {
         const coord1 = { x: 0, y: 7 };
         const coord2 = { x: 7, y: 7 };
@@ -41,5 +41,25 @@ describe('Utils', () => {
         const expectedOutput = ['a', 'aa', 'aaa', 'aaaa', 'aaaaa', 'aaaaaa', 'aaaaaaa'];
 
         expect(getStringCombinations(str, str.length)).to.have.deep.members(expectedOutput);
-    })
+    });
+
+    it('transpopse should return a transposed matrix', () => {
+        const board = [
+            ['1', '2', '3'],
+            ['4', '5', '6'],
+            ['7', '8', '9'],
+        ];
+        const transposedBoard = [
+            ['1', '4', '7'],
+            ['2', '5', '8'],
+            ['3', '6', '9'],
+        ];
+        expect(transpose(board)).to.deep.equal(transposedBoard);
+    });
+
+    it('transposeCoord should return the coordinates flipped', () => {
+        const coord = { x: 10, y: 65 };
+        const expectedCoord = { x: 65, y: 10 };
+        expect(transposeCoord(coord)).to.deep.equal(expectedCoord);
+    });
 });

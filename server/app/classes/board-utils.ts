@@ -44,3 +44,21 @@ export const getStringCombinations = (str: string, length: number): string[] => 
 
     return Array.from(new Set(output.filter((item) => item.length <= length)));
 };
+
+/**
+ * @param arr 2d array to transpose
+ * @returns a transposed copy of the current board state
+ */
+export const transpose = (arr: (string | null)[][]): (string | null)[][] => {
+    return arr[0].map((_, colIndex) => arr.map((row) => row[colIndex]));
+};
+
+/**
+ * Transposes the coordinate passed
+ *
+ * @param coord coord to transpose
+ * @returns a transposed coord
+ */
+export const transposeCoord = (coord: Vec2): Vec2 => {
+    return { x: coord.y, y: coord.x };
+};

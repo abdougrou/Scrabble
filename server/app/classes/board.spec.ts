@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { describe } from 'mocha';
 import { Board } from './board';
 import { Trie } from './trie';
-import { coordToKey } from './utils';
+import { coordToKey } from './board-utils';
 
 const BOARD_SIZE = 15;
 
@@ -60,20 +60,6 @@ describe('Board', () => {
         const letter = 'x';
         board.setLetter(coord, letter);
         expect(board.getLetter(coord)).to.equal(letter);
-    });
-
-    it('transpopse should return a transposed matrix', () => {
-        board.data = [
-            ['1', '2', '3'],
-            ['4', '5', '6'],
-            ['7', '8', '9'],
-        ];
-        const transposedBoard = [
-            ['1', '4', '7'],
-            ['2', '5', '8'],
-            ['3', '6', '9'],
-        ];
-        expect(board.transpose()).to.deep.equal(transposedBoard);
     });
 
     it('generatePrefixes returns valid prefixes', () => {

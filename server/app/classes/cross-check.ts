@@ -1,3 +1,5 @@
+import { Trie } from './trie';
+
 const CHAR_CODE_A = 'a'.charCodeAt(0);
 const CHAR_CODE_Z = 'z'.charCodeAt(0);
 const CHAR_CODE_STAR = '*'.charCodeAt(0);
@@ -58,5 +60,48 @@ export class CrossCheck {
         if (shift === INVALID_LETTER) return INVALID_LETTER;
         for (let i = 0; i < shift; i++) value *= 2;
         return value;
+    }
+
+    /**
+     * Find all cross checks for given row
+     *
+     * @param row row containing board letters
+     * @param coord index in row
+     * @param dictionary dictionary to validate words
+     * @returns array of valid letters for coord
+     */
+    static rowCrossCheck(row: (string | null)[], coord: number, dictionary: Trie): string[] {
+        const validLetters: Set<string> = new Set();
+        const rowStr = row.map((item) => (item ? item : ' ')).join('');
+        let boardPrefix = '';
+        let boardSuffix = '';
+
+        if (row[coord - 1]) {
+            let i = coord - 1;
+            while (row[i]) i--;
+            boardPrefix = rowStr.slice(i + 1, coord);
+        }
+        if (row[coord + 1]) {
+            let i = coord + 1;
+            while (row[i]) i++;
+            boardSuffix = rowStr.slice(coord + 1, i);
+        }
+        let suffixes: string[] = [];
+        if (boardPrefix.length) {
+            suffixes = dictionary.find(boardPrefix).map((item) => item.slice(coord - 1));
+        } else {
+            for (let i = 'a'.charCodeAt(0); i <= 'z'.charCodeAt(0); i++) {
+                suffixes = suffixes.concat(dictionary.find(String.fromCharCode(i)));
+            }
+        }
+        for (const suffix of suffixes) {
+            if (suffix.length > row.length - coord) continue;
+            let valid = true;
+            for (let i = 1; i < suffix.length; i++) {
+                if (boardSuffix[i - 1] && boardSuffix[i - 1] !== suffix[i]) valid = false;
+            }
+            if (valid) validLetters.add(suffix[0]);
+        }
+        return Array.from(validLetters.keys());
     }
 }

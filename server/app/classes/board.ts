@@ -1,6 +1,6 @@
 import { BOARD_SIZE } from '@app/constants';
 import { Trie } from './trie';
-import { coordToKey, getStringCombinations } from './utils';
+import { coordToKey, getStringCombinations } from './board-utils';
 import { Vec2 } from './vec2';
 
 export class Board {
@@ -59,13 +59,6 @@ export class Board {
      */
     getLetter(coord: Vec2): string | null {
         return this.data[coord.x][coord.y];
-    }
-
-    /**
-     * @returns a transposed copy of the current board state
-     */
-    transpose(): (string | null)[][] {
-        return this.data[0].map((_, colIndex) => this.data.map((row) => row[colIndex]));
     }
 
     /**

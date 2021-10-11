@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { describe } from 'mocha';
 import { CrossCheck } from './cross-check';
+import { Trie } from './trie';
 
 describe('CrossCheck', () => {
     let check: CrossCheck;
@@ -75,5 +76,43 @@ describe('CrossCheck', () => {
         expect(CrossCheck.getLetterValue(n)).to.equal(expectN);
         expect(CrossCheck.getLetterValue(star)).to.equal(expectSTAR);
         expect(CrossCheck.getLetterValue(invalid)).to.equal(invalidBitShift);
+    });
+
+    it('rowCrossCheck returns all valid letters when suffix only exists', () => {
+        const dict: Trie = new Trie(['aavce', 'aaxxe']);
+        const row = [null, 'a', 'a', null, null, null];
+        const coord = 3;
+        const expectLetters = ['v', 'x'];
+
+        expect(CrossCheck.rowCrossCheck(row, coord, dict)).to.have.members(expectLetters);
+    });
+
+    it('rowCrossCheck returns all valid letters when prefix only exists', () => {
+        const dict: Trie = new Trie(['aavce', 'aaxxe', 'baa', 'maa']);
+        const row1 = [null, null, 'a', null, null, null];
+        const row2 = [null, null, 'a', null, null, null];
+        const coord = 1;
+        const expectLetters = ['a', 'b', 'm'];
+
+        expect(CrossCheck.rowCrossCheck(row1, coord, dict)).to.have.members(expectLetters);
+        expect(CrossCheck.rowCrossCheck(row2, coord, dict)).to.have.members(expectLetters);
+    });
+
+    it('rowCrossCheck returns all valid letters when suffix and prefix exists', () => {
+        const dict: Trie = new Trie(['aavce', 'aaxxe']);
+        const row = [null, 'a', 'a', null, 'c', null];
+        const coord = 3;
+        const expectLetters = ['v'];
+
+        const output = CrossCheck.rowCrossCheck(row, coord, dict);
+        expect(output).to.have.members(expectLetters);
+    });
+
+    it('rowCrossCheck returns only valid letters when the word fits in the row', () => {
+        const dict: Trie = new Trie(['aavce', 'aaxce']);
+        const row = [null, 'a', 'a', null];
+        const coord = 3;
+
+        expect(CrossCheck.rowCrossCheck(row, coord, dict)).to.have.members([]);
     });
 });
