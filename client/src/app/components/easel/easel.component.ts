@@ -55,6 +55,12 @@ export class EaselComponent implements OnChanges {
         }
     }
 
+    @HostListener('wheel', ['$event'])
+    scroll(event: WheelEvent) {
+        if (event.deltaY < 0) this.moveLeft();
+        else if (event.deltaY > 0) this.moveRight();
+    }
+
     ngOnChanges(changes: SimpleChanges) {
         if (changes.keyboardReceiver) {
             if (this.keyboardReceiver !== KEYBOARD_EVENT_RECEIVER.easel) this.resetTileState();
@@ -121,31 +127,26 @@ export class EaselComponent implements OnChanges {
     }
 
     selectTileForManipulation(tile: EaselTile) {
-        switch (tile.state) {
-            case TileState.Manipulation:
-                break;
-            // this code follows the project description PDF "scrabble"
-            case TileState.Exchange:
-            case TileState.None:
-                this.tiles.forEach((easelTile) => {
-                    easelTile.state = TileState.None;
-                });
-                tile.state = TileState.Manipulation;
-                break;
+        this.tiles.forEach((easelTile) => {
+            easelTile.state = TileState.None;
+        });
+        tile.state = TileState.Manipulation;
 
-            // // this code follows the issues description
-            // case TileState.Exchange:
-            //     break;
-            // case TileState.None:
-            //     this.tiles.forEach((easelTile) => {
-            //         if (easelTile.state === TileState.Manipulation) easelTile.state = TileState.None;
-            //     });
-            //     tile.state = TileState.Manipulation;
-            //     break;
-        }
+        // // this code follows the issues description
+        // case TileState.Exchange:
+        //     break;
+        // case TileState.None:
+        //     this.tiles.forEach((easelTile) => {
+        //         if (easelTile.state === TileState.Manipulation) easelTile.state = TileState.None;
+        //     });
+        //     tile.state = TileState.Manipulation;
+        //     break;
     }
 
     selectTileForExchange(tile: EaselTile) {
+        this.tiles.forEach((easelTile) => {
+            if (easelTile.state === TileState.Manipulation) easelTile.state = TileState.None;
+        });
         switch (tile.state) {
             case TileState.Exchange:
                 tile.state = TileState.None;
@@ -159,9 +160,37 @@ export class EaselComponent implements OnChanges {
         }
     }
 
-    moveLeft() {}
+    moveLeft() {
+        const NOT_PRESENT = -1;
+        let indexOfManipulatedTile = NOT_PRESENT;
+        this.tiles.forEach((easelTile) => {
+            if (easelTile.state === TileState.Manipulation && indexOfManipulatedTile === NOT_PRESENT) {
+                indexOfManipulatedTile = this.tiles.indexOf(easelTile);
+            }
+        });
+        if (indexOfManipulatedTile !== NOT_PRESENT) {
+            const prevIndex = indexOfManipulatedTile !== 0 ? indexOfManipulatedTile - 1 : this.tiles.length - 1;
+            const prevTile: EaselTile = this.tiles[prevIndex];
+            this.tiles[prevIndex] = this.tiles[indexOfManipulatedTile];
+            this.tiles[indexOfManipulatedTile] = prevTile;
+        }
+    }
 
-    moveRight() {}
+    moveRight() {
+        const NOT_PRESENT = -1;
+        let indexOfManipulatedTile = NOT_PRESENT;
+        this.tiles.forEach((easelTile) => {
+            if (easelTile.state === TileState.Manipulation && indexOfManipulatedTile === NOT_PRESENT) {
+                indexOfManipulatedTile = this.tiles.indexOf(easelTile);
+            }
+        });
+        if (indexOfManipulatedTile !== NOT_PRESENT) {
+            const nextIndex = indexOfManipulatedTile !== this.tiles.length - 1 ? indexOfManipulatedTile + 1 : 0;
+            const nextTile: EaselTile = this.tiles[nextIndex];
+            this.tiles[nextIndex] = this.tiles[indexOfManipulatedTile];
+            this.tiles[indexOfManipulatedTile] = nextTile;
+        }
+    }
 
     // selectTileWithKeyboard(event: KeyboardEvent) {}
 }
