@@ -9,6 +9,7 @@ import { COMMAND_RESULT, GRID_SIZE, LETTER_POINTS, MAX_SKIP_COUNT, SECOND_MD, ST
 import { BehaviorSubject, Subscription, timer } from 'rxjs';
 import { BoardService } from './board.service';
 import { CalculatePointsService } from './calculate-points.service';
+import { ExchangeTilesService } from './exchange-tiles.service';
 import { GridService } from './grid.service';
 import { PlayerService } from './player.service';
 import { ReserveService } from './reserve.service';
@@ -39,6 +40,7 @@ export class GameManagerService {
         private gridService: GridService,
         private wordValidation: WordValidationService,
         private calculatePoints: CalculatePointsService,
+        private exchangeTileService: ExchangeTilesService,
     ) {}
 
     get reserveCount() {
@@ -98,6 +100,15 @@ export class GameManagerService {
         this.startTimer();
         // Send player switch event
         if (this.players.current instanceof VirtualPlayer) this.playVirtualPlayer();
+    }
+
+    exchangeTiles(tiles: string, player: Player): string {
+        const message = this.exchangeTileService.exchangeTiles(tiles, player);
+        if (message === '') {
+            this.players.skipCounter = 0;
+            this.switchPlayers();
+            return `${player.name} a échangé les lettres ${tiles}`;
+        } else return message;
     }
 
     playVirtualPlayer() {
@@ -202,29 +213,6 @@ export class GameManagerService {
         }
     }
 
-    exchangeTiles(tiles: string, player: Player): string {
-        let successfulExchange = false;
-        let message = '';
-        if (this.players.current !== player) {
-            message = "Ce n'est pas votre tour";
-        } else if (!this.reserve.isExchangePossible(tiles.length)) {
-            message = "Il n'y a pas assez de tuiles dans la réserve";
-        } else if (!player.easel.containsTiles(tiles)) {
-            message = 'Votre chevalet ne contient pas les lettres nécessaires';
-        } else {
-            const easelTiles: Tile[] = player.easel.getTiles(tiles); // getTiles remove and get the tiles
-            const reserveTiles: Tile[] = this.reserve.getLetters(tiles.length);
-            player.easel.addTiles(reserveTiles);
-            this.reserve.returnLetters(easelTiles);
-            message = `${player.name} a échangé les lettres ${tiles}`;
-            successfulExchange = true;
-        }
-        if (successfulExchange) {
-            this.players.skipCounter = 0;
-            this.switchPlayers();
-        }
-        return message;
-    }
     placeTiles(word: string, coordStr: string, vertical: boolean, player: Player): string {
         //  Check if it's the player's turn to play
         if (this.players.current !== player) return "Ce n'est pas votre tour";
