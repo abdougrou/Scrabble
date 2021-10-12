@@ -86,41 +86,55 @@ describe('CrossCheck', () => {
         expect(CrossCheck.getLetterValue(invalid)).to.equal(invalidBitShift);
     });
 
-    it('rowCrossCheck returns all valid letters when suffix only exists', () => {
+    it('crossCheck should return only valid letters for both row and column', () => {
+        const dict: Trie = new Trie(['aaac', 'abac', 'acac', 'aa', 'ba', 'bac', 'caa', 'zaa']);
+        const board = [
+            [null, null, null, null, null],
+            [null, 'a', null, null, null],
+            [null, null, 'a', null, null],
+            [null, 'a', null, null, null],
+            [null, 'c', null, null, null],
+        ];
+        const coord = { x: 2, y: 1 };
+        const crossCheckValue = 7;
+        expect(CrossCheck.crossCheck(board, coord, dict).value).to.equal(crossCheckValue);
+    });
+
+    it('crossCheckOneDimension returns all valid letters when prefix only exists', () => {
         const dict: Trie = new Trie(['aavce', 'aaxxe']);
         const row = [null, 'a', 'a', null, null, null];
         const coord = 3;
         const expectLetters = ['v', 'x'];
 
-        expect(CrossCheck.rowCrossCheck(row, coord, dict)).to.have.members(expectLetters);
+        expect(CrossCheck.crossCheckOneDimension(row, coord, dict)).to.have.members(expectLetters);
     });
 
-    it('rowCrossCheck returns all valid letters when prefix only exists', () => {
+    it('crossCheckOneDimension returns all valid letters when suffix only exists', () => {
         const dict: Trie = new Trie(['aavce', 'aaxxe', 'baa', 'maa']);
         const row1 = [null, null, 'a', null, null, null];
         const row2 = [null, null, 'a', null, null, null];
         const coord = 1;
         const expectLetters = ['a', 'b', 'm'];
 
-        expect(CrossCheck.rowCrossCheck(row1, coord, dict)).to.have.members(expectLetters);
-        expect(CrossCheck.rowCrossCheck(row2, coord, dict)).to.have.members(expectLetters);
+        expect(CrossCheck.crossCheckOneDimension(row1, coord, dict)).to.have.members(expectLetters);
+        expect(CrossCheck.crossCheckOneDimension(row2, coord, dict)).to.have.members(expectLetters);
     });
 
-    it('rowCrossCheck returns all valid letters when suffix and prefix exists', () => {
+    it('crossCheckOneDimension returns all valid letters when suffix and prefix exists', () => {
         const dict: Trie = new Trie(['aavce', 'aaxxe']);
         const row = [null, 'a', 'a', null, 'c', null];
         const coord = 3;
         const expectLetters = ['v'];
 
-        const output = CrossCheck.rowCrossCheck(row, coord, dict);
+        const output = CrossCheck.crossCheckOneDimension(row, coord, dict);
         expect(output).to.have.members(expectLetters);
     });
 
-    it('rowCrossCheck returns only valid letters when the word fits in the row', () => {
+    it('crossCheckOneDimension returns only valid letters when the word fits in the row', () => {
         const dict: Trie = new Trie(['aavce', 'aaxce']);
         const row = [null, 'a', 'a', null];
         const coord = 3;
 
-        expect(CrossCheck.rowCrossCheck(row, coord, dict)).to.have.members([]);
+        expect(CrossCheck.crossCheckOneDimension(row, coord, dict)).to.have.members([]);
     });
 });

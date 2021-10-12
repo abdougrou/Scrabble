@@ -1,5 +1,7 @@
 /* eslint-disable no-bitwise */
+import { transpose } from './board-utils';
 import { Trie } from './trie';
+import { Vec2 } from './vec2';
 
 const CHAR_CODE_A = 'a'.charCodeAt(0);
 const CHAR_CODE_Z = 'z'.charCodeAt(0);
@@ -73,6 +75,25 @@ export class CrossCheck {
     }
 
     /**
+     * Calculates the cross check for the given board, coordinate and dictioanry
+     *
+     * @param board 2d array to calculate cross check from
+     * @param coord cross check coordinate
+     * @param dictionary used dictionary
+     * @returns CrossCheck for said coordinate
+     */
+    static crossCheck(board: (string | null)[][], coord: Vec2, dictionary: Trie): CrossCheck {
+        const crossCheck = new CrossCheck();
+        const transposedBoard = transpose(board);
+        const rowLetters = this.crossCheckOneDimension(board[coord.x], coord.y, dictionary);
+        const colLetters = this.crossCheckOneDimension(transposedBoard[coord.y], coord.x, dictionary);
+        const letters = rowLetters.filter((letter) => colLetters.indexOf(letter) >= 0);
+        for (const letter of letters) CrossCheck.addLetter(crossCheck, letter);
+
+        return crossCheck;
+    }
+
+    /**
      * Find all cross checks for given row
      *
      * @param row row containing board letters
@@ -80,7 +101,7 @@ export class CrossCheck {
      * @param dictionary dictionary to validate words
      * @returns array of valid letters for coord
      */
-    static rowCrossCheck(row: (string | null)[], coord: number, dictionary: Trie): string[] {
+    static crossCheckOneDimension(row: (string | null)[], coord: number, dictionary: Trie): string[] {
         const validLetters: Set<string> = new Set();
         const rowStr = row.map((item) => (item ? item : ' ')).join('');
         let boardPrefix = '';
