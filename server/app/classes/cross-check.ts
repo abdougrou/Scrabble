@@ -1,3 +1,4 @@
+/* eslint-disable no-bitwise */
 import { Trie } from './trie';
 
 const CHAR_CODE_A = 'a'.charCodeAt(0);
@@ -13,19 +14,6 @@ export class CrossCheck {
 
     constructor() {
         this.value = 0;
-    }
-
-    /**
-     * Get a letters shift value, with 'a' being 1 and * = 27
-     *
-     * @param letter letter to shift
-     * @returns letter shift value (position in bit vector)
-     */
-    static getLetterBitShift(letter: string): number {
-        const charCode = letter.charCodeAt(0);
-        if (charCode >= CHAR_CODE_A && charCode <= CHAR_CODE_Z) return charCode - CHAR_CODE_A;
-        else if (charCode === CHAR_CODE_STAR) return CHAR_CODE_Z - CHAR_CODE_A + 1;
-        return INVALID_LETTER;
     }
 
     /**
@@ -49,17 +37,39 @@ export class CrossCheck {
     }
 
     /**
+     * Check if a letter is in the bit vector
+     *
+     * @param check bit vector
+     * @param letter letter to check if it is in the bit vector
+     * @returns true if it is in the bit vector
+     */
+    static hasLetter(check: CrossCheck, letter: string): boolean {
+        return (check.value & this.getLetterValue(letter)) > 0;
+    }
+
+    /**
      * Calculates the bit value for a given letter
      *
      * @param letter to calculate bit value
      * @returns bit value
      */
     static getLetterValue(letter: string): number {
-        let value = 1;
         const shift = CrossCheck.getLetterBitShift(letter[0]);
         if (shift === INVALID_LETTER) return INVALID_LETTER;
-        for (let i = 0; i < shift; i++) value *= 2;
-        return value;
+        return 1 << shift;
+    }
+
+    /**
+     * Get a letters shift value, with 'a' being 1 and * = 27
+     *
+     * @param letter letter to shift
+     * @returns letter shift value (position in bit vector)
+     */
+    static getLetterBitShift(letter: string): number {
+        const charCode = letter.charCodeAt(0);
+        if (charCode >= CHAR_CODE_A && charCode <= CHAR_CODE_Z) return charCode - CHAR_CODE_A;
+        else if (charCode === CHAR_CODE_STAR) return CHAR_CODE_Z - CHAR_CODE_A + 1;
+        return INVALID_LETTER;
     }
 
     /**

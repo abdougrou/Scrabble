@@ -61,6 +61,14 @@ describe('CrossCheck', () => {
         expect(check.value).to.equal(0);
     });
 
+    it('hasLetter returns true only when a letter is in the bit vector', () => {
+        const anStar = 67117057;
+        check.value = anStar;
+        expect(CrossCheck.hasLetter(check, 'a')).to.equal(true);
+        expect(CrossCheck.hasLetter(check, '*')).to.equal(true);
+        expect(CrossCheck.hasLetter(check, 'b')).to.equal(false);
+    });
+
     it('getLetterValue returns the correct values', () => {
         const a = 'a';
         const n = 'n';
