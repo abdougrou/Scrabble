@@ -61,13 +61,17 @@ export class Board {
         return this.data[coord.x][coord.y];
     }
 
+    // generateWords(word: string, easel: string, limit: number, node: TrieNode, dictionary: Trie) {
+    //     const prefixes = this.generateEaselPrefix(easel, limit);
+    // }
+
     /**
      * Finds all valid prefixes for the given parameters
      *
      * @param easel characters to find valid prefixes from
      * @param limit max prefix length
      */
-    generatePrefixes(easel: string, limit: number, dictionary: Trie): string[] {
+    generateEaselPrefix(easel: string, limit: number, dictionary: Trie): string[] {
         const unvalidated: string[] = getStringCombinations(easel, limit);
         const validated = unvalidated.filter((item) => dictionary.find(item).length > 0);
         return validated;

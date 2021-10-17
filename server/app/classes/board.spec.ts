@@ -67,7 +67,7 @@ describe('Board', () => {
         const easel = 'aab';
         const limit = 3;
         const expectedPrefixes = ['aa', 'a', 'b'];
-        const validated = board.generatePrefixes(easel, limit, dictionary);
+        const validated = board.generateEaselPrefix(easel, limit, dictionary);
 
         expect(validated).to.have.deep.members(expectedPrefixes);
     });
