@@ -21,3 +21,13 @@
     right: 0%;
     padding: 7%;
 }
+
+.exchange-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: 1em;
+}
+
+.mat-raised-button {
+    background-color: burlywood;
+}

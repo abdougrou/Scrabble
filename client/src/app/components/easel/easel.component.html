@@ -13,3 +13,9 @@
         </div>
     </mat-card>
 </mat-card>
+<div class="exchange-buttons" *ngIf="exchangableTiles">
+    <button mat-raised-button (click)="exchangeTiles()" [disabled]="this.players[0].name !== this.mainPlayerName || this.numTilesReserve < 7">
+        Échanger
+    </button>
+    <button mat-raised-button>Annuler</button>
+</div>

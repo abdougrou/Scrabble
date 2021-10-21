@@ -1,8 +1,11 @@
 import { Component, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Player } from '@app/classes/player';
 import { EaselTile, TileState } from '@app/classes/tile';
 import { KEYBOARD_EVENT_RECEIVER, MouseButton } from '@app/constants';
+import { GameManagerService } from '@app/services/game-manager.service';
 import { MouseManagerService } from '@app/services/mouse-manager.service';
 import { PlayerService } from '@app/services/player.service';
+import { ReserveService } from '@app/services/reserve.service';
 
 @Component({
     selector: 'app-easel',
@@ -15,14 +18,26 @@ export class EaselComponent implements OnChanges {
     @Output() isInside = new EventEmitter<boolean>();
 
     tiles: EaselTile[] = [];
+    players: Player[];
     buttonPressed = '';
+    mainPlayerName;
+    exchangableTiles = false;
+    numTilesReserve;
 
-    constructor(readonly playerService: PlayerService, private mouseManager: MouseManagerService) {
+    constructor(
+        readonly playerService: PlayerService,
+        private mouseManager: MouseManagerService,
+        private reserve: ReserveService,
+        private gameManager: GameManagerService,
+    ) {
         this.tiles = this.playerService.mainPlayer.easel.tiles;
         if (this.keyboardReceiver !== KEYBOARD_EVENT_RECEIVER.easel)
             this.tiles.forEach((easelTile) => {
                 easelTile.state = TileState.None;
             });
+        this.players = this.playerService.players;
+        this.mainPlayerName = this.gameManager.mainPlayerName;
+        this.numTilesReserve = this.reserve.tileCount;
     }
 
     @HostListener('mousedown', ['$event'])
@@ -71,6 +86,7 @@ export class EaselComponent implements OnChanges {
         this.tiles.forEach((easelTile) => {
             easelTile.state = TileState.None;
         });
+        this.exchangableTiles = false;
     }
 
     containsTile(tileLetter: string): boolean {
@@ -120,9 +136,11 @@ export class EaselComponent implements OnChanges {
     tileClicked(tile: EaselTile, event: MouseEvent): void {
         if (this.mouseManager.easelMouseClicked(true, event) === TileState.Manipulation) {
             this.selectTileForManipulation(tile);
+            this.exchangableTiles = false;
         }
         if (this.mouseManager.easelMouseClicked(true, event) === TileState.Exchange) {
             this.selectTileForExchange(tile);
+            this.exchangableTiles = true;
         }
     }
 
@@ -154,7 +172,6 @@ export class EaselComponent implements OnChanges {
             // if we want to respect the issues instead of the project description PDF "scrabble", we add a break in the manipulation case;
             case TileState.Manipulation:
             case TileState.None:
-                // check if current player turn
                 tile.state = TileState.Exchange;
                 break;
         }
@@ -190,6 +207,15 @@ export class EaselComponent implements OnChanges {
             this.tiles[nextIndex] = this.tiles[indexOfManipulatedTile];
             this.tiles[indexOfManipulatedTile] = nextTile;
         }
+    }
+
+    exchangeTiles() {
+        let tilesToExchange = '';
+        this.tiles.forEach((easelTile) => {
+            if (easelTile.state === TileState.Exchange) tilesToExchange += easelTile.tile.letter;
+        });
+        this.gameManager.exchangeTiles(tilesToExchange, this.playerService.getPlayerByName(this.mainPlayerName));
+        this.resetTileState();
     }
 
     // selectTileWithKeyboard(event: KeyboardEvent) {}
