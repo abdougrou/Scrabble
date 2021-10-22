@@ -3,12 +3,13 @@ import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
 import { COMMANDS, COMMAND_RESULT, SYSTEM_NAME } from '@app/constants';
 import { GameManagerService } from './game-manager.service';
+import { ReserveService } from './reserve.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class CommandHandlerService {
-    constructor(private gameManager: GameManagerService) {}
+    constructor(private gameManager: GameManagerService, private reserveService: ReserveService) {}
 
     handleCommand(command: string, player: Player): ChatMessage {
         switch (command.split(' ')[0]) {
@@ -81,5 +82,27 @@ export class CommandHandlerService {
                 'Erreur de syntaxe, pour activer ou désactiver les affichages de débogage, il faut suivre le format suivant : !debug';
         }
         return commandResult;
+    }
+
+    reserve(command: string): ChatMessage {
+        const commandResult: ChatMessage = { user: '', body: '' };
+        const regex = new RegExp(/^!réserve$/g);
+        if (regex.test(command) && this.gameManager.debug) {
+            commandResult.user = COMMAND_RESULT;
+            commandResult.body = this.reserveDisplay();
+        } else {
+            commandResult.user = SYSTEM_NAME;
+            commandResult.body =
+                'Erreur de syntaxe, pour activer ou désactiver les affichages de réserve, il faut suivre le format suivant : !réserve';
+        }
+        return commandResult;
+    }
+
+    reserveDisplay(): string {
+        let display = '';
+        this.reserveService.tiles.forEach((letter) => {
+            display += `${letter.tile}: ${letter.count}\n`;
+        });
+        return display;
     }
 }

@@ -17,6 +17,7 @@ import { GameConfigPageComponent } from './components/game-config-page/game-conf
 import { ModeSelectionComponent } from './components/mode-selection/mode-selection.component';
 import { PlayerInfoComponent } from './components/player-info/player-info.component';
 import { EndGamePopupComponent } from './components/end-game-popup/end-game-popup.component';
+import { AbandonPageComponent } from './components/abandon-page/abandon-page.component';
 
 /**
  * Main module that is used in main.ts.
@@ -38,6 +39,7 @@ import { EndGamePopupComponent } from './components/end-game-popup/end-game-popu
         EaselComponent,
         PlayerInfoComponent,
         EndGamePopupComponent,
+        AbandonPageComponent,
     ],
     imports: [AppMaterialModule, AppRoutingModule, BrowserAnimationsModule, BrowserModule, FormsModule, ReactiveFormsModule, HttpClientModule],
     providers: [],

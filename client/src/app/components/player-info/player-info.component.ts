@@ -1,9 +1,12 @@
 import { Component, DoCheck } from '@angular/core';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { Player } from '@app/classes/player';
 import { MAX_FONT_MULTIPLIER, MIN_FONT_MULTIPLIER } from '@app/constants';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { GridService } from '@app/services/grid.service';
 import { PlayerService } from '@app/services/player.service';
+// eslint-disable-next-line no-restricted-imports
+import { AbandonPageComponent } from '../abandon-page/abandon-page.component';
 
 @Component({
     selector: 'app-player-info',
@@ -16,7 +19,12 @@ export class PlayerInfoComponent implements DoCheck {
     mainPlayerName: string;
     isEnded: boolean;
 
-    constructor(private playerService: PlayerService, private gameManager: GameManagerService, private gridService: GridService) {
+    constructor(
+        private playerService: PlayerService,
+        private gameManager: GameManagerService,
+        private gridService: GridService,
+        public matDialog: MatDialog,
+    ) {
         this.players = this.playerService.players;
         this.mainPlayerName = this.gameManager.mainPlayerName;
         this.isEnded = this.gameManager.isEnded;
@@ -68,5 +76,15 @@ export class PlayerInfoComponent implements DoCheck {
 
     quit() {
         this.gameManager.reset();
+    }
+
+    openAbandonPage() {
+        const dialogConfig = new MatDialogConfig();
+        // The user can't close the dialog by clicking outside its body
+        dialogConfig.disableClose = true;
+        dialogConfig.id = 'abandon-page-component';
+        dialogConfig.height = '350px';
+        dialogConfig.width = '600px';
+        this.matDialog.open(AbandonPageComponent, dialogConfig);
     }
 }
