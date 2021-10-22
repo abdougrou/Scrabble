@@ -46,10 +46,8 @@ export class EaselComponent implements OnChanges {
             else {
                 if (this.containsTile(event.key.toLowerCase())) {
                     this.selectTileForManipulation(this.tileKeyboardClicked(event.key.toLowerCase()));
-                } else if (!event.shiftKey) {
-                    this.tiles.forEach((easelTile) => {
-                        if (easelTile.state === TileState.Manipulation) easelTile.state = TileState.None;
-                    });
+                } else if (!event.shiftKey && !event.ctrlKey) {
+                    this.resetTileState();
                 }
             }
         }
