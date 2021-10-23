@@ -41,8 +41,9 @@ export class EaselComponent implements OnChanges {
             if (event.shiftKey && event.key === '*') {
                 this.buttonPressed = '*';
             }
-            if (event.key === 'ArrowRight') this.moveRight();
-            else if (event.key === 'ArrowLeft') this.moveLeft();
+            if (event.key === 'ArrowRight') {
+                this.moveRight();
+            } else if (event.key === 'ArrowLeft') this.moveLeft();
             else {
                 if (this.containsTile(event.key.toLowerCase())) {
                     this.selectTileForManipulation(this.tileKeyboardClicked(event.key.toLowerCase()));
@@ -53,10 +54,12 @@ export class EaselComponent implements OnChanges {
         }
     }
 
-    @HostListener('wheel', ['$event'])
+    @HostListener('document:wheel', ['$event'])
     scroll(event: WheelEvent) {
-        if (event.deltaY < 0) this.moveLeft();
-        else if (event.deltaY > 0) this.moveRight();
+        if (this.keyboardReceiver === KEYBOARD_EVENT_RECEIVER.easel) {
+            if (event.deltaY < 0) this.moveLeft();
+            else if (event.deltaY > 0) this.moveRight();
+        }
     }
 
     ngOnChanges(changes: SimpleChanges) {

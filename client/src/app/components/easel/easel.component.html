@@ -1,4 +1,4 @@
-<mat-card id="easel">
+<mat-card id="easel" *ngIf="{tiles}">
     <mat-card
         class="tile"
         (mousedown)="tileClicked(tile, $event)"
