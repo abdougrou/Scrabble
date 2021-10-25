@@ -17,7 +17,8 @@
         "suppressImplicitAnyIndexErrors": true,
         "strictNullChecks": true,
         "paths": {
-            "@app/*": ["./app/*"]
+            "@app/*": ["./app/*"],
+            "@static/*": ["../static/*"]
         }
     }
 }
