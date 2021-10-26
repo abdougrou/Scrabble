@@ -8,15 +8,15 @@
         <input type="text" formControlName="name"  pattern="[a-zA-Z]*" matInput>
         <mat-hint align="end">{{ this.gameConfigForm.get('name')?.value?.length || 0 }}/20</mat-hint>
       </mat-form-field>
-    
+
       <mat-form-field appearance="outline">
         <mat-label>Minuterie (en secondes):</mat-label>
         <input type="number" name="points"  value="60" step="30" min="30" max="300" formControlName="duration"  matInput>
       </mat-form-field>
-    
+
       <mat-checkbox formControlName="bonusEnabled"> Bonus Aléatoire
       </mat-checkbox>
-      
+
       <mat-form-field appearance="outline">
         <mat-select formControlName="dictionary" placeholder="Français" >
           <mat-option value=0>Français</mat-option>
@@ -25,8 +25,8 @@
       </mat-form-field>
       <div class="horizontal">
         <button mat-raised-button class="button"  (click)="back()">Retour</button>
-        <button mat-raised-button class="button" [disabled]="!this.gameConfigForm.valid" (click)="play()" [routerLink]="['/game']">Jouer</button>   
+        <button mat-raised-button class="button" [disabled]="!this.gameConfigForm.valid" (click)="play()">Jouer</button>
       </div>
-    </div> 
+    </div>
 </div>
 </form>

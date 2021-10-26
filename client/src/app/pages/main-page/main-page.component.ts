@@ -5,6 +5,7 @@ import { GameMode } from '@app/classes/game-config';
 import { ModeSelectionComponent } from '@app/components/mode-selection/mode-selection.component';
 import { DIALOG_HEIGHT, DIALOG_WIDTH } from '@app/constants';
 import { BehaviorSubject } from 'rxjs';
+import {WebSocketService} from "@app/services/web-socket.service";
 
 @Component({
     selector: 'app-main-page',
@@ -16,7 +17,7 @@ export class MainPageComponent {
     readonly title: string = 'LOG2990';
     message: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
-    constructor(public dialog: MatDialog) {}
+    constructor(public dialog: MatDialog, public socketManager: WebSocketService) {}
 
     // Press Classic Button
     startClassic() {

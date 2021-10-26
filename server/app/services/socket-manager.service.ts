@@ -12,7 +12,6 @@ export class SocketManagerService {
     }
 
     handleSockets() {
-        console.log('allo');
         // TODO move socket event names to static folder as constants and use in client as well
         this.socket.on('connection', (socket) => {
             console.log(`Connexion par l'utilisateur avec id : ${socket.id}`);
