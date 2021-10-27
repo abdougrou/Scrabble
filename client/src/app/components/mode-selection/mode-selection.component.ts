@@ -1,11 +1,12 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { Dictionary, GameConfig, GameMode } from '@app/classes/game-config';
-import { DIALOG_HEIGHT, DIALOG_WIDTH, DURATION_INIT } from '@app/constants';
-import { GameConfigPageComponent } from '@app/components/game-config-page/game-config-page.component';
-import { WebSocketService } from '@app/services/web-socket.service';
-import { GameManagerService } from '@app/services/game-manager.service';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { Dictionary, GameConfig, GameMode } from '@app/classes/game-config';
+import { GameConfigPageComponent } from '@app/components/game-config-page/game-config-page.component';
+import { MultiplayerRoomsComponent } from '@app/components/multiplayer-rooms/multiplayer-rooms.component';
+import { DIALOG_HEIGHT, DIALOG_WIDTH, DURATION_INIT } from '@app/constants';
+import { GameManagerService } from '@app/services/game-manager.service';
+import { WebSocketService } from '@app/services/web-socket.service';
 
 @Component({
     selector: 'app-mode-selection',
@@ -24,7 +25,7 @@ export class ModeSelectionComponent {
     ) {}
 
     playSolo(): void {
-        this.openDialogBox()
+        this.openDialogBox(false)
             .afterClosed()
             .subscribe((result) => {
                 if (!result) return;
@@ -35,13 +36,11 @@ export class ModeSelectionComponent {
     }
 
     playMulti(): void {
-        this.openDialogBox()
+        this.openDialogBox(true)
             .afterClosed()
             .subscribe((result) => {
                 if (!result || !this.webSocket.startMultiplayerGame((result as GameConfig).playerName1)) return;
-                const gameConfig = result as GameConfig;
-                gameConfig.isMultiPlayer = true;
-                this.gameManager.initialize(gameConfig);
+                this.gameManager.initialize(result as GameConfig);
                 this.router.navigateByUrl('/game');
                 this.closeSelf();
             });
@@ -52,7 +51,7 @@ export class ModeSelectionComponent {
     }
 
     // Open game configuration popup
-    private openDialogBox(): MatDialogRef<GameConfigPageComponent, unknown> {
+    private openDialogBox(isMulti: boolean): MatDialogRef<unknown, unknown> {
         const gameConfig = {
             playerName1: 'default',
             playerName2: 'default',
@@ -63,10 +62,18 @@ export class ModeSelectionComponent {
             dictionary: Dictionary.French,
         } as GameConfig;
 
-        return this.dialog.open(GameConfigPageComponent, {
-            height: DIALOG_HEIGHT,
-            width: DIALOG_WIDTH,
-            data: { config: gameConfig },
-        });
+        if (isMulti) {
+            return this.dialog.open(MultiplayerRoomsComponent, {
+                height: DIALOG_HEIGHT,
+                width: DIALOG_WIDTH,
+                data: { config: gameConfig },
+            });
+        } else {
+            return this.dialog.open(GameConfigPageComponent, {
+                height: DIALOG_HEIGHT,
+                width: DIALOG_WIDTH,
+                data: { config: gameConfig },
+            });
+        }
     }
 }

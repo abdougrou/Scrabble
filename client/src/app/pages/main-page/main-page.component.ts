@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { GameMode } from '@app/classes/game-config';
 import { ModeSelectionComponent } from '@app/components/mode-selection/mode-selection.component';
 import { DIALOG_HEIGHT, DIALOG_WIDTH } from '@app/constants';
-import { WebSocketService } from "@app/services/web-socket.service";
+import { WebSocketService } from '@app/services/web-socket.service';
 import { WebsocketManagerService } from '@app/services/websocket-manager.service';
 import { BehaviorSubject } from 'rxjs';
 
