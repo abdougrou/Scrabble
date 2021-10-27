@@ -1,8 +1,11 @@
+import { transpose } from './board-utils';
+
 export class Anchor {
     x: number;
     y: number;
     leftPart: string;
     leftLength: number;
+    across: boolean;
 
     /**
      * Finds all anchors in the board
@@ -12,8 +15,10 @@ export class Anchor {
      */
     static findAnchors(board: (string | null)[][]): Anchor[] {
         let anchors: Anchor[] = [];
+        const transposed = transpose(board);
         for (let i = 0; i < board.length; i++) {
-            anchors = anchors.concat(this.findAnchorsOneDimension(board[i], i));
+            anchors = anchors.concat(this.findAnchorsOneDimension(board[i], i, true));
+            anchors = anchors.concat(this.findAnchorsOneDimension(transposed[i], i, false));
         }
         return anchors;
     }
@@ -24,9 +29,10 @@ export class Anchor {
      *
      * @param arr array of elements to find anchors in
      * @param rowNumber to use in anchor coordinate
+     * @param across whether the anchor is for an across or down placement
      * @returns array of anchors
      */
-    static findAnchorsOneDimension(arr: (string | null)[], rowNumber: number): Anchor[] {
+    static findAnchorsOneDimension(arr: (string | null)[], rowNumber: number, across: boolean): Anchor[] {
         const anchors: Anchor[] = [];
         let leftPart = '';
         for (let i = 0; i < arr.length; i++) {
@@ -38,10 +44,11 @@ export class Anchor {
                 const lastElementIndex = -1;
                 const lastAnchor = anchors.slice(lastElementIndex)[0];
                 anchors.push({
-                    x: rowNumber,
-                    y: i,
+                    x: across ? rowNumber : i,
+                    y: across ? i : rowNumber,
                     leftPart,
-                    leftLength: lastAnchor ? i - lastAnchor.y - 1 : i,
+                    leftLength: lastAnchor ? i - (across ? lastAnchor.y : lastAnchor.x) - 1 : i,
+                    across,
                 });
                 leftPart = '';
             }
