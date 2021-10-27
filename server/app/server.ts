@@ -12,6 +12,8 @@ export class Server {
     private server: http.Server;
     private socketManager: SocketManagerService;
 
+    private socketManager: SocketManagerService;
+
     constructor(private readonly application: Application) {}
 
     private static normalizePort(val: number | string): number | string | boolean {
@@ -28,6 +30,9 @@ export class Server {
         this.application.app.set('port', Server.appPort);
 
         this.server = http.createServer(this.application.app);
+        this.socketManager = new SocketManagerService(this.server);
+        this.socketManager.handleSockets();
+
         this.socketManager = new SocketManagerService(this.server);
         this.socketManager.handleSockets();
 

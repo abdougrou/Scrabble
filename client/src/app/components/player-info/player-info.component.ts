@@ -1,16 +1,16 @@
-import { Component, DoCheck } from '@angular/core';
+import {Component, DoCheck, OnDestroy} from '@angular/core';
 import { Player } from '@app/classes/player';
-import { PlayerService } from '@app/services/player.service';
 import { MAX_FONT_MULTIPLIER, MIN_FONT_MULTIPLIER } from '@app/constants';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { GridService } from '@app/services/grid.service';
+import { PlayerService } from '@app/services/player.service';
 
 @Component({
     selector: 'app-player-info',
     templateUrl: './player-info.component.html',
     styleUrls: ['./player-info.component.scss'],
 })
-export class PlayerInfoComponent implements DoCheck {
+export class PlayerInfoComponent implements DoCheck, OnDestroy {
     fontSize: number = 0;
     players: Player[] = [];
     mainPlayerName: string;
@@ -20,6 +20,10 @@ export class PlayerInfoComponent implements DoCheck {
         this.players = this.playerService.players;
         this.mainPlayerName = this.gameManager.mainPlayerName;
         this.isEnded = this.gameManager.isEnded;
+    }
+
+    ngOnDestroy(): void {
+        this.quit();
     }
     get timer() {
         return this.gameManager.currentTurnDurationLeft;
@@ -58,7 +62,7 @@ export class PlayerInfoComponent implements DoCheck {
     }
 
     skipTurn() {
-        this.gameManager.skipTurn();
+        this.gameManager.buttonSkipTurn();
     }
 
     endGame() {

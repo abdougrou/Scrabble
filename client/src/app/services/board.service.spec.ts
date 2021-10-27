@@ -16,6 +16,11 @@ describe('BoardService', () => {
         expect(service).toBeTruthy();
     });
 
+    it('should not place tile on existing tile', () => {
+        const tile: Tile = { letter: 'a', points: 2 };
+        service.board.set(service.coordToKey({ x: 7, y: 7 }), tile);
+        expect(service.placeTile({ x: 7, y: 7 }, { letter: 'b', points: 2 })).toBeFalse();
+    })
     it('placeTile places the tile in the board, returns true if no tile exists at coord', () => {
         const coord: Vec2 = { x: 3, y: 3 };
         const tile: Tile = { letter: 'x', points: 0 };

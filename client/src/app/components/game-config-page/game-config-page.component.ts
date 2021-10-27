@@ -51,9 +51,7 @@ export class GameConfigPageComponent implements DoCheck {
         this.data.config.duration = this.gameConfigForm.get('duration')?.value;
         this.data.config.bonusEnabled = this.gameConfigForm.get('bonusEnabled')?.value;
         this.data.config.dictionary = this.gameConfigForm.get('dictionary')?.value;
-        // send gameConfig data to the game manager service
-        this.gameManagerService.initialize(this.data.config);
-        this.dialogRef.close(true);
+        this.dialogRef.close(this.data.config);
     }
 
     // close just the 2nd popup and clear input data
@@ -62,10 +60,7 @@ export class GameConfigPageComponent implements DoCheck {
     }
 
     pickPlayerName() {
-        const randomPlayerNames = RANDOM_PLAYER_NAMES;
-
-        while (this.randomPlayerName === this.gameConfigForm.get('name')?.value) {
-            this.randomPlayerName = randomPlayerNames[Math.floor(Math.random() * randomPlayerNames.length)];
-        }
+        while (this.randomPlayerName === this.gameConfigForm.get('name')?.value)
+            this.randomPlayerName = RANDOM_PLAYER_NAMES[Math.floor(Math.random() * RANDOM_PLAYER_NAMES.length)];
     }
 }

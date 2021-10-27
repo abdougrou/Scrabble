@@ -54,7 +54,7 @@ describe('ModeSelectionComponent', () => {
 
     it('should close after back()', () => {
         const spy = spyOn(component.dialogRef, 'close').and.callThrough();
-        component.back();
+        component.closeSelf();
         expect(spy).toHaveBeenCalled();
     });
 

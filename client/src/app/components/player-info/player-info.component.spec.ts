@@ -18,7 +18,7 @@ describe('PlayerInfoComponent', () => {
         playerService = new PlayerService();
         playerService.createPlayer('player', []);
         playerService.createPlayer('playerTwo', []);
-        gameManagerService = jasmine.createSpyObj('GameManagerService', ['skipTurn', 'reset', 'stopTimer', 'endGame']);
+        gameManagerService = jasmine.createSpyObj('GameManagerService', ['buttonSkipTurn', 'reset', 'stopTimer', 'endGame']);
         gridService = jasmine.createSpyObj('GrideService', ['clearBoard', 'drawBoard']);
     });
     beforeEach(async () => {
@@ -48,6 +48,11 @@ describe('PlayerInfoComponent', () => {
         playerService.players[1].score = 10;
 
         expect(component.winner).toEqual(playerService.players[1].name);
+
+        playerService.players[0].score = 10;
+        playerService.players[1].score = 0;
+
+        expect(component.winner).toEqual(playerService.players[0].name);
     });
 
     it('should increase font', () => {
@@ -56,6 +61,9 @@ describe('PlayerInfoComponent', () => {
         expect(component.fontSize).toEqual(oldSize + 1);
         expect(gridService.clearBoard).toHaveBeenCalled();
         expect(gridService.drawBoard).toHaveBeenCalled();
+        component.fontSize = 3;
+        component.increaseFont();
+        expect(component.fontSize).toEqual(3);
     });
 
     it('should decrease font', () => {
@@ -64,6 +72,10 @@ describe('PlayerInfoComponent', () => {
         expect(component.fontSize).toEqual(0);
         expect(gridService.clearBoard).toHaveBeenCalled();
         expect(gridService.drawBoard).toHaveBeenCalled();
+        component.fontSize = -1;
+        component.decreaseFont();
+        const size = -1;
+        expect(component.fontSize).toEqual(size);
     });
 
     it('#getTimer should return currentTurnDurationLeft', () => {
@@ -73,7 +85,7 @@ describe('PlayerInfoComponent', () => {
     it('should call game manager skip turn function when turn skipped', () => {
         component.skipTurn();
         fixture.detectChanges();
-        expect(gameManagerService.skipTurn).toHaveBeenCalled();
+        expect(gameManagerService.buttonSkipTurn).toHaveBeenCalled();
     });
 
     it('should end game', () => {
@@ -84,12 +96,12 @@ describe('PlayerInfoComponent', () => {
 
     it('should call stop timer if turn skipped six times continuously', () => {
         playerService.skipCounter = MAX_SKIP_COUNT - 1;
-        gameManagerService.skipTurn.and.callFake(() => {
+        gameManagerService.buttonSkipTurn.and.callFake(() => {
             playerService.skipCounter++;
             if (playerService.skipCounter >= MAX_SKIP_COUNT) gameManagerService.stopTimer();
         });
         component.skipTurn();
-        expect(gameManagerService.skipTurn).toHaveBeenCalled();
+        expect(gameManagerService.buttonSkipTurn).toHaveBeenCalled();
         expect(playerService.skipCounter).toEqual(MAX_SKIP_COUNT);
         expect(gameManagerService.stopTimer).toHaveBeenCalled();
     });

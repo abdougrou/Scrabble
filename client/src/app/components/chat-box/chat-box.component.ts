@@ -1,4 +1,4 @@
-import { Component, DoCheck, ElementRef, HostListener, Renderer2, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
 import { SYSTEM_NAME } from '@app/constants';
@@ -11,10 +11,8 @@ import { PlayerService } from '@app/services/player.service';
     templateUrl: './chat-box.component.html',
     styleUrls: ['./chat-box.component.scss'],
 })
-export class ChatBoxComponent implements DoCheck {
+export class ChatBoxComponent {
     @ViewChild('messageInput') messageInput: ElementRef<HTMLInputElement>;
-    @ViewChild('defaultMessage') defaultMessage: ElementRef<HTMLElement>;
-    @ViewChild('chatBody') chatBody: ElementRef<HTMLElement>;
 
     buttonPressed = '';
     message = '';
@@ -26,23 +24,18 @@ export class ChatBoxComponent implements DoCheck {
     constructor(
         public gameManager: GameManagerService,
         public playerService: PlayerService,
-        public commandHandler: CommandHandlerService,
-        private renderer: Renderer2,
+        public commandHandler: CommandHandlerService, // private renderer: Renderer2,
     ) {
         this.mainPlayerName = this.gameManager.mainPlayerName;
         this.enemyPlayerName = this.gameManager.enemyPlayerName;
+        this.gameManager.commandMessage.asObservable().subscribe((msg) => {
+            this.showMessage(msg);
+        });
     }
 
     @HostListener('keydown', ['$event'])
     buttonDetect(event: KeyboardEvent) {
         this.buttonPressed = event.key;
-    }
-
-    ngDoCheck() {
-        if (this.gameManager.isEnded === true) {
-            const message = { user: SYSTEM_NAME, body: this.gameManager.endGameMessage } as ChatMessage;
-            this.showMessage(message);
-        }
     }
 
     submitInput(): void {
@@ -57,11 +50,11 @@ export class ChatBoxComponent implements DoCheck {
     }
 
     showMessage(message: ChatMessage): void {
-        const newMessage: HTMLParagraphElement = this.renderer.createElement('p');
+        const newMessage = document.createElement('p');
         switch (message.user) {
             case SYSTEM_NAME:
                 newMessage.innerHTML = `${message.user} : ${message.body}`;
-                newMessage.style.color = '#cf000f';
+                newMessage.style.color = 'rgb(207, 0, 15)';
                 break;
             case this.mainPlayerName:
                 newMessage.innerHTML = `${message.user} : ${message.body}`;
@@ -76,12 +69,18 @@ export class ChatBoxComponent implements DoCheck {
                 newMessage.style.color = 'gray';
                 break;
         }
-        this.defaultMessage.nativeElement.appendChild(newMessage);
+        const parentMessage = document.getElementById('default-message');
+        if (parentMessage) {
+            parentMessage.appendChild(newMessage);
+        }
         this.scrollDown();
     }
 
     scrollDown(): void {
-        this.chatBody.nativeElement.scrollTop = 0;
+        const chatBody = document.getElementById('messages');
+        if (chatBody) {
+            chatBody.scrollTop = 0;
+        }
     }
 
     checkCommand(message: ChatMessage, player: Player): ChatMessage {
