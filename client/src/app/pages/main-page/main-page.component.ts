@@ -4,19 +4,25 @@ import { MatDialog } from '@angular/material/dialog';
 import { GameMode } from '@app/classes/game-config';
 import { ModeSelectionComponent } from '@app/components/mode-selection/mode-selection.component';
 import { DIALOG_HEIGHT, DIALOG_WIDTH } from '@app/constants';
+import { CommunicationService } from '@app/services/communication.service';
+import { WebsocketManagerService } from '@app/services/websocket-manager.service';
 import { BehaviorSubject } from 'rxjs';
 
 @Component({
     selector: 'app-main-page',
     templateUrl: './main-page.component.html',
     styleUrls: ['./main-page.component.scss'],
-    providers: [MatDialog, Overlay],
+    providers: [MatDialog, Overlay, WebsocketManagerService],
 })
 export class MainPageComponent {
     readonly title: string = 'LOG2990';
     message: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
-    constructor(public dialog: MatDialog) {}
+    constructor(public dialog: MatDialog, public commService: CommunicationService, public websocketManager: WebsocketManagerService) {}
+
+    basicGet() {
+        this.commService.basicGet();
+    }
 
     // Press Classic Button
     startClassic() {
