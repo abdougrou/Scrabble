@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { KEYBOARD_EVENT_RECEIVER, MouseButton } from '@app/constants';
+import { PlaceTilesService } from '@app/services/place-tiles.service';
 
 @Component({
     selector: 'app-game-page',
@@ -14,6 +15,8 @@ export class GamePageComponent {
     // if the value gets to 2 or more, it means that we didnt click inside a keyboardreceiver
     clickInsideCounter = 1;
 
+    constructor(private placeTiles: PlaceTilesService) {}
+
     mouseClick(event: MouseEvent) {
         if (event.button === MouseButton.Left || event.button === MouseButton.Right) {
             this.clickInsideCounter++;
@@ -21,6 +24,7 @@ export class GamePageComponent {
         if (this.clickInsideCounter > 1) {
             this.keyboardReceiver = KEYBOARD_EVENT_RECEIVER.none;
         }
+        if (this.keyboardReceiver !== KEYBOARD_EVENT_RECEIVER.board) this.placeTiles.endPlacement();
         // window.alert(this.keyboardReceiver + ' et : ' + this.clickInsideCounter);
     }
 

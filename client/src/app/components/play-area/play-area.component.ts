@@ -27,6 +27,8 @@ export class PlayAreaComponent implements AfterViewInit {
     buttonDetect(event: KeyboardEvent) {
         if (this.keyboardReceiver === KEYBOARD_EVENT_RECEIVER.board) {
             this.placeTilesService.manageKeyboard(event.key);
+        } else {
+            this.placeTilesService.endPlacement();
         }
     }
 
