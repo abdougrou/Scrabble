@@ -9,6 +9,7 @@ export class WebSocketService {
     private socket: io.Socket;
     private connected = false;
     constructor() {
+        console.log("allo");
         this.socket = io.io('http://localhost:3000');
         this.enableListeners();
     }
