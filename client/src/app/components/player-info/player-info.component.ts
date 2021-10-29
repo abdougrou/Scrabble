@@ -5,6 +5,7 @@ import { MAX_FONT_MULTIPLIER, MIN_FONT_MULTIPLIER } from '@app/constants';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { GridService } from '@app/services/grid.service';
 import { PlayerService } from '@app/services/player.service';
+// eslint-disable-next-line no-restricted-imports
 import { AbandonPageComponent } from '../abandon-page/abandon-page.component';
 
 @Component({
@@ -82,8 +83,8 @@ export class PlayerInfoComponent implements DoCheck {
         // The user can't close the dialog by clicking outside its body
         dialogConfig.disableClose = true;
         dialogConfig.id = 'abandon-page-component';
-        dialogConfig.height = '350px';
-        dialogConfig.width = '600px';
+        dialogConfig.height = '200px';
+        dialogConfig.width = '550px';
         this.matDialog.open(AbandonPageComponent, dialogConfig);
     }
 }
