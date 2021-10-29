@@ -1,4 +1,4 @@
-<div class="chat-container">
+<div (mousedown)="insideChatBox($event)" class="chat-container">
     <div #chatBody class="chat-body" id="messages">
         <p #defaultMessage id="default-message"></p>
     </div>

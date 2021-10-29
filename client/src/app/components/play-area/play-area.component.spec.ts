@@ -1,13 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { PlayAreaComponent } from '@app/components/play-area/play-area.component';
-import { EaselComponent } from '@app/components/easel/easel.component';
-import { PlayerService } from '@app/services/player.service';
-import { GridService } from '@app/services/grid.service';
-import { BoardService } from '@app/services/board.service';
-import { Player } from '@app/classes/player';
-import { Easel } from '@app/classes/easel';
 import { CanvasTestHelper } from '@app/classes/canvas-test-helper';
+import { Easel } from '@app/classes/easel';
+import { Player } from '@app/classes/player';
+import { EaselComponent } from '@app/components/easel/easel.component';
+import { PlayAreaComponent } from '@app/components/play-area/play-area.component';
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from '@app/constants';
+import { BoardService } from '@app/services/board.service';
+import { GridService } from '@app/services/grid.service';
+import { PlayerService } from '@app/services/player.service';
 
 describe('PlayAreaComponent', () => {
     let component: PlayAreaComponent;
@@ -45,11 +45,5 @@ describe('PlayAreaComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
-    });
-
-    it('should detect the button pressed', () => {
-        const mockButtonClick = new KeyboardEvent('keydown', { key: 'k' });
-        component.buttonDetect(mockButtonClick);
-        expect(component.buttonPressed).toBe('k');
     });
 });

@@ -1,10 +1,26 @@
 <mat-card id="easel">
-  <mat-card class="tile" *ngFor="let tile of tiles">
-    <div class="letter">
-      {{tile.letter | uppercase}}
-    </div>
-    <div class="points">
-      {{tile.points}}
-    </div>
-  </mat-card>
+    <mat-card
+        class="tile"
+        (mousedown)="tileClicked(tile, $event)"
+        *ngFor="let tile of tiles"
+        [ngStyle]="{ 'background-color': tile.state === 1 ? '#8FC1D4' : tile.state === 2 ? '#76b947' : 'burlywood' }"
+    >
+        <div class="letter">
+            {{ tile.tile.letter | uppercase }}
+        </div>
+        <div class="points">
+            {{ tile.tile.points }}
+        </div>
+    </mat-card>
 </mat-card>
+<div class="exchange-buttons" *ngIf="exchangableTiles">
+    <button
+        mat-raised-button
+        (click)="exchangeTiles()"
+        [disabled]="this.players[0].name !== this.mainPlayerName || this.numTilesReserve < 7"
+        class="validate"
+    >
+        Échanger
+    </button>
+    <button mat-raised-button (click)="resetTileState()">Annuler</button>
+</div>

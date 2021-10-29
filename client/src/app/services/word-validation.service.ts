@@ -171,6 +171,15 @@ export class WordValidationService {
     }
 
     /**
+     * @param word from which we want to remove accents/diacritics
+     * @returns string corresponding to the word without accents
+     */
+    removeAccents(word: string): string {
+        //  This line of code was taken from https://stackoverflow.com/a/37511463
+        return word.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    /**
      * @param board the board from which we want to retrieve words
      * @returns an array of strings containing all the words on the board
      */
@@ -213,15 +222,6 @@ export class WordValidationService {
             }
         }
         return boardWords;
-    }
-
-    /**
-     * @param word from which we want to remove accents/diacritics
-     * @returns boolean value corresponding to whether or not the word is in the dictionnary
-     */
-    private removeAccents(word: string): string {
-        //  This line of code was taken from https://stackoverflow.com/a/37511463
-        return word.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
 
     private getDictionnary() {

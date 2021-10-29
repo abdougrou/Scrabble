@@ -1,3 +1,6 @@
+import { Tile } from './classes/tile';
+import { Vec2 } from './classes/vec2';
+
 // Game Config constants
 export const DURATION_INIT = 60;
 export const MAX_USERNAME_LENGTH = 20;
@@ -22,6 +25,22 @@ export const COMMANDS = {
     debug: '!debug',
     reserve: '!reserve',
 };
+
+export const KEYBOARD_EVENT_RECEIVER = {
+    chatbox: 'chatbox',
+    easel: 'easel',
+    board: 'board',
+    none: 'none',
+};
+
+// Mouse Buttons
+export const enum MouseButton {
+    Left = 0,
+    Middle = 1,
+    Right = 2,
+    Back = 3,
+    Forward = 4,
+}
 
 // Reserve constants
 export const MIN_EXCHANGE_RESERVE_COUNT = 7;
@@ -110,6 +129,11 @@ const POINT_NUM = 5.7;
 const POINT_DENUM = 6;
 export const POINT_OFFSET = STEP * (POINT_NUM / POINT_DENUM);
 
+export const RIGHT_ARROW: Tile = { letter: '➞', points: -1 };
+export const DOWN_ARROW: Tile = { letter: '🠗', points: -1 };
+export const INVALID_COORDS: Vec2 = { x: -1, y: -1 };
+export const INVALID_POINT = -1;
+
 //  les nombres permettant de creer la fraction equivalentes au offset
 const NUM = 5;
 const DENUM = 6;
@@ -140,6 +164,7 @@ export const TILE_COLORS = {
     w3: '#D84141',
 };
 export const TILE_TEXT_COLOR = '#060606';
+export const TEMP_TILE_COLOR = '#76B947';
 //  the index to tiles of red colors
 const RED_MULTIPLIER_INDEX = 4;
 export const BOARD_MULTIPLIER = [

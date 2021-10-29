@@ -47,7 +47,7 @@ export class VirtualPlayer implements Player {
         result: BehaviorSubject<ChatMessage>,
         debug: boolean,
     ): PlaceTilesInfo {
-        const possiblePermutations: BoardWord[] = validation.getPossibleWords(this.easel.tiles);
+        const possiblePermutations: BoardWord[] = validation.getPossibleWords(this.easel.easelTileToTile(this.easel.tiles));
         const validPermutations: BoardWord[] = [];
         const msg: ChatMessage = { user: SYSTEM_NAME, body: '<br>' };
         for (const permutation of possiblePermutations) {

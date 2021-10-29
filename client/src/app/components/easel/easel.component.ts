@@ -1,11 +1,227 @@
-import { Component, Input } from '@angular/core';
-import { Tile } from '@app/classes/tile';
+import { Component, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Player } from '@app/classes/player';
+import { EaselTile, TileState } from '@app/classes/tile';
+import { KEYBOARD_EVENT_RECEIVER, MouseButton } from '@app/constants';
+import { GameManagerService } from '@app/services/game-manager.service';
+import { MouseManagerService } from '@app/services/mouse-manager.service';
+import { PlayerService } from '@app/services/player.service';
+import { ReserveService } from '@app/services/reserve.service';
 
 @Component({
     selector: 'app-easel',
     templateUrl: './easel.component.html',
     styleUrls: ['./easel.component.scss'],
 })
-export class EaselComponent {
-    @Input() tiles: Tile[] = [];
+export class EaselComponent implements OnChanges {
+    @Input() keyboardReceiver: string;
+    @Output() keyboardReceiverChange = new EventEmitter<string>();
+    @Output() isInside = new EventEmitter<boolean>();
+
+    tiles: EaselTile[] = [];
+    players: Player[];
+    buttonPressed = '';
+    mainPlayerName;
+    exchangableTiles = false;
+    numTilesReserve;
+
+    constructor(
+        readonly playerService: PlayerService,
+        private mouseManager: MouseManagerService,
+        private reserve: ReserveService,
+        private gameManager: GameManagerService,
+    ) {
+        this.tiles = this.playerService.mainPlayer.easel.tiles;
+        if (this.keyboardReceiver !== KEYBOARD_EVENT_RECEIVER.easel)
+            this.tiles.forEach((easelTile) => {
+                easelTile.state = TileState.None;
+            });
+        this.players = this.playerService.players;
+        this.mainPlayerName = this.gameManager.mainPlayerName;
+        this.numTilesReserve = this.reserve.tileCount;
+    }
+
+    @HostListener('mousedown', ['$event'])
+    mouseClick(event: MouseEvent) {
+        if (event.button === MouseButton.Left || event.button === MouseButton.Right) {
+            this.keyboardReceiver = KEYBOARD_EVENT_RECEIVER.easel;
+            this.keyboardReceiverChange.emit(KEYBOARD_EVENT_RECEIVER.easel);
+            this.isInside.emit(true);
+        }
+    }
+
+    @HostListener('document:keydown', ['$event'])
+    buttonDetect(event: KeyboardEvent) {
+        if (this.keyboardReceiver === KEYBOARD_EVENT_RECEIVER.easel) {
+            this.buttonPressed = event.key;
+            if (event.shiftKey && event.key === '*') {
+                this.buttonPressed = '*';
+            }
+            if (event.key === 'ArrowRight') this.moveRight();
+            else if (event.key === 'ArrowLeft') this.moveLeft();
+            else {
+                if (this.containsTile(event.key.toLowerCase())) {
+                    this.selectTileForManipulation(this.tileKeyboardClicked(event.key.toLowerCase()));
+                } else if (!event.shiftKey) {
+                    this.tiles.forEach((easelTile) => {
+                        if (easelTile.state === TileState.Manipulation) easelTile.state = TileState.None;
+                    });
+                }
+            }
+        }
+    }
+
+    @HostListener('wheel', ['$event'])
+    scroll(event: WheelEvent) {
+        if (event.deltaY < 0) this.moveLeft();
+        else if (event.deltaY > 0) this.moveRight();
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes.keyboardReceiver) {
+            if (this.keyboardReceiver !== KEYBOARD_EVENT_RECEIVER.easel) this.resetTileState();
+        }
+    }
+
+    resetTileState() {
+        this.tiles.forEach((easelTile) => {
+            easelTile.state = TileState.None;
+        });
+        this.exchangableTiles = false;
+    }
+
+    containsTile(tileLetter: string): boolean {
+        let found = false;
+        this.tiles.forEach((easelTile) => {
+            if (easelTile.tile.letter === tileLetter) {
+                found = true;
+            }
+        });
+        return found;
+    }
+
+    tileKeyboardClicked(letter: string): EaselTile {
+        const NOT_PRESENT = -1;
+        let indexOfFirstOccuredTile = NOT_PRESENT;
+        let indexOfManipulatedTile = NOT_PRESENT;
+        let indexOfNextOccurance = NOT_PRESENT;
+        // We try to find the first occurance of the tile with the selected letter
+        this.tiles.forEach((easelTile) => {
+            if (easelTile.tile.letter === letter && indexOfFirstOccuredTile === NOT_PRESENT) {
+                indexOfFirstOccuredTile = this.tiles.indexOf(easelTile);
+            }
+        });
+        // We try to see if there is a tile already in manipulation state
+        this.tiles.forEach((easelTile) => {
+            if (easelTile.state === TileState.Manipulation && indexOfManipulatedTile === NOT_PRESENT)
+                indexOfManipulatedTile = this.tiles.indexOf(easelTile);
+        });
+        // we take the first occurance if there is no manipulated tile already
+        // or if the manipulated tile is not the same as the one we are looking for
+        if (
+            indexOfManipulatedTile === NOT_PRESENT ||
+            this.tiles[indexOfFirstOccuredTile].tile.letter !== this.tiles[indexOfManipulatedTile].tile.letter
+        ) {
+            return this.tiles[indexOfFirstOccuredTile];
+        } else {
+            this.tiles.forEach((easelTile) => {
+                if (easelTile.tile.letter === letter && indexOfNextOccurance === NOT_PRESENT) {
+                    indexOfNextOccurance = this.tiles.indexOf(easelTile, indexOfManipulatedTile + 1);
+                }
+            });
+            if (indexOfNextOccurance === NOT_PRESENT) return this.tiles[indexOfFirstOccuredTile];
+            else return this.tiles[indexOfNextOccurance];
+        }
+    }
+
+    tileClicked(tile: EaselTile, event: MouseEvent): void {
+        if (this.mouseManager.easelMouseClicked(true, event) === TileState.Manipulation) {
+            this.selectTileForManipulation(tile);
+            this.exchangableTiles = false;
+        }
+        if (this.mouseManager.easelMouseClicked(true, event) === TileState.Exchange) {
+            this.selectTileForExchange(tile);
+            this.exchangableTiles = true;
+        }
+        let exchangeable = false;
+        this.tiles.forEach((easelTile) => {
+            if (easelTile.state === TileState.Exchange) exchangeable = true;
+        });
+        this.exchangableTiles = exchangeable;
+    }
+
+    selectTileForManipulation(tile: EaselTile) {
+        this.tiles.forEach((easelTile) => {
+            easelTile.state = TileState.None;
+        });
+        tile.state = TileState.Manipulation;
+
+        // // this code follows the issues description
+        // case TileState.Exchange:
+        //     break;
+        // case TileState.None:
+        //     this.tiles.forEach((easelTile) => {
+        //         if (easelTile.state === TileState.Manipulation) easelTile.state = TileState.None;
+        //     });
+        //     tile.state = TileState.Manipulation;
+        //     break;
+    }
+
+    selectTileForExchange(tile: EaselTile) {
+        this.tiles.forEach((easelTile) => {
+            if (easelTile.state === TileState.Manipulation) easelTile.state = TileState.None;
+        });
+        switch (tile.state) {
+            case TileState.Exchange:
+                tile.state = TileState.None;
+                break;
+            // if we want to respect the issues instead of the project description PDF "scrabble", we add a break in the manipulation case;
+            case TileState.Manipulation:
+            case TileState.None:
+                tile.state = TileState.Exchange;
+                break;
+        }
+    }
+
+    moveLeft() {
+        const NOT_PRESENT = -1;
+        let indexOfManipulatedTile = NOT_PRESENT;
+        this.tiles.forEach((easelTile) => {
+            if (easelTile.state === TileState.Manipulation && indexOfManipulatedTile === NOT_PRESENT) {
+                indexOfManipulatedTile = this.tiles.indexOf(easelTile);
+            }
+        });
+        if (indexOfManipulatedTile !== NOT_PRESENT) {
+            const prevIndex = indexOfManipulatedTile !== 0 ? indexOfManipulatedTile - 1 : this.tiles.length - 1;
+            const prevTile: EaselTile = this.tiles[prevIndex];
+            this.tiles[prevIndex] = this.tiles[indexOfManipulatedTile];
+            this.tiles[indexOfManipulatedTile] = prevTile;
+        }
+    }
+
+    moveRight() {
+        const NOT_PRESENT = -1;
+        let indexOfManipulatedTile = NOT_PRESENT;
+        this.tiles.forEach((easelTile) => {
+            if (easelTile.state === TileState.Manipulation && indexOfManipulatedTile === NOT_PRESENT) {
+                indexOfManipulatedTile = this.tiles.indexOf(easelTile);
+            }
+        });
+        if (indexOfManipulatedTile !== NOT_PRESENT) {
+            const nextIndex = indexOfManipulatedTile !== this.tiles.length - 1 ? indexOfManipulatedTile + 1 : 0;
+            const nextTile: EaselTile = this.tiles[nextIndex];
+            this.tiles[nextIndex] = this.tiles[indexOfManipulatedTile];
+            this.tiles[indexOfManipulatedTile] = nextTile;
+        }
+    }
+
+    exchangeTiles() {
+        let tilesToExchange = '';
+        this.tiles.forEach((easelTile) => {
+            if (easelTile.state === TileState.Exchange) tilesToExchange += easelTile.tile.letter;
+        });
+        this.gameManager.exchangeTiles(tilesToExchange, this.playerService.getPlayerByName(this.mainPlayerName));
+        this.resetTileState();
+    }
+
+    // selectTileWithKeyboard(event: KeyboardEvent) {}
 }

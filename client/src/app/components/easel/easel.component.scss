@@ -1,25 +1,38 @@
-#easel
-{
+#easel {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
-    background-color: #BA8C63;
+    background-color: #ba8c63;
 }
 
-.tile
-{
+.tile {
     display: block;
     border: 3px;
     background-color: burlywood;
     font-weight: 700;
     font-size: x-large;
+    cursor: pointer;
 }
-.points
-{
+.points {
     height: 29%;
     font-size: xx-small;
     position: absolute;
     bottom: 0%;
-    right:0%;
+    right: 0%;
     padding: 7%;
+}
+
+.exchange-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: 1em;
+}
+
+.mat-raised-button {
+    background-color: burlywood;
+}
+
+.validate {
+    background-color: #76b947;
+    color: white;
 }
