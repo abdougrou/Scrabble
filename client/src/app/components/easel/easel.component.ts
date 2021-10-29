@@ -142,6 +142,11 @@ export class EaselComponent implements OnChanges {
             this.selectTileForExchange(tile);
             this.exchangableTiles = true;
         }
+        let exchangeable = false;
+        this.tiles.forEach((easelTile) => {
+            if (easelTile.state === TileState.Exchange) exchangeable = true;
+        });
+        this.exchangableTiles = exchangeable;
     }
 
     selectTileForManipulation(tile: EaselTile) {

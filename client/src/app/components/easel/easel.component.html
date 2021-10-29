@@ -3,7 +3,7 @@
         class="tile"
         (mousedown)="tileClicked(tile, $event)"
         *ngFor="let tile of tiles"
-        [ngStyle]="{ 'background-color': tile.state === 1 ? 'blue' : tile.state === 2 ? '#76b947' : 'burlywood' }"
+        [ngStyle]="{ 'background-color': tile.state === 1 ? '#8FC1D4' : tile.state === 2 ? '#76b947' : 'burlywood' }"
     >
         <div class="letter">
             {{ tile.tile.letter | uppercase }}
