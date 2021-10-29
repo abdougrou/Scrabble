@@ -21,6 +21,8 @@ export class CommandHandlerService {
                 return this.pass(command, player);
             case COMMANDS.debug:
                 return this.debug(command);
+            case COMMANDS.reserve:
+                return this.reserve(command);
             default:
                 return { user: SYSTEM_NAME, body: "La commande entrée n'est pas valide" } as ChatMessage;
         }
@@ -101,7 +103,7 @@ export class CommandHandlerService {
     reserveDisplay(): string {
         let display = '';
         this.reserveService.tiles.forEach((letter) => {
-            display += `${letter.tile}: ${letter.count}\n`;
+            display += `${letter.tile.letter}: ${letter.count}\n`;
         });
         return display;
     }
