@@ -5,7 +5,7 @@
     "private": true,
     "scripts": {
         "start": "nodemon",
-        "build": "rimraf out && tsc --project tsconfig.app.json",
+        "build": "rimraf out/server/app && tsc --project tsconfig.app.json",
         "format": "prettier --config ../.prettierrc.yaml --write \"app/**/*\"",
         "lint": "eslint -c .eslintrc.json \"./app/**/*.ts\" --format stylish",
         "test": "cross-env TS_NODE_PROJECT='./tsconfig.spec.json' mocha --config=.mocharc.json --node-env=test",
@@ -42,7 +42,6 @@
     },
     "_moduleAliases": {
         "@app": "out/server/app/"
-
     },
     "dependencies": {
         "cookie-parser": "1.4.5",

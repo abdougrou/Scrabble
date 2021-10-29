@@ -8,6 +8,7 @@ export class SocketManagerService {
     
     // private lastAvailableRoom: string | undefined = undefined;
     constructor(server: http.Server) {
+        console.log("allo");
         this.socket = new io.Server(server, { cors: { origin: '*', methods: ['GET', 'POST', 'DELETE'] } });
     }
 

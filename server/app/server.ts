@@ -28,13 +28,10 @@ export class Server {
         this.application.app.set('port', Server.appPort);
 
         this.server = http.createServer(this.application.app);
-        this.socketManager = new SocketManagerService(this.server);
-        this.socketManager.handleSockets();
-
-        this.socketManager = new SocketManagerService(this.server);
-        this.socketManager.handleSockets();
 
         this.server.listen(Server.appPort);
+        this.socketManager = new SocketManagerService(this.server);
+        this.socketManager.handleSockets();
         this.server.on('error', (error: NodeJS.ErrnoException) => this.onError(error));
         this.server.on('listening', () => this.onListening());
     }

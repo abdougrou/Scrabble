@@ -12,11 +12,5 @@
         "Express": true,
         "Mocha": true
     },
-    "prettier/prettier": [
-        "error",
-        {
-          "endOfLine": "auto",
-        }
-      ],
     "overrides": []
 }
