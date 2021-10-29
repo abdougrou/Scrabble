@@ -6,7 +6,6 @@ import { GameConfigPageComponent } from '@app/components/game-config-page/game-c
 import { MultiplayerRoomsComponent } from '@app/components/multiplayer-rooms/multiplayer-rooms.component';
 import { DIALOG_HEIGHT, DIALOG_WIDTH, DURATION_INIT } from '@app/constants';
 import { GameManagerService } from '@app/services/game-manager.service';
-import { WebSocketService } from '@app/services/web-socket.service';
 
 @Component({
     selector: 'app-mode-selection',
@@ -18,7 +17,7 @@ export class ModeSelectionComponent {
     constructor(
         public dialogRef: MatDialogRef<ModeSelectionComponent>,
         public dialog: MatDialog,
-        private webSocket: WebSocketService,
+        // private communication: CommunicationService,
         @Inject(MAT_DIALOG_DATA) public data: { mode: GameMode },
         private gameManager: GameManagerService,
         private router: Router,
@@ -39,7 +38,7 @@ export class ModeSelectionComponent {
         this.openDialogBox(true)
             .afterClosed()
             .subscribe((result) => {
-                if (!result || !this.webSocket.startMultiplayerGame((result as GameConfig).playerName1)) return;
+                if (!result) return;
                 this.gameManager.initialize(result as GameConfig);
                 this.router.navigateByUrl('/game');
                 this.closeSelf();

@@ -12,8 +12,6 @@ export class Server {
     private server: http.Server;
     private socketManager: SocketManagerService;
 
-    private socketManager: SocketManagerService;
-
     constructor(private readonly application: Application) {}
 
     private static normalizePort(val: number | string): number | string | boolean {

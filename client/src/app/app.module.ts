@@ -13,11 +13,11 @@ import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { MaterialPageComponent } from '@app/pages/material-page/material-page.component';
 import { ChatBoxComponent } from './components/chat-box/chat-box.component';
 import { EaselComponent } from './components/easel/easel.component';
+import { EndGamePopupComponent } from './components/end-game-popup/end-game-popup.component';
 import { GameConfigPageComponent } from './components/game-config-page/game-config-page.component';
 import { ModeSelectionComponent } from './components/mode-selection/mode-selection.component';
-import { PlayerInfoComponent } from './components/player-info/player-info.component';
-import { EndGamePopupComponent } from './components/end-game-popup/end-game-popup.component';
 import { MultiplayerRoomsComponent } from './components/multiplayer-rooms/multiplayer-rooms.component';
+import { PlayerInfoComponent } from './components/player-info/player-info.component';
 
 /**
  * Main module that is used in main.ts.

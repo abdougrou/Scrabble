@@ -1,24 +1,26 @@
-import { Server } from '@app/server';
+import { Lobby, LobbyConfig } from '@common/lobby';
 import { Socket } from 'socket.io';
-import { GameConfig } from './game-config';
-import { Lobby } from './lobby';
+import { Service } from 'typedi';
 
+@Service()
 export class LobbyManager {
     /**
      * Map containing all active lobbies
      */
     static lobbies: Map<string, Lobby> = new Map();
-
-    constructor( server: Server) {};
     
     /**
-     * Creates a new lobby and adds it to the lobb
+     * Creates a new lobby and adds it to the lobbies list
      * 
      * @param config game configuration
+     * @return lobby key
      */
-    static createLobby(config: GameConfig) {
-        const lobby = new Lobby('',config);
-        this.lobbies.set('uwu', lobby);
+    static createLobby(config: LobbyConfig): string {
+        let key = this.generateKey();
+        while (this.lobbies.get(key)) key = this.generateKey();
+        const lobby: Lobby = { key: key, config: config };
+        this.lobbies.set(key, lobby);
+        return key;
     }
 
     /**
@@ -30,7 +32,7 @@ export class LobbyManager {
     static joinLobby(key: string, socket: Socket): boolean {
         const lobby = this.lobbies.get(key);
         if (lobby) {
-            lobby.join(socket);
+            // Join
             return true;
         }
         return false;
@@ -52,8 +54,20 @@ export class LobbyManager {
      * @param key lobby key
      */
     static deleteLobby(key: string) {
-        this.lobbies.get(key)?.destroy();
         this.lobbies.delete(key);
     }
-}
 
+    /**
+     * Generate a random string key
+     * 
+     * @return unique key string
+     */
+    static generateKey(): string {
+        let result = '';
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        for ( var i = 0; i < 8; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return result;
+    }
+}

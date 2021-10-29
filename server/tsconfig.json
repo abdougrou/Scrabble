@@ -18,7 +18,8 @@
         "strictNullChecks": true,
         "paths": {
             "@app/*": ["./app/*"],
-            "@static/*": ["../static/*"]
+            "@static/*": ["../static/*"],
+            "@common/*": ["../common/*"]
         }
     }
 }
