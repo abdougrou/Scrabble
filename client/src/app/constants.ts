@@ -20,7 +20,7 @@ export const COMMANDS = {
     place: '!placer',
     pass: '!passer',
     debug: '!debug',
-    reserve: '!réserve',
+    reserve: '!reserve',
 };
 
 // Reserve constants

@@ -88,7 +88,7 @@ export class CommandHandlerService {
 
     reserve(command: string): ChatMessage {
         const commandResult: ChatMessage = { user: '', body: '' };
-        const regex = new RegExp(/^!réserve$/g);
+        const regex = new RegExp(/^!reserve$/g);
         if (regex.test(command) && this.gameManager.debug) {
             commandResult.user = COMMAND_RESULT;
             commandResult.body = this.reserveDisplay();
