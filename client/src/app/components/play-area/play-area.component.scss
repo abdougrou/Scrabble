@@ -1,3 +1,18 @@
 #canvas {
     border: 1px solid black;
 }
+
+.validate-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: 1em;
+}
+
+.mat-raised-button {
+    background-color: burlywood;
+}
+
+.validate {
+    background-color: #76b947;
+    color: white;
+}

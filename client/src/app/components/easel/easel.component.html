@@ -3,7 +3,7 @@
         class="tile"
         (mousedown)="tileClicked(tile, $event)"
         *ngFor="let tile of tiles"
-        [ngStyle]="{ 'background-color': tile.state === 1 ? 'red' : tile.state === 2 ? 'blue' : 'burlywood' }"
+        [ngStyle]="{ 'background-color': tile.state === 1 ? 'blue' : tile.state === 2 ? '#76b947' : 'burlywood' }"
     >
         <div class="letter">
             {{ tile.tile.letter | uppercase }}
@@ -14,8 +14,13 @@
     </mat-card>
 </mat-card>
 <div class="exchange-buttons" *ngIf="exchangableTiles">
-    <button mat-raised-button (click)="exchangeTiles()" [disabled]="this.players[0].name !== this.mainPlayerName || this.numTilesReserve < 7">
+    <button
+        mat-raised-button
+        (click)="exchangeTiles()"
+        [disabled]="this.players[0].name !== this.mainPlayerName || this.numTilesReserve < 7"
+        class="validate"
+    >
         Échanger
     </button>
-    <button mat-raised-button>Annuler</button>
+    <button mat-raised-button (click)="resetTileState()">Annuler</button>
 </div>

@@ -131,6 +131,7 @@ export const POINT_OFFSET = STEP * (POINT_NUM / POINT_DENUM);
 export const RIGHT_ARROW: Tile = { letter: '➞', points: -1 };
 export const DOWN_ARROW: Tile = { letter: '🠗', points: -1 };
 export const INVALID_COORDS: Vec2 = { x: -1, y: -1 };
+export const INVALID_POINT = -1;
 
 //  les nombres permettant de creer la fraction equivalentes au offset
 const NUM = 5;
@@ -162,6 +163,7 @@ export const TILE_COLORS = {
     w3: '#D84141',
 };
 export const TILE_TEXT_COLOR = '#060606';
+export const TEMP_TILE_COLOR = '#76B947';
 //  the index to tiles of red colors
 const RED_MULTIPLIER_INDEX = 4;
 export const BOARD_MULTIPLIER = [

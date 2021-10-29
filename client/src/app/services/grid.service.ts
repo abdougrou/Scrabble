@@ -2,25 +2,27 @@ import { Injectable } from '@angular/core';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
 import {
-    BOARD_MULTIPLIER,
-    COLS,
-    CANVAS_HEIGHT,
-    CANVAS_WIDTH,
-    GRID_SIZE,
-    TILE_COLORS,
-    STEP,
-    ROWS,
-    TILE_TEXT_COLOR,
-    LETTER_OFFSET,
-    POINT_OFFSET,
     BASE_LETTER_FONT_SIZE,
     BASE_POINT_FONT_SIZE,
-    LETTER_FONT_SIZE_MODIFIER,
-    POINT_FONT_SIZE_MODIFIER,
-    TILE_MULTIPLIER,
-    TILE_TYPE,
-    GRID_WIDTH,
+    BOARD_MULTIPLIER,
+    CANVAS_HEIGHT,
+    CANVAS_WIDTH,
+    COLS,
     GRID_HEIGHT,
+    GRID_SIZE,
+    GRID_WIDTH,
+    INVALID_POINT,
+    LETTER_FONT_SIZE_MODIFIER,
+    LETTER_OFFSET,
+    POINT_FONT_SIZE_MODIFIER,
+    POINT_OFFSET,
+    ROWS,
+    STEP,
+    TEMP_TILE_COLOR,
+    TILE_COLORS,
+    TILE_MULTIPLIER,
+    TILE_TEXT_COLOR,
+    TILE_TYPE,
 } from '@app/constants';
 import { BoardService } from './board.service';
 
@@ -54,6 +56,12 @@ export class GridService {
         this.gridContext.fillStyle = colour;
         this.gridContext.strokeStyle = TILE_TEXT_COLOR;
         this.gridContext.fill();
+    }
+
+    borderTile(coord: Vec2) {
+        this.gridContext.strokeStyle = TEMP_TILE_COLOR;
+        this.gridContext.lineWidth = 2;
+        this.gridContext.strokeRect(coord.x * STEP + 1, coord.y * STEP + 1, STEP - 3, STEP - 3);
     }
 
     drawMultiplierText(coord: Vec2, multiplierType: string, multiplier: number) {
@@ -99,7 +107,11 @@ export class GridService {
     drawTile(coord: Vec2, tile: Tile, fontSizeModifier: number) {
         const letterFont = BASE_LETTER_FONT_SIZE + fontSizeModifier * LETTER_FONT_SIZE_MODIFIER;
         const pointFont = BASE_POINT_FONT_SIZE + fontSizeModifier * POINT_FONT_SIZE_MODIFIER;
-        this.colorTile(coord, 'burlywood');
+        if (tile.points !== INVALID_POINT) {
+            this.colorTile(coord, 'burlywood');
+        } else {
+            this.colorTile(coord, TEMP_TILE_COLOR);
+        }
         this.gridContext.fillStyle = 'black';
 
         this.gridContext.textBaseline = 'middle';
@@ -107,10 +119,12 @@ export class GridService {
         this.gridContext.font = `${letterFont}px system-ui`;
         this.gridContext.fillText(tile.letter.toUpperCase(), coord.x * STEP + LETTER_OFFSET, coord.y * STEP + LETTER_OFFSET);
 
-        this.gridContext.textBaseline = 'bottom';
-        this.gridContext.textAlign = 'right';
-        this.gridContext.font = `${pointFont}px system-ui`;
-        this.gridContext.fillText(tile.points.toString(), coord.x * STEP + POINT_OFFSET, coord.y * STEP + POINT_OFFSET);
+        if (tile.points !== INVALID_POINT) {
+            this.gridContext.textBaseline = 'bottom';
+            this.gridContext.textAlign = 'right';
+            this.gridContext.font = `${pointFont}px system-ui`;
+            this.gridContext.fillText(tile.points.toString(), coord.x * STEP + POINT_OFFSET, coord.y * STEP + POINT_OFFSET);
+        }
     }
 
     clearBoard() {

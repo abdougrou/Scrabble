@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild } from '@angular/core';
-import { Tile } from '@app/classes/tile';
+import { TileCoords } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { CANVAS_HEIGHT, CANVAS_WIDTH, KEYBOARD_EVENT_RECEIVER } from '@app/constants';
+import { CANVAS_HEIGHT, CANVAS_WIDTH, INVALID_COORDS, KEYBOARD_EVENT_RECEIVER } from '@app/constants';
 import { GridService } from '@app/services/grid.service';
 import { PlaceTilesService } from '@app/services/place-tiles.service';
 @Component({
@@ -16,17 +16,23 @@ export class PlayAreaComponent implements AfterViewInit {
     @Output() keyboardReceiverChange = new EventEmitter<string>();
     @Output() isInside = new EventEmitter<boolean>();
 
-    tiles: Tile[] = [];
-    mousePosition: Vec2 = { x: 0, y: 0 };
-    buttonPressed = '';
+    tilesPlacedOnBoard: TileCoords[] = [];
     private canvasSize = { x: CANVAS_WIDTH, y: CANVAS_HEIGHT };
 
-    constructor(private readonly gridService: GridService, private placeTilesService: PlaceTilesService) {}
+    constructor(private readonly gridService: GridService, public placeTilesService: PlaceTilesService) {
+        this.tilesPlacedOnBoard = this.placeTilesService.tilesPlacedOnBoard;
+    }
 
     @HostListener('document:keydown', ['$event'])
     buttonDetect(event: KeyboardEvent) {
         if (this.keyboardReceiver === KEYBOARD_EVENT_RECEIVER.board) {
             this.placeTilesService.manageKeyboard(event.key);
+            for (const tile of this.tilesPlacedOnBoard) {
+                this.gridService.borderTile(tile.coords);
+            }
+            if (this.placeTilesService.directionIndicator.coords !== INVALID_COORDS) {
+                this.gridService.borderTile(this.placeTilesService.directionIndicator.coords);
+            }
         } else {
             this.placeTilesService.endPlacement();
         }

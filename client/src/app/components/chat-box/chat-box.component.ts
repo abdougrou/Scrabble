@@ -24,6 +24,7 @@ export class ChatBoxComponent implements OnChanges {
     player: Player;
     mainPlayerName: string;
     enemyPlayerName: string;
+    manualPlacementMessage: string;
 
     constructor(
         public gameManager: GameManagerService,

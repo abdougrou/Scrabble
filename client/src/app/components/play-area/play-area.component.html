@@ -16,3 +16,7 @@
         <p *ngIf="buttonPressed !== ''">Touche : {{ buttonPressed }}</p>
     </div>
 --></div>
+<div class="validate-buttons" *ngIf="tilesPlacedOnBoard.length > 0">
+    <button mat-raised-button (click)="this.placeTilesService.validatePlacement()" class="validate">Jouer</button>
+    <button mat-raised-button>Annuler</button>
+</div>
