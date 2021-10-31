@@ -1,4 +1,4 @@
-import { RESERVE_EXCHANGE_LIMIT } from "@app/constants";
+import { RESERVE_EXCHANGE_LIMIT } from '@app/constants';
 
 export class Reserve {
     data: Map<string, number> = new Map();
@@ -95,5 +95,22 @@ export class Reserve {
             available = Array.from(this.data.entries()).filter((entry) => entry[1] > 0);
         }
         return output;
+    }
+
+    /**
+     * Prints the reserve in the following format:
+     *
+     * A: 2
+     *
+     * B: 3
+     *
+     * @return formatted string of the reserve
+     */
+    toString(): string {
+        let output = '';
+        Array.from(this.data.entries()).forEach((item) => {
+            output += item[0].toUpperCase() + ': ' + item[1] + '\n';
+        });
+        return output.slice(0, output.length - 1);
     }
 }

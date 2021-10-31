@@ -110,4 +110,10 @@ describe('Reserve', () => {
         const letters = reserve.getRandomLetters(getCount);
         expect(letters.length).to.lessThanOrEqual(getCount);
     });
+
+    it('toString returns the reserve in the correct format', () => {
+        reserve = new Reserve(RESERVE_STR);
+        const expected = 'A: 5\nB: 3';
+        expect(reserve.toString()).to.equal(expected);
+    });
 });
