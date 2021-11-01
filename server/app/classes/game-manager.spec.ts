@@ -20,6 +20,15 @@ describe('GameManager', () => {
         expect(gameManager.addPlayer('player3')).to.equal(false);
     });
 
+    it('getPlayer returns correct values', () => {
+        const player1: Player = { name: 'player1', easel: new Easel(['a', 'b', 'c']), score: 0 };
+        const player2: Player = { name: 'player2', easel: new Easel(['a', 'b', 'c']), score: 0 };
+        gameManager.players = [player1, player2];
+
+        expect(gameManager.getPlayer(player1.name)).to.equal(player1);
+        expect(gameManager.getPlayer('player3')).to.equal(undefined);
+    });
+
     it('swapPlayers swaps players', () => {
         gameManager.addPlayer('player1');
         gameManager.addPlayer('player2');

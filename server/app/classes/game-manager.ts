@@ -14,15 +14,27 @@ export class GameManager {
     }
 
     /**
-     * Adds a player to the game, max 2 players
+     * Adds a player to the game
      *
-     * @param name player name
+     * @param name player name, must be different than current player's name
+     * @returns true if the player is added successfully
      */
     addPlayer(name: string): boolean {
         if (this.players.length > 1) return false;
-        for (const player of this.players) if (name === player.name) return false;
+        else if (this.players[0]?.name === name) return false;
         this.players.push({ name, easel: new Easel(), score: 0 });
         return true;
+    }
+
+    /**
+     * Get a player by name
+     *
+     * @param name player name
+     * @returns Player if they're in game, undefined otherwise
+     */
+    getPlayer(name: string): Player | undefined {
+        for (const player of this.players) if (player.name === name) return player;
+        return undefined;
     }
 
     swapPlayers() {
