@@ -12,7 +12,7 @@ describe('CommandHandlerService', () => {
     let player: Player;
 
     beforeEach(() => {
-        gameManagerSpy = jasmine.createSpyObj<GameManagerService>('GameManagerService', ['exchangeTiles', 'placeTiles', 'skipTurn']);
+        gameManagerSpy = jasmine.createSpyObj<GameManagerService>('GameManagerService', ['exchangeTiles', 'placeTiles', 'skipTurn', 'activateDebug']);
     });
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -20,10 +20,10 @@ describe('CommandHandlerService', () => {
         });
         service = TestBed.inject(CommandHandlerService);
         tiles = [
-            { letter: 'A', points: 0 },
-            { letter: 'B', points: 0 },
-            { letter: 'C', points: 0 },
-            { letter: 'D', points: 0 },
+            { letter: 'a', points: 0 },
+            { letter: 'b', points: 0 },
+            { letter: 'c', points: 0 },
+            { letter: 'd', points: 0 },
         ];
         player = {
             name: 'player',
@@ -40,12 +40,15 @@ describe('CommandHandlerService', () => {
         const exchange = '!echanger abcdef';
         const place = '!placer a10v abcdef';
         const pass = '!passer';
+        const debug = '!debug';
         service.handleCommand(exchange, player);
         service.handleCommand(place, player);
         service.handleCommand(pass, player);
+        service.handleCommand(debug, player);
         expect(gameManagerSpy.exchangeTiles).toHaveBeenCalledTimes(1);
         expect(gameManagerSpy.placeTiles).toHaveBeenCalledTimes(1);
         expect(gameManagerSpy.skipTurn).toHaveBeenCalledTimes(1);
+        expect(gameManagerSpy.activateDebug).toHaveBeenCalledTimes(1);
     });
 
     it('should call GameManager exchangeTiles when the command is valid', () => {
@@ -74,5 +77,18 @@ describe('CommandHandlerService', () => {
         service.pass(passGood, player);
         service.pass(passBad, player);
         expect(gameManagerSpy.skipTurn).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call GameManager activateDebug when command is valid', () => {
+        const debugGood = '!debug';
+        const debugBad = '!debug la';
+        service.debug(debugGood);
+        service.debug(debugBad);
+        expect(gameManagerSpy.activateDebug).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return an error message when the command is invalid', () => {
+        const invalidCmdExchange = 'echanger abcccccas';
+        expect(service.handleCommand(invalidCmdExchange, player).body).toBe("La commande entrée n'est pas valide");
     });
 });

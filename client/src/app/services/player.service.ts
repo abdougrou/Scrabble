@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
 import { Tile } from '@app/classes/tile';
+import { VirtualPlayer } from '@app/classes/virtual-player';
 
 @Injectable({
     providedIn: 'root',
@@ -12,6 +13,7 @@ export class PlayerService {
     get current(): Player {
         return this.players[0];
     }
+    mainPlayer: Player;
 
     createPlayer(name: string, tiles: Tile[]) {
         const player: Player = {
@@ -22,6 +24,11 @@ export class PlayerService {
         this.players.push(player);
     }
 
+    createVirtualPlayer(name: string, tiles: Tile[]) {
+        const vPlayer: VirtualPlayer = new VirtualPlayer(name, new Easel(tiles));
+        this.players.push(vPlayer);
+    }
+
     switchPlayers() {
         this.players.reverse();
     }
@@ -29,10 +36,6 @@ export class PlayerService {
     getPlayerByName(name: string): Player {
         if (this.players[1].name === name) return this.players[1];
         else return this.players[0];
-    }
-
-    incrementSkipCounter() {
-        this.skipCounter++;
     }
 
     clear() {

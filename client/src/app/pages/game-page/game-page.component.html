@@ -1,6 +1,18 @@
-<div class="container">
-    <app-sidebar></app-sidebar>
+<div (click)="mouseClick($event)" class="container">
+    <app-sidebar class="sidebar"></app-sidebar>
     <section class="play-area-container">
-        <app-play-area class="play-area" tabindex="0"></app-play-area>
+        <app-play-area
+            [keyboardReceiver]="keyboardReceiver"
+            (keyboardReceiverChange)="changeKeyboardReceiver($event)"
+            (isInside)="clickedInside($event)"
+            class="play-area"
+            tabindex="0"
+        ></app-play-area>
     </section>
+    <app-chat-box
+        [keyboardReceiver]="keyboardReceiver"
+        (isInside)="clickedInside($event)"
+        (keyboardReceiverChange)="changeKeyboardReceiver($event)"
+        id="chat-box"
+    ></app-chat-box>
 </div>

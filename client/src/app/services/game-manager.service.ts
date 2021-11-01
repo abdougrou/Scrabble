@@ -1,63 +1,162 @@
 import { Injectable } from '@angular/core';
 import { GameConfig } from '@app/classes/game-config';
-import { Player } from '@app/classes/player';
-import { Tile } from '@app/classes/tile';
+import { ChatMessage } from '@app/classes/message';
+import { PlayAction, Player } from '@app/classes/player';
+import { PlaceTilesInfo, Tile, TileCoords } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { GRID_SIZE, RANDOM_PLAYER_NAMES, SECOND_MD, STARTING_TILE_AMOUNT } from '@app/constants';
-import { timer } from 'rxjs';
+import { VirtualPlayer } from '@app/classes/virtual-player';
+import { COMMAND_RESULT, GRID_SIZE, LETTER_POINTS, MAX_SKIP_COUNT, SECOND_MD, STARTING_TILE_AMOUNT, SYSTEM_NAME } from '@app/constants';
+import { BehaviorSubject, Subscription, timer } from 'rxjs';
 import { BoardService } from './board.service';
+import { CalculatePointsService } from './calculate-points.service';
+import { ExchangeTilesService } from './exchange-tiles.service';
+import { GridService } from './grid.service';
 import { PlayerService } from './player.service';
 import { ReserveService } from './reserve.service';
+import { WordValidationService } from './word-validation.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class GameManagerService {
+    commandMessage: BehaviorSubject<ChatMessage> = new BehaviorSubject({ user: '', body: '' });
     turnDuration: number;
     currentTurnDurationLeft: number;
+    subscription: Subscription;
+    tilePlaceBackSubscription: Subscription;
     randomPlayerNameIndex: number;
     isFirstTurn: boolean = true;
-
     mainPlayerName: string;
     enemyPlayerName: string;
+    isEnded: boolean;
+    endGameMessage: string = '';
+    debug: boolean = false;
+    isMultiPlayer: boolean;
 
-    constructor(private board: BoardService, private reserve: ReserveService, private players: PlayerService) {}
+    constructor(
+        private board: BoardService,
+        private reserve: ReserveService,
+        private players: PlayerService,
+        private gridService: GridService,
+        private wordValidation: WordValidationService,
+        private calculatePoints: CalculatePointsService,
+        private exchangeTileService: ExchangeTilesService,
+    ) {}
+
+    get reserveCount() {
+        return this.reserve.tileCount;
+    }
 
     initialize(gameConfig: GameConfig) {
         this.mainPlayerName = gameConfig.playerName1;
         this.enemyPlayerName = gameConfig.playerName2;
+        this.isMultiPlayer = gameConfig.isMultiPlayer;
         this.turnDuration = gameConfig.duration;
         this.currentTurnDurationLeft = gameConfig.duration;
-        this.randomPlayerNameIndex = Math.floor(Math.random() * RANDOM_PLAYER_NAMES.length);
-
-        this.initializePlayers([gameConfig.playerName1, RANDOM_PLAYER_NAMES[this.randomPlayerNameIndex]]);
-
+        this.isEnded = false;
+        this.initializePlayers([this.mainPlayerName, this.enemyPlayerName]);
+        this.players.mainPlayer = this.players.getPlayerByName(this.mainPlayerName);
         this.startTimer();
     }
 
     startTimer() {
         const source = timer(0, SECOND_MD);
-        source.subscribe((seconds) => {
+        this.subscription = source.subscribe((seconds) => {
             this.currentTurnDurationLeft = this.turnDuration - (seconds % this.turnDuration) - 1;
             if (this.currentTurnDurationLeft === 0) {
                 this.currentTurnDurationLeft = this.turnDuration;
                 this.switchPlayers();
-
                 // TODO send player switch event
+            }
+        });
+    }
+
+    startTilePLaceBackCountdown(player: Player, retrievedTiles: Tile[], tilesToPlace: TileCoords[]) {
+        const source = timer(0, SECOND_MD);
+        this.tilePlaceBackSubscription = source.subscribe((seconds) => {
+            const counter = 3 - (seconds % 3) - 1;
+            if (counter === 0) {
+                player.easel.addTiles(retrievedTiles);
+                for (const aTile of tilesToPlace) {
+                    this.board.board.delete(this.board.coordToKey(aTile.coords));
+                }
+                this.gridService.drawBoard();
+                this.tilePlaceBackSubscription.unsubscribe();
             }
         });
     }
 
     initializePlayers(playerNames: string[]) {
         this.players.createPlayer(playerNames[0], this.reserve.getLetters(STARTING_TILE_AMOUNT));
-        this.players.createPlayer(playerNames[1], this.reserve.getLetters(STARTING_TILE_AMOUNT));
+        if (this.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getLetters(STARTING_TILE_AMOUNT));
+        else this.players.createVirtualPlayer(playerNames[1], this.reserve.getLetters(STARTING_TILE_AMOUNT));
         // if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
     }
 
     switchPlayers() {
         this.players.switchPlayers();
+        this.subscription.unsubscribe();
         this.currentTurnDurationLeft = this.turnDuration;
+        this.startTimer();
         // Send player switch event
+        if (this.players.current instanceof VirtualPlayer) this.playVirtualPlayer();
+    }
+
+    exchangeTiles(tiles: string, player: Player): string {
+        const message = this.exchangeTileService.exchangeTiles(tiles, player);
+        if (message === '') {
+            this.players.skipCounter = 0;
+            this.switchPlayers();
+            return `${player.name} a échangé les lettres ${tiles}`;
+        } else return message;
+    }
+
+    playVirtualPlayer() {
+        const vPlayer: VirtualPlayer = this.players.current as VirtualPlayer;
+        vPlayer.play().subscribe((action) => {
+            switch (action) {
+                case PlayAction.ExchangeTiles: {
+                    const tilesToExchange = vPlayer.exchange();
+                    if (this.reserve.isExchangePossible(tilesToExchange.length)) {
+                        const msg: ChatMessage = { user: this.enemyPlayerName, body: this.exchangeTiles(tilesToExchange, vPlayer) };
+                        this.commandMessage.next(msg);
+                    } else {
+                        this.buttonSkipTurn();
+                    }
+                    break;
+                }
+                case PlayAction.PlaceTiles: {
+                    const placeTilesInfo: PlaceTilesInfo = vPlayer.place(
+                        this.wordValidation,
+                        this.calculatePoints,
+                        this.board,
+                        this.commandMessage,
+                        this.debug,
+                    );
+                    // console.log(
+                    //     `Bot places the word "${placeTilesInfo.word}" ${placeTilesInfo.vertical ? 'vertical' : 'horizontal'}ly at ${
+                    //         placeTilesInfo.coordStr
+                    //     }`,
+                    // );
+                    if (placeTilesInfo.word.length > 0) {
+                        // console.log(placeTilesInfo);
+                        // console.log(this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer));
+                        const msg: ChatMessage = {
+                            user: this.enemyPlayerName,
+                            body: this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer),
+                        };
+                        this.commandMessage.next(msg);
+                    } else {
+                        this.buttonSkipTurn();
+                    }
+                    break;
+                }
+                default:
+                    // console.log('Bot skipped his turn');
+                    this.buttonSkipTurn();
+                    break;
+            }
+        });
     }
 
     giveTiles(player: Player, amount: number) {
@@ -65,77 +164,174 @@ export class GameManagerService {
         player.easel.addTiles(tiles);
     }
 
-    skipTurn() {
-        this.players.incrementSkipCounter();
-        this.switchPlayers();
+    buttonSkipTurn(): void {
+        const msg: ChatMessage = { user: COMMAND_RESULT, body: `${this.players.current.name} a passé son tour` };
+        this.commandMessage.next(msg);
+        this.skipTurn();
     }
 
-    // TODO skipCounter to reset when place or exchange command excuted
+    skipTurn() {
+        this.players.skipCounter++;
+        if (this.players.skipCounter >= MAX_SKIP_COUNT) {
+            this.endGame();
+        } else {
+            this.switchPlayers();
+        }
+    }
 
     // TODO implement stopTimer() to end the game after 6 skipTurn
+    endGame() {
+        const msg: ChatMessage = {
+            user: SYSTEM_NAME,
+            body: `La partie est terminée! <br>
+            chevalet de ${this.players.getPlayerByName(this.mainPlayerName).name}: ${this.players.getPlayerByName(this.mainPlayerName).easel}.<br>
+            chevalet de ${this.players.getPlayerByName(this.enemyPlayerName).name}: ${this.players.getPlayerByName(this.enemyPlayerName).easel}.`,
+        };
+        this.commandMessage.next(msg);
+        this.stopTimer();
+        this.isEnded = true;
+    }
+
+    stopTimer() {
+        this.subscription.unsubscribe();
+    }
 
     reset() {
+        this.stopTimer();
+        this.board.board = new Map();
+        this.reserve = new ReserveService();
         this.players.clear();
     }
 
-    exchangeTiles(tiles: string, player: Player): string {
-        if (this.players.current !== player) {
-            return "Ce n'est pas votre tour";
-        } else if (!this.reserve.isExchangePossible(tiles.length)) {
-            return "Il n'y a pas assez de tuiles dans la réserve";
-        } else if (!player.easel.containsTiles(tiles)) {
-            return 'Votre chevalet ne contient pas les lettres nécessaires';
+    activateDebug(): string {
+        if (this.debug) {
+            this.debug = false;
+            return 'affichages de débogage désactivés';
         } else {
-            const easelTiles: Tile[] = player.easel.getTiles(tiles);
-            const reserveTiles: Tile[] = this.reserve.getLetters(tiles.length);
-            player.easel.addTiles(reserveTiles);
-            this.reserve.returnLetters(easelTiles);
-            return `${player.name} a échangé les lettres ${tiles}`;
+            this.debug = true;
+            return 'affichages de débogage activés';
         }
     }
 
     placeTiles(word: string, coordStr: string, vertical: boolean, player: Player): string {
-        const coord: Vec2 = this.getCoordinateFromString(coordStr);
+        //  Check if it's the player's turn to play
         if (this.players.current !== player) return "Ce n'est pas votre tour";
-
-        //  check if word can fit on board
-        if (vertical) {
-            if (coord.y + word.length > GRID_SIZE) return 'Commande impossible a realise';
-        } else {
-            if (coord.x + word.length > GRID_SIZE) return 'Commande impossible a realise';
-        }
-
-        const coords: Vec2[] = new Array();
-        let neededLetters = '';
-        for (let i = 0; i < word.length; i++) {
-            let nextCoord: Vec2;
-            if (!vertical) nextCoord = { x: coord.x + i, y: coord.y };
-            else nextCoord = { x: coord.x, y: coord.y + i };
-
-            const tile: Tile | undefined = this.board.getTile(nextCoord);
-            if (tile) {
-                if (tile.letter !== word.charAt(i)) return 'Commande impossible a realise';
+        //  Get the tiles and coordinates associated to the word
+        const tileCoords: TileCoords[] = this.getTileCoords(word, coordStr, vertical);
+        //  Compare the letter positions to the tiles on the board
+        if (this.wordCollides(tileCoords)) return 'Commande impossible a realise';
+        //  Check that the command will lead to tiles being placed
+        if (tileCoords.length === 0) return 'Le mot que vous tentez de placer se trouve deja sur le tableau';
+        //  Manage blank letters
+        const tilesToRetrieve: TileCoords[] = [];
+        const tilesToPlace: TileCoords[] = [];
+        for (const tileCoord of tileCoords) {
+            if (tileCoord.tile.letter === tileCoord.tile.letter.toUpperCase()) {
+                tilesToRetrieve.push({ tile: { letter: '*', points: tileCoord.tile.points }, coords: tileCoord.coords });
+                tilesToPlace.push({ tile: { letter: tileCoord.tile.letter.toLowerCase(), points: 0 }, coords: tileCoord.coords });
             } else {
-                neededLetters += word.charAt(i);
-                coords.push(nextCoord);
+                tilesToRetrieve.push(tileCoord);
+                tilesToPlace.push(tileCoord);
             }
         }
-
-        if (neededLetters.length === 0) return 'Vous ne pouvez pas placer le mot';
-        else if (!player.easel.containsTiles(neededLetters)) return 'Votre chevalet ne contient pas les lettres nécessaires';
-
-        //  valider avant de placer
-        const neededTiles = player.easel.getTiles(neededLetters);
-        for (let i = 0; i < neededLetters.length; i++) {
-            this.board.placeTile(coords[i], neededTiles[i]);
+        //  Check that the easel contains all the needed letters
+        if (!player.easel.containsTiles(this.getStringToRetrieve(tilesToRetrieve))) return 'Votre chevalet ne contient pas les lettres nécessaires';
+        //  Retrieve the tiles from the player's easel
+        const retrievedTiles: Tile[] = player.easel.getTiles(this.getStringToRetrieve(tilesToRetrieve));
+        //  Check that the position of the word is valid
+        if (this.validWordPosition(word, tilesToPlace, vertical)) {
+            //  check that the word itself is valid
+            //  We place the tiles on the board and give the player new tiles if the word and position are valid
+            const scoreNewTiles = this.calculatePoints.calculatePoints(tilesToPlace);
+            for (const aTile of tilesToPlace) {
+                this.board.placeTile(aTile.coords, aTile.tile);
+            }
+            this.gridService.drawBoard();
+            if (this.wordValidation.validateWords(tilesToPlace)) {
+                player.score += scoreNewTiles;
+                const numTiles = this.reserve.tileCount < tilesToPlace.length ? this.reserve.tileCount : tilesToPlace.length;
+                player.easel.addTiles(this.reserve.getLetters(numTiles));
+            } else {
+                this.startTilePLaceBackCountdown(player, retrievedTiles, tilesToPlace);
+                this.gridService.drawBoard();
+                return 'le mot nest pas dans le dictionnaire';
+            }
+        } else {
+            //  We give the player his tiles back if the word is invalid
+            player.easel.addTiles(retrievedTiles);
+            return 'placement de mot invalide';
         }
-        return `${player.name} a placé le mot "${word}" ${vertical ? 'verticale' : 'horizentale'}ment à la case ${coordStr}`;
+        this.gridService.drawBoard();
+        this.switchPlayers();
+        this.players.skipCounter = 0;
+        return `${player.name} a placé le mot "${word}" ${vertical ? 'verticale' : 'horizontale'}ment à la case ${coordStr}`;
+    }
+
+    wordCollides(tileCoords: TileCoords[]): boolean {
+        for (let i = tileCoords.length - 1; i >= 0; i--) {
+            if (this.board.getTile(tileCoords[i].coords)) {
+                if ((this.board.getTile(tileCoords[i].coords) as Tile).letter === tileCoords[i].tile.letter) {
+                    tileCoords.splice(i, 1);
+                } else {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    getTileCoords(word: string, coordStr: string, vertical: boolean): TileCoords[] {
+        const coords = this.getCoordinateFromString(coordStr);
+        const tileCoords: TileCoords[] = [];
+        for (let i = 0; i < word.length; i++) {
+            const coord: Vec2 = vertical ? { x: coords.x, y: coords.y + i } : { x: coords.x + i, y: coords.y };
+            tileCoords.push({ tile: { letter: word.charAt(i), points: LETTER_POINTS.get(word.charAt(i)) as number }, coords: coord });
+        }
+        return tileCoords;
     }
 
     getCoordinateFromString(coordStr: string): Vec2 {
         const CHAR_OFFSET = 'a'.charCodeAt(0);
-        const coordX = coordStr[0].toLowerCase().charCodeAt(0) - CHAR_OFFSET;
-        const coordY = parseInt(coordStr.substr(1, coordStr.length), 10) - 1;
+        const coordX = parseInt(coordStr.substr(1, coordStr.length), 10) - 1;
+        const coordY = coordStr[0].toLowerCase().charCodeAt(0) - CHAR_OFFSET;
         return { x: coordX, y: coordY } as Vec2;
+    }
+
+    private getStringToRetrieve(tileCoords: TileCoords[]): string {
+        let stringToRetrieve = '';
+        for (const aLetter of tileCoords) {
+            stringToRetrieve += aLetter.tile.letter;
+        }
+        return stringToRetrieve;
+    }
+    private validWordPosition(word: string, tilesToPlace: TileCoords[], vertical: boolean): boolean {
+        const BOARD_CENTER: Vec2 = { x: 7, y: 7 };
+        //  Check if word is placed outside of the board
+        for (const aTile of tilesToPlace) {
+            if (aTile.coords.x >= GRID_SIZE || aTile.coords.y >= GRID_SIZE) return false;
+        }
+        //  if first turn, the word must touch the center of the board
+        if (this.board.board.size === 0) {
+            let isCenter = false;
+            for (const aTile of tilesToPlace) {
+                if (aTile.coords.x === BOARD_CENTER.x && aTile.coords.y === BOARD_CENTER.y) {
+                    isCenter = true;
+                }
+            }
+            return isCenter;
+        }
+        // If size of tiles to be placed is inferior to size of word we can determine the word touches another one
+        if (tilesToPlace.length < word.length) {
+            return true;
+        } else {
+            //  Iterate through the tiles to see if any of them is adjacent to a tile on the board
+            let isTouching = false;
+            for (const aTile of tilesToPlace) {
+                const firstCoord = vertical ? { x: aTile.coords.x + 1, y: aTile.coords.y } : { x: aTile.coords.x, y: aTile.coords.y + 1 };
+                const secondCoord = vertical ? { x: aTile.coords.x - 1, y: aTile.coords.y } : { x: aTile.coords.x, y: aTile.coords.y - 1 };
+                if (this.board.getTile(firstCoord) !== undefined || this.board.getTile(secondCoord) !== undefined) isTouching = true;
+            }
+            return isTouching;
+        }
     }
 }

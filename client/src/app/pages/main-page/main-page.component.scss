@@ -1,6 +1,7 @@
 .container {
     min-height: 100vh;
     height: auto;
+    background-color: #eeeee4;
 }
 
 .justified {
@@ -18,12 +19,13 @@
 .team-name {
     margin-top: 0.25em;
     margin-bottom: 0.25em;
-    color: green;
+    color: rgba(0, 0, 0, 0.54);
 }
 
 .header-item {
     justify-content: center;
     text-align: center;
+    color: rgba(0, 0, 0, 0.54);
 }
 
 .footer-item {
@@ -31,10 +33,10 @@
 }
 
 .footer-item p :nth-child(even) {
-    color: orange;
+    color: rgba(0, 0, 0, 0.54);
 }
 .footer-item p :nth-child(odd) {
-    color: blue;
+    color: rgba(0, 0, 0, 0.54);
 }
 
 .server-message {
@@ -45,6 +47,6 @@
 
 .mat-raised-button {
     color: white;
-    background-color: #23501f;
+    background-color: #1e81b0;
     width: 100%;
 }

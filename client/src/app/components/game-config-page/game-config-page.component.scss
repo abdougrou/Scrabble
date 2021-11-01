@@ -3,6 +3,10 @@
     height: auto;
 }
 
+h2 {
+    color: #3f51b5;
+}
+
 .justified {
     display: flex;
     flex-direction: column;
@@ -17,7 +21,12 @@
 
 .mat-raised-button {
     color: white;
-    background-color: #23501f;
+    background-color: #1e81b0;
+}
+
+#back {
+    background-color: #cf000f;
+    color: white;
 }
 
 .horizontal {

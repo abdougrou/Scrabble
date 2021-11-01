@@ -1,7 +1,12 @@
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
 .card {
-    max-width: 400px;
     margin-bottom: 8px;
-    background-color: rgb(204, 166, 116);
+    background-color: #abdbe3;
 }
 mat-card-title {
   color: black;
@@ -12,7 +17,11 @@ mat-card-subtitle {
 }
 
 .mat-raised-button {
-  background-color: burlywood;
+  background-color: #d2eeef;
+  margin-left: 1em;
+}
+
+.font-size-button {
   margin-right: 10px;
   margin-left: 10px;
 }
@@ -20,9 +29,33 @@ mat-card-subtitle {
 .justified {
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .justified-right {
   display: flex;
   justify-content: flex-end;
+  margin-right: 1em;
+}
+
+.first {
+  background-color: #1e81b0;
+}
+
+.first mat-card-title {
+  color:white;
+}
+
+.first mat-card-subtitle {
+  color: white;
+}
+
+.font-size-display {
+  font-weight: bold;
+  margin-left: 1em;
+}
+
+.warn {
+  background-color: #cf000f;
+  color: white;
 }

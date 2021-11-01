@@ -1,15 +1,11 @@
 .container {
     height: auto;
-    min-height: 98vh;
-    width: 435px;
-//    border: 1px solid black;
+    min-height: 100vh;
+    width: 100%;
     padding: 0 5px 0 5px;
     margin-right: 5px;
-    background-color: #ecc39e;
+    background-color: #eeeee4;
+    box-shadow: 2px 2px 20px rgb(0,0,0,0.2);
 }
 
-#chat-box {
-    position: fixed;
-    bottom: 0;
-    margin-bottom: 20px;
-}
+

@@ -1,32 +1,32 @@
 <form [formGroup]="gameConfigForm">
 <div class="container justified">
   <h2 mat-dialog-title>Paramètres de la partie</h2>
-
+    <p>vous jouez contre : {{ this.randomPlayerName }}</p>
     <div class="justified">
-      <mat-form-field appearance="outline">
+      <mat-form-field hintLabel="Lettres seulement" appearance="outline">
         <mat-label>Username</mat-label>
-        <input type="text" formControlName="name" matInput>
+        <input type="text" formControlName="name"  pattern="[a-zA-Z]*" matInput>
+        <mat-hint align="end">{{ this.gameConfigForm.get('name')?.value?.length || 0 }}/20</mat-hint>
       </mat-form-field>
-    
+
       <mat-form-field appearance="outline">
         <mat-label>Minuterie (en secondes):</mat-label>
-        <input type="number" name="points"  value="60" step="30" min="0" max="300" formControlName="duration"  matInput>
+        <input type="number" name="points"  value="60" step="30" min="30" max="300" formControlName="duration"  matInput>
       </mat-form-field>
-    
+
       <mat-checkbox formControlName="bonusEnabled"> Bonus Aléatoire
       </mat-checkbox>
-      
+
       <mat-form-field appearance="outline">
-        <mat-label>Dictionnaire</mat-label>
-        <mat-select formControlName="dictionary" >
+        <mat-select formControlName="dictionary" placeholder="Français" >
           <mat-option value=0>Français</mat-option>
           <mat-option value=1>Anglais</mat-option>
         </mat-select>
       </mat-form-field>
       <div class="horizontal">
-        <button mat-raised-button class="button"  (click)="back()">Retour</button>
-        <button mat-raised-button class="button" [disabled]="!this.gameConfigForm.valid" (click)="play()" [routerLink]="['/game']">Jouer</button>   
+        <button mat-raised-button id="back" class="button"  (click)="back()">Retour</button>
+        <button mat-raised-button class="button" [disabled]="!this.gameConfigForm.valid" (click)="play()">Jouer</button>
       </div>
-    </div> 
+    </div>
 </div>
 </form>

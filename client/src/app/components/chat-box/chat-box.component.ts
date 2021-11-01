@@ -1,6 +1,7 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { ChatMessage } from '@app/classes/message';
-import { SYSTEM_NAME } from '@app/constants';
+import { Player } from '@app/classes/player';
+import { KEYBOARD_EVENT_RECEIVER, MouseButton, SYSTEM_NAME } from '@app/constants';
 import { CommandHandlerService } from '@app/services/command-handler.service';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { PlayerService } from '@app/services/player.service';
@@ -10,30 +11,54 @@ import { PlayerService } from '@app/services/player.service';
     templateUrl: './chat-box.component.html',
     styleUrls: ['./chat-box.component.scss'],
 })
-export class ChatBoxComponent {
+export class ChatBoxComponent implements OnChanges {
+    @ViewChild('messageInput') messageInput: ElementRef<HTMLInputElement>;
+
+    @Input() keyboardReceiver: string;
+    @Output() keyboardReceiverChange = new EventEmitter<string>();
+    @Output() isInside = new EventEmitter<boolean>();
+
     buttonPressed = '';
     message = '';
     chatMessage: ChatMessage = { user: '', body: '' };
+    player: Player;
+    mainPlayerName: string;
+    enemyPlayerName: string;
+    manualPlacementMessage: string;
 
-    constructor(public gameManager: GameManagerService, public playerService: PlayerService, public commandHandler: CommandHandlerService) {}
+    constructor(
+        public gameManager: GameManagerService,
+        public playerService: PlayerService,
+        public commandHandler: CommandHandlerService, // private renderer: Renderer2,
+    ) {
+        this.mainPlayerName = this.gameManager.mainPlayerName;
+        this.enemyPlayerName = this.gameManager.enemyPlayerName;
+        this.gameManager.commandMessage.asObservable().subscribe((msg) => {
+            this.showMessage(msg);
+        });
+    }
 
     @HostListener('keydown', ['$event'])
     buttonDetect(event: KeyboardEvent) {
         this.buttonPressed = event.key;
     }
 
-    submitInput(): void {
-        const input = document.getElementById('message-input') as HTMLInputElement;
-        if (input === null) {
-            throw new Error('message-input error in the chatbox');
-        } else {
-            if (input.value !== '') {
-                this.chatMessage.user = this.gameManager.mainPlayerName;
-                this.chatMessage.body = this.message;
-                this.showMessage(this.chatMessage);
-                this.showMessage(this.checkCommand(this.chatMessage));
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes.keyboardReceiver) {
+            if (this.keyboardReceiver === KEYBOARD_EVENT_RECEIVER.chatbox) {
+                // focus l'input du text
             }
-            input.value = '';
+        }
+    }
+
+    submitInput(): void {
+        if (this.messageInput.nativeElement.value !== '') {
+            this.chatMessage.user = this.mainPlayerName;
+            this.chatMessage.body = this.message;
+            this.player = this.getPlayerByName(this.chatMessage.user);
+            this.messageInput.nativeElement.value = '';
+            this.showMessage(this.chatMessage);
+            this.showMessage(this.checkCommand(this.chatMessage, this.player));
         }
     }
 
@@ -42,13 +67,13 @@ export class ChatBoxComponent {
         switch (message.user) {
             case SYSTEM_NAME:
                 newMessage.innerHTML = `${message.user} : ${message.body}`;
-                newMessage.style.color = 'red';
+                newMessage.style.color = 'rgb(207, 0, 15)';
                 break;
-            case this.gameManager.mainPlayerName:
+            case this.mainPlayerName:
                 newMessage.innerHTML = `${message.user} : ${message.body}`;
                 newMessage.style.color = 'gray';
                 break;
-            case this.gameManager.enemyPlayerName:
+            case this.enemyPlayerName:
                 newMessage.innerHTML = `${message.user} : ${message.body}`;
                 newMessage.style.color = 'darkgoldenrod';
                 break;
@@ -58,9 +83,7 @@ export class ChatBoxComponent {
                 break;
         }
         const parentMessage = document.getElementById('default-message');
-        if (parentMessage === null) {
-            throw new Error('the message sent can not be shown');
-        } else {
+        if (parentMessage) {
             parentMessage.appendChild(newMessage);
         }
         this.scrollDown();
@@ -68,18 +91,28 @@ export class ChatBoxComponent {
 
     scrollDown(): void {
         const chatBody = document.getElementById('messages');
-        if (chatBody === null) {
-            throw new Error('can not scroll down in the chat box');
-        } else {
+        if (chatBody) {
             chatBody.scrollTop = 0;
         }
     }
 
-    checkCommand(message: ChatMessage): ChatMessage {
+    checkCommand(message: ChatMessage, player: Player): ChatMessage {
         let systemMessage: ChatMessage = { user: '', body: '' };
         if (message.body.startsWith('!')) {
-            systemMessage = this.commandHandler.handleCommand(message.body, this.playerService.getPlayerByName(message.user));
+            systemMessage = this.commandHandler.handleCommand(message.body, player);
         }
         return systemMessage;
+    }
+
+    getPlayerByName(name: string): Player {
+        return this.playerService.getPlayerByName(name);
+    }
+
+    insideChatBox(event: MouseEvent) {
+        if (event.button === MouseButton.Left) {
+            this.keyboardReceiver = KEYBOARD_EVENT_RECEIVER.chatbox;
+            this.keyboardReceiverChange.emit(KEYBOARD_EVENT_RECEIVER.chatbox);
+            this.isInside.emit(true);
+        }
     }
 }

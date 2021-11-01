@@ -1,27 +1,35 @@
-<mat-card class="card">
-    <mat-card-title > Timer : {{ this.timer }}</mat-card-title>
-</mat-card>
-
-<div *ngFor="let player of players">
+<div class="container">
     <mat-card class="card">
-        <mat-card-title-group>
-          <mat-card-title>{{ player.name }}</mat-card-title>
-          <mat-card-subtitle>Score : {{ player.score }}</mat-card-subtitle>
-          <mat-card-subtitle>Tiles : {{ player.easel.count }}</mat-card-subtitle>
-          <img mat-card-sm-image src="../../../assets/profile-pic.jpg" >
-        </mat-card-title-group>
+        <mat-card-title > Timer : {{ this.timer }}</mat-card-title>
     </mat-card>
-</div>
 
-<div>
-    <mat-card class="card justified">
-        <button mat-raised-button>-</button>
-        <span>(fZixe) px</span>
-        <button mat-raised-button>+</button>
-    </mat-card>
-</div>
+    <div *ngFor="let player of players; first as isFirst" >
+        <mat-card [ngClass]="{ 'first' : isFirst }" class="card">
+            <mat-card-title-group >
+            <mat-card-title>{{ player.name }}</mat-card-title>
+            <mat-card-subtitle>Score : {{ player.score }}</mat-card-subtitle>
+            <mat-card-subtitle>Tiles : {{ player.easel.count }}</mat-card-subtitle>
+            <div>
+                <mat-icon *ngIf="player.name === this.mainPlayerName">person</mat-icon>
+            <img *ngIf="isFirst;else other_content" mat-card-sm-image src="../../../assets/profile-pic-first.jpg" >
+            <ng-template #other_content><img  mat-card-sm-image src="../../../assets/profile-pic.jpg" ></ng-template>
+            </div>
+            </mat-card-title-group>
+        </mat-card>
+    </div>
 
-<div class="justified-right">
-    <button mat-raised-button (click)= "skipTurn()">Passer le tour</button>
-    <button mat-raised-button [routerLink]="['/home']" (click)="quit()">Quitter</button>
+    <div>
+        <mat-card class="card justified">
+            <button mat-raised-button (click)="decreaseFont()">-</button>
+            <span class="font-size-display">Taille: {{fontSize}}</span>
+            <button mat-raised-button (click)="increaseFont()">+</button>
+        </mat-card>
+    </div>
+    <div class="justified-right">
+        <button mat-raised-button [disabled]="this.players[0].name !== this.mainPlayerName || this.isEnded" (click)= "skipTurn()">Passer le tour</button>
+        <button mat-raised-button *ngIf="!this.isEnded" (click)="openAbandonPage()" class="warn">Abandonner</button>
+        <button mat-raised-button *ngIf="this.isEnded" [routerLink]="['/home']" (click)="quit()" class="warn">Quitter</button>
+    </div>
+    <div><span matBadge="{{this.reserveCount}}" matBadgeColor="warn" ><img src="../../../assets/reserve.png" width="8%" ></span></div>
+    <app-end-game-popup *ngIf="this.isEnded" [players]="players" [winnerName]="this.winner" [isEqual]="this.players[0].score === this.players[1].score"></app-end-game-popup>
 </div>
