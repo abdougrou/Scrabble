@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Dictionary, GameConfig } from '@app/classes/game-config';
 import { Lobby, LobbyConfig } from '@common/lobby';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -16,16 +17,16 @@ export class CommunicationService {
 
     constructor(private readonly http: HttpClient) {}
 
-    createLobby(creator: string, duration: number): void {
+    createLobby(gameConfig: GameConfig): void {
         // this.socket = io.io('https://localhost:3000');
         // eslint-disable-next-line no-console
         // console.log(`Client socket id : ${this.socket.id}`);
         // this.enableListeners();
         const lobbyConfig: LobbyConfig = {
-            host: creator,
-            turnDuration: duration,
-            bonusEnabled: false,
-            dictionary: 'french',
+            host: gameConfig.playerName1,
+            turnDuration: gameConfig.duration,
+            bonusEnabled: gameConfig.bonusEnabled,
+            dictionary: gameConfig.dictionary === Dictionary.French ? 'Français' : 'Anglais',
         };
 
         // this.putLobby(gameConfig);
@@ -48,6 +49,12 @@ export class CommunicationService {
         return this.http
             .put<{ key: string }>('http://localhost:3000/api/lobby', lobbyConfig, this.httpOptions)
             .pipe(catchError(this.handleError<{ key: string }>('putLobby')));
+    }
+
+    deleteLobby(lobbyConfig: LobbyConfig): Observable<{ key: string }> {
+        return this.http
+            .put<{ key: string }>('http://localhost:3000/api/lobby/delete', lobbyConfig, this.httpOptions)
+            .pipe(catchError(this.handleError<{ key: string }>('deleteLobby')));
     }
 
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {

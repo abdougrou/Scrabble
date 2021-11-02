@@ -19,6 +19,8 @@ import { GameConfigPageComponent } from './components/game-config-page/game-conf
 import { ModeSelectionComponent } from './components/mode-selection/mode-selection.component';
 import { MultiplayerRoomsComponent } from './components/multiplayer-rooms/multiplayer-rooms.component';
 import { PlayerInfoComponent } from './components/player-info/player-info.component';
+import { MultiGameConfigComponent } from './components/multi-game-config/multi-game-config.component';
+import { WaitingPopupComponent } from './components/waiting-popup/waiting-popup.component';
 
 /**
  * Main module that is used in main.ts.
@@ -42,6 +44,8 @@ import { PlayerInfoComponent } from './components/player-info/player-info.compon
         EndGamePopupComponent,
         AbandonPageComponent,
         MultiplayerRoomsComponent,
+        MultiGameConfigComponent,
+        WaitingPopupComponent,
     ],
     imports: [AppMaterialModule, AppRoutingModule, BrowserAnimationsModule, BrowserModule, FormsModule, ReactiveFormsModule, HttpClientModule],
     providers: [],
