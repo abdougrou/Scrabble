@@ -1,5 +1,5 @@
 import { CLASSIC_RESERVE } from '@app/constants';
-import { ExchangeResult, PassResult, ReserveResult } from './command-result';
+import { ExchangeResult, PassResult, ReserveResult } from '@common/command-result';
 import { Easel } from './easel';
 import { Player } from './player';
 import { Reserve } from './reserve';

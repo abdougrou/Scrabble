@@ -1,35 +1,43 @@
 import { Lobby, LobbyConfig } from '@common/lobby';
-import { Socket } from 'socket.io';
 import { Service } from 'typedi';
 
 @Service()
-export class LobbyManager {
+export class LobbyService {
     /**
      * Map containing all active lobbies
      */
-    static lobbies: Map<string, Lobby> = new Map();
-    
+    lobbies: Map<string, Lobby> = new Map();
+
     /**
      * Creates a new lobby and adds it to the lobbies list
-     * 
+     *
      * @param config game configuration
      * @return lobby key
      */
-    static createLobby(config: LobbyConfig): string {
+    createLobby(config: LobbyConfig): string {
         let key = this.generateKey();
         while (this.lobbies.get(key)) key = this.generateKey();
-        const lobby: Lobby = { key: key, config: config };
+        const lobby: Lobby = { key, config };
         this.lobbies.set(key, lobby);
         return key;
     }
 
     /**
-     * Join a lobby if it exists
-     * 
-     * @param key lobby key
-     * @return true if the lobbie exists, false otherwise
+     * Returns all lobbies
+     *
+     * @returns all lobbies in the service
      */
-    static joinLobby(key: string, socket: Socket): boolean {
+    getLobbies(): Lobby[] {
+        return Array.from(this.lobbies.values());
+    }
+
+    /**
+     * Join a lobby if it exists
+     *
+     * @param key lobby key
+     * @return true if the lobby exists, false otherwise
+     */
+    joinLobby(key: string): boolean {
         const lobby = this.lobbies.get(key);
         if (lobby) {
             // Join
@@ -40,32 +48,33 @@ export class LobbyManager {
 
     /**
      * Gets a lobby from the lobby list
-     * 
+     *
      * @param key lobby key
      * @return Lobby if the key exists, undefined otherwise
      */
-    static getLobby(key: string): Lobby | undefined {
+    getLobby(key: string): Lobby | undefined {
         return this.lobbies.get(key);
     }
 
     /**
      * Destroys a lobby if it exists
-     * 
+     *
      * @param key lobby key
      */
-    static deleteLobby(key: string) {
+    deleteLobby(key: string) {
         this.lobbies.delete(key);
     }
 
     /**
      * Generate a random string key
-     * 
+     *
      * @return unique key string
      */
-    static generateKey(): string {
+    generateKey(): string {
         let result = '';
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for ( var i = 0; i < 8; i++ ) {
+        const KEY_LEN = 8;
+        for (let i = 0; i < KEY_LEN; i++) {
             result += characters.charAt(Math.floor(Math.random() * characters.length));
         }
         return result;

@@ -1,20 +1,22 @@
-import { LobbyManager } from "@app/services/lobby-manager";
-import { Lobby } from "@common/lobby";
-import * as express from "express";
-import { Service } from "typedi";
+import { LobbyService } from '@app/services/lobby.service';
+import { Lobby } from '@common/lobby';
+import { Request, Response, Router } from 'express';
+import { Service } from 'typedi';
 
 @Service()
 export class LobbyController {
-    public router: express.Router;
-    constructor() {
-        this.router = express.Router();
-        this.router.get("/", (req, res) => {
-            const lobbies: Lobby[] = Array.from(LobbyManager.lobbies.values());
+    router: Router;
+    constructor(lobbyService: LobbyService) {
+        this.router = Router();
+
+        this.router.get('/', (req: Request, res: Response) => {
+            const lobbies: Lobby[] = lobbyService.getLobbies();
             res.send(lobbies);
-        })
-        this.router.put("/", (req, res) => {
-            const key = LobbyManager.createLobby(req.body);
-            res.send({key : key});
-        })
+        });
+
+        this.router.put('/', (req: Request, res: Response) => {
+            const key = lobbyService.createLobby(req.body);
+            res.send({ key });
+        });
     }
 }

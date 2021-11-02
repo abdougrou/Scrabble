@@ -1,6 +1,6 @@
+import { ExchangeResult, PassResult, ReserveResult as PrintReserveResult } from '@common/command-result';
 import { expect } from 'chai';
 import { describe } from 'mocha';
-import { ExchangeResult, PassResult, ReserveResult as PrintReserveResult } from './command-result';
 import { Easel } from './easel';
 import { GameManager } from './game-manager';
 import { Player } from './player';
