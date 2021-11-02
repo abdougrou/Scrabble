@@ -1,13 +1,14 @@
 import * as http from 'http';
 import * as io from 'socket.io';
 import { Service } from 'typedi';
-import { LobbyManager } from './lobby-manager';
+import { LobbyService } from './lobby.service';
+
 @Service()
 export class SocketManagerService {
     private socket: io.Server;
 
     // private lastAvailableRoom: string | undefined = undefined;
-    constructor(server: http.Server) {
+    constructor(server: http.Server, public lobbyService: LobbyService) {
         // eslint-disable-next-line no-console
         console.log('allo');
         this.socket = new io.Server(server, { cors: { origin: '*', methods: ['GET', 'POST', 'DELETE'] } });
@@ -28,9 +29,9 @@ export class SocketManagerService {
             console.log(`Player ${playerName} is starting a multiplayer game`);
         });
 
-        this.socket.on('on user join room', (key: string, playerName: string) => {
+        this.socket.on('on user join room', (key: string) => {
             // TODO if the key is not registered send an error message
-            LobbyManager.getLobby(key);
+            this.lobbyService.getLobby(key);
         });
     }
 }

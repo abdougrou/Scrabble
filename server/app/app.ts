@@ -12,7 +12,7 @@ export class Application {
     app: express.Application;
     private readonly internalError: number = StatusCodes.INTERNAL_SERVER_ERROR;
 
-    constructor(private readonly lobbyController: LobbyController) {
+    constructor(public lobbyController: LobbyController) {
         this.app = express();
         this.config();
         this.bindRoutes();
