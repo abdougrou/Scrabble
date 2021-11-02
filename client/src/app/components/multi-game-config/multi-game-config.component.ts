@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { Dictionary, GameConfig } from '@app/classes/game-config';
 import { WaitingPopupComponent } from '@app/components/waiting-popup/waiting-popup.component';
 import { DIALOG_HEIGHT, DIALOG_WIDTH, DURATION_INIT, MAX_USERNAME_LENGTH, MIN_USERNAME_LENGTH } from '@app/constants';
+import { CommunicationService } from '@app/services/communication.service';
 import { GameManagerService } from '@app/services/game-manager.service';
 
 @Component({
@@ -22,6 +23,7 @@ export class MultiGameConfigComponent {
         private formBuilder: FormBuilder,
         public gameManagerService: GameManagerService,
         public router: Router,
+        public communication: CommunicationService,
     ) {
         this.gameConfigForm = this.formBuilder.group({
             name: ['', [Validators.required, Validators.minLength(MIN_USERNAME_LENGTH), Validators.maxLength(MAX_USERNAME_LENGTH)]],
@@ -36,7 +38,7 @@ export class MultiGameConfigComponent {
         this.data.config.duration = this.gameConfigForm.get('duration')?.value;
         this.data.config.bonusEnabled = this.gameConfigForm.get('bonusEnabled')?.value;
         this.data.config.dictionary = this.gameConfigForm.get('dictionary')?.value;
-        this.dialogRef.close(this.data.config);
+        this.communication.createLobby(this.data.config);
         this.openWaitingPopup()
             .afterClosed()
             .subscribe((result) => {
@@ -52,7 +54,6 @@ export class MultiGameConfigComponent {
         return this.dialog.open(WaitingPopupComponent, {
             height: DIALOG_HEIGHT,
             width: DIALOG_WIDTH,
-            data: { config: this.data.config },
         });
     }
 

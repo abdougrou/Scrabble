@@ -8,7 +8,7 @@ export class SocketManagerService {
     private socket: io.Server;
 
     // private lastAvailableRoom: string | undefined = undefined;
-    constructor(server: http.Server, public lobbyService: LobbyService) {
+    constructor(server: http.Server, private lobbyService: LobbyService) {
         // eslint-disable-next-line no-console
         console.log('allo');
         this.socket = new io.Server(server, { cors: { origin: '*', methods: ['GET', 'POST', 'DELETE'] } });

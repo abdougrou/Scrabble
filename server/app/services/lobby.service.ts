@@ -17,7 +17,8 @@ export class LobbyService {
     createLobby(config: LobbyConfig): string {
         let key = this.generateKey();
         while (this.lobbies.get(key)) key = this.generateKey();
-        const lobby: Lobby = { key, config };
+        config.key = key;
+        const lobby: Lobby = { config };
         this.lobbies.set(key, lobby);
         return key;
     }

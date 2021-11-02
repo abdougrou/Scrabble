@@ -1,6 +1,5 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Router } from '@angular/router';
 import { Dictionary, GameConfig, GameMode } from '@app/classes/game-config';
 import { MultiGameConfigComponent } from '@app/components/multi-game-config/multi-game-config.component';
 import { DIALOG_HEIGHT, DIALOG_WIDTH, DURATION_INIT } from '@app/constants';
@@ -21,20 +20,17 @@ export class MultiplayerRoomsComponent {
         public communication: CommunicationService,
         public gameManager: GameManagerService,
         public dialog: MatDialog,
-        private router: Router,
         @Inject(MAT_DIALOG_DATA) public data: { mode: GameMode },
     ) {
         this.getLobbies();
     }
 
     async createLobby() {
-        this.openDialogBox()
+        this.openFormPopup()
             .afterClosed()
             .subscribe((result) => {
                 if (!result) return;
                 this.gameManager.initialize(result as GameConfig);
-                this.communication.createLobby(result as GameConfig);
-                this.router.navigateByUrl('/game');
                 this.closeSelf();
             });
 
@@ -44,7 +40,7 @@ export class MultiplayerRoomsComponent {
         this.getLobbies();
     }
 
-    openDialogBox(): MatDialogRef<unknown, unknown> {
+    openFormPopup(): MatDialogRef<unknown, unknown> {
         const gameConfig = {
             playerName1: 'default',
             playerName2: 'default',

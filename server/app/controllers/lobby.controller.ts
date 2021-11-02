@@ -18,5 +18,10 @@ export class LobbyController {
             const key = lobbyService.createLobby(req.body);
             res.send({ key });
         });
+
+        this.router.delete('/', (req: Request, res: Response) => {
+            const key = lobbyService.deleteLobby(req.body);
+            res.send({ key });
+        });
     }
 }
