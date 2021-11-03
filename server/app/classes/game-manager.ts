@@ -27,6 +27,21 @@ export class GameManager {
     }
 
     /**
+     * Removes a player from the game
+     *
+     * @param name player to remove
+     * @returns true if the player was removed, false otherwise
+     */
+    removePlayer(name: string): boolean {
+        const newPlayers = this.players.filter((player) => player.name !== name);
+        if (newPlayers.length < this.players.length) {
+            this.players = newPlayers;
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Get a player by name
      *
      * @param name player name

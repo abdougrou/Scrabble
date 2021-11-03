@@ -1,5 +1,5 @@
 import { LobbyService } from '@app/services/lobby.service';
-import { Lobby } from '@common/lobby';
+import { LobbyConfig } from '@common/lobby-config';
 import { Request, Response, Router } from 'express';
 import { Service } from 'typedi';
 
@@ -10,7 +10,10 @@ export class LobbyController {
         this.router = Router();
 
         this.router.get('/', (req: Request, res: Response) => {
-            const lobbies: Lobby[] = lobbyService.getLobbies();
+            const lobbies: LobbyConfig[] = lobbyService
+                .getLobbies()
+                .filter((lobby) => lobby.started)
+                .map((lobby) => lobby.config);
             res.send(lobbies);
         });
 

@@ -1,11 +1,7 @@
-export interface Lobby {
-    config: LobbyConfig;
-};
-
 export interface LobbyConfig {
-    key?: string,
+    key?: string;
     host: string;
     turnDuration: number;
     bonusEnabled: boolean;
     dictionary: string;
-};
+}

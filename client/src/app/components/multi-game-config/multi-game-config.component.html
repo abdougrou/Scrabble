@@ -1,32 +1,30 @@
 <form [formGroup]="gameConfigForm">
     <div class="container justified">
-      <h2 mat-dialog-title>Paramètres de la partie</h2>
+        <h2 mat-dialog-title>Paramètres de la partie</h2>
         <div class="justified">
-          <mat-form-field hintLabel="Lettres seulement" appearance="outline">
-            <mat-label>Nom d'utilisateur</mat-label>
-            <input type="text" formControlName="name"  pattern="[a-zA-Z]*" matInput>
-            <mat-hint align="end">{{ this.gameConfigForm.get('name')?.value?.length || 0 }}/20</mat-hint>
-          </mat-form-field>
-    
-          <mat-form-field appearance="outline">
-            <mat-label>Minuterie (en secondes):</mat-label>
-            <input type="number" name="points"  value="60" step="30" min="60" max="300" formControlName="duration"  matInput>
-          </mat-form-field>
-    
-          <mat-checkbox formControlName="bonusEnabled"> Bonus Aléatoire
-          </mat-checkbox>
-    
-          <mat-form-field appearance="outline">
-            <mat-select formControlName="dictionary" placeholder="Français" >
-              <mat-option value=0>Français</mat-option>
-              <mat-option value=1>Anglais</mat-option>
-            </mat-select>
-          </mat-form-field>
-          <div class="horizontal">
-            <button mat-raised-button id="back" class="button"  (click)="back()">Retour</button>
-            <button mat-raised-button class="button" [disabled]="!this.gameConfigForm.valid" (click)="setConfig()">Créer Partie</button>
-          </div>
+            <mat-form-field hintLabel="Lettres seulement" appearance="outline">
+                <mat-label>Nom d'utilisateur</mat-label>
+                <input type="text" formControlName="name" pattern="[a-zA-Z]*" matInput />
+                <mat-hint align="end">{{ this.gameConfigForm.get('name')?.value?.length || 0 }}/20</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Minuterie (en secondes):</mat-label>
+                <input type="number" name="points" value="60" step="30" min="60" max="300" formControlName="duration" matInput />
+            </mat-form-field>
+
+            <mat-checkbox formControlName="bonusEnabled"> Bonus Aléatoire </mat-checkbox>
+
+            <mat-form-field appearance="outline">
+                <mat-select formControlName="dictionary" placeholder="Français">
+                    <mat-option value="0">Français</mat-option>
+                    <mat-option value="1">Anglais</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <div class="horizontal">
+                <button mat-raised-button id="back" class="button" (click)="back()">Retour</button>
+                <button mat-raised-button class="button" [disabled]="!this.gameConfigForm.valid" (click)="createLobby()">Créer Partie</button>
+            </div>
         </div>
     </div>
-    </form>
-    
+</form>

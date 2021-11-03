@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Dictionary, GameConfig } from '@app/classes/game-config';
-import { Lobby, LobbyConfig } from '@common/lobby';
+import { LobbyConfig } from '@common/lobby-config';
+import { JoinLobbyMessage, SocketEvent } from '@common/socket-messages';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import * as io from 'socket.io-client';
@@ -20,28 +20,17 @@ export class CommunicationService {
         this.socket = io.io('ws://localhost:3000');
     }
 
-    createLobby(gameConfig: GameConfig): string {
-        // eslint-disable-next-line no-console
-        // console.log(`Client socket id : ${this.socket.id}`);
-        // this.enableListeners();
-        const lobbyConfig: LobbyConfig = {
-            host: gameConfig.playerName1,
-            turnDuration: gameConfig.duration,
-            bonusEnabled: gameConfig.bonusEnabled,
-            dictionary: gameConfig.dictionary === Dictionary.French ? 'Français' : 'Anglais',
-        };
-
-        // this.putLobby(gameConfig);
-        const obsPut = this.putLobby(lobbyConfig);
+    createLobby(config: LobbyConfig): string {
+        const obsPut = this.putLobby(config);
         obsPut.pipe(map((message: { key: string }) => message)).subscribe((message) => {
             this.lobbyKey = message.key;
+            this.socket.emit(SocketEvent.playerJoinLobby, { lobbyKey: this.lobbyKey, playerName: 'host' } as JoinLobbyMessage);
         });
         return this.lobbyKey;
     }
 
     joinLobby(key: string): void {
-        console.log(key);
-        this.socket.emit('on-join-room', key);
+        this.socket.emit('on join room', key);
     }
 
     // TODO remove default value for testing purposes only
@@ -51,8 +40,10 @@ export class CommunicationService {
     //     return true;
     // }
 
-    getLobbies(): Observable<Lobby[]> {
-        return this.http.get<Lobby[]>('http://localhost:3000/api/lobby', this.httpOptions).pipe(catchError(this.handleError<Lobby[]>('getLobbies')));
+    getLobbies(): Observable<LobbyConfig[]> {
+        return this.http
+            .get<LobbyConfig[]>('http://localhost:3000/api/lobby', this.httpOptions)
+            .pipe(catchError(this.handleError<LobbyConfig[]>('getLobbies')));
     }
 
     putLobby(lobbyConfig: LobbyConfig): Observable<{ key: string }> {
