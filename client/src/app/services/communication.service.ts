@@ -4,21 +4,23 @@ import { Dictionary, GameConfig } from '@app/classes/game-config';
 import { Lobby, LobbyConfig } from '@common/lobby';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import * as io from 'socket.io-client';
 
 @Injectable({
     providedIn: 'root',
 })
 export class CommunicationService {
     lobbyKey: string;
-    // private socket: Socket;
+    private socket: io.Socket;
     private httpOptions = {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
     };
-    constructor(private readonly http: HttpClient) {}
+    constructor(private readonly http: HttpClient) {
+        this.socket = io.io('ws://localhost:3000');
+    }
 
     createLobby(gameConfig: GameConfig): string {
-        // this.socket = io.io('https://localhost:3000');
         // eslint-disable-next-line no-console
         // console.log(`Client socket id : ${this.socket.id}`);
         // this.enableListeners();
@@ -37,6 +39,11 @@ export class CommunicationService {
         return this.lobbyKey;
     }
 
+    joinLobby(key: string): void {
+        console.log(key);
+        this.socket.emit('on-join-room', key);
+    }
+
     // TODO remove default value for testing purposes only
     // startMultiplayerGame(playerName: string, roomId: number = 0): boolean {
     //     this.socket.emit('start multiplayer game', playerName);
@@ -53,17 +60,7 @@ export class CommunicationService {
             .put<{ key: string }>('http://localhost:3000/api/lobby', lobbyConfig, this.httpOptions)
             .pipe(catchError(this.handleError<{ key: string }>('putLobby')));
     }
-    /*
-    deleteLobby(lobbyKey: string): Observable<{ key: string }> {
-        window.alert(key);
-        return (
-            this.http
-                .delete<{ key: string }>('http://localhost:3000/api/lobby/', lobbyKey, this.httpOptions)
-                // .delete<{ key: string }>('http://localhost:3000/api/lobby/', lobbyKey, this.httpOptions)
-                .pipe(catchError(this.handleError<{ key: string }>('deleteLobby')))
-        );
-    }
-*/
+
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
         return () => of(result as T);
     }

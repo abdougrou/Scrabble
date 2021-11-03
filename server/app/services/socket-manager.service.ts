@@ -24,12 +24,12 @@ export class SocketManagerService {
             // TODO merge playerName and roomId into single interface to facilitate communication process
         });
 
-        this.socket.on('start multiplayer game', (playerName: string) => {
+        this.socket.on('start-multiplayer-game', (playerName: string) => {
             // eslint-disable-next-line no-console
             console.log(`Player ${playerName} is starting a multiplayer game`);
         });
 
-        this.socket.on('on user join room', (key: string) => {
+        this.socket.on('on-join-room', (key: string) => {
             // TODO if the key is not registered send an error message
             this.lobbyService.getLobby(key);
         });

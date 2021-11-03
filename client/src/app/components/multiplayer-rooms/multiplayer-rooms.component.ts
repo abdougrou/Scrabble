@@ -67,4 +67,8 @@ export class MultiplayerRoomsComponent {
     closeSelf(): void {
         this.dialogRef.close();
     }
+
+    joinLobby(key: string): void {
+        this.communication.joinLobby(key);
+    }
 }

@@ -18,17 +18,15 @@ export class WaitingPopupComponent {
     ) {}
 
     switchMode() {
-        // this.communication.deleteLobby(this.communication.lobbyKey);
+        // nothing
     }
 
     back() {
-        // this.communication.deleteLobby(this.communication.lobbyKey);
         this.dialogRef.close();
     }
 
     startGame() {
         this.router.navigateByUrl('/game');
-        // this.communication.deleteLobby(this.communication.lobbyKey);
         this.dialogRef.close();
     }
 }
