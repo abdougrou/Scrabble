@@ -11,6 +11,7 @@ import * as io from 'socket.io-client';
 })
 export class CommunicationService {
     lobbyKey: string;
+    playerName: string;
     private socket: io.Socket;
     private httpOptions = {
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -23,18 +24,19 @@ export class CommunicationService {
     createLobby(config: LobbyConfig): string {
         const obsPut = this.putLobby(config);
         obsPut.pipe(map((message: { key: string }) => message)).subscribe((message) => {
-            this.joinLobby(message.key);
+            this.joinLobby(message.key, config.host);
         });
         return this.lobbyKey;
     }
 
-    joinLobby(key: string) {
+    joinLobby(key: string, playerName: string) {
         this.lobbyKey = key;
-        this.socket.emit(SocketEvent.playerJoinLobby, { lobbyKey: key, playerName: 'PLAYER_NAME' } as JoinLobbyMessage);
+        this.playerName = playerName;
+        this.socket.emit(SocketEvent.playerJoinLobby, { lobbyKey: key, playerName } as JoinLobbyMessage);
     }
 
     leaveLobby() {
-        this.socket.emit(SocketEvent.playerLeaveLobby, { lobbyKey: this.lobbyKey, playerName: 'PLAYER_NAME' } as LeaveLobbyMessage);
+        this.socket.emit(SocketEvent.playerLeaveLobby, { lobbyKey: this.lobbyKey, playerName: this.playerName } as LeaveLobbyMessage);
     }
 
     // TODO remove default value for testing purposes only

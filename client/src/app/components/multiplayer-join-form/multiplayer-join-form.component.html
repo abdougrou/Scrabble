@@ -7,6 +7,6 @@
     </mat-form-field>
 </form>
 <button mat-raised-button id="back" class="button" (click)="back()">Retour</button>
-<button mat-raised-button class="button" [disabled]="this.joinForm.get('name')?.value === this.data.host" (click)="joinLobby()">
+<button mat-raised-button class="button" [disabled]="this.joinForm.get('name')?.value === this.data.message.host" (click)="joinLobby()">
     Rejoindre la salle
 </button>

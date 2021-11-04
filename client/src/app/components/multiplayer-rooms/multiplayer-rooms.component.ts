@@ -76,7 +76,7 @@ export class MultiplayerRoomsComponent {
                 if (!result) return;
                 // serverGameManager initialize game
                 // delete lobby
-                this.communication.joinLobby(key);
+
                 this.closeSelf();
             });
     }
@@ -86,7 +86,7 @@ export class MultiplayerRoomsComponent {
         return this.dialog.open(MultiplayerJoinFormComponent, {
             height: DIALOG_HEIGHT,
             width: DIALOG_WIDTH,
-            data: { host: lobbyToJoin.host },
+            data: { message: { key, host: lobbyToJoin.host } },
         });
     }
 }

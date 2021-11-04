@@ -2,6 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MAX_USERNAME_LENGTH, MIN_USERNAME_LENGTH } from '@app/constants';
+import { CommunicationService } from '@app/services/communication.service';
 
 @Component({
     selector: 'app-multiplayer-join-form',
@@ -13,7 +14,8 @@ export class MultiplayerJoinFormComponent {
     constructor(
         public dialogRef: MatDialogRef<MultiplayerJoinFormComponent>,
         private formBuilder: FormBuilder,
-        @Inject(MAT_DIALOG_DATA) public data: { host: string },
+        public communication: CommunicationService,
+        @Inject(MAT_DIALOG_DATA) public data: { message: { key: string; host: string } },
     ) {
         this.joinForm = this.formBuilder.group({
             name: ['', [Validators.required, Validators.minLength(MIN_USERNAME_LENGTH), Validators.maxLength(MAX_USERNAME_LENGTH)]],
@@ -21,9 +23,11 @@ export class MultiplayerJoinFormComponent {
     }
 
     joinLobby() {
-        console.log('Host Name In Join Form: ', this.data.host);
-        if (this.data.host !== this.joinForm.get('name')?.value) console.log('Player names are differents!');
-        this.dialogRef.close(true);
+        console.log('Host Name In Join Form: ', this.data.message.host);
+        const playerName = this.joinForm.get('name')?.value;
+        if (this.data.message.host !== playerName) console.log('Player names are differents!');
+        this.communication.joinLobby(this.data.message.key, this.data.message.host);
+        this.dialogRef.close(playerName);
     }
 
     back() {
