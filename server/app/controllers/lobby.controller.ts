@@ -12,8 +12,9 @@ export class LobbyController {
         this.router.get('/', (req: Request, res: Response) => {
             const lobbies: LobbyConfig[] = lobbyService
                 .getLobbies()
-                .filter((lobby) => lobby.started)
+                .filter((lobby) => !lobby.started)
                 .map((lobby) => lobby.config);
+            console.log(lobbies.length);
             res.send(lobbies);
         });
 
