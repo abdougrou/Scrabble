@@ -17,9 +17,10 @@ import { EaselComponent } from './components/easel/easel.component';
 import { EndGamePopupComponent } from './components/end-game-popup/end-game-popup.component';
 import { GameConfigPageComponent } from './components/game-config-page/game-config-page.component';
 import { ModeSelectionComponent } from './components/mode-selection/mode-selection.component';
+import { MultiGameConfigComponent } from './components/multi-game-config/multi-game-config.component';
+import { MultiplayerJoinFormComponent } from './components/multiplayer-join-form/multiplayer-join-form.component';
 import { MultiplayerRoomsComponent } from './components/multiplayer-rooms/multiplayer-rooms.component';
 import { PlayerInfoComponent } from './components/player-info/player-info.component';
-import { MultiGameConfigComponent } from './components/multi-game-config/multi-game-config.component';
 import { WaitingPopupComponent } from './components/waiting-popup/waiting-popup.component';
 
 /**
@@ -46,6 +47,7 @@ import { WaitingPopupComponent } from './components/waiting-popup/waiting-popup.
         MultiplayerRoomsComponent,
         MultiGameConfigComponent,
         WaitingPopupComponent,
+        MultiplayerJoinFormComponent,
     ],
     imports: [AppMaterialModule, AppRoutingModule, BrowserAnimationsModule, BrowserModule, FormsModule, ReactiveFormsModule, HttpClientModule],
     providers: [],

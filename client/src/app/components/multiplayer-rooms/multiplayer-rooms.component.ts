@@ -2,6 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Dictionary, GameConfig, GameMode } from '@app/classes/game-config';
 import { MultiGameConfigComponent } from '@app/components/multi-game-config/multi-game-config.component';
+import { MultiplayerJoinFormComponent } from '@app/components/multiplayer-join-form/multiplayer-join-form.component';
 import { DIALOG_HEIGHT, DIALOG_WIDTH, DURATION_INIT } from '@app/constants';
 import { CommunicationService } from '@app/services/communication.service';
 import { GameManagerService } from '@app/services/game-manager.service';
@@ -69,6 +70,23 @@ export class MultiplayerRoomsComponent {
     }
 
     joinLobby(key: string): void {
-        this.communication.joinLobby(key);
+        this.openJoinPopup(key)
+            .afterClosed()
+            .subscribe((result) => {
+                if (!result) return;
+                // serverGameManager initialize game
+                // delete lobby
+                this.communication.joinLobby(key);
+                this.closeSelf();
+            });
+    }
+
+    openJoinPopup(key: string): MatDialogRef<unknown, unknown> {
+        const lobbyToJoin = this.lobbies.filter((lobby) => lobby.key === key)[0];
+        return this.dialog.open(MultiplayerJoinFormComponent, {
+            height: DIALOG_HEIGHT,
+            width: DIALOG_WIDTH,
+            data: { host: lobbyToJoin.host },
+        });
     }
 }
