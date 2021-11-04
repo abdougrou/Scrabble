@@ -1,4 +1,4 @@
-import { JoinLobbyMessage, LeaveLobbyMessage } from '@common/socket-messages';
+import { JoinLobbyMessage, LeaveLobbyMessage, SocketEvent } from '@common/socket-messages';
 import * as http from 'http';
 import * as io from 'socket.io';
 import { Service } from 'typedi';
@@ -14,11 +14,11 @@ export class SocketManagerService {
 
     handleSockets() {
         this.io.on('connection', (socket) => {
-            socket.on('player join lobby', (message: JoinLobbyMessage) => {
+            socket.on(SocketEvent.playerJoinLobby, (message: JoinLobbyMessage) => {
                 this.lobbyService.playerJoinLobby(message.playerName, message.lobbyKey);
             });
 
-            socket.on('player leave lobby', (message: LeaveLobbyMessage) => {
+            socket.on(SocketEvent.playerLeaveLobby, (message: LeaveLobbyMessage) => {
                 this.lobbyService.playerLeaveLobby(message.playerName, message.lobbyKey);
             });
 

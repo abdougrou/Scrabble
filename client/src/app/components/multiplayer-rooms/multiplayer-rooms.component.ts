@@ -5,7 +5,7 @@ import { MultiGameConfigComponent } from '@app/components/multi-game-config/mult
 import { DIALOG_HEIGHT, DIALOG_WIDTH, DURATION_INIT } from '@app/constants';
 import { CommunicationService } from '@app/services/communication.service';
 import { GameManagerService } from '@app/services/game-manager.service';
-import { Lobby } from '@common/lobby';
+import { LobbyConfig } from '@common/lobby-config';
 
 @Component({
     selector: 'app-multiplayer-rooms',
@@ -13,7 +13,7 @@ import { Lobby } from '@common/lobby';
     styleUrls: ['./multiplayer-rooms.component.scss'],
 })
 export class MultiplayerRoomsComponent {
-    lobbies: Lobby[];
+    lobbies: LobbyConfig[];
 
     constructor(
         public dialogRef: MatDialogRef<MultiplayerRoomsComponent>,

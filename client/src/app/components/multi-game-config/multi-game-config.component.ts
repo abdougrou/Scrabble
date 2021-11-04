@@ -7,7 +7,7 @@ import { WaitingPopupComponent } from '@app/components/waiting-popup/waiting-pop
 import { DIALOG_HEIGHT, DIALOG_WIDTH, DURATION_INIT, MAX_USERNAME_LENGTH, MIN_USERNAME_LENGTH } from '@app/constants';
 import { CommunicationService } from '@app/services/communication.service';
 import { GameManagerService } from '@app/services/game-manager.service';
-import { LobbyConfig } from '@common/lobby';
+import { LobbyConfig } from '@common/lobby-config';
 
 @Component({
     selector: 'app-multi-game-config',
@@ -46,8 +46,9 @@ export class MultiGameConfigComponent {
                 if (!result) return;
                 // serverGameManager initialize game
                 // delete lobby
+                this.communication.leaveLobby();
                 this.router.navigateByUrl('/game');
-                this.closeSelf();
+                this.dialogRef.close();
             });
     }
 
@@ -59,10 +60,6 @@ export class MultiGameConfigComponent {
     }
 
     back() {
-        this.dialogRef.close();
-    }
-
-    closeSelf() {
         this.dialogRef.close();
     }
 }

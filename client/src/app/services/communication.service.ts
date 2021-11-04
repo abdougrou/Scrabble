@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { LobbyConfig } from '@common/lobby-config';
-import { JoinLobbyMessage, SocketEvent } from '@common/socket-messages';
+import { JoinLobbyMessage, LeaveLobbyMessage, SocketEvent } from '@common/socket-messages';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import * as io from 'socket.io-client';
@@ -23,14 +23,18 @@ export class CommunicationService {
     createLobby(config: LobbyConfig): string {
         const obsPut = this.putLobby(config);
         obsPut.pipe(map((message: { key: string }) => message)).subscribe((message) => {
-            this.lobbyKey = message.key;
-            this.socket.emit(SocketEvent.playerJoinLobby, { lobbyKey: this.lobbyKey, playerName: 'host' } as JoinLobbyMessage);
+            this.joinLobby(message.key);
         });
         return this.lobbyKey;
     }
 
-    joinLobby(key: string): void {
-        this.socket.emit('on join room', key);
+    joinLobby(key: string) {
+        this.lobbyKey = key;
+        this.socket.emit(SocketEvent.playerJoinLobby, { lobbyKey: key, playerName: 'PLAYER_NAME' } as JoinLobbyMessage);
+    }
+
+    leaveLobby() {
+        this.socket.emit(SocketEvent.playerLeaveLobby, { lobbyKey: this.lobbyKey, playerName: 'PLAYER_NAME' } as LeaveLobbyMessage);
     }
 
     // TODO remove default value for testing purposes only
