@@ -1,7 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { ChatMessage } from '@app/classes/message';
 import { GameConfig, LobbyConfig } from '@common/lobby-config';
-import { JoinLobbyMessage, LeaveLobbyMessage, SetConfigMessage, SocketEvent } from '@common/socket-messages';
+import { JoinLobbyMessage, LeaveLobbyMessage, NormalChatMessage, SetConfigMessage, SocketEvent } from '@common/socket-messages';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import * as io from 'socket.io-client';
@@ -73,6 +74,10 @@ export class CommunicationService {
         return this.http
             .put<{ key: string }>('http://localhost:3000/api/lobby', lobbyConfig, this.httpOptions)
             .pipe(catchError(this.handleError<{ key: string }>('putLobby')));
+    }
+
+    sendMessage(message: ChatMessage) {
+        this.socket.emit(SocketEvent.chatMessage, { lobbyKey: this.lobbyKey, playerName: message.user, message: message.body } as NormalChatMessage);
     }
 
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
