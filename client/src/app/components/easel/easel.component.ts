@@ -37,7 +37,6 @@ export class EaselComponent implements OnChanges {
     @HostListener('document:keydown', ['$event'])
     buttonDetect(event: KeyboardEvent) {
         if (this.keyboardReceiver === KEYBOARD_EVENT_RECEIVER.easel) {
-            this.buttonPressed = event.key;
             if (event.shiftKey && event.key === '*') {
                 this.buttonPressed = '*';
             }
@@ -45,6 +44,7 @@ export class EaselComponent implements OnChanges {
                 this.moveRight();
             } else if (event.key === 'ArrowLeft') this.moveLeft();
             else {
+                this.buttonPressed = event.key;
                 if (this.containsTile(event.key.toLowerCase())) {
                     this.selectTileForManipulation(this.tileKeyboardClicked(event.key.toLowerCase()));
                 } else if (!event.shiftKey && !event.ctrlKey) {
@@ -132,16 +132,6 @@ export class EaselComponent implements OnChanges {
             easelTile.state = TileState.None;
         });
         tile.state = TileState.Manipulation;
-
-        // // this code follows the issues description
-        // case TileState.Exchange:
-        //     break;
-        // case TileState.None:
-        //     this.tiles.forEach((easelTile) => {
-        //         if (easelTile.state === TileState.Manipulation) easelTile.state = TileState.None;
-        //     });
-        //     tile.state = TileState.Manipulation;
-        //     break;
     }
 
     selectTileForExchange(tile: EaselTile) {
@@ -152,10 +142,8 @@ export class EaselComponent implements OnChanges {
             case TileState.Exchange:
                 tile.state = TileState.None;
                 break;
-            // if we want to respect the issues instead of the project description PDF "scrabble", we add a break in the manipulation case;
             case TileState.Manipulation:
             case TileState.None:
-                // check if current player turn
                 tile.state = TileState.Exchange;
                 break;
         }

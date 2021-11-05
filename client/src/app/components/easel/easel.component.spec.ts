@@ -2,10 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
 import { EaselTile, TileState } from '@app/classes/tile';
-import { KEYBOARD_EVENT_RECEIVER, MouseButton } from '@app/constants';
+import { KEYBOARD_EVENT_RECEIVER, MouseButton, STARTING_TILE_AMOUNT } from '@app/constants';
 import { MouseManagerService } from '@app/services/mouse-manager.service';
 import { PlayerService } from '@app/services/player.service';
 import { EaselComponent } from './easel.component';
+
+// TODO : TEST ONCHANGES, AND TILECLICKED
 
 describe('EaselComponent', () => {
     let component: EaselComponent;
@@ -76,25 +78,16 @@ describe('EaselComponent', () => {
         expect(component.buttonPressed).toBe('*');
     });
 
-    // NOT SURE IF IT SHOULDN'T DETECT '*'
-    // it("shouldn't detect the '*' when SHIFT isn't pressed", () => {
-    //     component.keyboardReceiver = KEYBOARD_EVENT_RECEIVER.easel;
-    //     component.buttonPressed = 'a';
-    //     const mockButtonClick = new KeyboardEvent('keydown', { shiftKey: false, key: '*' });
-    //     component.buttonDetect(mockButtonClick);
-    //     expect(component.buttonPressed).toBe('a');
-    // });
-
     it('should call the moveLeft and moveRight methods when the left and right arrows are pressed', () => {
         component.keyboardReceiver = KEYBOARD_EVENT_RECEIVER.easel;
         const mockRightArrowClick = new KeyboardEvent('keydown', { key: 'ArrowRight' });
         const mockLeftArrowClick = new KeyboardEvent('keydown', { key: 'ArrowLeft' });
-        component.buttonDetect(mockRightArrowClick);
-        component.buttonDetect(mockLeftArrowClick);
         spyOn(component, 'moveLeft');
         spyOn(component, 'moveRight');
-        expect(component.moveLeft).toHaveBeenCalledTimes(1);
-        expect(component.moveRight).toHaveBeenCalledTimes(1);
+        component.buttonDetect(mockRightArrowClick);
+        component.buttonDetect(mockLeftArrowClick);
+        expect(component.moveLeft).toHaveBeenCalled();
+        expect(component.moveRight).toHaveBeenCalled();
     });
 
     it('should call selectTileForManipulation when the key is in the easel', () => {
@@ -133,9 +126,9 @@ describe('EaselComponent', () => {
         const SCROLL_DOWN_VALUE = 100;
         component.keyboardReceiver = KEYBOARD_EVENT_RECEIVER.easel;
         const mockWheelDown = new WheelEvent('wheel', { deltaY: SCROLL_DOWN_VALUE });
-        component.scroll(mockWheelDown);
         spyOn(component, 'moveRight');
         spyOn(component, 'moveLeft');
+        component.scroll(mockWheelDown);
         expect(component.moveRight).toHaveBeenCalled();
         expect(component.moveLeft).not.toHaveBeenCalled();
     });
@@ -144,10 +137,102 @@ describe('EaselComponent', () => {
         const SCROLL_UP_VALUE = -100;
         component.keyboardReceiver = KEYBOARD_EVENT_RECEIVER.easel;
         const mockWheelUp = new WheelEvent('wheel', { deltaY: SCROLL_UP_VALUE });
-        component.scroll(mockWheelUp);
         spyOn(component, 'moveLeft');
         spyOn(component, 'moveRight');
+        component.scroll(mockWheelUp);
         expect(component.moveLeft).toHaveBeenCalled();
         expect(component.moveRight).not.toHaveBeenCalled();
     });
+
+    it('should reset all tiles', () => {
+        const tileA: EaselTile = { tile: { letter: 'a', points: 0 }, state: TileState.Manipulation };
+        for (let i = 0; i < STARTING_TILE_AMOUNT; i++) component.tiles.push(tileA);
+        component.resetTileState();
+        for (let i = 0; i < STARTING_TILE_AMOUNT; i++) expect(component.tiles[i].state).toBe(TileState.None);
+    });
+
+    it('containsTile should return the good value', () => {
+        const letters: string[] = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+        for (let i = 0; i < STARTING_TILE_AMOUNT; i++) {
+            const tile: EaselTile = { tile: { letter: letters[i], points: 0 }, state: TileState.None };
+            component.tiles.push(tile);
+        }
+        const goodTile = 'a';
+        const badTile = 'x';
+        expect(component.containsTile(goodTile)).toBe(true);
+        expect(component.containsTile(badTile)).toBe(false);
+    });
+
+    it('containsTile should return the good value', () => {
+        const letters: string[] = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+        for (let i = 0; i < STARTING_TILE_AMOUNT; i++) {
+            const tile: EaselTile = { tile: { letter: letters[i], points: 0 }, state: TileState.None };
+            component.tiles.push(tile);
+        }
+        const goodTile = 'a';
+        const badTile = 'x';
+        expect(component.containsTile(goodTile)).toBe(true);
+        expect(component.containsTile(badTile)).toBe(false);
+    });
+
+    it('tileKeyboardClicked should return the first occurance of a tile when there is no selected tile', () => {
+        const letters: string[] = ['a', 'b', 'c', 'b', 'e', 'b', 'e'];
+        for (let i = 0; i < STARTING_TILE_AMOUNT; i++) {
+            const tile: EaselTile = { tile: { letter: letters[i], points: 0 }, state: TileState.None };
+            component.tiles.push(tile);
+        }
+        const secondTile = 'b';
+        const fifthTile = 'e';
+        const secondTileIndex = 1;
+        const fifthTileIndex = 4;
+        expect(component.tileKeyboardClicked(secondTile)).toBe(component.tiles[secondTileIndex]);
+        expect(component.tileKeyboardClicked(fifthTile)).toBe(component.tiles[fifthTileIndex]);
+    });
+
+    it('tileKeyboardClicked should always return the same tile if there is only one occurance of it', () => {
+        const letters: string[] = ['a', 'b', 'c', 'b', 'e', 'b', 'e'];
+        for (let i = 0; i < STARTING_TILE_AMOUNT; i++) {
+            const tile: EaselTile = { tile: { letter: letters[i], points: 0 }, state: TileState.None };
+            component.tiles.push(tile);
+        }
+        const selectedTileIndex = 2;
+        const selectedTileLetter = 'c';
+        component.tiles[selectedTileIndex].state = TileState.Manipulation;
+        expect(component.tileKeyboardClicked(selectedTileLetter)).toBe(component.tiles[selectedTileIndex]);
+    });
+
+    it('tileKeyboardClicked should return the next occuranced tile if the first occurance is selected', () => {
+        const letters: string[] = ['a', 'b', 'c', 'b', 'e', 'b', 'e'];
+        for (let i = 0; i < STARTING_TILE_AMOUNT; i++) {
+            const tile: EaselTile = { tile: { letter: letters[i], points: 0 }, state: TileState.None };
+            component.tiles.push(tile);
+        }
+        const selectedTileIndex = 3;
+        const secondOccuranceTileIndex = 5;
+        const selectedTileLetter = 'b';
+        component.tiles[selectedTileIndex].state = TileState.Manipulation;
+        expect(component.tileKeyboardClicked(selectedTileLetter)).toBe(component.tiles[secondOccuranceTileIndex]);
+    });
+
+    it('tileKeyboardClicked should return the first occuranced tile if there is no more occurances on the right of the selected tile', () => {
+        const letters: string[] = ['a', 'b', 'c', 'b', 'e', 'b', 'e'];
+        for (let i = 0; i < STARTING_TILE_AMOUNT; i++) {
+            const tile: EaselTile = { tile: { letter: letters[i], points: 0 }, state: TileState.None };
+            component.tiles.push(tile);
+        }
+        const firstOccuranceTileIndex = 1;
+        const selectedTileIndex = 5;
+        const selectedTileLetter = 'b';
+        component.tiles[selectedTileIndex].state = TileState.Manipulation;
+        expect(component.tileKeyboardClicked(selectedTileLetter)).toBe(component.tiles[firstOccuranceTileIndex]);
+    });
+
+    // it('should call selectTileForManipulation if we leftClick the tile', () => {
+    //     const tile: EaselTile = { tile: { letter: 'a', points: 0 }, state: TileState.None };
+    //     const mockMouseLeftClick = new MouseEvent('mousedown', { button: MouseButton.Left });
+    //     spyOn(component, 'selectTileForManipulation');
+    //     spyOn(mouseService, 'easelMouseClicked');
+    //     component.tileClicked(tile, mockMouseLeftClick);
+    //     expect(mouseService.easelMouseClicked).toHaveBeenCalled();
+    // });
 });
