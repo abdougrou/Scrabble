@@ -6,7 +6,9 @@ import {
     SetConfigMessage,
     SkipTurnMessage,
     SocketEvent,
-    SwitchPlayersMessage
+    SwitchPlayersMessage,
+    UpdateGameManagerMessage,
+    UpdateMessage
 } from '@common/socket-messages';
 import * as http from 'http';
 import * as io from 'socket.io';
@@ -59,6 +61,16 @@ export class SocketManagerService {
 
             socket.on(SocketEvent.playerLeaveLobby, (message: LeaveLobbyMessage) => {
                 this.lobbyService.playerLeaveLobby(message.playerName, message.lobbyKey);
+            });
+
+            socket.on(SocketEvent.update, (message: UpdateMessage) => {
+                const gameManager = this.lobbyService.getLobby(message.lobbyKey)?.gameManager;
+                this.io.to(message.lobbyKey).emit(SocketEvent.update, {
+                    players: gameManager?.players,
+                    reserveData: gameManager?.reserve.data,
+                    reserveCount: gameManager?.reserve.size,
+                    boardData: gameManager?.board.data,
+                } as UpdateGameManagerMessage);
             });
 
             socket.on('disconnection', () => {

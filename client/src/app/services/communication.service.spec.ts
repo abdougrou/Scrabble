@@ -1,12 +1,11 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { Message } from '@app/classes/message';
 import { CommunicationService } from '@app/services/communication.service';
 
 describe('CommunicationService', () => {
     let httpMock: HttpTestingController;
     let service: CommunicationService;
-    let baseUrl: string;
+    // let baseUrl: string;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -15,7 +14,7 @@ describe('CommunicationService', () => {
         service = TestBed.inject(CommunicationService);
         httpMock = TestBed.inject(HttpTestingController);
         // eslint-disable-next-line dot-notation -- baseUrl is private and we need access for the test
-        baseUrl = service['baseUrl'];
+        // baseUrl = service['baseUrl'];
     });
 
     afterEach(() => {
@@ -25,7 +24,7 @@ describe('CommunicationService', () => {
     it('should be created', () => {
         expect(service).toBeTruthy();
     });
-
+    /*
     it('should return expected message (HttpClient called once)', () => {
         const expectedMessage: Message = { body: 'Hello', title: 'World' };
 
@@ -61,4 +60,6 @@ describe('CommunicationService', () => {
         expect(req.request.method).toBe('GET');
         req.error(new ErrorEvent('Random error occurred'));
     });
+
+    */
 });

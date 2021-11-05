@@ -319,7 +319,7 @@ describe('GameManagerService', () => {
         const previousPlayer = playerService.current;
         service.placeTiles('allo', 'h8v', true, playerService.current);
         expect(previousPlayer.easel.tiles.length).toBe(reserveTilesLength);
-        expect(previousPlayer.easel.tiles[0].letter).toBe('a');
+        expect(previousPlayer.easel.tiles[0].tile.letter).toBe('a');
     });
 
     it('placeTile not allow a word to be placed on top of another one', () => {

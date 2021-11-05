@@ -12,6 +12,7 @@ import {
     SkipTurnMessage,
     SocketEvent,
     SwitchPlayersMessage,
+    UpdateGameManagerMessage,
     UpdateMessage
 } from '@common/socket-messages';
 import { Observable, of } from 'rxjs';
@@ -54,6 +55,8 @@ export class CommunicationService {
         this.lobbyKey = key;
         this.playerName = playerName;
         this.socket.emit(SocketEvent.playerJoinLobby, { lobbyKey: key, playerName } as JoinLobbyMessage);
+        this.update();
+        console.log('Players : ', this.gameManager.players);
     }
 
     setConfig(config: LobbyConfig, guestName: string) {
@@ -82,11 +85,11 @@ export class CommunicationService {
 
     update() {
         this.socket.emit(SocketEvent.update, { lobbyKey: this.lobbyKey } as UpdateMessage);
-        this.socket.on(SocketEvent.update, (gameManager) => {
+        this.socket.on(SocketEvent.update, (gameManager: UpdateGameManagerMessage) => {
             this.gameManager.players = gameManager.players;
-            this.gameManager.reserve = gameManager.reserve;
-            this.gameManager.board = gameManager.board;
-            this.gameManager.turnDurationLeft = gameManager.turnDurationLeft;
+            this.gameManager.reserveData = gameManager.reserveData;
+            this.gameManager.board.multiplayerBoard = gameManager.boardData;
+            this.gameManager.reserveCount = gameManager.reserveCount;
         });
     }
 

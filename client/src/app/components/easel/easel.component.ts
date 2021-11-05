@@ -1,9 +1,11 @@
 import { Component, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Router } from '@angular/router';
 import { Player } from '@app/classes/player';
 import { EaselTile, TileState } from '@app/classes/tile';
 import { KEYBOARD_EVENT_RECEIVER, MouseButton } from '@app/constants';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { MouseManagerService } from '@app/services/mouse-manager.service';
+import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-manager.service';
 import { PlayerService } from '@app/services/player.service';
 import { ReserveService } from '@app/services/reserve.service';
 
@@ -29,14 +31,24 @@ export class EaselComponent implements OnChanges {
         private mouseManager: MouseManagerService,
         private reserve: ReserveService,
         private gameManager: GameManagerService,
+        private multiGameManager: MultiplayerGameManagerService,
+        private router: Router,
     ) {
-        this.tiles = this.playerService.mainPlayer.easel.tiles;
+        if (this.router.url === '/multiplayer-game') {
+            this.players = this.multiGameManager.players;
+            this.tiles = this.multiGameManager.getMainPlayer().easel.tiles;
+            this.mainPlayerName = this.multiGameManager.getMainPlayer().name;
+        } else {
+            this.mainPlayerName = this.gameManager.mainPlayerName;
+            this.tiles = this.playerService.mainPlayer.easel.tiles;
+            this.players = this.playerService.players;
+        }
+
         if (this.keyboardReceiver !== KEYBOARD_EVENT_RECEIVER.easel)
             this.tiles.forEach((easelTile) => {
                 easelTile.state = TileState.None;
             });
-        this.players = this.playerService.players;
-        this.mainPlayerName = this.gameManager.mainPlayerName;
+
         this.numTilesReserve = this.reserve.tileCount;
     }
 
@@ -219,7 +231,11 @@ export class EaselComponent implements OnChanges {
         this.tiles.forEach((easelTile) => {
             if (easelTile.state === TileState.Exchange) tilesToExchange += easelTile.tile.letter;
         });
-        this.gameManager.exchangeTiles(tilesToExchange, this.playerService.getPlayerByName(this.mainPlayerName));
+        if (this.router.url === '/multiplayer-game') {
+            this.multiGameManager.exchangeLetters(tilesToExchange, this.multiGameManager.getMainPlayer());
+        } else {
+            this.gameManager.exchangeTiles(tilesToExchange, this.playerService.getPlayerByName(this.mainPlayerName));
+        }
         this.resetTileState();
     }
 

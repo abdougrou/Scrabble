@@ -59,7 +59,7 @@ describe('ModeSelectionComponent', () => {
     });
 
     it("should 'Retour' button call back()", () => {
-        const spy = spyOn(component, 'back').and.callThrough();
+        const spy = spyOn(component, 'closeSelf').and.callThrough();
         const button = fixture.debugElement.nativeElement.querySelector('#back');
         button.click();
         expect(spy).toHaveBeenCalled();

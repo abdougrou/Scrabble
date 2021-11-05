@@ -12,7 +12,7 @@ import { LobbyConfig } from '@common/lobby-config';
 })
 export class MultiplayerJoinFormComponent implements DoCheck {
     joinForm: FormGroup;
-    result: { config: LobbyConfig; playerName: string };
+    result: { config: LobbyConfig; playerName: string; mainPlayerName: string };
     constructor(
         public dialogRef: MatDialogRef<MultiplayerJoinFormComponent>,
         private formBuilder: FormBuilder,
@@ -28,14 +28,14 @@ export class MultiplayerJoinFormComponent implements DoCheck {
         if (this.communication.started) {
             console.log(' Client Two (config): ', this.result.config);
             console.log(' Client Two (guest): ', this.result.playerName);
-            this.dialogRef.close(this.result);
+            setTimeout(() => this.dialogRef.close(this.result), 0);
         }
     }
 
     joinLobby() {
         console.log('Host Name In Join Form: ', this.data.message.host);
         const playerName = this.joinForm.get('name')?.value;
-        this.result = { config: this.data.config, playerName };
+        this.result = { config: this.data.config, playerName, mainPlayerName: playerName };
         if (this.data.message.host !== playerName) console.log('Player names are differents!');
         this.communication.joinLobby(this.data.message.key, playerName);
         this.communication.setConfig(this.data.config, playerName);

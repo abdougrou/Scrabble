@@ -42,7 +42,12 @@ export class ModeSelectionComponent {
             .afterClosed()
             .subscribe((result) => {
                 if (!result) return;
-                const parameters: { config: LobbyConfig; playerName: string } = result as { config: LobbyConfig; playerName: string };
+                const parameters: { config: LobbyConfig; playerName: string; mainPlayerName: string } = result as {
+                    config: LobbyConfig;
+                    playerName: string;
+                    mainPlayerName: string;
+                };
+                this.multiGameManager.mainPlayerName = parameters.mainPlayerName;
                 this.multiGameManager.initialize(parameters.config, parameters.playerName);
                 this.router.navigateByUrl('/multiplayer-game');
                 this.closeSelf();

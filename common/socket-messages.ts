@@ -63,3 +63,11 @@ export interface SkipTurnMessage {
 export interface UpdateMessage {
     lobbyKey: string;
 }
+
+export interface UpdateGameManagerMessage {
+    players: Player[];
+    reserveData: Map<string, number>;
+    reserveCount: number;
+    boardData: (string | null)[][];
+    // turnDurationLeft: number;
+}

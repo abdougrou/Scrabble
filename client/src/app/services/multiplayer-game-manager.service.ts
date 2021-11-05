@@ -5,7 +5,6 @@ import { LobbyConfig } from '@common/lobby-config';
 import { BoardService } from './board.service';
 import { CommunicationService } from './communication.service';
 import { GridService } from './grid.service';
-import { ReserveService } from './reserve.service';
 
 @Injectable({
     providedIn: 'root',
@@ -14,30 +13,32 @@ export class MultiplayerGameManagerService {
     players: Player[];
     turnDuration: number;
     turnDurationLeft: number;
-    randomPlayerNameIndex: number;
-    isFirstTurn: boolean = true;
     mainPlayerName: string;
-    enemyPlayerName: string;
+    isFirstTurn: boolean = true;
+    hostName: string;
+    guestName: string;
     isEnded: boolean;
     endGameMessage: string = '';
     debug: boolean = false;
-    constructor(
-        private gridService: GridService,
-        private communication: CommunicationService,
-        public board: BoardService,
-        public reserve: ReserveService,
-    ) {
+    reserveData: Map<string, number>;
+    reserveCount: number;
+    constructor(private gridService: GridService, private communication: CommunicationService, public board: BoardService) {
         this.communication.setGameManager(this);
     }
 
     initialize(lobbyConfig: LobbyConfig, playerName: string) {
-        this.mainPlayerName = lobbyConfig.host;
-        this.enemyPlayerName = playerName;
+        this.hostName = lobbyConfig.host;
+        this.guestName = playerName;
         this.turnDuration = lobbyConfig.turnDuration;
         this.turnDurationLeft = lobbyConfig.turnDuration;
         this.isEnded = false;
         this.communication.update();
         // this.startTimer();
+    }
+
+    getMainPlayer(): Player {
+        if (this.players[0].name === this.mainPlayerName) return this.players[0];
+        else return this.players[1];
     }
 
     update() {

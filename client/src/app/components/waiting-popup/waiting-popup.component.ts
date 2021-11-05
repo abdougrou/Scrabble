@@ -11,7 +11,7 @@ import { LobbyConfig } from '@common/lobby-config';
     styleUrls: ['./waiting-popup.component.scss'],
 })
 export class WaitingPopupComponent implements DoCheck {
-    result: { config: LobbyConfig; playerName: string };
+    result: { config: LobbyConfig; playerName: string; mainPlayerName: string };
     constructor(
         public dialogRef: MatDialogRef<WaitingPopupComponent>,
         public communication: CommunicationService,
@@ -21,10 +21,14 @@ export class WaitingPopupComponent implements DoCheck {
 
     ngDoCheck() {
         if (this.communication.started) {
-            this.result = { config: this.communication.config, playerName: this.communication.guestName };
+            this.result = {
+                config: this.communication.config,
+                playerName: this.communication.guestName,
+                mainPlayerName: this.communication.config.host,
+            };
             console.log(' Client One (config): ', this.result.config);
             console.log(' Client One (guest): ', this.result.playerName);
-            this.dialogRef.close(this.result);
+            setTimeout(() => this.dialogRef.close(this.result), 0);
         }
     }
     switchMode() {
