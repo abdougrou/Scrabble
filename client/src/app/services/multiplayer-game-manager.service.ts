@@ -5,6 +5,7 @@ import { LobbyConfig } from '@common/lobby-config';
 import { BoardService } from './board.service';
 import { CommunicationService } from './communication.service';
 import { GridService } from './grid.service';
+import { ReserveService } from './reserve.service';
 
 @Injectable({
     providedIn: 'root',
@@ -20,9 +21,12 @@ export class MultiplayerGameManagerService {
     isEnded: boolean;
     endGameMessage: string = '';
     debug: boolean = false;
-    reserveData: Map<string, number>;
-    reserveCount: number;
-    constructor(private gridService: GridService, private communication: CommunicationService, public board: BoardService) {
+    constructor(
+        private gridService: GridService,
+        private communication: CommunicationService,
+        public board: BoardService,
+        public reserve: ReserveService,
+    ) {
         this.communication.setGameManager(this);
     }
 
@@ -43,6 +47,7 @@ export class MultiplayerGameManagerService {
 
     update() {
         this.communication.update();
+        this.gridService.drawBoard();
     }
 
     // startTimer() {

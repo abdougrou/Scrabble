@@ -17,6 +17,7 @@ export class GameManager {
     constructor() {
         this.players = [];
         this.reserve = new Reserve(CLASSIC_RESERVE);
+        this.board = new Board();
         this.moveGenerator = new MoveGenerator(new Trie()); // TODO Fill trie with words
     }
 

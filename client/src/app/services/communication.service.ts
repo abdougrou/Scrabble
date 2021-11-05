@@ -87,9 +87,11 @@ export class CommunicationService {
         this.socket.emit(SocketEvent.update, { lobbyKey: this.lobbyKey } as UpdateMessage);
         this.socket.on(SocketEvent.update, (gameManager: UpdateGameManagerMessage) => {
             this.gameManager.players = gameManager.players;
-            this.gameManager.reserveData = gameManager.reserveData;
+            this.gameManager.reserve.serverReserveData = gameManager.reserveData;
+            this.gameManager.reserve.tileCount = gameManager.reserveCount;
+            this.gameManager.reserve.serverReserveToTiles();
             this.gameManager.board.multiplayerBoard = gameManager.boardData;
-            this.gameManager.reserveCount = gameManager.reserveCount;
+            this.gameManager.board.multiplayerBoardToBoard();
         });
     }
 
