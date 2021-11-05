@@ -30,6 +30,7 @@ export class GameManager {
         if (this.players.length > 1) return false;
         else if (this.players[0]?.name === name) return false;
         this.players.push({ name, easel: new Easel(), score: 0 });
+        // return this.players.length === 2;
         return true;
     }
 
