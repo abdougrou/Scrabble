@@ -90,21 +90,28 @@ describe('MoveGenerator', () => {
     //     expect(moveGenerator.crossChecks.size).to.equal(expectedLength);
     // });
 
-    // it('generateLegalMoves finds all legal moves for a given board and easel', () => {
-    //     board = [
-    //         [null, null, null, null, null, null, null],
-    //         [null, null, null, null, null, null, null],
-    //         [null, null, null, null, null, null, null],
-    //         [null, null, 'c', null, 't', null, null],
-    //         [null, null, null, null, null, null, null],
-    //         [null, null, null, null, null, null, null],
-    //         [null, null, null, null, null, null, null],
-    //     ];
-    //     dictionary = new Trie(['cat']);
-    //     moveGenerator = new MoveGenerator(dictionary);
-    //     moveGenerator.calculateAnchorsAndCrossChecks(board);
-    //     const easel = 'a';
-    //     moveGenerator.generateLegalMoves(board, easel);
-    //     console.log(moveGenerator.legalMoves);
-    // });
+    it('generateLegalMoves finds all legal moves for a given board and easel', () => {
+        board = [
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, 'c', null, 't', null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+        ];
+        dictionary = new Trie(['cat', 'cbt', 'cab', 'cba']);
+        moveGenerator = new MoveGenerator(dictionary);
+        moveGenerator.calculateAnchorsAndCrossChecks(board);
+        const easel = 'ab';
+        moveGenerator.generateLegalMoves(board, easel);
+        const coord = { x: 3, y: 2 };
+        const expectedMoves = [
+            { word: 'cat', coord, across: true },
+            { word: 'cbt', coord, across: true },
+            { word: 'cab', coord, across: false },
+            { word: 'cba', coord, across: false },
+        ];
+        expect(moveGenerator.legalMoves).to.have.deep.members(expectedMoves);
+    });
 });

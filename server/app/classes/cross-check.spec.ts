@@ -100,6 +100,66 @@ describe('CrossCheck', () => {
         expect(CrossCheck.crossCheck(board, coord, dict).value).to.equal(crossCheckValue);
     });
 
+    it('crossCheck should return valid letters when prefix on both directions', () => {
+        const dict: Trie = new Trie(['abc', 'acd']);
+        const board = [
+            [null, null, null, null, null, null],
+            [null, null, null, null, null, null],
+            [null, null, 'c', 'd', null, null],
+            [null, 'b', null, null, null, null],
+            [null, 'c', null, null, null, null],
+            [null, null, null, null, null, null],
+        ];
+        const coord = { x: 2, y: 1 };
+        const crossCheckValue = 1;
+        expect(CrossCheck.crossCheck(board, coord, dict).value).to.equal(crossCheckValue);
+    });
+
+    it('crossCheck should return valid letters when suffix on buth directions', () => {
+        const dict: Trie = new Trie(['abc', 'dxc']);
+        const board = [
+            [null, null, null, null, null, null],
+            [null, null, null, null, 'a', null],
+            [null, null, null, null, 'b', null],
+            [null, null, 'd', 'x', null, null],
+            [null, null, null, null, null, null],
+            [null, null, null, null, null, null],
+        ];
+        const coord = { x: 3, y: 4 };
+        const crossCheckValue = 4;
+        expect(CrossCheck.crossCheck(board, coord, dict).value).to.equal(crossCheckValue);
+    });
+
+    it('crossCheck should return valid letters when across suffix and down prefix', () => {
+        const dict: Trie = new Trie(['abc', 'cdx']);
+        const board = [
+            [null, null, null, null, null, null],
+            [null, 'a', null, null, null, null],
+            [null, 'b', null, null, null, null],
+            [null, null, 'd', 'x', null, null],
+            [null, null, null, null, null, null],
+            [null, null, null, null, null, null],
+        ];
+        const coord = { x: 3, y: 1 };
+        const crossCheckValue = 4;
+        expect(CrossCheck.crossCheck(board, coord, dict).value).to.equal(crossCheckValue);
+    });
+
+    it('crossCheck should return valid letters when across prefix and down suffix', () => {
+        const dict: Trie = new Trie(['abc', 'dxa']);
+        const board = [
+            [null, null, null, null, null, null],
+            [null, null, null, null, null, null],
+            [null, null, 'd', 'x', null, null],
+            [null, null, null, null, 'b', null],
+            [null, null, null, null, 'c', null],
+            [null, null, null, null, null, null],
+        ];
+        const coord = { x: 2, y: 4 };
+        const crossCheckValue = 1;
+        expect(CrossCheck.crossCheck(board, coord, dict).value).to.equal(crossCheckValue);
+    });
+
     it('crossCheckOneDimension returns all valid letters when prefix only exists', () => {
         const dict: Trie = new Trie(['aavce', 'aaxxe']);
         const row = [null, 'a', 'a', null, null, null];
@@ -111,13 +171,11 @@ describe('CrossCheck', () => {
 
     it('crossCheckOneDimension returns all valid letters when suffix only exists', () => {
         const dict: Trie = new Trie(['aavce', 'aaxxe', 'baa', 'maa']);
-        const row1 = [null, null, 'a', null, null, null];
-        const row2 = [null, null, 'a', null, null, null];
+        const row = [null, null, 'a', null, null, null];
         const coord = 1;
         const expectLetters = ['a', 'b', 'm'];
 
-        expect(CrossCheck.crossCheckOneDimension(row1, coord, dict)).to.have.members(expectLetters);
-        expect(CrossCheck.crossCheckOneDimension(row2, coord, dict)).to.have.members(expectLetters);
+        expect(CrossCheck.crossCheckOneDimension(row, coord, dict)).to.have.members(expectLetters);
     });
 
     it('crossCheckOneDimension returns all valid letters when suffix and prefix exists', () => {

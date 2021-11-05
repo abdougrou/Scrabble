@@ -87,11 +87,12 @@ export class CrossCheck {
         const transposedBoard = transpose(board);
         const rowLetters = this.crossCheckOneDimension(board[coord.x], coord.y, dictionary);
         const colLetters = this.crossCheckOneDimension(transposedBoard[coord.y], coord.x, dictionary);
-        const letters = rowLetters.filter((letter) => colLetters.indexOf(letter) >= 0);
-        // console.log(coord);
-        // console.log(rowLetters);
-        // console.log(colLetters);
-        // console.log(letters);
+        const letters =
+            rowLetters.length === 0
+                ? colLetters
+                : colLetters.length === 0
+                ? rowLetters
+                : rowLetters.filter((letter) => colLetters.indexOf(letter) >= 0);
         for (const letter of letters) CrossCheck.addLetter(crossCheck, letter);
 
         return crossCheck;
@@ -108,6 +109,7 @@ export class CrossCheck {
     static crossCheckOneDimension(row: (string | null)[], coord: number, dictionary: Trie): string[] {
         const validLetters: Set<string> = new Set();
         const rowStr = row.map((item) => (item ? item : ' ')).join('');
+        if (row.join('').length === 0) return [];
         let boardPrefix = '';
         let boardSuffix = '';
 
@@ -122,8 +124,8 @@ export class CrossCheck {
             boardSuffix = rowStr.slice(coord + 1, i);
         }
         let suffixes: string[] = [];
-        if (boardPrefix.length) {
-            suffixes = dictionary.find(boardPrefix).map((item) => item.slice(coord - 1));
+        if (boardPrefix.length > 0) {
+            suffixes = dictionary.find(boardPrefix).map((item) => item.slice(boardPrefix.length));
         } else {
             for (let i = 'a'.charCodeAt(0); i <= 'z'.charCodeAt(0); i++) {
                 suffixes = suffixes.concat(dictionary.find(String.fromCharCode(i)));
@@ -132,10 +134,12 @@ export class CrossCheck {
         for (const suffix of suffixes) {
             if (suffix.length > row.length - coord) continue;
             let valid = true;
-            for (let i = 1; i < suffix.length; i++) {
+            for (let i = 1; i <= suffix.length; i++) {
                 if (boardSuffix[i - 1] && boardSuffix[i - 1] !== suffix[i]) valid = false;
             }
-            if (valid) validLetters.add(suffix[0]);
+            if (valid) {
+                validLetters.add(suffix[0]);
+            }
         }
         return Array.from(validLetters.keys());
     }
