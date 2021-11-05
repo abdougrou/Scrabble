@@ -65,7 +65,7 @@ export class ModeSelectionComponent {
             return this.dialog.open(MultiplayerRoomsComponent, {
                 height: DIALOG_HEIGHT,
                 width: DIALOG_WIDTH,
-                data: { config: gameConfig },
+                data: { mode: this.data.mode },
             });
         } else {
             return this.dialog.open(GameConfigPageComponent, {

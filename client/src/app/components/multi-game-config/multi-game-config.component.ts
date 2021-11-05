@@ -7,7 +7,7 @@ import { WaitingPopupComponent } from '@app/components/waiting-popup/waiting-pop
 import { DIALOG_HEIGHT, DIALOG_WIDTH, DURATION_INIT, MAX_USERNAME_LENGTH, MIN_USERNAME_LENGTH } from '@app/constants';
 import { CommunicationService } from '@app/services/communication.service';
 import { GameManagerService } from '@app/services/game-manager.service';
-import { LobbyConfig } from '@common/lobby-config';
+import { GameConfig, GameMode, LobbyConfig } from '@common/lobby-config';
 
 @Component({
     selector: 'app-multi-game-config',
@@ -39,16 +39,22 @@ export class MultiGameConfigComponent {
         this.data.config.turnDuration = this.gameConfigForm.get('duration')?.value;
         this.data.config.bonusEnabled = this.gameConfigForm.get('bonusEnabled')?.value;
         this.data.config.dictionary = this.gameConfigForm.get('dictionary')?.value;
+        const gameConfig = {
+            playerName1: this.data.config.host,
+            playerName2: 'default',
+            duration: this.data.config.turnDuration,
+            gameMode: GameMode.Classic,
+            dictionary: Dictionary.French,
+            isMultiPlayer: true,
+            bonusEnabled: this.data.config.bonusEnabled,
+        } as GameConfig;
         this.communication.createLobby(this.data.config);
+        this.communication.setConfig(gameConfig);
         this.openWaitingPopup()
             .afterClosed()
             .subscribe((result) => {
                 if (!result) return;
-                // serverGameManager initialize game
-                // delete lobby
-                this.communication.leaveLobby();
-                this.router.navigateByUrl('/game');
-                this.dialogRef.close();
+                this.dialogRef.close(result);
             });
     }
 
@@ -56,6 +62,7 @@ export class MultiGameConfigComponent {
         return this.dialog.open(WaitingPopupComponent, {
             height: DIALOG_HEIGHT,
             width: DIALOG_WIDTH,
+            disableClose: true,
         });
     }
 

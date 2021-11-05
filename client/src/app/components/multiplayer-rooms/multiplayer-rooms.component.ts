@@ -15,6 +15,7 @@ import { LobbyConfig } from '@common/lobby-config';
 })
 export class MultiplayerRoomsComponent {
     lobbies: LobbyConfig[];
+    lobbyGameConfig: GameConfig;
 
     constructor(
         public dialogRef: MatDialogRef<MultiplayerRoomsComponent>,
@@ -31,8 +32,7 @@ export class MultiplayerRoomsComponent {
             .afterClosed()
             .subscribe((result) => {
                 if (!result) return;
-                this.gameManager.initialize(result as GameConfig);
-                this.closeSelf();
+                this.dialogRef.close(true);
             });
 
         const delay = 250;
@@ -42,20 +42,17 @@ export class MultiplayerRoomsComponent {
     }
 
     openFormPopup(): MatDialogRef<unknown, unknown> {
-        const gameConfig = {
-            playerName1: 'default',
-            playerName2: 'default',
-            gameMode: this.data.mode,
-            isMultiPlayer: true,
-            duration: DURATION_INIT,
+        const lobbyConfig = {
+            host: 'default',
+            turnDuration: DURATION_INIT,
             bonusEnabled: false,
             dictionary: Dictionary.French,
-        } as GameConfig;
+        };
 
         return this.dialog.open(MultiGameConfigComponent, {
             height: DIALOG_HEIGHT,
             width: DIALOG_WIDTH,
-            data: { config: gameConfig },
+            data: { config: lobbyConfig },
         });
     }
 
@@ -65,28 +62,30 @@ export class MultiplayerRoomsComponent {
         });
     }
 
-    closeSelf(): void {
-        this.dialogRef.close();
-    }
-
     joinLobby(key: string): void {
         this.openJoinPopup(key)
             .afterClosed()
             .subscribe((result) => {
                 if (!result) return;
-                // serverGameManager initialize game
-                // delete lobby
-
-                this.closeSelf();
+                this.dialogRef.close(result);
             });
     }
 
     openJoinPopup(key: string): MatDialogRef<unknown, unknown> {
         const lobbyToJoin = this.lobbies.filter((lobby) => lobby.key === key)[0];
+        const gameConfig = {
+            playerName1: lobbyToJoin.host,
+            playerName2: 'default',
+            gameMode: this.data.mode,
+            duration: lobbyToJoin.turnDuration,
+            bonusEnabled: lobbyToJoin.bonusEnabled,
+            dictionary: lobbyToJoin.dictionary === '0' ? Dictionary.French : Dictionary.English,
+            isMultiPlayer: true,
+        } as GameConfig;
         return this.dialog.open(MultiplayerJoinFormComponent, {
             height: DIALOG_HEIGHT,
             width: DIALOG_WIDTH,
-            data: { message: { key, host: lobbyToJoin.host } },
+            data: { config: gameConfig, message: { key, host: lobbyToJoin.host } },
         });
     }
 }

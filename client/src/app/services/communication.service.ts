@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { LobbyConfig } from '@common/lobby-config';
-import { JoinLobbyMessage, LeaveLobbyMessage, SocketEvent } from '@common/socket-messages';
+import { GameConfig, LobbyConfig } from '@common/lobby-config';
+import { JoinLobbyMessage, LeaveLobbyMessage, SetConfigMessage, SocketEvent } from '@common/socket-messages';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import * as io from 'socket.io-client';
@@ -12,6 +12,8 @@ import * as io from 'socket.io-client';
 export class CommunicationService {
     lobbyKey: string;
     playerName: string;
+    started = false;
+    config: GameConfig;
     private socket: io.Socket;
     private httpOptions = {
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -33,6 +35,21 @@ export class CommunicationService {
         this.lobbyKey = key;
         this.playerName = playerName;
         this.socket.emit(SocketEvent.playerJoinLobby, { lobbyKey: key, playerName } as JoinLobbyMessage);
+    }
+
+    setConfig(config: GameConfig) {
+        // console logs to debug
+        // eslint-disable-next-line no-console
+        console.log('setConfig Data: ', config);
+        this.socket.emit(SocketEvent.setConfig, { lobbyKey: this.lobbyKey, config } as SetConfigMessage);
+        this.socket.on('start game', (gameConfig) => {
+            // eslint-disable-next-line no-console
+            console.log('Server: game started');
+            this.started = true;
+            this.config = gameConfig;
+            // eslint-disable-next-line no-console
+            console.log(this.config);
+        });
     }
 
     leaveLobby() {

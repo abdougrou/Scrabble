@@ -1,6 +1,6 @@
 import { BOARD_SIZE } from '@app/constants';
-import { Trie } from './trie';
 import { coordToKey, getStringCombinations } from './board-utils';
+import { Trie } from './trie';
 import { Vec2 } from './vec2';
 
 export class Board {

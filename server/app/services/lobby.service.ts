@@ -42,7 +42,10 @@ export class LobbyService {
      */
     playerJoinLobby(name: string, key: string): boolean {
         const lobby = this.lobbies.get(key);
-        if (lobby) return lobby.gameManager.addPlayer(name);
+        if (lobby) {
+            lobby.started = lobby.gameManager.addPlayer(name);
+            return lobby.started;
+        }
         return false;
     }
 
