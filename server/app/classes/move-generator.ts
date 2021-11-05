@@ -32,7 +32,6 @@ export class MoveGenerator {
             const coord: Vec2 = { x: anchor.x, y: anchor.y };
             const crossCheck = CrossCheck.crossCheck(board, coord, this.dictionary);
             this.crossChecks.set(coordToKey(coord), crossCheck);
-            // console.log(anchor, crossCheck);
         });
     }
 
@@ -46,7 +45,9 @@ export class MoveGenerator {
         this.anchors.forEach((anchor) => {
             if (anchor.leftPart.length > 0) {
                 const node = this.dictionary.getNode(anchor.leftPart);
-                if (node) this.extendLeft(board, easel, anchor.leftPart, anchor, node, 0);
+                if (node) {
+                    this.extendLeft(board, easel, anchor.leftPart, anchor, node, 0);
+                }
             } else this.extendLeft(board, easel, '', anchor, this.dictionary.root, anchor.leftLength);
         });
     }
