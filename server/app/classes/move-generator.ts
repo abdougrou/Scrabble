@@ -1,5 +1,6 @@
+import { CLASSIC_RESERVE } from '@app/constants';
 import { Anchor } from './anchor';
-import { coordToKey } from './board-utils';
+import { coordToKey, transpose } from './board-utils';
 import { CrossCheck } from './cross-check';
 import { Trie, TrieNode } from './trie';
 import { Vec2 } from './vec2';
@@ -15,9 +16,16 @@ export class MoveGenerator {
     crossChecks: Map<string, CrossCheck> = new Map();
     dictionary: Trie;
     legalMoves: Move[] = [];
+    pointMap: Map<string, number> = new Map();
 
     constructor(dictionary: Trie) {
         this.dictionary = dictionary;
+
+        const lettersData: string[] = CLASSIC_RESERVE.split(/\r?\n/);
+        lettersData.forEach((letterData) => {
+            const data = letterData.split(',');
+            this.pointMap.set(data[0], parseInt(data[2], 10));
+        });
     }
 
     /**
@@ -33,6 +41,32 @@ export class MoveGenerator {
             const crossCheck = CrossCheck.crossCheck(board, coord, this.dictionary);
             this.crossChecks.set(coordToKey(coord), crossCheck);
         });
+    }
+
+    calculateCrossSum(board: (string | null)[][], coord: Vec2, across: boolean): number {
+        const row = across ? board[coord.x] : transpose(board)[coord.y];
+        const coord1D = across ? coord.y : coord.x;
+        return this.calculateCrossSumOneDimension(row, coord1D);
+    }
+
+    calculateCrossSumOneDimension(row: (string | null)[], coord: number): number {
+        let points = 0;
+        if (row[coord - 1]) {
+            let i = coord - 1;
+            while (row[i]) {
+                points += this.pointMap.get(row[i] as string) as number;
+                i--;
+            }
+        }
+        if (row[coord + 1]) {
+            let i = coord + 1;
+            while (row[i]) {
+                points += this.pointMap.get(row[i] as string) as number;
+                i++;
+            }
+        }
+
+        return points;
     }
 
     /**

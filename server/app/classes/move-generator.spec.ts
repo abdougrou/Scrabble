@@ -71,24 +71,24 @@ describe('MoveGenerator', () => {
         expect(moveGenerator.legalMoves).to.have.deep.members(expectedLegalMoves);
     });
 
-    // it('calculateAnchorsAndCrossChecks finds all anchors and cross checks for a given board', () => {
-    //     board = [
-    //         [null, null, null, null, null, null, null],
-    //         [null, null, null, null, null, null, null],
-    //         [null, null, null, null, null, null, null],
-    //         [null, null, 'c', null, 't', null, null],
-    //         [null, null, null, null, null, null, null],
-    //         [null, null, null, null, null, null, null],
-    //         [null, null, null, null, null, null, null],
-    //     ];
-    //     dictionary = new Trie(['cacat', 'cat']);
-    //     moveGenerator = new MoveGenerator(dictionary);
-    //     moveGenerator.calculateAnchorsAndCrossChecks(board);
+    it('calculateAnchorsAndCrossChecks finds all anchors and cross checks for a given board', () => {
+        board = [
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, 'c', null, 't', null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+        ];
+        dictionary = new Trie(['cacat', 'cat']);
+        moveGenerator = new MoveGenerator(dictionary);
+        moveGenerator.calculateAnchorsAndCrossChecks(board);
 
-    //     const expectedLength = 7;
-    //     expect(moveGenerator.anchors.length).to.equal(expectedLength);
-    //     expect(moveGenerator.crossChecks.size).to.equal(expectedLength);
-    // });
+        const expectedLength = 7;
+        expect(moveGenerator.anchors.length).to.equal(expectedLength);
+        expect(moveGenerator.crossChecks.size).to.equal(expectedLength);
+    });
 
     it('generateLegalMoves finds all legal moves for a given board and easel', () => {
         board = [
@@ -113,5 +113,29 @@ describe('MoveGenerator', () => {
             { word: 'cba', coord, across: false },
         ];
         expect(moveGenerator.legalMoves).to.have.deep.members(expectedMoves);
+    });
+
+    it('calculateCrossSums returns correct value for given coord', () => {
+        board = [
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, 'c', null, 't', null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+        ];
+        dictionary = new Trie(['cat']);
+        moveGenerator = new MoveGenerator(dictionary);
+
+        const coord1 = { x: 3, y: 3 };
+        const across1 = true;
+        const expectedValue1 = 4;
+        expect(moveGenerator.calculateCrossSum(board, coord1, across1)).to.equal(expectedValue1);
+
+        const coord2 = coord1;
+        const across2 = false;
+        const expectedValue2 = 0;
+        expect(moveGenerator.calculateCrossSum(board, coord2, across2)).to.equal(expectedValue2);
     });
 });
