@@ -1,4 +1,13 @@
-import { JoinLobbyMessage, LeaveLobbyMessage, SetConfigMessage, SocketEvent } from '@common/socket-messages';
+import {
+    ExchangeLettersMessage,
+    JoinLobbyMessage,
+    LeaveLobbyMessage,
+    PlaceLettersMessage,
+    SetConfigMessage,
+    SkipTurnMessage,
+    SocketEvent,
+    SwitchPlayersMessage
+} from '@common/socket-messages';
 import * as http from 'http';
 import * as io from 'socket.io';
 import { Service } from 'typedi';
@@ -16,15 +25,36 @@ export class SocketManagerService {
         this.io.on('connection', (socket) => {
             socket.on(SocketEvent.playerJoinLobby, (message: JoinLobbyMessage) => {
                 this.lobbyService.playerJoinLobby(message.playerName, message.lobbyKey);
+                const lobby = this.lobbyService.getLobby(message.lobbyKey);
+                if (lobby?.gameManager.players.length === 2) lobby.started = true;
                 console.log('(Join) key: ', message.lobbyKey);
                 socket.join(message.lobbyKey);
             });
 
             socket.on(SocketEvent.setConfig, (message: SetConfigMessage) => {
                 console.log('(setConfig) key: ', message.lobbyKey);
-                console.log('Host : ', message.config.playerName1);
+                console.log('Host : ', message.config.host);
                 const lobby = this.lobbyService.getLobby(message.lobbyKey);
-                if (lobby?.started) this.io.to(message.lobbyKey).emit('start game', message.config);
+                if (lobby?.started)
+                    this.io
+                        .to(message.lobbyKey)
+                        .emit('start game', { lobbyKey: message.lobbyKey, config: message.config, guest: message.guest } as SetConfigMessage);
+            });
+
+            socket.on(SocketEvent.switchPlayers, (message: SwitchPlayersMessage) => {
+                this.lobbyService.getLobby(message.lobbyKey)?.gameManager.swapPlayers();
+            });
+
+            socket.on(SocketEvent.exchangeLetters, (message: ExchangeLettersMessage) => {
+                this.lobbyService.getLobby(message.lobbyKey)?.gameManager.exchangeLetters(message.player, message.letters);
+            });
+
+            socket.on(SocketEvent.placeLetters, (message: PlaceLettersMessage) => {
+                this.lobbyService.getLobby(message.lobbyKey)?.gameManager.placeLetters(message.player, message.word, message.coord, message.across);
+            });
+
+            socket.on(SocketEvent.skipTurn, (message: SkipTurnMessage) => {
+                this.lobbyService.getLobby(message.lobbyKey)?.gameManager.passTurn(message.player);
             });
 
             socket.on(SocketEvent.playerLeaveLobby, (message: LeaveLobbyMessage) => {

@@ -1,6 +1,6 @@
 import { Player } from "@app/classes/player";
 import { Vec2 } from "@app/classes/vec2";
-import { GameConfig } from "./lobby-config";
+import { LobbyConfig } from "./lobby-config";
 
 export const SocketEvent = {
     playerJoinLobby: 'player join lobby',
@@ -11,7 +11,8 @@ export const SocketEvent = {
     placeLetters: 'place letters',
     exchangeLetters: 'exchange letters',
     skipTurn: 'skip turn',
-    setPlayers: 'set players'
+    setPlayers: 'set players',
+    update: 'update'
 };
 
 export interface JoinLobbyMessage {
@@ -26,7 +27,8 @@ export interface LeaveLobbyMessage {
 
 export interface SetConfigMessage {
     lobbyKey: string;
-    config: GameConfig;
+    config: LobbyConfig;
+    guest: string;
 }
 
 // I dont know how it will work currently
@@ -58,6 +60,6 @@ export interface SkipTurnMessage {
     player: Player;
 }
 
-export interface SetPlayers {
+export interface UpdateMessage {
     lobbyKey: string;
 }

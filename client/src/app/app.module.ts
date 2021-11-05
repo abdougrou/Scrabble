@@ -22,6 +22,7 @@ import { MultiplayerJoinFormComponent } from './components/multiplayer-join-form
 import { MultiplayerRoomsComponent } from './components/multiplayer-rooms/multiplayer-rooms.component';
 import { PlayerInfoComponent } from './components/player-info/player-info.component';
 import { WaitingPopupComponent } from './components/waiting-popup/waiting-popup.component';
+import { MultiplayerGamePageComponent } from './pages/multiplayer-game-page/multiplayer-game-page.component';
 
 /**
  * Main module that is used in main.ts.
@@ -48,6 +49,7 @@ import { WaitingPopupComponent } from './components/waiting-popup/waiting-popup.
         MultiGameConfigComponent,
         WaitingPopupComponent,
         MultiplayerJoinFormComponent,
+        MultiplayerGamePageComponent,
     ],
     imports: [AppMaterialModule, AppRoutingModule, BrowserAnimationsModule, BrowserModule, FormsModule, ReactiveFormsModule, HttpClientModule],
     providers: [],
