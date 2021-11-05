@@ -8,7 +8,7 @@ export interface TrieNode {
 }
 
 export class Trie {
-    private root: TrieNode;
+    root: TrieNode;
 
     constructor(dictionary?: string[]) {
         this.root = {
@@ -30,7 +30,7 @@ export class Trie {
 
         for (let i = 0; i < word.length; i++) {
             let nextNode = node.children.get(word[i]);
-            // Check if node exists
+            // Check if node does not exists
             if (!nextNode) {
                 // Create new node with parent and terminal assigned
                 nextNode = {
@@ -40,6 +40,8 @@ export class Trie {
                     children: new Map(),
                 };
                 node.children.set(word[i], nextNode);
+            } else if (i === word.length - 1) {
+                nextNode.terminal = true;
             }
             node = nextNode;
         }

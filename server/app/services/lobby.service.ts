@@ -1,4 +1,3 @@
-import { GameManager } from '@app/classes/game-manager';
 import { Lobby } from '@app/classes/lobby';
 import { LobbyConfig } from '@common/lobby-config';
 import { Service } from 'typedi';
@@ -19,8 +18,7 @@ export class LobbyService {
     createLobby(config: LobbyConfig): string {
         let key = this.generateKey();
         while (this.lobbies.get(key)) key = this.generateKey();
-        config.key = key;
-        const lobby: Lobby = { config, gameManager: new GameManager(), started: false };
+        const lobby = new Lobby(key, config);
         this.lobbies.set(key, lobby);
         return key;
     }
@@ -38,14 +36,11 @@ export class LobbyService {
      * Join a lobby if it exists
      *
      * @param key lobby key
-     * @return true if the lobby exists, false otherwise
+     * @return true a player has been added to the game, false otherwise
      */
     playerJoinLobby(name: string, key: string): boolean {
         const lobby = this.lobbies.get(key);
-        if (lobby) {
-            lobby.started = lobby.gameManager.addPlayer(name);
-            return lobby.started;
-        }
+        if (lobby) return lobby.gameManager.addPlayer(name);
         return false;
     }
 

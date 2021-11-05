@@ -3,6 +3,13 @@ export enum PassResult {
     NotCurrentPlayer,
 }
 
+export enum PlaceResult {
+    Success,
+    NotCurrentPlayer,
+    NotInEasel,
+    NotValid,
+}
+
 export enum ExchangeResult {
     Success,
     NotCurrentPlayer,

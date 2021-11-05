@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import { describe } from 'mocha';
 import { LobbyService } from './lobby.service';
 
-describe('LobbyController', () => {
+describe('LobbyService', () => {
     let lobbyService: LobbyService;
 
     beforeEach(async () => {
@@ -25,76 +25,76 @@ describe('LobbyController', () => {
     });
 
     it('getLobbies returns all lobbies', () => {
-        const lobby = new Lobby({
+        const lobby: LobbyConfig = {
             key: 'key',
             host: 'host',
             turnDuration: 60,
             bonusEnabled: false,
             dictionary: 'french',
-        });
-        lobbyService.lobbies.set('lobby1', lobby);
-        lobbyService.lobbies.set('lobby2', lobby);
+        };
+        lobbyService.lobbies.set('lobby1', new Lobby(lobby.key!, lobby));
+        lobbyService.lobbies.set('lobby2', new Lobby(lobby.key!, lobby));
         expect(lobbyService.getLobbies().length).to.equal(2);
     });
 
     it('playerJoinLobby should return true if the player joins the lobby, false otherwise', () => {
-        const lobby = new Lobby({
+        const lobby: LobbyConfig = {
             key: 'key',
             host: 'host',
             turnDuration: 60,
             bonusEnabled: false,
             dictionary: 'french',
-        });
-        lobbyService.lobbies.set(lobby.config.key!, lobby);
-        expect(lobbyService.playerJoinLobby('player1', lobby.config.key!)).to.equal(true);
-        expect(lobbyService.playerJoinLobby('player2', lobby.config.key!)).to.equal(true);
-        expect(lobbyService.playerJoinLobby(lobby.config.host, 'noo')).to.equal(false);
+        };
+        lobbyService.lobbies.set(lobby.key!, new Lobby(lobby.key!, lobby));
+        expect(lobbyService.playerJoinLobby('player1', lobby.key!)).to.equal(true);
+        expect(lobbyService.playerJoinLobby('player2', lobby.key!)).to.equal(true);
+        expect(lobbyService.playerJoinLobby(lobby.host, 'noo')).to.equal(false);
         expect(lobbyService.playerJoinLobby('player3', 'no lobby')).to.equal(false);
     });
 
     it('playerLeaveLobby should return true when the player is removed from the lobby, false otherwise', () => {
-        const lobby = new Lobby({
+        const lobby: LobbyConfig = {
             key: 'key',
             host: 'host',
             turnDuration: 60,
             bonusEnabled: false,
             dictionary: 'french',
-        });
+        };
         const player1 = 'player1';
         const player2 = 'player2';
-        lobbyService.lobbies.set(lobby.config.key!, lobby);
-        lobbyService.playerJoinLobby(player1, lobby.config.key!);
-        lobbyService.playerJoinLobby(player2, lobby.config.key!);
-        expect(lobbyService.playerLeaveLobby(player1, lobby.config.key!)).to.equal(true);
+        lobbyService.lobbies.set(lobby.key!, new Lobby(lobby.key!, lobby));
+        lobbyService.playerJoinLobby(player1, lobby.key!);
+        lobbyService.playerJoinLobby(player2, lobby.key!);
+        expect(lobbyService.playerLeaveLobby(player1, lobby.key!)).to.equal(true);
         expect(lobbyService.lobbies.size).to.equal(1);
-        expect(lobbyService.playerLeaveLobby(player2, lobby.config.key!)).to.equal(true);
+        expect(lobbyService.playerLeaveLobby(player2, lobby.key!)).to.equal(true);
         expect(lobbyService.lobbies.size).to.equal(0);
         expect(lobbyService.playerLeaveLobby('player3', 'noo')).to.equal(false);
     });
 
     it('getLobby should return the lobby if it exists, undefined otherwise', () => {
-        const lobby = new Lobby({
+        const lobby: LobbyConfig = {
             key: 'key',
             host: 'host',
             turnDuration: 60,
             bonusEnabled: false,
             dictionary: 'french',
-        });
-        lobbyService.lobbies.set(lobby.config.key!, lobby);
-        expect(lobbyService.getLobby(lobby.config.key!)).to.equal(lobby);
+        };
+        lobbyService.lobbies.set(lobby.key!, new Lobby(lobby.key!, lobby));
+        expect(lobbyService.getLobby(lobby.key!)?.config).to.equal(lobby);
         expect(lobbyService.getLobby('noo')).to.equal(undefined);
     });
 
     it('deleteLobby should delete the lobby from the list', () => {
-        const lobby = new Lobby({
+        const lobby: LobbyConfig = {
             key: 'key',
             host: 'host',
             turnDuration: 60,
             bonusEnabled: false,
             dictionary: 'french',
-        });
-        lobbyService.lobbies.set(lobby.config.key!, lobby);
-        lobbyService.deleteLobby(lobby.config.key!);
+        };
+        lobbyService.lobbies.set(lobby.key!, new Lobby(lobby.key!, lobby));
+        lobbyService.deleteLobby(lobby.key!);
 
         expect(lobbyService.lobbies.size).to.equal(0);
     });

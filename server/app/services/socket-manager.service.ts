@@ -6,7 +6,7 @@ import { LobbyService } from './lobby.service';
 
 @Service()
 export class SocketManagerService {
-    private io: io.Server;
+    io: io.Server;
 
     constructor(server: http.Server, private lobbyService: LobbyService) {
         this.io = new io.Server(server, { cors: { origin: '*' } });

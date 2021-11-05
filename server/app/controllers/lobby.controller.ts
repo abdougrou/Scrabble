@@ -14,7 +14,6 @@ export class LobbyController {
                 .getLobbies()
                 .filter((lobby) => !lobby.started)
                 .map((lobby) => lobby.config);
-            console.log(lobbies.length);
             res.send(lobbies);
         });
 

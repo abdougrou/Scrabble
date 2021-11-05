@@ -75,7 +75,7 @@ export class CrossCheck {
     }
 
     /**
-     * Calculates the cross check for the given board, coordinate and dictioanry
+     * Calculates the cross check for the given board, coordinate and dictionary
      *
      * @param board 2d array to calculate cross check from
      * @param coord cross check coordinate
@@ -88,6 +88,10 @@ export class CrossCheck {
         const rowLetters = this.crossCheckOneDimension(board[coord.x], coord.y, dictionary);
         const colLetters = this.crossCheckOneDimension(transposedBoard[coord.y], coord.x, dictionary);
         const letters = rowLetters.filter((letter) => colLetters.indexOf(letter) >= 0);
+        // console.log(coord);
+        // console.log(rowLetters);
+        // console.log(colLetters);
+        // console.log(letters);
         for (const letter of letters) CrossCheck.addLetter(crossCheck, letter);
 
         return crossCheck;

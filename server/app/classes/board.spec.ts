@@ -1,8 +1,6 @@
 import { expect } from 'chai';
 import { describe } from 'mocha';
 import { Board } from './board';
-import { Trie } from './trie';
-import { coordToKey } from './board-utils';
 
 const BOARD_SIZE = 15;
 
@@ -31,8 +29,6 @@ describe('Board', () => {
 
     it('new board has one centered anchor', () => {
         board.initialize();
-        expect(board.anchors.size).to.equal(1);
-        expect(board.anchors.has(coordToKey({ x: 7, y: 7 })));
     });
 
     it('clone should return a copy of the board', () => {
@@ -60,15 +56,5 @@ describe('Board', () => {
         const letter = 'x';
         board.setLetter(coord, letter);
         expect(board.getLetter(coord)).to.equal(letter);
-    });
-
-    it('generatePrefixes returns valid prefixes', () => {
-        const dictionary = new Trie(['aacbb', 'acbbc', 'bbcaa', 'ccabc']);
-        const easel = 'aab';
-        const limit = 3;
-        const expectedPrefixes = ['aa', 'a', 'b'];
-        const validated = board.generateEaselPrefix(easel, limit, dictionary);
-
-        expect(validated).to.have.deep.members(expectedPrefixes);
     });
 });
