@@ -3,7 +3,9 @@ import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
 import { KEYBOARD_EVENT_RECEIVER, MouseButton, SYSTEM_NAME } from '@app/constants';
 import { CommandHandlerService } from '@app/services/command-handler.service';
+import { CommunicationService } from '@app/services/communication.service';
 import { GameManagerService } from '@app/services/game-manager.service';
+import { ModeSelectionService } from '@app/services/mode-selection.service';
 import { PlayerService } from '@app/services/player.service';
 
 @Component({
@@ -25,11 +27,14 @@ export class ChatBoxComponent implements OnChanges {
     mainPlayerName: string;
     enemyPlayerName: string;
     manualPlacementMessage: string;
+    lastCommand: string;
 
     constructor(
         public gameManager: GameManagerService,
         public playerService: PlayerService,
-        public commandHandler: CommandHandlerService, // private renderer: Renderer2,
+        public commandHandler: CommandHandlerService,
+        private communication: CommunicationService,
+        private mode: ModeSelectionService,
     ) {
         this.mainPlayerName = this.gameManager.mainPlayerName;
         this.enemyPlayerName = this.gameManager.enemyPlayerName;
@@ -57,8 +62,12 @@ export class ChatBoxComponent implements OnChanges {
             this.chatMessage.body = this.message;
             this.player = this.getPlayerByName(this.chatMessage.user);
             this.messageInput.nativeElement.value = '';
-            this.showMessage(this.chatMessage);
-            this.showMessage(this.checkCommand(this.chatMessage, this.player));
+            if (!this.mode.modeConfig.isMultiPlayer) {
+                this.showMessage(this.chatMessage);
+                this.showMessage(this.checkCommand(this.chatMessage, this.player));
+            } else {
+                // call communcation service
+            }
         }
     }
 

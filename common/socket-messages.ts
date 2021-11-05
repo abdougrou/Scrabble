@@ -1,9 +1,11 @@
-import { GameConfig } from "./lobby-config";
+import { GameConfig } from './lobby-config';
 
 export const SocketEvent = {
     playerJoinLobby: 'player join lobby',
     playerLeaveLobby: 'player leave lobby',
-    setConfig: 'set config'
+    setConfig: 'set config',
+    chatMessage: 'message',
+    commandMessage: 'command',
 };
 
 export interface JoinLobbyMessage {
@@ -19,4 +21,10 @@ export interface LeaveLobbyMessage {
 export interface SetConfigMessage {
     lobbyKey: string;
     config: GameConfig;
+}
+
+export interface NormalChatMessage {
+    lobbyKey: string;
+    playerName: string;
+    message: string;
 }

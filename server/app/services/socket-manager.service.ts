@@ -16,6 +16,8 @@ export class SocketManagerService {
         this.io.on('connection', (socket) => {
             socket.on(SocketEvent.playerJoinLobby, (message: JoinLobbyMessage) => {
                 this.lobbyService.playerJoinLobby(message.playerName, message.lobbyKey);
+                const lobby = this.lobbyService.getLobby(message.lobbyKey);
+                if (lobby?.gameManager.players.length === 2) lobby.started = true;
                 console.log('(Join) key: ', message.lobbyKey);
                 socket.join(message.lobbyKey);
             });

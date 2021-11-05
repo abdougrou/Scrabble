@@ -6,6 +6,7 @@ import { GameConfigPageComponent } from '@app/components/game-config-page/game-c
 import { MultiplayerRoomsComponent } from '@app/components/multiplayer-rooms/multiplayer-rooms.component';
 import { DIALOG_HEIGHT, DIALOG_WIDTH, DURATION_INIT } from '@app/constants';
 import { GameManagerService } from '@app/services/game-manager.service';
+import { ModeSelectionService } from '@app/services/mode-selection.service';
 
 @Component({
     selector: 'app-mode-selection',
@@ -21,6 +22,7 @@ export class ModeSelectionComponent {
         @Inject(MAT_DIALOG_DATA) public data: { mode: GameMode },
         private gameManager: GameManagerService,
         private router: Router,
+        private modeSelection: ModeSelectionService,
     ) {}
 
     playSolo(): void {
@@ -28,6 +30,7 @@ export class ModeSelectionComponent {
             .afterClosed()
             .subscribe((result) => {
                 if (!result) return;
+                this.modeSelection.modeConfig = result as GameConfig;
                 this.gameManager.initialize(result as GameConfig);
                 this.router.navigateByUrl('/game');
                 this.closeSelf();
@@ -39,6 +42,7 @@ export class ModeSelectionComponent {
             .afterClosed()
             .subscribe((result) => {
                 if (!result) return;
+                this.modeSelection.modeConfig = result as GameConfig;
                 this.gameManager.initialize(result as GameConfig);
                 this.router.navigateByUrl('/game');
                 this.closeSelf();
