@@ -1,10 +1,22 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Player } from '@app/classes/player';
+import { Vec2 } from '@app/classes/vec2';
 import { GameConfig, LobbyConfig } from '@common/lobby-config';
-import { JoinLobbyMessage, LeaveLobbyMessage, SetConfigMessage, SocketEvent } from '@common/socket-messages';
+import {
+    ExchangeLettersMessage,
+    JoinLobbyMessage,
+    LeaveLobbyMessage,
+    PlaceLettersMessage,
+    SetConfigMessage,
+    SkipTurnMessage,
+    SocketEvent,
+    SwitchPlayersMessage
+} from '@common/socket-messages';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import * as io from 'socket.io-client';
+import { MultiplayerGameManagerService } from './multiplayer-game-manager.service';
 
 @Injectable({
     providedIn: 'root',
@@ -14,6 +26,7 @@ export class CommunicationService {
     playerName: string;
     started = false;
     config: GameConfig;
+    gameManager: MultiplayerGameManagerService;
     private socket: io.Socket;
     private httpOptions = {
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -21,6 +34,10 @@ export class CommunicationService {
     };
     constructor(private readonly http: HttpClient) {
         this.socket = io.io('ws://localhost:3000');
+    }
+
+    setGameManager(gameManager: MultiplayerGameManagerService) {
+        this.gameManager = gameManager;
     }
 
     createLobby(config: LobbyConfig): string {
@@ -50,6 +67,32 @@ export class CommunicationService {
             // eslint-disable-next-line no-console
             console.log(this.config);
         });
+    }
+
+    setPlayers() {
+        this.socket.emit(SocketEvent.setPlayers, { lobbyKey: this.lobbyKey } as SetPlayersMessage);
+        this.socket.on(SocketEvent.setPlayers, (players) => {
+            this.gameManager.players = players;
+        });
+    }
+
+    // TODO
+    startTimer() {}
+
+    switchPlayers() {
+        this.socket.emit(SocketEvent.switchPlayers, { lobbyKey: this.lobbyKey } as SwitchPlayersMessage);
+    }
+
+    exchangeLetters(letters: string, player: Player) {
+        this.socket.emit(SocketEvent.exchangeLetters, { lobbyKey: this.lobbyKey, player, letters } as ExchangeLettersMessage);
+    }
+
+    placeLetters(player: Player, word: string, coord: Vec2, across: boolean) {
+        this.socket.emit(SocketEvent.placeLetters, { lobbyKey: this.lobbyKey, player, word, coord, across } as PlaceLettersMessage);
+    }
+
+    skipTurn(player: Player) {
+        this.socket.emit(SocketEvent.skipTurn, { lobbyKey: this.lobbyKey, player } as SkipTurnMessage);
     }
 
     leaveLobby() {
