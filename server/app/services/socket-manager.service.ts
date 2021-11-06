@@ -34,13 +34,10 @@ export class SocketManagerService {
                 this.lobbyService.playerJoinLobby(message.playerName, message.lobbyKey);
                 const lobby = this.lobbyService.getLobby(message.lobbyKey);
                 if (lobby?.gameManager.players.length === 2) lobby.started = true;
-                console.log('(Join) key: ', message.lobbyKey);
                 socket.join(message.lobbyKey);
             });
 
             socket.on(SocketEvent.setConfig, (message: SetConfigMessage) => {
-                console.log('(setConfig) key: ', message.lobbyKey);
-                console.log('Host : ', message.config.host);
                 const lobby = this.lobbyService.getLobby(message.lobbyKey);
                 if (lobby?.started)
                     this.io

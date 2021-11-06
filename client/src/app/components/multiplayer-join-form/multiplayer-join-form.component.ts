@@ -26,8 +26,6 @@ export class MultiplayerJoinFormComponent implements DoCheck {
 
     ngDoCheck() {
         if (this.communication.started) {
-            console.log(' Client Two (config): ', this.result.config);
-            console.log(' Client Two (guest): ', this.result.playerName);
             setTimeout(() => this.dialogRef.close(this.result), 0);
         }
     }
