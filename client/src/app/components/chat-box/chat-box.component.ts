@@ -38,8 +38,13 @@ export class ChatBoxComponent implements OnChanges {
         private communication: CommunicationService,
         private router: Router,
     ) {
-        this.mainPlayerName = this.gameManager.mainPlayerName;
-        this.enemyPlayerName = this.gameManager.enemyPlayerName;
+        if (this.router.url === '/multiplayer-game') {
+            this.mainPlayerName = this.multiplayerGameManager.mainPlayerName;
+            this.enemyPlayerName = this.multiplayerGameManager.players.find((player) => player.name !== this.mainPlayerName)?.name as string;
+        } else {
+            this.mainPlayerName = this.gameManager.mainPlayerName;
+            this.enemyPlayerName = this.gameManager.enemyPlayerName;
+        }
         this.gameManager.commandMessage.asObservable().subscribe((msg) => {
             this.showMessage(msg);
         });
@@ -65,14 +70,16 @@ export class ChatBoxComponent implements OnChanges {
         if (this.messageInput.nativeElement.value !== '') {
             this.chatMessage.user = this.mainPlayerName;
             this.chatMessage.body = this.message;
-            this.player = this.getPlayerByName(this.chatMessage.user);
+            this.player = this.multiplayerGameManager.getMainPlayer();
             this.messageInput.nativeElement.value = '';
-            this.showMessage(this.chatMessage);
             if (this.router.url === '/game') {
+                this.showMessage(this.chatMessage);
                 this.showMessage(this.checkCommand(this.chatMessage, this.player));
             } else if (this.router.url === '/multiplayer-game') {
-                if (!this.isCommand(this.chatMessage.body)) this.communication.sendMessage(this.chatMessage);
-                else {
+                if (!this.isCommand(this.chatMessage.body)) {
+                    this.communication.sendMessage(this.chatMessage);
+                } else {
+                    this.showMessage(this.chatMessage);
                     this.handleMultiplayerCommand(this.chatMessage);
                 }
             }
@@ -80,30 +87,32 @@ export class ChatBoxComponent implements OnChanges {
     }
 
     showMessage(message: ChatMessage): void {
-        const newMessage = document.createElement('p');
-        switch (message.user) {
-            case SYSTEM_NAME:
-                newMessage.innerHTML = message.body;
-                newMessage.style.color = 'rgb(207, 0, 15)';
-                break;
-            case this.mainPlayerName:
-                newMessage.innerHTML = `${message.user} : ${message.body}`;
-                newMessage.style.color = 'gray';
-                break;
-            case this.enemyPlayerName:
-                newMessage.innerHTML = `${message.user} : ${message.body}`;
-                newMessage.style.color = 'darkgoldenrod';
-                break;
-            default:
-                newMessage.innerHTML = message.body;
-                newMessage.style.color = 'gray';
-                break;
+        if (message.body !== '') {
+            const newMessage = document.createElement('p');
+            switch (message.user) {
+                case SYSTEM_NAME:
+                    newMessage.innerHTML = message.body;
+                    newMessage.style.color = 'rgb(207, 0, 15)';
+                    break;
+                case this.mainPlayerName:
+                    newMessage.innerHTML = `${message.user} : ${message.body}`;
+                    newMessage.style.color = 'gray';
+                    break;
+                case this.enemyPlayerName:
+                    newMessage.innerHTML = `${message.user} : ${message.body}`;
+                    newMessage.style.color = 'darkgoldenrod';
+                    break;
+                default:
+                    newMessage.innerHTML = message.body;
+                    newMessage.style.color = 'gray';
+                    break;
+            }
+            const parentMessage = document.getElementById('default-message');
+            if (parentMessage) {
+                parentMessage.appendChild(newMessage);
+            }
+            this.scrollDown();
         }
-        const parentMessage = document.getElementById('default-message');
-        if (parentMessage) {
-            parentMessage.appendChild(newMessage);
-        }
-        this.scrollDown();
     }
 
     scrollDown(): void {

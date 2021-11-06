@@ -5,6 +5,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { GameMode } from '@app/classes/game-config';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
+// import { CommunicationService } from '@app/services/communication.service';
+// import SpyObj = jasmine.SpyObj;
 
 describe('MainPageComponent', () => {
     let component: MainPageComponent;
@@ -12,6 +14,10 @@ describe('MainPageComponent', () => {
     let fixture: ComponentFixture<MainPageComponent>;
 
     beforeEach(async () => {
+        // communicationServiceSpy = jasmine.createSpyObj('ExampleService', ['basicGet', 'basicPost']);
+        // communicationServiceSpy.basicGet.and.returnValue(of({ title: '', body: '' }));
+        // communicationServiceSpy.basicPost.and.returnValue(of());
+
         await TestBed.configureTestingModule({
             imports: [RouterTestingModule, BrowserAnimationsModule, HttpClientModule, MatDialogModule],
             declarations: [MainPageComponent],

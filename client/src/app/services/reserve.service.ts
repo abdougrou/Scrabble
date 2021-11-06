@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ReserveTile, Tile } from '@app/classes/tile';
-import { CLASSIC_RESERVE, MIN_EXCHANGE_RESERVE_COUNT } from '@app/constants';
+import { CLASSIC_RESERVE, LETTER_POINTS, MIN_EXCHANGE_RESERVE_COUNT } from '@app/constants';
 
 @Injectable({
     providedIn: 'root',
@@ -8,6 +8,7 @@ import { CLASSIC_RESERVE, MIN_EXCHANGE_RESERVE_COUNT } from '@app/constants';
 export class ReserveService {
     tiles: Map<string, ReserveTile> = new Map<string, ReserveTile>();
     tileCount: number = 0;
+    serverReserveData: Map<string, number>;
 
     constructor() {
         const lettersData: string[] = CLASSIC_RESERVE.split(/\r?\n/);
@@ -24,6 +25,15 @@ export class ReserveService {
 
             this.tileCount += parseInt(data[1], 10);
         });
+    }
+
+    serverReserveToTiles() {
+        this.tiles.clear();
+        for (const tile of Array.from(Object.keys(this.serverReserveData))) {
+            const clientTile: Tile = { letter: tile, points: LETTER_POINTS.get(tile) as number };
+            const reserveTile: ReserveTile = { tile: clientTile, count: this.serverReserveData.get(tile) as number };
+            this.tiles.set(tile[0], reserveTile);
+        }
     }
 
     isExchangePossible(amount: number) {

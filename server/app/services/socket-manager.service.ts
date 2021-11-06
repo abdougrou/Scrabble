@@ -1,3 +1,4 @@
+import { Player } from '@app/classes/player';
 import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
 import {
     ExchangeLettersMessage,
@@ -5,11 +6,14 @@ import {
     LeaveLobbyMessage,
     NormalChatMessage,
     PlaceLettersMessage,
+    PlayerData,
     SetConfigMessage,
     ShowReserveMessage,
     SkipTurnMessage,
     SocketEvent,
     SwitchPlayersMessage,
+    UpdateGameManagerMessage,
+    UpdateMessage,
 } from '@common/socket-messages';
 import * as http from 'http';
 import * as io from 'socket.io';
@@ -139,6 +143,21 @@ export class SocketManagerService {
 
             socket.on(SocketEvent.playerLeaveLobby, (message: LeaveLobbyMessage) => {
                 this.lobbyService.playerLeaveLobby(message.playerName, message.lobbyKey);
+            });
+
+            socket.on(SocketEvent.update, (message: UpdateMessage) => {
+                const gameManager = this.lobbyService.getLobby(message.lobbyKey)?.gameManager;
+                const serverPlayers: PlayerData[] = [];
+                for (const serverPlayer of gameManager?.players as Player[]) {
+                    const player: PlayerData = { name: serverPlayer.name, score: serverPlayer.score, easel: serverPlayer.easel.toString() };
+                    serverPlayers.push(player);
+                }
+                this.io.to(message.lobbyKey).emit(SocketEvent.update, {
+                    players: serverPlayers,
+                    reserveData: gameManager?.reserve.data,
+                    reserveCount: gameManager?.reserve.size,
+                    boardData: gameManager?.board.data,
+                } as UpdateGameManagerMessage);
             });
 
             socket.on('disconnection', () => {

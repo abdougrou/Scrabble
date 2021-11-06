@@ -1,9 +1,11 @@
 import { Component, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Router } from '@angular/router';
 import { Player } from '@app/classes/player';
 import { EaselTile, TileState } from '@app/classes/tile';
 import { KEYBOARD_EVENT_RECEIVER, MouseButton } from '@app/constants';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { MouseManagerService } from '@app/services/mouse-manager.service';
+import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-manager.service';
 import { PlayerService } from '@app/services/player.service';
 import { ReserveService } from '@app/services/reserve.service';
 
@@ -29,14 +31,24 @@ export class EaselComponent implements OnChanges {
         private mouseManager: MouseManagerService,
         private reserve: ReserveService,
         private gameManager: GameManagerService,
+        private multiGameManager: MultiplayerGameManagerService,
+        private router: Router,
     ) {
-        this.tiles = this.playerService.mainPlayer.easel.tiles;
+        if (this.router.url === '/multiplayer-game') {
+            this.players = this.multiGameManager.players;
+            if (this.multiGameManager.getMainPlayer().easel.tiles) this.tiles = this.multiGameManager.getMainPlayer().easel.tiles;
+            this.mainPlayerName = this.multiGameManager.getMainPlayer().name;
+        } else {
+            this.mainPlayerName = this.gameManager.mainPlayerName;
+            this.tiles = this.playerService.mainPlayer.easel.tiles;
+            this.players = this.playerService.players;
+        }
+
         if (this.keyboardReceiver !== KEYBOARD_EVENT_RECEIVER.easel)
-            this.tiles.forEach((easelTile) => {
+            for (const easelTile of this.tiles) {
                 easelTile.state = TileState.None;
-            });
-        this.players = this.playerService.players;
-        this.mainPlayerName = this.gameManager.mainPlayerName;
+            }
+
         this.numTilesReserve = this.reserve.tileCount;
     }
 
@@ -84,19 +96,19 @@ export class EaselComponent implements OnChanges {
     }
 
     resetTileState() {
-        this.tiles.forEach((easelTile) => {
+        for (const easelTile of this.tiles) {
             easelTile.state = TileState.None;
-        });
+        }
         this.exchangableTiles = false;
     }
 
     containsTile(tileLetter: string): boolean {
         let found = false;
-        this.tiles.forEach((easelTile) => {
+        for (const easelTile of this.tiles) {
             if (easelTile.tile.letter === tileLetter) {
                 found = true;
             }
-        });
+        }
         return found;
     }
 
@@ -106,16 +118,16 @@ export class EaselComponent implements OnChanges {
         let indexOfManipulatedTile = NOT_PRESENT;
         let indexOfNextOccurance = NOT_PRESENT;
         // We try to find the first occurance of the tile with the selected letter
-        this.tiles.forEach((easelTile) => {
+        for (const easelTile of this.tiles) {
             if (easelTile.tile.letter === letter && indexOfFirstOccuredTile === NOT_PRESENT) {
                 indexOfFirstOccuredTile = this.tiles.indexOf(easelTile);
             }
-        });
+        }
         // We try to see if there is a tile already in manipulation state
-        this.tiles.forEach((easelTile) => {
+        for (const easelTile of this.tiles) {
             if (easelTile.state === TileState.Manipulation && indexOfManipulatedTile === NOT_PRESENT)
                 indexOfManipulatedTile = this.tiles.indexOf(easelTile);
-        });
+        }
         // we take the first occurance if there is no manipulated tile already
         // or if the manipulated tile is not the same as the one we are looking for
         if (
@@ -124,11 +136,11 @@ export class EaselComponent implements OnChanges {
         ) {
             return this.tiles[indexOfFirstOccuredTile];
         } else {
-            this.tiles.forEach((easelTile) => {
+            for (const easelTile of this.tiles) {
                 if (easelTile.tile.letter === letter && indexOfNextOccurance === NOT_PRESENT) {
                     indexOfNextOccurance = this.tiles.indexOf(easelTile, indexOfManipulatedTile + 1);
                 }
-            });
+            }
             if (indexOfNextOccurance === NOT_PRESENT) return this.tiles[indexOfFirstOccuredTile];
             else return this.tiles[indexOfNextOccurance];
         }
@@ -144,23 +156,23 @@ export class EaselComponent implements OnChanges {
             this.exchangableTiles = true;
         }
         let exchangeable = false;
-        this.tiles.forEach((easelTile) => {
+        for (const easelTile of this.tiles) {
             if (easelTile.state === TileState.Exchange) exchangeable = true;
-        });
+        }
         this.exchangableTiles = exchangeable;
     }
 
     selectTileForManipulation(tile: EaselTile) {
-        this.tiles.forEach((easelTile) => {
+        for (const easelTile of this.tiles) {
             easelTile.state = TileState.None;
-        });
+        }
         tile.state = TileState.Manipulation;
     }
 
     selectTileForExchange(tile: EaselTile) {
-        this.tiles.forEach((easelTile) => {
+        for (const easelTile of this.tiles) {
             if (easelTile.state === TileState.Manipulation) easelTile.state = TileState.None;
-        });
+        }
         switch (tile.state) {
             case TileState.Exchange:
                 tile.state = TileState.None;
@@ -175,11 +187,11 @@ export class EaselComponent implements OnChanges {
     moveLeft() {
         const NOT_PRESENT = -1;
         let indexOfManipulatedTile = NOT_PRESENT;
-        this.tiles.forEach((easelTile) => {
+        for (const easelTile of this.tiles) {
             if (easelTile.state === TileState.Manipulation && indexOfManipulatedTile === NOT_PRESENT) {
                 indexOfManipulatedTile = this.tiles.indexOf(easelTile);
             }
-        });
+        }
         if (indexOfManipulatedTile !== NOT_PRESENT) {
             if (indexOfManipulatedTile !== 0) {
                 const tempTile: EaselTile = this.tiles[indexOfManipulatedTile - 1];
@@ -196,11 +208,12 @@ export class EaselComponent implements OnChanges {
     moveRight() {
         const NOT_PRESENT = -1;
         let indexOfManipulatedTile = NOT_PRESENT;
-        this.tiles.forEach((easelTile) => {
+        for (const easelTile of this.tiles) {
             if (easelTile.state === TileState.Manipulation && indexOfManipulatedTile === NOT_PRESENT) {
                 indexOfManipulatedTile = this.tiles.indexOf(easelTile);
             }
-        });
+        }
+
         if (indexOfManipulatedTile !== NOT_PRESENT) {
             if (indexOfManipulatedTile !== this.tiles.length - 1) {
                 const tempTile: EaselTile = this.tiles[indexOfManipulatedTile + 1];
@@ -218,10 +231,14 @@ export class EaselComponent implements OnChanges {
 
     exchangeTiles() {
         let tilesToExchange = '';
-        this.tiles.forEach((easelTile) => {
+        for (const easelTile of this.tiles) {
             if (easelTile.state === TileState.Exchange) tilesToExchange += easelTile.tile.letter;
-        });
-        this.gameManager.exchangeTiles(tilesToExchange, this.playerService.getPlayerByName(this.mainPlayerName));
+        }
+        if (this.router.url === '/multiplayer-game') {
+            this.multiGameManager.exchangeLetters(tilesToExchange, this.multiGameManager.getMainPlayer());
+        } else {
+            this.gameManager.exchangeTiles(tilesToExchange, this.playerService.getPlayerByName(this.mainPlayerName));
+        }
         this.resetTileState();
     }
 

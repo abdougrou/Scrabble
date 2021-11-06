@@ -1,8 +1,11 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Easel } from '@app/classes/easel';
 import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
+import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
+import { LETTER_POINTS } from '@app/constants';
 import { LobbyConfig } from '@common/lobby-config';
 import {
     ExchangeLettersMessage,
@@ -15,6 +18,7 @@ import {
     SkipTurnMessage,
     SocketEvent,
     SwitchPlayersMessage,
+    UpdateGameManagerMessage,
     UpdateMessage,
 } from '@common/socket-messages';
 import { BehaviorSubject, Observable, of } from 'rxjs';
@@ -58,6 +62,8 @@ export class CommunicationService {
         this.lobbyKey = key;
         this.playerName = playerName;
         this.socket.emit(SocketEvent.playerJoinLobby, { lobbyKey: key, playerName } as JoinLobbyMessage);
+        this.update();
+        console.log('Players : ', this.gameManager.players);
     }
 
     setConfig(config: LobbyConfig, guestName: string) {
@@ -86,11 +92,22 @@ export class CommunicationService {
 
     update() {
         this.socket.emit(SocketEvent.update, { lobbyKey: this.lobbyKey } as UpdateMessage);
-        this.socket.on(SocketEvent.update, (gameManager) => {
-            this.gameManager.players = gameManager.players;
-            this.gameManager.reserve = gameManager.reserve;
-            this.gameManager.board = gameManager.board;
-            this.gameManager.turnDurationLeft = gameManager.turnDurationLeft;
+        this.socket.on(SocketEvent.update, (gameManager: UpdateGameManagerMessage) => {
+            let playerIndex = 0;
+            for (const serverPlayer of gameManager.players) {
+                const tiles: Tile[] = [];
+                for (const tileLetter of serverPlayer.easel.split('')) {
+                    tiles.push({ letter: tileLetter, points: LETTER_POINTS.get(tileLetter) as number });
+                }
+                const player: Player = { name: serverPlayer.name, score: serverPlayer.score, easel: new Easel(tiles) };
+                this.gameManager.players[playerIndex] = player;
+                playerIndex++;
+            }
+            this.gameManager.reserve.serverReserveData = gameManager.reserveData;
+            this.gameManager.reserve.tileCount = gameManager.reserveCount;
+            this.gameManager.reserve.serverReserveToTiles();
+            this.gameManager.board.multiplayerBoard = gameManager.boardData;
+            this.gameManager.board.multiplayerBoardToBoard();
         });
     }
 
@@ -124,7 +141,6 @@ export class CommunicationService {
         this.socket.on(SocketEvent.chatMessage, (msg) => {
             this.serverMessage.next({ user: msg.split(':')[0].trim(), body: msg.split(':')[1] });
         });
-        this.update();
     }
 
     leaveLobby() {

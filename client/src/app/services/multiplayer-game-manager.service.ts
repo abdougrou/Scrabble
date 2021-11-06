@@ -11,13 +11,13 @@ import { ReserveService } from './reserve.service';
     providedIn: 'root',
 })
 export class MultiplayerGameManagerService {
-    players: Player[];
+    players: Player[] = [];
     turnDuration: number;
-    turnDurationLeft: number;
-    randomPlayerNameIndex: number;
-    isFirstTurn: boolean = true;
+    turnDurationLeft: number = 0;
     mainPlayerName: string;
-    enemyPlayerName: string;
+    isFirstTurn: boolean = true;
+    hostName: string;
+    guestName: string;
     isEnded: boolean;
     endGameMessage: string = '';
     debug: boolean = false;
@@ -31,8 +31,8 @@ export class MultiplayerGameManagerService {
     }
 
     initialize(lobbyConfig: LobbyConfig, playerName: string) {
-        this.mainPlayerName = lobbyConfig.host;
-        this.enemyPlayerName = playerName;
+        this.hostName = lobbyConfig.host;
+        this.guestName = playerName;
         this.turnDuration = lobbyConfig.turnDuration;
         this.turnDurationLeft = lobbyConfig.turnDuration;
         this.isEnded = false;
@@ -40,8 +40,14 @@ export class MultiplayerGameManagerService {
         // this.startTimer();
     }
 
+    getMainPlayer(): Player {
+        if (this.players[0].name === this.mainPlayerName) return this.players[0];
+        else return this.players[1];
+    }
+
     update() {
         this.communication.update();
+        this.gridService.drawBoard();
     }
 
     // startTimer() {

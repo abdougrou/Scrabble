@@ -74,3 +74,15 @@ export interface NormalChatMessage {
     playerName: string;
     message: string;
 }
+export interface PlayerData {
+    name: string;
+    score: number;
+    easel: string;
+}
+export interface UpdateGameManagerMessage {
+    players: PlayerData[];
+    reserveData: Map<string, number>;
+    reserveCount: number;
+    boardData: (string | null)[][];
+    // turnDurationLeft: number;
+}

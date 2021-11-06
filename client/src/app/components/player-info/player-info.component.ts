@@ -1,9 +1,11 @@
 import { Component, DoCheck, OnDestroy } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { Player } from '@app/classes/player';
 import { MAX_FONT_MULTIPLIER, MIN_FONT_MULTIPLIER } from '@app/constants';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { GridService } from '@app/services/grid.service';
+import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-manager.service';
 import { PlayerService } from '@app/services/player.service';
 // eslint-disable-next-line no-restricted-imports
 import { AbandonPageComponent } from '../abandon-page/abandon-page.component';
@@ -22,19 +24,28 @@ export class PlayerInfoComponent implements DoCheck, OnDestroy {
     constructor(
         private playerService: PlayerService,
         private gameManager: GameManagerService,
+        private multiplayerGameManager: MultiplayerGameManagerService,
+        private router: Router,
         private gridService: GridService,
         public matDialog: MatDialog,
     ) {
-        this.players = this.playerService.players;
-        this.mainPlayerName = this.gameManager.mainPlayerName;
-        this.isEnded = this.gameManager.isEnded;
+        if (this.router.url === '/multiplayer-game') {
+            this.players = this.multiplayerGameManager.players;
+            this.mainPlayerName = this.multiplayerGameManager.getMainPlayer().name;
+            this.isEnded = false;
+        } else {
+            this.players = this.playerService.players;
+            this.mainPlayerName = this.gameManager.mainPlayerName;
+            this.isEnded = this.gameManager.isEnded;
+        }
     }
 
     ngOnDestroy(): void {
         this.quit();
     }
     get timer() {
-        return this.gameManager.currentTurnDurationLeft;
+        if (this.router.url === '/multiplayer-game') return this.multiplayerGameManager.turnDurationLeft;
+        else return this.gameManager.currentTurnDurationLeft;
     }
 
     get winner() {
@@ -42,13 +53,16 @@ export class PlayerInfoComponent implements DoCheck, OnDestroy {
     }
 
     get reserveCount() {
-        return this.gameManager.reserveCount;
+        if (this.router.url === '/multiplayer-game') return this.multiplayerGameManager.reserve.tileCount;
+        else return this.gameManager.reserveCount;
     }
 
     ngDoCheck() {
         if (this.players === undefined) return;
         if (this.players[0].easel.count === 0 || this.players[1].easel.count === 0) {
-            if (this.gameManager.reserveCount === 0) this.endGame();
+            if (this.router.url !== '/multiplayer-game') {
+                if (this.gameManager.reserveCount === 0) this.endGame();
+            }
         }
     }
 
@@ -70,16 +84,19 @@ export class PlayerInfoComponent implements DoCheck, OnDestroy {
     }
 
     skipTurn() {
-        this.gameManager.buttonSkipTurn();
+        if (this.router.url === '/multiplayer-game') this.multiplayerGameManager.skipTurn();
+        else this.gameManager.buttonSkipTurn();
     }
 
     endGame() {
-        this.gameManager.endGame();
-        this.isEnded = this.gameManager.isEnded;
+        if (this.router.url !== '/multiplayer-game') {
+            this.gameManager.endGame();
+            this.isEnded = this.gameManager.isEnded;
+        }
     }
 
     quit() {
-        this.gameManager.reset();
+        if (this.router.url !== '/multiplayer-game') this.gameManager.reset();
     }
 
     openAbandonPage() {
