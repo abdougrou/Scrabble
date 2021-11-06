@@ -52,28 +52,29 @@ export class EaselComponent implements OnChanges {
     @HostListener('document:keydown', ['$event'])
     buttonDetect(event: KeyboardEvent) {
         if (this.keyboardReceiver === KEYBOARD_EVENT_RECEIVER.easel) {
-            this.buttonPressed = event.key;
             if (event.shiftKey && event.key === '*') {
                 this.buttonPressed = '*';
             }
-            if (event.key === 'ArrowRight') this.moveRight();
-            else if (event.key === 'ArrowLeft') this.moveLeft();
+            if (event.key === 'ArrowRight') {
+                this.moveRight();
+            } else if (event.key === 'ArrowLeft') this.moveLeft();
             else {
+                this.buttonPressed = event.key;
                 if (this.containsTile(event.key.toLowerCase())) {
                     this.selectTileForManipulation(this.tileKeyboardClicked(event.key.toLowerCase()));
-                } else if (!event.shiftKey) {
-                    this.tiles.forEach((easelTile) => {
-                        if (easelTile.state === TileState.Manipulation) easelTile.state = TileState.None;
-                    });
+                } else if (!event.shiftKey && !event.ctrlKey) {
+                    this.resetTileState();
                 }
             }
         }
     }
 
-    @HostListener('wheel', ['$event'])
+    @HostListener('document:wheel', ['$event'])
     scroll(event: WheelEvent) {
-        if (event.deltaY < 0) this.moveLeft();
-        else if (event.deltaY > 0) this.moveRight();
+        if (this.keyboardReceiver === KEYBOARD_EVENT_RECEIVER.easel) {
+            if (event.deltaY < 0) this.moveLeft();
+            else if (event.deltaY > 0) this.moveRight();
+        }
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -154,16 +155,6 @@ export class EaselComponent implements OnChanges {
             easelTile.state = TileState.None;
         });
         tile.state = TileState.Manipulation;
-
-        // // this code follows the issues description
-        // case TileState.Exchange:
-        //     break;
-        // case TileState.None:
-        //     this.tiles.forEach((easelTile) => {
-        //         if (easelTile.state === TileState.Manipulation) easelTile.state = TileState.None;
-        //     });
-        //     tile.state = TileState.Manipulation;
-        //     break;
     }
 
     selectTileForExchange(tile: EaselTile) {
@@ -174,7 +165,6 @@ export class EaselComponent implements OnChanges {
             case TileState.Exchange:
                 tile.state = TileState.None;
                 break;
-            // if we want to respect the issues instead of the project description PDF "scrabble", we add a break in the manipulation case;
             case TileState.Manipulation:
             case TileState.None:
                 tile.state = TileState.Exchange;
@@ -191,10 +181,15 @@ export class EaselComponent implements OnChanges {
             }
         });
         if (indexOfManipulatedTile !== NOT_PRESENT) {
-            const prevIndex = indexOfManipulatedTile !== 0 ? indexOfManipulatedTile - 1 : this.tiles.length - 1;
-            const prevTile: EaselTile = this.tiles[prevIndex];
-            this.tiles[prevIndex] = this.tiles[indexOfManipulatedTile];
-            this.tiles[indexOfManipulatedTile] = prevTile;
+            if (indexOfManipulatedTile !== 0) {
+                const tempTile: EaselTile = this.tiles[indexOfManipulatedTile - 1];
+                this.tiles[indexOfManipulatedTile - 1] = this.tiles[indexOfManipulatedTile];
+                this.tiles[indexOfManipulatedTile] = tempTile;
+            } else {
+                const tempTile: EaselTile = this.tiles[indexOfManipulatedTile];
+                this.tiles.shift();
+                this.tiles.push(tempTile);
+            }
         }
     }
 
@@ -207,10 +202,17 @@ export class EaselComponent implements OnChanges {
             }
         });
         if (indexOfManipulatedTile !== NOT_PRESENT) {
-            const nextIndex = indexOfManipulatedTile !== this.tiles.length - 1 ? indexOfManipulatedTile + 1 : 0;
-            const nextTile: EaselTile = this.tiles[nextIndex];
-            this.tiles[nextIndex] = this.tiles[indexOfManipulatedTile];
-            this.tiles[indexOfManipulatedTile] = nextTile;
+            if (indexOfManipulatedTile !== this.tiles.length - 1) {
+                const tempTile: EaselTile = this.tiles[indexOfManipulatedTile + 1];
+                this.tiles[indexOfManipulatedTile + 1] = this.tiles[indexOfManipulatedTile];
+                this.tiles[indexOfManipulatedTile] = tempTile;
+            } else {
+                const tempTile: EaselTile = this.tiles[indexOfManipulatedTile];
+                this.tiles.pop();
+                this.tiles.reverse();
+                this.tiles.push(tempTile);
+                this.tiles.reverse();
+            }
         }
     }
 
