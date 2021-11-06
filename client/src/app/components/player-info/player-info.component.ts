@@ -89,12 +89,14 @@ export class PlayerInfoComponent implements DoCheck, OnDestroy {
     }
 
     endGame() {
-        this.gameManager.endGame();
-        this.isEnded = this.gameManager.isEnded;
+        if (this.router.url !== '/multiplayer-game') {
+            this.gameManager.endGame();
+            this.isEnded = this.gameManager.isEnded;
+        }
     }
 
     quit() {
-        this.gameManager.reset();
+        if (this.router.url !== '/multiplayer-game') this.gameManager.reset();
     }
 
     openAbandonPage() {

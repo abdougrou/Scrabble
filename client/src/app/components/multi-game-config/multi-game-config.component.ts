@@ -39,7 +39,7 @@ export class MultiGameConfigComponent {
         this.data.config.turnDuration = this.gameConfigForm.get('duration')?.value;
         this.data.config.bonusEnabled = this.gameConfigForm.get('bonusEnabled')?.value;
         this.data.config.dictionary = this.gameConfigForm.get('dictionary')?.value;
-        this.communication.createLobby(this.data.config);
+        console.log('Comm createLobby key: ', this.communication.createLobby(this.data.config));
         this.communication.setConfig(this.data.config, 'default');
         this.openWaitingPopup()
             .afterClosed()
@@ -54,6 +54,7 @@ export class MultiGameConfigComponent {
             height: DIALOG_HEIGHT,
             width: DIALOG_WIDTH,
             disableClose: true,
+            data: { config: this.data.config },
         });
     }
 

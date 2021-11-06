@@ -89,13 +89,15 @@ export class CommunicationService {
     update() {
         this.socket.emit(SocketEvent.update, { lobbyKey: this.lobbyKey } as UpdateMessage);
         this.socket.on(SocketEvent.update, (gameManager: UpdateGameManagerMessage) => {
+            let playerIndex = 0;
             for (const serverPlayer of gameManager.players) {
                 const tiles: Tile[] = [];
                 for (const tileLetter of serverPlayer.easel.split('')) {
                     tiles.push({ letter: tileLetter, points: LETTER_POINTS.get(tileLetter) as number });
                 }
                 const player: Player = { name: serverPlayer.name, score: serverPlayer.score, easel: new Easel(tiles) };
-                this.gameManager.players.push(player);
+                this.gameManager.players[playerIndex] = player;
+                playerIndex++;
             }
             this.gameManager.reserve.serverReserveData = gameManager.reserveData;
             this.gameManager.reserve.tileCount = gameManager.reserveCount;

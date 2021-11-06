@@ -1,5 +1,5 @@
-import { Component, DoCheck } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { Component, DoCheck, Inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { CommunicationService } from '@app/services/communication.service';
 import { GameManagerService } from '@app/services/game-manager.service';
@@ -14,6 +14,7 @@ export class WaitingPopupComponent implements DoCheck {
     result: { config: LobbyConfig; playerName: string; mainPlayerName: string };
     constructor(
         public dialogRef: MatDialogRef<WaitingPopupComponent>,
+        @Inject(MAT_DIALOG_DATA) public data: { config: LobbyConfig },
         public communication: CommunicationService,
         public gameManager: GameManagerService,
         public router: Router,
@@ -22,7 +23,7 @@ export class WaitingPopupComponent implements DoCheck {
     ngDoCheck() {
         if (this.communication.started) {
             this.result = {
-                config: this.communication.config,
+                config: this.data.config,
                 playerName: this.communication.guestName,
                 mainPlayerName: this.communication.config.host,
             };
