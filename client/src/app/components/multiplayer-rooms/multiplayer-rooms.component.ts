@@ -31,7 +31,7 @@ export class MultiplayerRoomsComponent {
             .afterClosed()
             .subscribe((result) => {
                 if (!result) return;
-                this.dialogRef.close(true);
+                this.dialogRef.close(result);
             });
 
         const delay = 250;
