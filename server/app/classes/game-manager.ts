@@ -18,6 +18,7 @@ export class GameManager {
     constructor() {
         this.players = [];
         this.reserve = new Reserve(CLASSIC_RESERVE);
+        this.board = new Board();
         this.moveGenerator = new MoveGenerator(new Trie()); // TODO Fill trie with words
         this.board = new Board();
         this.board.initialize(false);
@@ -33,6 +34,7 @@ export class GameManager {
         if (this.players.length > 1) return false;
         else if (this.players[0]?.name === name) return false;
         this.players.push({ name, easel: new Easel(), score: 0 });
+        console.log(this.players[0]?.easel.letters);
         return true;
     }
 
