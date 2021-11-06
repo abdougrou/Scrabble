@@ -96,7 +96,7 @@ export class CommunicationService {
             let playerIndex = 0;
             for (const serverPlayer of gameManager.players) {
                 const tiles: Tile[] = [];
-                for (const tileLetter of serverPlayer.easel.split('')) {
+                for (const tileLetter of serverPlayer.easel.split(',')) {
                     tiles.push({ letter: tileLetter, points: LETTER_POINTS.get(tileLetter) as number });
                 }
                 const player: Player = { name: serverPlayer.name, score: serverPlayer.score, easel: new Easel(tiles) };

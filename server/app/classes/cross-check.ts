@@ -86,7 +86,7 @@ export class CrossCheck {
         const crossCheck = new CrossCheck();
         const transposedBoard = transpose(board);
         const rowLetters = this.crossCheckOneDimension(board[coord.x], coord.y, dictionary);
-        const colLetters = this.crossCheckOneDimension(transposedBoard[coord.y], coord.x, dictionary);
+        const colLetters = this.crossCheckOneDimension(transposedBoard[coord.y] as (string | null)[], coord.x, dictionary);
         const letters =
             rowLetters.length === 0
                 ? colLetters

@@ -49,7 +49,7 @@ export const getStringCombinations = (str: string, length: number): string[] => 
  * @param arr 2d array to transpose
  * @returns a transposed copy of the current board state
  */
-export const transpose = (arr: (string | null)[][]): (string | null)[][] => {
+export const transpose = (arr: unknown[][]): unknown[][] => {
     return arr[0].map((_, colIndex) => arr.map((row) => row[colIndex]));
 };
 

@@ -1,6 +1,7 @@
 import { CLASSIC_RESERVE } from '@app/constants';
 import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
 import { Board } from './board';
+import { transpose } from './board-utils';
 import { Easel } from './easel';
 import { Move, MoveGenerator } from './move-generator';
 import { Player } from './player';
@@ -19,6 +20,8 @@ export class GameManager {
         this.reserve = new Reserve(CLASSIC_RESERVE);
         this.board = new Board();
         this.moveGenerator = new MoveGenerator(new Trie()); // TODO Fill trie with words
+        this.board = new Board();
+        this.board.initialize(false);
     }
 
     /**
@@ -30,8 +33,8 @@ export class GameManager {
     addPlayer(name: string): boolean {
         if (this.players.length > 1) return false;
         else if (this.players[0]?.name === name) return false;
-        this.players.push({ name, easel: new Easel(), score: 0 });
-        console.log(this.players[0]?.easel.letters);
+        const startingLetterCount = 7;
+        this.players.push({ name, easel: new Easel(this.reserve.getRandomLetters(startingLetterCount)), score: 0 });
         return true;
     }
 
@@ -89,7 +92,6 @@ export class GameManager {
      */
     placeLetters(player: Player, word: string, coord: Vec2, across: boolean): PlaceResult {
         if (player.name !== this.players[0].name) return PlaceResult.NotCurrentPlayer;
-        // check if letters in easel are enough for the word
 
         const move: Move | undefined = this.moveGenerator.legalMoves.find(
             (_move) => _move.word === word && _move.coord === coord && _move.across === across,
@@ -97,17 +99,28 @@ export class GameManager {
         if (!move) return PlaceResult.NotValid;
 
         const nextCoord = coord;
+        let points = 0;
+        const row: (string | null)[] = (move.across ? this.board.data : transpose(this.board.data))[move.across ? move.coord.x : move.coord.y] as (
+            | string
+            | null
+        )[];
+        const pointRow: number[] = (move.across ? this.board.pointGrid : transpose(this.board.pointGrid))[
+            move.across ? move.coord.x : move.coord.y
+        ] as number[];
         for (const k of word) {
             if (!this.board.getLetter(nextCoord)) {
                 this.board.setLetter(nextCoord, k);
                 player.easel.getLetters([k]);
             }
+            points += this.moveGenerator.calculateCrossSum(this.board.data, coord, move.across);
 
             if (across) nextCoord.y++;
             else nextCoord.x++;
         }
+        points += this.moveGenerator.calculateWordPoints(move, row, pointRow);
 
         // place the word on the board, recalculate anchors and cross checks
+        player.score += points;
         return PlaceResult.Success;
     }
 

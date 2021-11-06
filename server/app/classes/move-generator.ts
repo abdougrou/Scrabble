@@ -1,8 +1,14 @@
+import { CLASSIC_RESERVE } from '@app/constants';
 import { Anchor } from './anchor';
-import { coordToKey } from './board-utils';
+import { coordToKey, transpose } from './board-utils';
 import { CrossCheck } from './cross-check';
 import { Trie, TrieNode } from './trie';
 import { Vec2 } from './vec2';
+
+const LIGHT_BLUE_MULTIPLIER = 2;
+const DARK_BLUE_MULTIPLIER = 3;
+const PINK_MULTIPLIER = 2;
+const RED_MULTIPLIER = 3;
 
 export interface Move {
     word: string;
@@ -15,9 +21,16 @@ export class MoveGenerator {
     crossChecks: Map<string, CrossCheck> = new Map();
     dictionary: Trie;
     legalMoves: Move[] = [];
+    pointMap: Map<string, number> = new Map();
 
     constructor(dictionary: Trie) {
         this.dictionary = dictionary;
+
+        const lettersData: string[] = CLASSIC_RESERVE.split(/\r?\n/);
+        lettersData.forEach((letterData) => {
+            const data = letterData.split(',');
+            this.pointMap.set(data[0], parseInt(data[2], 10));
+        });
     }
 
     /**
@@ -33,6 +46,32 @@ export class MoveGenerator {
             const crossCheck = CrossCheck.crossCheck(board, coord, this.dictionary);
             this.crossChecks.set(coordToKey(coord), crossCheck);
         });
+    }
+
+    calculateCrossSum(board: (string | null)[][], coord: Vec2, across: boolean): number {
+        const row = across ? board[coord.x] : (transpose(board)[coord.y] as (string | null)[]);
+        const coord1D = across ? coord.y : coord.x;
+        return this.calculateCrossSumOneDimension(row, coord1D);
+    }
+
+    calculateCrossSumOneDimension(row: (string | null)[], coord: number): number {
+        let points = 0;
+        if (row[coord - 1]) {
+            let i = coord - 1;
+            while (row[i]) {
+                points += this.pointMap.get(row[i] as string) as number;
+                i--;
+            }
+        }
+        if (row[coord + 1]) {
+            let i = coord + 1;
+            while (row[i]) {
+                points += this.pointMap.get(row[i] as string) as number;
+                i++;
+            }
+        }
+
+        return points;
     }
 
     /**
@@ -121,5 +160,52 @@ export class MoveGenerator {
     legalMove(word: string, square: Vec2, across: boolean) {
         const coord = across ? { x: square.x, y: square.y - word.length } : { x: square.x - word.length, y: square.y };
         this.legalMoves.push({ word, coord, across });
+    }
+
+    calculateWordPoints(move: Move, row: (string | null)[], pointRow: number[]): number {
+        let points = 0;
+        let numNewPinkTiles = 0;
+        let numNewRedTiles = 0;
+        const blank = 0;
+        const lightBlue = 1;
+        const darkBlue = 2;
+        const pink = 3;
+        const red = 4;
+
+        for (let i = 0; i < move.word.length; i++) {
+            const coord = i + (move.across ? move.coord.y : move.coord.x);
+            const letter = row[coord];
+            if (letter) {
+                points += this.pointMap.get(letter) as number;
+            } else {
+                const multiplier = pointRow[coord];
+                switch (multiplier) {
+                    case blank:
+                        points += pointRow[coord];
+                        break;
+                    case lightBlue:
+                        points += LIGHT_BLUE_MULTIPLIER * pointRow[coord];
+                        break;
+                    case darkBlue:
+                        points += DARK_BLUE_MULTIPLIER * pointRow[coord];
+                        break;
+                    case pink:
+                        points += pointRow[coord];
+                        numNewPinkTiles++;
+                        break;
+                    case red:
+                        points += pointRow[coord];
+                        numNewRedTiles++;
+                        break;
+                }
+            }
+        }
+        if (numNewPinkTiles !== 0) {
+            points *= Math.pow(PINK_MULTIPLIER, numNewPinkTiles);
+        }
+        if (numNewRedTiles !== 0) {
+            points *= Math.pow(RED_MULTIPLIER, numNewRedTiles);
+        }
+        return points;
     }
 }
