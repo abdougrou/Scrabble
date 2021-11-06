@@ -33,8 +33,8 @@ export class GameManager {
     addPlayer(name: string): boolean {
         if (this.players.length > 1) return false;
         else if (this.players[0]?.name === name) return false;
-        this.players.push({ name, easel: new Easel(), score: 0 });
-        console.log(this.players[0]?.easel.letters);
+        const startingLetterCount = 7;
+        this.players.push({ name, easel: new Easel(this.reserve.getRandomLetters(startingLetterCount)), score: 0 });
         return true;
     }
 

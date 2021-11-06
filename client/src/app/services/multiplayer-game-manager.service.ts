@@ -23,7 +23,7 @@ export class MultiplayerGameManagerService {
     debug: boolean = false;
     constructor(
         private gridService: GridService,
-        private communication: CommunicationService,
+        public communication: CommunicationService,
         public board: BoardService,
         public reserve: ReserveService,
     ) {
