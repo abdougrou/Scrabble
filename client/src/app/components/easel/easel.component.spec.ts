@@ -1,5 +1,6 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
 import { EaselTile, TileState } from '@app/classes/tile';
@@ -26,7 +27,7 @@ describe('EaselComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
+            imports: [HttpClientTestingModule, RouterTestingModule],
             declarations: [EaselComponent],
             providers: [
                 { provide: PlayerService, useValue: playerService },

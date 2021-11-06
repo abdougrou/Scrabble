@@ -1,5 +1,6 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 import { MultiplayerGamePageComponent } from './multiplayer-game-page.component';
 
 describe('MultiplayerGamePageComponent', () => {
@@ -8,7 +9,7 @@ describe('MultiplayerGamePageComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
+            imports: [HttpClientTestingModule, RouterTestingModule],
             declarations: [MultiplayerGamePageComponent],
         }).compileComponents();
     });

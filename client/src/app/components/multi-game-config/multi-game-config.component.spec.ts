@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormBuilder } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MultiGameConfigComponent } from './multi-game-config.component';
 
@@ -16,10 +17,7 @@ describe('MultiGameConfigComponent', () => {
         await TestBed.configureTestingModule({
             imports: [MatDialogModule],
             declarations: [MultiGameConfigComponent],
-            providers: [
-                { provide: MatDialogRef, useValue: dialogMock },
-                { provide: MAT_DIALOG_DATA, useValue: {} },
-            ],
+            providers: [FormBuilder, { provide: MatDialogRef, useValue: dialogMock }, { provide: MAT_DIALOG_DATA, useValue: {} }],
         }).compileComponents();
     });
 

@@ -1,3 +1,4 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Easel } from '@app/classes/easel';
 import { Dictionary, GameMode } from '@app/classes/game-config';
@@ -57,6 +58,7 @@ describe('PlaceTilesService', () => {
     });
     beforeEach(() => {
         TestBed.configureTestingModule({
+            imports: [HttpClientTestingModule],
             providers: [
                 { provide: GridService, useValue: gridServiceMock },
                 { provide: BoardService, useValue: boardService },
