@@ -1,25 +1,34 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { FormBuilder } from '@angular/forms';
+import { MatDialogRef } from '@angular/material/dialog';
 import { MultiplayerJoinFormComponent } from './multiplayer-join-form.component';
 
 describe('MultiplayerJoinFormComponent', () => {
-  let component: MultiplayerJoinFormComponent;
-  let fixture: ComponentFixture<MultiplayerJoinFormComponent>;
+    let component: MultiplayerJoinFormComponent;
+    let fixture: ComponentFixture<MultiplayerJoinFormComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [ MultiplayerJoinFormComponent ]
-    })
-    .compileComponents();
-  });
+    const dialogMock = {
+        close: () => {
+            // Do nothing
+        },
+    };
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(MultiplayerJoinFormComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [HttpClientTestingModule],
+            declarations: [MultiplayerJoinFormComponent],
+            providers: [FormBuilder, { provide: MatDialogRef, useValue: dialogMock }],
+        }).compileComponents();
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    beforeEach(() => {
+        fixture = TestBed.createComponent(MultiplayerJoinFormComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
+
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 });

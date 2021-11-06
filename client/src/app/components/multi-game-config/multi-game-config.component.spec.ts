@@ -1,25 +1,35 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MultiGameConfigComponent } from './multi-game-config.component';
 
 describe('MultiGameConfigComponent', () => {
-  let component: MultiGameConfigComponent;
-  let fixture: ComponentFixture<MultiGameConfigComponent>;
+    let component: MultiGameConfigComponent;
+    let fixture: ComponentFixture<MultiGameConfigComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [ MultiGameConfigComponent ]
-    })
-    .compileComponents();
-  });
+    const dialogMock = {
+        close: () => {
+            // Do nothing
+        },
+    };
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(MultiGameConfigComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [MatDialogModule],
+            declarations: [MultiGameConfigComponent],
+            providers: [
+                { provide: MatDialogRef, useValue: dialogMock },
+                { provide: MAT_DIALOG_DATA, useValue: {} },
+            ],
+        }).compileComponents();
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    beforeEach(() => {
+        fixture = TestBed.createComponent(MultiGameConfigComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
+
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 });

@@ -55,7 +55,7 @@ describe('ChatBoxComponent', () => {
     it('should add the system message in red in the chat', () => {
         const parentMessage = document.getElementById('default-message');
         const systemMessage = { user: SYSTEM_NAME, body: 'system Message' } as ChatMessage;
-        const systemHtmlMessage = 'Système : system Message';
+        const systemHtmlMessage = 'system Message';
         component.showMessage(systemMessage);
         expect(parentMessage?.innerText).toEqual(systemHtmlMessage);
         expect(parentMessage?.innerHTML.split('color: ')[1].split(';')[0]).toEqual('rgb(207, 0, 15)');
