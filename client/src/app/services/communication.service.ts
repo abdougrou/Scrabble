@@ -1,11 +1,26 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ChatMessage } from '@app/classes/message';
-import { GameConfig, LobbyConfig } from '@common/lobby-config';
-import { JoinLobbyMessage, LeaveLobbyMessage, NormalChatMessage, SetConfigMessage, SocketEvent } from '@common/socket-messages';
-import { Observable, of } from 'rxjs';
+import { Player } from '@app/classes/player';
+import { Vec2 } from '@app/classes/vec2';
+import { LobbyConfig } from '@common/lobby-config';
+import {
+    ExchangeLettersMessage,
+    JoinLobbyMessage,
+    LeaveLobbyMessage,
+    NormalChatMessage,
+    PlaceLettersMessage,
+    SetConfigMessage,
+    ShowReserveMessage,
+    SkipTurnMessage,
+    SocketEvent,
+    SwitchPlayersMessage,
+    UpdateMessage,
+} from '@common/socket-messages';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import * as io from 'socket.io-client';
+import { MultiplayerGameManagerService } from './multiplayer-game-manager.service';
 
 @Injectable({
     providedIn: 'root',
@@ -14,7 +29,10 @@ export class CommunicationService {
     lobbyKey: string;
     playerName: string;
     started = false;
-    config: GameConfig;
+    config: LobbyConfig;
+    gameManager: MultiplayerGameManagerService;
+    guestName: string;
+    serverMessage: BehaviorSubject<ChatMessage> = new BehaviorSubject({ user: '', body: '' });
     private socket: io.Socket;
     private httpOptions = {
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -22,6 +40,10 @@ export class CommunicationService {
     };
     constructor(private readonly http: HttpClient) {
         this.socket = io.io('ws://localhost:3000');
+    }
+
+    setGameManager(gameManager: MultiplayerGameManagerService) {
+        this.gameManager = gameManager;
     }
 
     createLobby(config: LobbyConfig): string {
@@ -38,19 +60,71 @@ export class CommunicationService {
         this.socket.emit(SocketEvent.playerJoinLobby, { lobbyKey: key, playerName } as JoinLobbyMessage);
     }
 
-    setConfig(config: GameConfig) {
+    setConfig(config: LobbyConfig, guestName: string) {
         // console logs to debug
         // eslint-disable-next-line no-console
         console.log('setConfig Data: ', config);
-        this.socket.emit(SocketEvent.setConfig, { lobbyKey: this.lobbyKey, config } as SetConfigMessage);
-        this.socket.on('start game', (gameConfig) => {
+        config.key = this.lobbyKey;
+        this.socket.emit(SocketEvent.setConfig, { lobbyKey: this.lobbyKey, config, guest: guestName } as SetConfigMessage);
+        this.socket.on('start game', (message: SetConfigMessage) => {
             // eslint-disable-next-line no-console
             console.log('Server: game started');
             this.started = true;
-            this.config = gameConfig;
+            this.config = message.config;
+            this.guestName = message.guest;
             // eslint-disable-next-line no-console
             console.log(this.config);
         });
+    }
+
+    setPlayers() {
+        this.update();
+    }
+
+    // TODO
+    // startTimer() {}
+
+    update() {
+        this.socket.emit(SocketEvent.update, { lobbyKey: this.lobbyKey } as UpdateMessage);
+        this.socket.on(SocketEvent.update, (gameManager) => {
+            this.gameManager.players = gameManager.players;
+            this.gameManager.reserve = gameManager.reserve;
+            this.gameManager.board = gameManager.board;
+            this.gameManager.turnDurationLeft = gameManager.turnDurationLeft;
+        });
+    }
+
+    switchPlayers() {
+        this.socket.emit(SocketEvent.switchPlayers, { lobbyKey: this.lobbyKey } as SwitchPlayersMessage);
+        this.update();
+    }
+
+    exchangeLetters(letters: string, player: Player) {
+        this.socket.emit(SocketEvent.exchangeLetters, { lobbyKey: this.lobbyKey, player, letters } as ExchangeLettersMessage);
+        this.update();
+    }
+
+    placeLetters(player: Player, word: string, coord: Vec2, across: boolean) {
+        this.socket.emit(SocketEvent.placeLetters, { lobbyKey: this.lobbyKey, player, word, coord, across } as PlaceLettersMessage);
+        this.update();
+    }
+
+    skipTurn(player: Player) {
+        this.socket.emit(SocketEvent.skipTurn, { lobbyKey: this.lobbyKey, player } as SkipTurnMessage);
+        this.update();
+    }
+
+    showReserve() {
+        this.socket.emit(SocketEvent.reserve, { lobbyKey: this.lobbyKey } as ShowReserveMessage);
+        this.update();
+    }
+
+    sendMessage(message: ChatMessage) {
+        this.socket.emit(SocketEvent.chatMessage, { lobbyKey: this.lobbyKey, playerName: message.user, message: message.body } as NormalChatMessage);
+        this.socket.on(SocketEvent.chatMessage, (msg) => {
+            this.serverMessage.next({ user: msg.split(':')[0].trim(), body: msg.split(':')[1] });
+        });
+        this.update();
     }
 
     leaveLobby() {
@@ -74,10 +148,6 @@ export class CommunicationService {
         return this.http
             .put<{ key: string }>('http://localhost:3000/api/lobby', lobbyConfig, this.httpOptions)
             .pipe(catchError(this.handleError<{ key: string }>('putLobby')));
-    }
-
-    sendMessage(message: ChatMessage) {
-        this.socket.emit(SocketEvent.chatMessage, { lobbyKey: this.lobbyKey, playerName: message.user, message: message.body } as NormalChatMessage);
     }
 
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {

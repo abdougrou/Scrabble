@@ -37,7 +37,12 @@ describe('GameManagerService', () => {
         wordValidationMock = jasmine.createSpyObj(WordValidationService, ['validateWords']);
         wordValidationMock.validateWords.and.returnValue(true);
         // eslint-disable-next-line prettier/prettier
-        TILES = [{ letter: 'a', points: 0 }, { letter: 'l', points: 0 }, { letter: 'l', points: 0 }, { letter: 'o', points: 0 },];
+        TILES = [
+            { letter: 'a', points: 0 },
+            { letter: 'l', points: 0 },
+            { letter: 'l', points: 0 },
+            { letter: 'o', points: 0 },
+        ];
     });
 
     beforeEach(() => {
@@ -292,7 +297,12 @@ describe('GameManagerService', () => {
             y: 7,
         };
         // eslint-disable-next-line prettier/prettier
-        const tiles: Tile[] = [{ letter: 'a', points: 0 }, { letter: 'l', points: 0 }, { letter: 'l', points: 0 }, { letter: '*', points: 0 },];
+        const tiles: Tile[] = [
+            { letter: 'a', points: 0 },
+            { letter: 'l', points: 0 },
+            { letter: 'l', points: 0 },
+            { letter: '*', points: 0 },
+        ];
         playerService.current.easel = new Easel(tiles);
         service.placeTiles('allO', 'h8v', true, playerService.current);
         for (let i = 0; i < word.length; i++) {
@@ -303,7 +313,11 @@ describe('GameManagerService', () => {
     it('placeTile should not allow a word to be placed if the letter of the tile on the board dont match the letter of the word', () => {
         const tiles: Tile[] = [
             // eslint-disable-next-line prettier/prettier
-            { letter: 'l', points: 0 }, { letter: 'z', points: 0 }, { letter: 's', points: 0 }, { letter: 'a', points: 0 },];
+            { letter: 'l', points: 0 },
+            { letter: 'z', points: 0 },
+            { letter: 's', points: 0 },
+            { letter: 'a', points: 0 },
+        ];
         playerService.current.easel = new Easel(tiles);
         service.placeTiles('le', 'h8v', true, playerService.current);
         expect(service.placeTiles('sa', 'i8h', false, playerService.current)).toBe('placement de mot invalide');
@@ -319,7 +333,7 @@ describe('GameManagerService', () => {
         const previousPlayer = playerService.current;
         service.placeTiles('allo', 'h8v', true, playerService.current);
         expect(previousPlayer.easel.tiles.length).toBe(reserveTilesLength);
-        expect(previousPlayer.easel.tiles[0].letter).toBe('a');
+        expect(previousPlayer.easel.tiles[0].tile.letter).toBe('a');
     });
 
     it('placeTile not allow a word to be placed on top of another one', () => {

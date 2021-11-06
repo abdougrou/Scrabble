@@ -19,11 +19,11 @@ export const STARTING_TILE_AMOUNT = 7;
 export const SECOND_MD = 1000;
 
 export const COMMANDS = {
-    exchange: '!echanger',
+    exchange: '!échanger',
     place: '!placer',
     pass: '!passer',
     debug: '!debug',
-    reserve: '!reserve',
+    reserve: '!réserve',
 };
 
 export const KEYBOARD_EVENT_RECEIVER = {

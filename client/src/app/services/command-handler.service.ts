@@ -29,14 +29,13 @@ export class CommandHandlerService {
     }
 
     exchange(command: string, player: Player): ChatMessage {
-        const commandResult: ChatMessage = { user: '', body: '' };
-        const regex = new RegExp(/^!echanger ([a-z]|\*){0,7}/g);
+        let commandResult: ChatMessage = { user: '', body: '' };
+        const regex = new RegExp(/^!échanger ([a-z]|\*){0,7}/g);
         if (regex.test(command)) {
-            commandResult.user = COMMAND_RESULT;
-            commandResult.body = this.gameManager.exchangeTiles(command.split(' ')[1], player);
+            commandResult = this.gameManager.exchangeTiles(command.split(' ')[1], player);
         } else {
             commandResult.user = SYSTEM_NAME;
-            commandResult.body = 'Erreur de syntaxe, pour échanger des lettres, il faut suivre le format suivant : !echanger (lettre)...';
+            commandResult.body = 'Erreur de syntaxe, pour échanger des lettres, il faut suivre le format suivant : !échanger (lettre)...';
         }
         return commandResult;
     }
@@ -88,14 +87,21 @@ export class CommandHandlerService {
 
     reserve(command: string): ChatMessage {
         const commandResult: ChatMessage = { user: '', body: '' };
-        const regex = new RegExp(/^!reserve$/g);
-        if (regex.test(command) && this.gameManager.debug) {
-            commandResult.user = COMMAND_RESULT;
-            commandResult.body = this.reserveDisplay();
+        const regex = new RegExp(/^!réserve$/g);
+        if (this.gameManager.debug) {
+            if (regex.test(command)) {
+                commandResult.user = COMMAND_RESULT;
+                commandResult.body = this.reserveDisplay();
+            } else {
+                commandResult.user = SYSTEM_NAME;
+                commandResult.body =
+                    'Erreur de syntaxe, pour activer ou désactiver les affichages de réserve, il faut suivre le format suivant : !réserve';
+            }
         } else {
             commandResult.user = SYSTEM_NAME;
             commandResult.body =
-                'Erreur de syntaxe, pour activer ou désactiver les affichages de réserve, il faut suivre le format suivant : !réserve';
+                "La commande !réserve n'est accessible que lorsque les affichages de débogages sont activés," +
+                'pour les activer, entrez la commande !debug ';
         }
         return commandResult;
     }

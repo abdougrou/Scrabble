@@ -1,5 +1,5 @@
 import { CLASSIC_RESERVE } from '@app/constants';
-import { ExchangeResult, PassResult, PlaceResult, ReserveResult } from '@common/command-result';
+import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
 import { Board } from './board';
 import { Easel } from './easel';
 import { Move, MoveGenerator } from './move-generator';
@@ -134,9 +134,7 @@ export class GameManager {
      * @param player the player to print the reserve to
      * @returns PrintReserveResult if failed, reserve string if success
      */
-    printReserve(player: Player): ReserveResult | string {
-        if (player.name !== this.players[0].name) return ReserveResult.NotCurrentPlayer;
-        else if (!player.debug) return ReserveResult.NotInDebugMode;
+    printReserve(): string {
         return this.reserve.toString();
     }
 }

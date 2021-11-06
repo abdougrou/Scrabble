@@ -6,7 +6,8 @@ import { GameConfigPageComponent } from '@app/components/game-config-page/game-c
 import { MultiplayerRoomsComponent } from '@app/components/multiplayer-rooms/multiplayer-rooms.component';
 import { DIALOG_HEIGHT, DIALOG_WIDTH, DURATION_INIT } from '@app/constants';
 import { GameManagerService } from '@app/services/game-manager.service';
-import { ModeSelectionService } from '@app/services/mode-selection.service';
+import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-manager.service';
+import { LobbyConfig } from '@common/lobby-config';
 
 @Component({
     selector: 'app-mode-selection',
@@ -21,8 +22,8 @@ export class ModeSelectionComponent {
         // private communication: CommunicationService,
         @Inject(MAT_DIALOG_DATA) public data: { mode: GameMode },
         private gameManager: GameManagerService,
+        private multiGameManager: MultiplayerGameManagerService,
         private router: Router,
-        private modeSelection: ModeSelectionService,
     ) {}
 
     playSolo(): void {
@@ -30,7 +31,6 @@ export class ModeSelectionComponent {
             .afterClosed()
             .subscribe((result) => {
                 if (!result) return;
-                this.modeSelection.modeConfig = result as GameConfig;
                 this.gameManager.initialize(result as GameConfig);
                 this.router.navigateByUrl('/game');
                 this.closeSelf();
@@ -42,9 +42,9 @@ export class ModeSelectionComponent {
             .afterClosed()
             .subscribe((result) => {
                 if (!result) return;
-                this.modeSelection.modeConfig = result as GameConfig;
-                this.gameManager.initialize(result as GameConfig);
-                this.router.navigateByUrl('/game');
+                const parameters: { config: LobbyConfig; playerName: string } = result as { config: LobbyConfig; playerName: string };
+                this.multiGameManager.initialize(parameters.config, parameters.playerName);
+                this.router.navigateByUrl('/multiplayer-game');
                 this.closeSelf();
             });
     }

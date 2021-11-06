@@ -1,11 +1,20 @@
-import { GameConfig } from './lobby-config';
+import { Player } from '@app/classes/player';
+import { Vec2 } from '@app/classes/vec2';
+import { LobbyConfig } from './lobby-config';
 
 export const SocketEvent = {
     playerJoinLobby: 'player join lobby',
     playerLeaveLobby: 'player leave lobby',
     setConfig: 'set config',
     chatMessage: 'message',
-    commandMessage: 'command',
+    startTimer: 'start timer',
+    switchPlayers: 'switch players',
+    placeLetters: 'place letters',
+    exchangeLetters: 'exchange letters',
+    skipTurn: 'skip turn',
+    setPlayers: 'set players',
+    update: 'update',
+    reserve: 'reserve',
 };
 
 export interface JoinLobbyMessage {
@@ -20,7 +29,44 @@ export interface LeaveLobbyMessage {
 
 export interface SetConfigMessage {
     lobbyKey: string;
-    config: GameConfig;
+    config: LobbyConfig;
+    guest: string;
+}
+
+// I dont know how it will work currently
+export interface StartTimerMessage {
+    lobbyKey: string;
+    playerName: string;
+}
+
+export interface SwitchPlayersMessage {
+    lobbyKey: string;
+}
+
+export interface PlaceLettersMessage {
+    lobbyKey: string;
+    player: Player;
+    word: string;
+    coord: Vec2;
+    across: boolean;
+}
+
+export interface ExchangeLettersMessage {
+    lobbyKey: string;
+    player: Player;
+    letters: string;
+}
+
+export interface SkipTurnMessage {
+    lobbyKey: string;
+    player: Player;
+}
+export interface ShowReserveMessage {
+    lobbyKey: string;
+}
+
+export interface UpdateMessage {
+    lobbyKey: string;
 }
 
 export interface NormalChatMessage {

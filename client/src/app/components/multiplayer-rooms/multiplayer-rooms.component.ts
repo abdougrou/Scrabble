@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Dictionary, GameConfig, GameMode } from '@app/classes/game-config';
+import { Dictionary, GameMode } from '@app/classes/game-config';
 import { MultiGameConfigComponent } from '@app/components/multi-game-config/multi-game-config.component';
 import { MultiplayerJoinFormComponent } from '@app/components/multiplayer-join-form/multiplayer-join-form.component';
 import { DIALOG_HEIGHT, DIALOG_WIDTH, DURATION_INIT } from '@app/constants';
@@ -15,7 +15,6 @@ import { LobbyConfig } from '@common/lobby-config';
 })
 export class MultiplayerRoomsComponent {
     lobbies: LobbyConfig[];
-    lobbyGameConfig: GameConfig;
 
     constructor(
         public dialogRef: MatDialogRef<MultiplayerRoomsComponent>,
@@ -73,19 +72,10 @@ export class MultiplayerRoomsComponent {
 
     openJoinPopup(key: string): MatDialogRef<unknown, unknown> {
         const lobbyToJoin = this.lobbies.filter((lobby) => lobby.key === key)[0];
-        const gameConfig = {
-            playerName1: lobbyToJoin.host,
-            playerName2: 'default',
-            gameMode: this.data.mode,
-            duration: lobbyToJoin.turnDuration,
-            bonusEnabled: lobbyToJoin.bonusEnabled,
-            dictionary: lobbyToJoin.dictionary === '0' ? Dictionary.French : Dictionary.English,
-            isMultiPlayer: true,
-        } as GameConfig;
         return this.dialog.open(MultiplayerJoinFormComponent, {
             height: DIALOG_HEIGHT,
             width: DIALOG_WIDTH,
-            data: { config: gameConfig, message: { key, host: lobbyToJoin.host } },
+            data: { config: lobbyToJoin, message: { key, host: lobbyToJoin.host } },
         });
     }
 }

@@ -102,12 +102,12 @@ export class GameManagerService {
         if (this.players.current instanceof VirtualPlayer) this.playVirtualPlayer();
     }
 
-    exchangeTiles(tiles: string, player: Player): string {
+    exchangeTiles(tiles: string, player: Player): ChatMessage {
         const message = this.exchangeTileService.exchangeTiles(tiles, player);
-        if (message === '') {
+        if (message.body === '') {
             this.players.skipCounter = 0;
             this.switchPlayers();
-            return `${player.name} a échangé les lettres ${tiles}`;
+            return { user: COMMAND_RESULT, body: `${player.name} a échangé les lettres ${tiles}` };
         } else return message;
     }
 
@@ -118,7 +118,7 @@ export class GameManagerService {
                 case PlayAction.ExchangeTiles: {
                     const tilesToExchange = vPlayer.exchange();
                     if (this.reserve.isExchangePossible(tilesToExchange.length)) {
-                        const msg: ChatMessage = { user: this.enemyPlayerName, body: this.exchangeTiles(tilesToExchange, vPlayer) };
+                        const msg: ChatMessage = this.exchangeTiles(tilesToExchange, vPlayer);
                         this.commandMessage.next(msg);
                     } else {
                         this.buttonSkipTurn();

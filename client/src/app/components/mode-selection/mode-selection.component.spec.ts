@@ -52,14 +52,14 @@ describe('ModeSelectionComponent', () => {
         component.dialog.closeAll();
     });
 
-    it('should close after back()', () => {
+    it('should close after closeSelf()', () => {
         const spy = spyOn(component.dialogRef, 'close').and.callThrough();
         component.closeSelf();
         expect(spy).toHaveBeenCalled();
     });
 
-    it("should 'Retour' button call back()", () => {
-        const spy = spyOn(component, 'back').and.callThrough();
+    it("should 'Retour' button call closeSelf()", () => {
+        const spy = spyOn(component, 'closeSelf').and.callThrough();
         const button = fixture.debugElement.nativeElement.querySelector('#back');
         button.click();
         expect(spy).toHaveBeenCalled();
