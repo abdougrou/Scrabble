@@ -1,7 +1,10 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
+import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
+import { LETTER_POINTS } from '@app/constants';
 import { LobbyConfig } from '@common/lobby-config';
 import {
     ExchangeLettersMessage,
@@ -86,7 +89,14 @@ export class CommunicationService {
     update() {
         this.socket.emit(SocketEvent.update, { lobbyKey: this.lobbyKey } as UpdateMessage);
         this.socket.on(SocketEvent.update, (gameManager: UpdateGameManagerMessage) => {
-            this.gameManager.players = gameManager.players;
+            for (const serverPlayer of gameManager.players) {
+                const tiles: Tile[] = [];
+                for (const tileLetter of serverPlayer.easel.split('')) {
+                    tiles.push({ letter: tileLetter, points: LETTER_POINTS.get(tileLetter) as number });
+                }
+                const player: Player = { name: serverPlayer.name, score: serverPlayer.score, easel: new Easel(tiles) };
+                this.gameManager.players.push(player);
+            }
             this.gameManager.reserve.serverReserveData = gameManager.reserveData;
             this.gameManager.reserve.tileCount = gameManager.reserveCount;
             this.gameManager.reserve.serverReserveToTiles();

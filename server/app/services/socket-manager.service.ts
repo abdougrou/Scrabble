@@ -1,8 +1,10 @@
+import { Player } from '@app/classes/player';
 import {
     ExchangeLettersMessage,
     JoinLobbyMessage,
     LeaveLobbyMessage,
     PlaceLettersMessage,
+    PlayerData,
     SetConfigMessage,
     SkipTurnMessage,
     SocketEvent,
@@ -65,8 +67,13 @@ export class SocketManagerService {
 
             socket.on(SocketEvent.update, (message: UpdateMessage) => {
                 const gameManager = this.lobbyService.getLobby(message.lobbyKey)?.gameManager;
+                const serverPlayers: PlayerData[] = [];
+                for (const serverPlayer of gameManager?.players as Player[]) {
+                    const player: PlayerData = { name: serverPlayer.name, score: serverPlayer.score, easel: serverPlayer.easel.toString() };
+                    serverPlayers.push(player);
+                }
                 this.io.to(message.lobbyKey).emit(SocketEvent.update, {
-                    players: gameManager?.players,
+                    players: serverPlayers,
                     reserveData: gameManager?.reserve.data,
                     reserveCount: gameManager?.reserve.size,
                     boardData: gameManager?.board.data,

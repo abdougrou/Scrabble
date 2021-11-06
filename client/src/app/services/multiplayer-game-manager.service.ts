@@ -11,9 +11,9 @@ import { ReserveService } from './reserve.service';
     providedIn: 'root',
 })
 export class MultiplayerGameManagerService {
-    players: Player[];
+    players: Player[] = [];
     turnDuration: number;
-    turnDurationLeft: number;
+    turnDurationLeft: number = 0;
     mainPlayerName: string;
     isFirstTurn: boolean = true;
     hostName: string;

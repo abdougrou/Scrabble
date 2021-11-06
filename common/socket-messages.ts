@@ -64,8 +64,13 @@ export interface UpdateMessage {
     lobbyKey: string;
 }
 
+export interface PlayerData {
+    name: string;
+    score: number;
+    easel: string;
+}
 export interface UpdateGameManagerMessage {
-    players: Player[];
+    players: PlayerData[];
     reserveData: Map<string, number>;
     reserveCount: number;
     boardData: (string | null)[][];
