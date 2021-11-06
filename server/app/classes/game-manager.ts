@@ -1,6 +1,7 @@
 import { CLASSIC_RESERVE } from '@app/constants';
 import { ExchangeResult, PassResult, PlaceResult, ReserveResult } from '@common/command-result';
 import { Board } from './board';
+import { transpose } from './board-utils';
 import { Easel } from './easel';
 import { Move, MoveGenerator } from './move-generator';
 import { Player } from './player';
@@ -95,17 +96,28 @@ export class GameManager {
         if (!move) return PlaceResult.NotValid;
 
         const nextCoord = coord;
+        let points = 0;
+        const row: (string | null)[] = (move.across ? this.board.data : transpose(this.board.data))[move.across ? move.coord.x : move.coord.y] as (
+            | string
+            | null
+        )[];
+        const pointRow: number[] = (move.across ? this.board.pointGrid : transpose(this.board.pointGrid))[
+            move.across ? move.coord.x : move.coord.y
+        ] as number[];
         for (const k of word) {
             if (!this.board.getLetter(nextCoord)) {
                 this.board.setLetter(nextCoord, k);
                 player.easel.getLetters([k]);
             }
+            points += this.moveGenerator.calculateCrossSum(this.board.data, coord, move.across);
 
             if (across) nextCoord.y++;
             else nextCoord.x++;
         }
+        points += this.moveGenerator.calculateWordPoints(move, row, pointRow);
 
         // place the word on the board, recalculate anchors and cross checks
+        player.score += points;
         return PlaceResult.Success;
     }
 

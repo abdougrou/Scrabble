@@ -138,4 +138,25 @@ describe('MoveGenerator', () => {
         const expectedValue2 = 0;
         expect(moveGenerator.calculateCrossSum(board, coord2, across2)).to.equal(expectedValue2);
     });
+
+    it('calculateWordPoints returns correct value', () => {
+        board = [
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, 'o', null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+        ];
+        dictionary = new Trie(['carotte']);
+        moveGenerator = new MoveGenerator(dictionary);
+
+        const coord = { x: 2, y: 1 };
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        const pointRow = [0, 1, 2, 0, 3, 4, 0];
+        const points = moveGenerator.calculateWordPoints({ word: 'carotte', coord, across: true }, board[coord.x], pointRow);
+        const expectedPoints = 90;
+        expect(points).to.equal(expectedPoints);
+    });
 });

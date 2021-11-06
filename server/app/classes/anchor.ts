@@ -18,7 +18,7 @@ export class Anchor {
         const transposed = transpose(board);
         for (let i = 0; i < board.length; i++) {
             anchors = anchors.concat(this.findAnchorsOneDimension(board[i], i, true));
-            anchors = anchors.concat(this.findAnchorsOneDimension(transposed[i], i, false));
+            anchors = anchors.concat(this.findAnchorsOneDimension(transposed[i] as (string | null)[], i, false));
         }
         return anchors;
     }
