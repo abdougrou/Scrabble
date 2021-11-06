@@ -63,23 +63,15 @@ export class CommunicationService {
         this.playerName = playerName;
         this.socket.emit(SocketEvent.playerJoinLobby, { lobbyKey: key, playerName } as JoinLobbyMessage);
         this.update();
-        console.log('Players : ', this.gameManager.players);
     }
 
     setConfig(config: LobbyConfig, guestName: string) {
-        // console logs to debug
-        // eslint-disable-next-line no-console
-        console.log('setConfig Data: ', config);
         config.key = this.lobbyKey;
         this.socket.emit(SocketEvent.setConfig, { lobbyKey: this.lobbyKey, config, guest: guestName } as SetConfigMessage);
         this.socket.on('start game', (message: SetConfigMessage) => {
-            // eslint-disable-next-line no-console
-            console.log('Server: game started');
             this.started = true;
             this.config = message.config;
             this.guestName = message.guest;
-            // eslint-disable-next-line no-console
-            console.log(this.config);
         });
     }
 

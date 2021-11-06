@@ -27,8 +27,6 @@ export class WaitingPopupComponent implements DoCheck {
                 playerName: this.communication.guestName,
                 mainPlayerName: this.communication.config.host,
             };
-            console.log(' Client One (config): ', this.result.config);
-            console.log(' Client One (guest): ', this.result.playerName);
             setTimeout(() => this.dialogRef.close(this.result), 0);
         }
     }

@@ -31,10 +31,8 @@ export class MultiplayerJoinFormComponent implements DoCheck {
     }
 
     joinLobby() {
-        console.log('Host Name In Join Form: ', this.data.message.host);
         const playerName = this.joinForm.get('name')?.value;
         this.result = { config: this.data.config, playerName, mainPlayerName: playerName };
-        if (this.data.message.host !== playerName) console.log('Player names are differents!');
         this.communication.joinLobby(this.data.message.key, playerName);
         this.communication.setConfig(this.data.config, playerName);
     }
