@@ -20,6 +20,7 @@ import { WordValidationService } from './word-validation.service';
 })
 export class GameManagerService {
     commandMessage: BehaviorSubject<ChatMessage> = new BehaviorSubject({ user: '', body: '' });
+    endTurn: BehaviorSubject<string> = new BehaviorSubject('');
     turnDuration: number;
     currentTurnDurationLeft: number;
     subscription: Subscription;
@@ -99,6 +100,7 @@ export class GameManagerService {
         this.currentTurnDurationLeft = this.turnDuration;
         this.startTimer();
         // Send player switch event
+        this.endTurn.next(this.players.current.name);
         if (this.players.current instanceof VirtualPlayer) this.playVirtualPlayer();
     }
 
