@@ -156,7 +156,7 @@ describe('MoveGenerator', () => {
         // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         const pointRow = [0, 1, 2, 0, 3, 4, 0];
         const points = moveGenerator.calculateWordPoints({ word: 'carotte', coord, across: true }, board[coord.x], pointRow);
-        const expectedPoints = 90;
+        const expectedPoints = 96;
         expect(points).to.equal(expectedPoints);
     });
 });

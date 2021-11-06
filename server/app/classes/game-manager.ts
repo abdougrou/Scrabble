@@ -19,6 +19,8 @@ export class GameManager {
         this.players = [];
         this.reserve = new Reserve(CLASSIC_RESERVE);
         this.moveGenerator = new MoveGenerator(new Trie()); // TODO Fill trie with words
+        this.board = new Board();
+        this.board.initialize(false);
     }
 
     /**
@@ -88,7 +90,6 @@ export class GameManager {
      */
     placeLetters(player: Player, word: string, coord: Vec2, across: boolean): PlaceResult {
         if (player.name !== this.players[0].name) return PlaceResult.NotCurrentPlayer;
-        // check if letters in easel are enough for the word
 
         const move: Move | undefined = this.moveGenerator.legalMoves.find(
             (_move) => _move.word === word && _move.coord === coord && _move.across === across,

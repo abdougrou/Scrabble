@@ -1,8 +1,9 @@
-import { ExchangeResult, PassResult, ReserveResult as PrintReserveResult } from '@common/command-result';
+import { ExchangeResult, PassResult, PlaceResult, ReserveResult as PrintReserveResult } from '@common/command-result';
 import { expect } from 'chai';
 import { describe } from 'mocha';
 import { Easel } from './easel';
 import { GameManager } from './game-manager';
+import { Move } from './move-generator';
 import { Player } from './player';
 import { Reserve } from './reserve';
 
@@ -82,5 +83,44 @@ describe('GameManager', () => {
         gameManager.swapPlayers();
         const expected = 'A: 5\nB: 3';
         expect(gameManager.printReserve(player2)).to.equal(expected);
+    });
+
+    it('placeLetters works just fine', () => {
+        const board = [
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, 'c', null, null, null],
+            [null, null, null, null, 't', null, null],
+            [null, null, null, 't', null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+        ];
+        const pointGrid = [
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 2, 0, 0, 0],
+            [0, 0, 2, 1, 2, 0, 0],
+            [0, 2, 1, 3, 1, 2, 0],
+            [0, 0, 2, 1, 2, 0, 0],
+            [0, 0, 0, 2, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0],
+        ];
+        gameManager.board.data = board;
+        gameManager.board.pointGrid = pointGrid;
+
+        const coord = { x: 3, y: 2 };
+        const move: Move = { word: 'cat', coord, across: true };
+        gameManager.moveGenerator.legalMoves.push(move);
+
+        const player: Player = { name: 'player', easel: new Easel(['c', 'a']), score: 0 };
+        const player2: Player = { name: 'player2', easel: new Easel(), score: 0 };
+        gameManager.players.push(player);
+
+        expect(gameManager.placeLetters(player2, move.word, move.coord, move.across)).to.equal(PlaceResult.NotCurrentPlayer);
+        expect(gameManager.placeLetters(player, 'word', move.coord, move.across)).to.equal(PlaceResult.NotValid);
+        expect(gameManager.placeLetters(player, move.word, move.coord, move.across)).to.equal(PlaceResult.Success);
+
+        const expectedScore = 14;
+        expect(player.score).to.equal(expectedScore);
+        // normal case
     });
 });
