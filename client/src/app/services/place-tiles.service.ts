@@ -42,7 +42,7 @@ export class PlaceTilesService {
                 this.directionIndicator.tile = RIGHT_ARROW;
                 this.directionIndicator.coords = tileCoord;
                 this.placeIndicator();
-            } else if (this.boardService.getTile(tileCoord)?.points === RIGHT_ARROW.points) {
+            } else if ((this.boardService.getTile(tileCoord) as Tile).points === RIGHT_ARROW.points) {
                 this.changeDirection();
             }
         }
@@ -87,19 +87,22 @@ export class PlaceTilesService {
                 }
                 default: {
                     if (this.directionIndicator.coords !== INVALID_COORDS) {
-                        key = this.wordValidation.removeAccents(key);
+                        //  source: https://stackoverflow.com/a/37511463
+                        key = key.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                         let easelLetter: string = key;
+                        if (key !== '*') {
+                            if (key === key.toUpperCase()) {
+                                easelLetter = '*';
+                                key = key.toLowerCase();
+                            }
 
-                        if (key === key.toUpperCase()) {
-                            easelLetter = '*';
-                            key = key.toLowerCase();
-                        }
-
-                        if (this.playerService.mainPlayer.easel.containsTiles(easelLetter)) {
-                            this.putEaselTileOnBoard(easelLetter, key);
-                            this.findNextEmptyTile();
+                            if (this.playerService.mainPlayer.easel.containsTiles(easelLetter)) {
+                                this.putEaselTileOnBoard(easelLetter, key);
+                                this.findNextEmptyTile();
+                            }
                         }
                     }
+                    break;
                 }
             }
         }

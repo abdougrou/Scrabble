@@ -1,5 +1,6 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MAX_SKIP_COUNT } from '@app/constants';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { GridService } from '@app/services/grid.service';
@@ -23,7 +24,7 @@ describe('PlayerInfoComponent', () => {
     });
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [HttpClientModule],
+            imports: [HttpClientModule, MatDialogModule],
             declarations: [PlayerInfoComponent],
             providers: [
                 { provide: GameManagerService, useValue: gameManagerService },

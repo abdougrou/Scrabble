@@ -1,25 +1,34 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { MatDialogRef } from '@angular/material/dialog';
+import { RouterTestingModule } from '@angular/router/testing';
 import { WaitingPopupComponent } from './waiting-popup.component';
 
 describe('WaitingPopupComponent', () => {
-  let component: WaitingPopupComponent;
-  let fixture: ComponentFixture<WaitingPopupComponent>;
+    let component: WaitingPopupComponent;
+    let fixture: ComponentFixture<WaitingPopupComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [ WaitingPopupComponent ]
-    })
-    .compileComponents();
-  });
+    const dialogMock = {
+        close: () => {
+            // Do nothing
+        },
+    };
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(WaitingPopupComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [HttpClientTestingModule, RouterTestingModule],
+            declarations: [WaitingPopupComponent],
+            providers: [{ provide: MatDialogRef, useValue: dialogMock }],
+        }).compileComponents();
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    beforeEach(() => {
+        fixture = TestBed.createComponent(WaitingPopupComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
+
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 });

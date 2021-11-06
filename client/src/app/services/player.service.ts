@@ -3,6 +3,7 @@ import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
 import { Tile } from '@app/classes/tile';
 import { VirtualPlayer } from '@app/classes/virtual-player';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -10,6 +11,7 @@ import { VirtualPlayer } from '@app/classes/virtual-player';
 export class PlayerService {
     players: Player[] = [];
     skipCounter = 0;
+    endTurn: BehaviorSubject<string> = new BehaviorSubject('');
     get current(): Player {
         return this.players[0];
     }
@@ -31,6 +33,7 @@ export class PlayerService {
 
     switchPlayers() {
         this.players.reverse();
+        this.endTurn.next('a');
     }
 
     getPlayerByName(name: string): Player {

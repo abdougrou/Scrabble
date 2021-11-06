@@ -1,3 +1,4 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CanvasTestHelper } from '@app/classes/canvas-test-helper';
 import { Easel } from '@app/classes/easel';
@@ -30,6 +31,7 @@ describe('PlayAreaComponent', () => {
     });
     beforeEach(async () => {
         await TestBed.configureTestingModule({
+            imports: [HttpClientTestingModule],
             declarations: [PlayAreaComponent, EaselComponent],
             providers: [
                 { provide: PlayerService, useValue: playerService },

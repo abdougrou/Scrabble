@@ -232,7 +232,7 @@ describe('GameManagerService', () => {
         expect(service.getCoordinateFromString(coordStr3)).toEqual(coordVec3);
         expect(service.getCoordinateFromString(coordStr4)).toEqual(coordVec4);
     });
-    //  PlaceTiles function tests
+    // PlaceTiles function tests
     it('Should not place a word outside of the board', () => {
         const word = 'allo';
         playerService.current.easel = new Easel(TILES);

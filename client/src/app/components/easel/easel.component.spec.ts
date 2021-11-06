@@ -1,3 +1,4 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
@@ -25,6 +26,7 @@ describe('EaselComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
+            imports: [HttpClientTestingModule],
             declarations: [EaselComponent],
             providers: [
                 { provide: PlayerService, useValue: playerService },
