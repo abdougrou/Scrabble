@@ -43,7 +43,7 @@ export class CommunicationService {
         headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
     };
     constructor(private readonly http: HttpClient) {
-        this.socket = io.io('ws://ec2-35-183-181-3.ca-central-1.compute.amazonaws.com:3000');
+        this.socket = io.io('ws://localhost:3000');
     }
 
     setGameManager(gameManager: MultiplayerGameManagerService) {

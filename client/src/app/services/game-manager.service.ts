@@ -37,7 +37,7 @@ export class GameManagerService {
     constructor(
         private board: BoardService,
         private reserve: ReserveService,
-        private players: PlayerService,
+        public players: PlayerService,
         private gridService: GridService,
         private wordValidation: WordValidationService,
         private calculatePoints: CalculatePointsService,

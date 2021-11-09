@@ -1,14 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
 import { Tile, TileCoords } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
 import { DOWN_ARROW, GRID_HEIGHT, GRID_SIZE, GRID_WIDTH, INVALID_COORDS, RIGHT_ARROW } from '@app/constants';
 import { BoardService } from './board.service';
 import { CalculatePointsService } from './calculate-points.service';
-import { GameManagerService } from './game-manager.service';
+import { GameManagerInterfaceService } from './game-manager-interface.service';
 import { GridService } from './grid.service';
-import { MultiplayerGameManagerService } from './multiplayer-game-manager.service';
-import { PlayerService } from './player.service';
 import { ReserveService } from './reserve.service';
 import { WordValidationService } from './word-validation.service';
 
@@ -23,25 +20,16 @@ export class PlaceTilesService {
     constructor(
         private gridService: GridService,
         private boardService: BoardService,
-        private playerService: PlayerService,
         private wordValidation: WordValidationService,
         private calculatePoints: CalculatePointsService,
         private reserveService: ReserveService,
-        private multiGameManager: MultiplayerGameManagerService,
-        private router: Router,
-        private gameManager: GameManagerService,
+        private generalGameManager: GameManagerInterfaceService,
     ) {}
 
     manageClick(mouseCoords: Vec2) {
         const tileCoord: Vec2 = this.getBoardTileFromMouse(mouseCoords);
-        if (this.router.url === '/multiplayer-game') {
-            if (this.multiGameManager.players[0].name === this.multiGameManager.mainPlayerName) {
-                this.setCurrentTile(tileCoord);
-            }
-        } else {
-            if (this.playerService.current === this.playerService.mainPlayer) {
-                this.setCurrentTile(tileCoord);
-            }
+        if (this.generalGameManager.getCurrentPlayer().name === this.generalGameManager.getMainPlayer().name) {
+            this.setCurrentTile(tileCoord);
         }
     }
 
@@ -81,14 +69,7 @@ export class PlaceTilesService {
     }
 
     manageKeyboard(key: string) {
-        let playerTurn = false;
-        let easelContains = false;
-        if (this.router.url === '/multiplayer-game') {
-            if (this.multiGameManager.players[0].name === this.multiGameManager.mainPlayerName) playerTurn = true;
-        } else {
-            if (this.playerService.current === this.playerService.mainPlayer) playerTurn = true;
-        }
-        if (playerTurn) {
+        if (this.generalGameManager.getCurrentPlayer().name === this.generalGameManager.getCurrentPlayer().name) {
             switch (key) {
                 case 'Backspace': {
                     this.returnLastTileToEasel();
@@ -112,13 +93,7 @@ export class PlaceTilesService {
                                 easelLetter = '*';
                                 key = key.toLowerCase();
                             }
-
-                            if (this.router.url === '/multiplayer-game') {
-                                if (this.multiGameManager.players[0].easel.containsTiles(easelLetter)) easelContains = true;
-                            } else {
-                                if (this.playerService.mainPlayer.easel.containsTiles(easelLetter)) easelContains = true;
-                            }
-                            if (easelContains) {
+                            if (this.generalGameManager.getCurrentPlayer().easel.containsTiles(easelLetter)) {
                                 this.putEaselTileOnBoard(easelLetter, key);
                                 this.findNextEmptyTile();
                             }
@@ -135,11 +110,7 @@ export class PlaceTilesService {
             const tileToRemove: TileCoords = this.tilesPlacedOnBoard.pop() as TileCoords;
             const tilesToReturn: Tile = this.tilesTakenFromEasel.pop() as Tile;
 
-            if (this.router.url === '/multiplayer-game') {
-                this.multiGameManager.players[0].easel.addTiles([tilesToReturn]);
-            } else {
-                this.playerService.mainPlayer.easel.addTiles([tilesToReturn]);
-            }
+            this.generalGameManager.getCurrentPlayer().easel.addTiles([tilesToReturn]);
             this.boardService.board.delete(this.boardService.coordToKey(tileToRemove.coords));
 
             this.removeIndicator();
@@ -153,13 +124,9 @@ export class PlaceTilesService {
             this.removeIndicator();
             if (this.validateWordPosition() && this.wordValidation.validateWords(this.tilesPlacedOnBoard)) {
                 const scoreNewTiles = this.calculatePoints.calculatePoints(this.tilesPlacedOnBoard);
-                if (this.router.url === '/multiplayer-game') {
-                    this.multiGameManager.players[0].score += scoreNewTiles;
-                    this.multiGameManager.players[0].easel.addTiles(this.reserveService.getLetters(this.tilesPlacedOnBoard.length));
-                } else {
-                    this.playerService.mainPlayer.score += scoreNewTiles;
-                    this.playerService.mainPlayer.easel.addTiles(this.reserveService.getLetters(this.tilesPlacedOnBoard.length));
-                }
+
+                this.generalGameManager.getCurrentPlayer().score += scoreNewTiles;
+                this.generalGameManager.getCurrentPlayer().easel.addTiles(this.reserveService.getLetters(this.tilesPlacedOnBoard.length));
 
                 this.directionIndicator.coords = INVALID_COORDS;
                 this.directionIndicator.tile = RIGHT_ARROW;
@@ -167,8 +134,7 @@ export class PlaceTilesService {
                 this.tilesTakenFromEasel.splice(0, this.tilesTakenFromEasel.length);
             } else this.endPlacement();
 
-            if (this.router.url === '/multiplayer-game') this.multiGameManager.switchPlayers();
-            else this.gameManager.switchPlayers();
+            this.generalGameManager.switchPlayers();
         }
     }
 
@@ -185,12 +151,7 @@ export class PlaceTilesService {
     }
 
     putEaselTileOnBoard(easelLetter: string, boardLetter: string) {
-        let tileTaken: Tile = { letter: '', points: 0 };
-        if (this.router.url === '/multiplayer-game') {
-            tileTaken = this.multiGameManager.players[0].easel.getTiles(easelLetter).pop() as Tile;
-        } else {
-            tileTaken = this.playerService.mainPlayer.easel.getTiles(easelLetter).pop() as Tile;
-        }
+        const tileTaken: Tile = this.generalGameManager.getCurrentPlayer().easel.getTiles(easelLetter).pop() as Tile;
 
         const tileToPlace: Tile = { letter: boardLetter, points: tileTaken.points };
         this.removeIndicator();
