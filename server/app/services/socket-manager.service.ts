@@ -1,3 +1,4 @@
+import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
 import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
 import {
@@ -13,7 +14,7 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
-    UpdateMessage,
+    UpdateMessage
 } from '@common/socket-messages';
 import * as http from 'http';
 import * as io from 'socket.io';
@@ -52,7 +53,10 @@ export class SocketManagerService {
             socket.on(SocketEvent.exchangeLetters, (message: ExchangeLettersMessage) => {
                 let commandResult = '';
                 let privateResult = true;
-                switch (this.lobbyService.getLobby(message.lobbyKey)?.gameManager.exchangeLetters(message.player, message.letters)) {
+                const player = this.lobbyService.getLobby(message.lobbyKey)?.gameManager.getPlayer(message.playerData.name) as Player;
+                player.score = message.playerData.score;
+                player.easel = new Easel(message.playerData.easel.split(''));
+                switch (this.lobbyService.getLobby(message.lobbyKey)?.gameManager.exchangeLetters(player, message.letters)) {
                     case ExchangeResult.NotCurrentPlayer:
                         privateResult = true;
                         commandResult = "Ce n'est pas votre tour";
@@ -70,20 +74,23 @@ export class SocketManagerService {
                         break;
                 }
                 if (privateResult) {
-                    socket.emit(SocketEvent.chatMessage, `${message.player} : ${commandResult}`);
+                    socket.emit(SocketEvent.chatMessage, `${player} : ${commandResult}`);
                 } else {
-                    socket.emit(SocketEvent.chatMessage, `Commande : ${message.player} a échangé les lettres ${message.letters}`);
-                    socket.broadcast.emit(SocketEvent.chatMessage, `Commande : ${message.player} a échangé  ${message.letters.length} lettres`);
+                    socket.emit(SocketEvent.chatMessage, `Commande : ${player} a échangé les lettres ${message.letters}`);
+                    socket.broadcast.emit(SocketEvent.chatMessage, `Commande : ${player} a échangé  ${message.letters.length} lettres`);
                 }
             });
 
             socket.on(SocketEvent.placeLetters, (message: PlaceLettersMessage) => {
                 let commandResult = '';
                 let privateResult = true;
+                const player = this.lobbyService.getLobby(message.lobbyKey)?.gameManager.getPlayer(message.playerData.name) as Player;
+                player.score = message.playerData.score;
+                player.easel = new Easel(message.playerData.easel.split(''));
                 switch (
                     this.lobbyService
                         .getLobby(message.lobbyKey)
-                        ?.gameManager.placeLetters(message.player, message.word, message.coord, message.across)
+                        ?.gameManager.placeLetters(player as Player, message.word, message.coord, message.across)
                 ) {
                     case PlaceResult.NotCurrentPlayer:
                         privateResult = true;
@@ -98,23 +105,39 @@ export class SocketManagerService {
                         break;
                 }
                 if (privateResult) {
-                    socket.emit(SocketEvent.chatMessage, `${message.player} : ${commandResult}`);
+                    socket.emit(SocketEvent.chatMessage, `${player} : ${commandResult}`);
                 } else {
                     this.io
                         .to(message.lobbyKey)
                         .emit(
                             SocketEvent.chatMessage,
-                            `Commande : ${message.player} a placé le mot "${message.word}" ${
-                                message.across ? 'horizontale' : 'verticale'
-                            }ment à la case ${message.coord}`,
+                            `Commande : ${player} a placé le mot "${message.word}" ${message.across ? 'horizontale' : 'verticale'}ment à la case ${
+                                message.coord
+                            }`,
                         );
+                    this.lobbyService.getLobby(message.lobbyKey)?.gameManager.swapPlayers();
+                    const gameManager = this.lobbyService.getLobby(message.lobbyKey)?.gameManager;
+                    const serverPlayers: PlayerData[] = [];
+                    for (const serverPlayer of gameManager?.players as Player[]) {
+                        const playerData: PlayerData = { name: serverPlayer.name, score: serverPlayer.score, easel: serverPlayer.easel.toString() };
+                        serverPlayers.push(playerData);
+                    }
+                    this.io.to(message.lobbyKey).emit(SocketEvent.update, {
+                        players: serverPlayers,
+                        reserveData: gameManager?.reserve.data,
+                        reserveCount: gameManager?.reserve.size,
+                        boardData: gameManager?.board.data,
+                    } as UpdateGameManagerMessage);
                 }
             });
 
             socket.on(SocketEvent.skipTurn, (message: SkipTurnMessage) => {
                 let commandResult = 'error';
                 let privateResult = true;
-                switch (this.lobbyService.getLobby(message.lobbyKey)?.gameManager.passTurn(message.player)) {
+                const player = this.lobbyService.getLobby(message.lobbyKey)?.gameManager.getPlayer(message.playerData.name) as Player;
+                player.score = message.playerData.score;
+                player.easel = new Easel(message.playerData.easel.split(''));
+                switch (this.lobbyService.getLobby(message.lobbyKey)?.gameManager.passTurn(player)) {
                     case PassResult.NotCurrentPlayer:
                         privateResult = true;
                         commandResult = "Ce n'est pas votre tour";
@@ -124,9 +147,9 @@ export class SocketManagerService {
                         break;
                 }
                 if (privateResult) {
-                    socket.emit(SocketEvent.chatMessage, `${message.player} : ${commandResult}`);
+                    socket.emit(SocketEvent.chatMessage, `${player} : ${commandResult}`);
                 } else {
-                    this.io.to(message.lobbyKey).emit(SocketEvent.chatMessage, `${message.player} a passé son tour`);
+                    this.io.to(message.lobbyKey).emit(SocketEvent.chatMessage, `${player} a passé son tour`);
                 }
             });
 

@@ -19,7 +19,7 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
-    UpdateMessage,
+    UpdateMessage
 } from '@common/socket-messages';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -100,6 +100,7 @@ export class CommunicationService {
             this.gameManager.reserve.serverReserveToTiles();
             this.gameManager.board.multiplayerBoard = gameManager.boardData;
             this.gameManager.board.multiplayerBoardToBoard();
+            this.gameManager.gridService.drawBoard();
         });
     }
 
@@ -109,17 +110,20 @@ export class CommunicationService {
     }
 
     exchangeLetters(letters: string, player: Player) {
-        this.socket.emit(SocketEvent.exchangeLetters, { lobbyKey: this.lobbyKey, player, letters } as ExchangeLettersMessage);
+        const playerData = { name: player.name, score: player.score, easel: player.easel.toString() };
+        this.socket.emit(SocketEvent.exchangeLetters, { lobbyKey: this.lobbyKey, playerData, letters } as ExchangeLettersMessage);
         this.update();
     }
 
     placeLetters(player: Player, word: string, coord: Vec2, across: boolean) {
-        this.socket.emit(SocketEvent.placeLetters, { lobbyKey: this.lobbyKey, player, word, coord, across } as PlaceLettersMessage);
+        const playerData = { name: player.name, score: player.score, easel: player.easel.toString() };
+        this.socket.emit(SocketEvent.placeLetters, { lobbyKey: this.lobbyKey, playerData, word, coord, across } as PlaceLettersMessage);
         this.update();
     }
 
     skipTurn(player: Player) {
-        this.socket.emit(SocketEvent.skipTurn, { lobbyKey: this.lobbyKey, player } as SkipTurnMessage);
+        const playerData = { name: player.name, score: player.score, easel: player.easel.toString() };
+        this.socket.emit(SocketEvent.skipTurn, { lobbyKey: this.lobbyKey, playerData } as SkipTurnMessage);
         this.update();
     }
 

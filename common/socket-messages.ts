@@ -1,4 +1,3 @@
-import { Player } from '@app/classes/player';
 import { Vec2 } from '@app/classes/vec2';
 import { LobbyConfig } from './lobby-config';
 
@@ -45,7 +44,7 @@ export interface SwitchPlayersMessage {
 
 export interface PlaceLettersMessage {
     lobbyKey: string;
-    player: Player;
+    playerData: PlayerData;
     word: string;
     coord: Vec2;
     across: boolean;
@@ -53,13 +52,13 @@ export interface PlaceLettersMessage {
 
 export interface ExchangeLettersMessage {
     lobbyKey: string;
-    player: Player;
+    playerData: PlayerData;
     letters: string;
 }
 
 export interface SkipTurnMessage {
     lobbyKey: string;
-    player: Player;
+    playerData: PlayerData;
 }
 export interface ShowReserveMessage {
     lobbyKey: string;

@@ -22,7 +22,7 @@ export class MultiplayerGameManagerService {
     endGameMessage: string = '';
     debug: boolean = false;
     constructor(
-        private gridService: GridService,
+        public gridService: GridService,
         public communication: CommunicationService,
         public board: BoardService,
         public reserve: ReserveService,
