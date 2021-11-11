@@ -91,6 +91,10 @@ export class GameManager {
      * @returns PlaceResult
      */
     placeLetters(player: Player, word: string, coord: Vec2, across: boolean): PlaceResult {
+        console.log(player);
+        console.log(word);
+        console.log(coord);
+        console.log(across);
         if (player.name !== this.players[0].name) return PlaceResult.NotCurrentPlayer;
 
         const move: Move | undefined = this.moveGenerator.legalMoves.find(

@@ -76,6 +76,11 @@ export class MultiplayerGameManagerService {
         this.communication.placeLetters(player, word, coord, !vertical);
         this.gridService.drawBoard();
     }
+
+    placeMouseLetters(word: string, coord: Vec2, vertical: boolean, player: Player) {
+        this.communication.placeLetters(player, word, coord, !vertical);
+        this.gridService.drawBoard();
+    }
 }
 const keyToCoord = (key: string): Vec2 => {
     const coords = key.split('.');

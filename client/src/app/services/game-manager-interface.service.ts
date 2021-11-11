@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Player } from '@app/classes/player';
+import { Vec2 } from '@app/classes/vec2';
 import { GameManagerService } from './game-manager.service';
 import { MultiplayerGameManagerService } from './multiplayer-game-manager.service';
 import { PlayerService } from './player.service';
@@ -43,6 +44,10 @@ export class GameManagerInterfaceService {
     placeTiles(word: string, coordStr: string, vertical: boolean, player: Player) {
         if (this.isMultiplayer) this.multiGameManager.placeLetters(word, coordStr, vertical, player);
         else this.soloGameManager.placeTiles(word, coordStr, vertical, player);
+    }
+
+    placeTilesMouse(word: string, coordStr: Vec2, vertical: boolean, player: Player) {
+        this.multiGameManager.placeMouseLetters(word, coordStr, vertical, player);
     }
 
     switchPlayers() {
