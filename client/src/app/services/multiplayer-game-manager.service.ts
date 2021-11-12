@@ -78,7 +78,7 @@ export class MultiplayerGameManagerService {
     }
 
     placeMouseLetters(word: string, coord: Vec2, vertical: boolean, player: Player) {
-        this.communication.placeLetters(player, word, coord, !vertical);
+        this.communication.placeLetters(player, word, coord, vertical);
         this.gridService.drawBoard();
     }
 }

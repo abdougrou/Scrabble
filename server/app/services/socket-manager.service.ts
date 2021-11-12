@@ -1,4 +1,6 @@
+import { transpose } from '@app/classes/board-utils';
 import { Easel } from '@app/classes/easel';
+import { GameManager } from '@app/classes/game-manager';
 import { Player } from '@app/classes/player';
 import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
 import {
@@ -14,7 +16,7 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
-    UpdateMessage
+    UpdateMessage,
 } from '@common/socket-messages';
 import * as http from 'http';
 import * as io from 'socket.io';
@@ -122,12 +124,14 @@ export class SocketManagerService {
                         const playerData: PlayerData = { name: serverPlayer.name, score: serverPlayer.score, easel: serverPlayer.easel.toString() };
                         serverPlayers.push(playerData);
                     }
+                    (gameManager as GameManager).board.data = transpose(gameManager?.board.data as (string | null)[][]) as (string | null)[][];
                     this.io.to(message.lobbyKey).emit(SocketEvent.update, {
                         players: serverPlayers,
                         reserveData: gameManager?.reserve.data,
                         reserveCount: gameManager?.reserve.size,
                         boardData: gameManager?.board.data,
                     } as UpdateGameManagerMessage);
+                    (gameManager as GameManager).board.data = transpose(gameManager?.board.data as (string | null)[][]) as (string | null)[][];
                 }
             });
 

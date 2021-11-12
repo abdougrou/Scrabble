@@ -158,7 +158,6 @@ export class MoveGenerator {
      * @param across whether the word is across or down
      */
     legalMove(word: string, square: Vec2, across: boolean) {
-        // const coord = across ? { x: square.x, y: square.y - word.length } : { x: square.x - word.length, y: square.y };
         const coord = { x: square.x, y: square.y };
         this.legalMoves.push({ word, coord, across });
     }
