@@ -73,7 +73,7 @@ export class MultiplayerGameManagerService {
 
     placeLetters(word: string, coordStr: string, vertical: boolean, player: Player) {
         const coord: Vec2 = keyToCoord(coordStr);
-        this.communication.placeLetters(player, word, coord, !vertical);
+        this.communication.placeLetters(player, word, coord, vertical);
         this.gridService.drawBoard();
     }
 

@@ -69,6 +69,7 @@ export class GameManager {
 
     swapPlayers() {
         this.players.reverse();
+        this.moveGenerator.calculateAnchorsAndCrossChecks(this.board.data);
     }
 
     /**

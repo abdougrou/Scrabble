@@ -62,7 +62,6 @@ export class CommunicationService {
         this.lobbyKey = key;
         this.playerName = playerName;
         this.socket.emit(SocketEvent.playerJoinLobby, { lobbyKey: key, playerName } as JoinLobbyMessage);
-        this.update();
     }
 
     setConfig(config: LobbyConfig, guestName: string) {
@@ -106,30 +105,25 @@ export class CommunicationService {
 
     switchPlayers() {
         this.socket.emit(SocketEvent.switchPlayers, { lobbyKey: this.lobbyKey } as SwitchPlayersMessage);
-        this.update();
     }
 
     exchangeLetters(letters: string, player: Player) {
         const playerData = { name: player.name, score: player.score, easel: player.easel.toString() };
         this.socket.emit(SocketEvent.exchangeLetters, { lobbyKey: this.lobbyKey, playerData, letters } as ExchangeLettersMessage);
-        this.update();
     }
 
     placeLetters(player: Player, word: string, coord: Vec2, across: boolean) {
         const playerData = { name: player.name, score: player.score, easel: player.easel.toString() };
         this.socket.emit(SocketEvent.placeLetters, { lobbyKey: this.lobbyKey, playerData, word, coord, across } as PlaceLettersMessage);
-        this.update();
     }
 
     skipTurn(player: Player) {
         const playerData = { name: player.name, score: player.score, easel: player.easel.toString() };
         this.socket.emit(SocketEvent.skipTurn, { lobbyKey: this.lobbyKey, playerData } as SkipTurnMessage);
-        this.update();
     }
 
     showReserve() {
         this.socket.emit(SocketEvent.reserve, { lobbyKey: this.lobbyKey } as ShowReserveMessage);
-        this.update();
     }
 
     sendMessage(message: ChatMessage) {
