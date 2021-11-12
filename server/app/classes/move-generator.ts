@@ -129,7 +129,10 @@ export class MoveGenerator {
 
         const boardLetter = board[square.x][square.y];
         if (!boardLetter) {
-            if (node.terminal) this.legalMove(partialWord, square, anchor.across);
+            if (node.terminal) {
+                const coord = anchor.across ? { x: square.x, y: square.y - partialWord.length } : { x: square.x - partialWord.length, y: square.y };
+                this.legalMove(partialWord, coord, anchor.across);
+            }
 
             node.children.forEach((edge) => {
                 const crossCheck = this.crossChecks.get(coordToKey(square));
@@ -154,11 +157,10 @@ export class MoveGenerator {
      * Stores the generated legal move
      *
      * @param word word to save
-     * @param square word's starting coordinate
+     * @param coord word's starting coordinate
      * @param across whether the word is across or down
      */
-    legalMove(word: string, square: Vec2, across: boolean) {
-        const coord = { x: square.x, y: square.y };
+    legalMove(word: string, coord: Vec2, across: boolean) {
         this.legalMoves.push({ word, coord, across });
     }
 

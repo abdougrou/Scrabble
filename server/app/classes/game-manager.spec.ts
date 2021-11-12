@@ -1,4 +1,4 @@
-import { ExchangeResult, PassResult, PlaceResult, ReserveResult as PrintReserveResult } from '@common/command-result';
+import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
 import { expect } from 'chai';
 import { describe } from 'mocha';
 import { Easel } from './easel';
@@ -78,11 +78,8 @@ describe('GameManager', () => {
 
         const reserveStr = 'a,5\nb,3';
         gameManager.reserve = new Reserve(reserveStr);
-        expect(gameManager.printReserve(player2)).to.equal(PrintReserveResult.NotCurrentPlayer);
-        expect(gameManager.printReserve(player1)).to.equal(PrintReserveResult.NotInDebugMode);
-        gameManager.swapPlayers();
         const expected = 'A: 5\nB: 3';
-        expect(gameManager.printReserve(player2)).to.equal(expected);
+        expect(gameManager.printReserve()).to.equal(expected);
     });
 
     it('placeLetters works just fine', () => {
@@ -121,6 +118,11 @@ describe('GameManager', () => {
 
         const expectedScore = 14;
         expect(player.score).to.equal(expectedScore);
-        // normal case
+    });
+
+    it('readDictionary creates and fills a Trie', () => {
+        const trie = gameManager.readDictionary('app/assets/test_dictionary.json');
+        const expected = trie.contains('aa') && trie.contains('bb') && trie.contains('cc');
+        expect(expected).to.equal(true);
     });
 });
