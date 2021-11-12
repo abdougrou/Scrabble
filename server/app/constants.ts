@@ -1,5 +1,6 @@
 export const BOARD_SIZE = 15;
 export const RESERVE_EXCHANGE_LIMIT = 7;
+export const EASEL_SIZE = 7;
 export const CLASSIC_RESERVE = `a,9,1
 b,2,3
 c,2,3

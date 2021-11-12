@@ -1,4 +1,4 @@
-import { CLASSIC_RESERVE } from '@app/constants';
+import { CLASSIC_RESERVE, EASEL_SIZE } from '@app/constants';
 import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
 import { readFileSync } from 'fs';
 import { Board } from './board';
@@ -86,6 +86,8 @@ export class GameManager {
     /**
      * Places a word on the board if it is possible
      *
+     * Refills the player's easel if letters are placed
+     *
      * @param player player to place letters
      * @param word word to place on the board
      * @param coord word's starting coordinate
@@ -125,6 +127,10 @@ export class GameManager {
         }
         points += this.moveGenerator.calculateWordPoints(move, row, pointRow);
         player.score += points;
+
+        const letterCount = EASEL_SIZE - player.easel.count;
+        player.easel.addLetters(this.reserve.getRandomLetters(letterCount));
+
         return PlaceResult.Success;
     }
 
