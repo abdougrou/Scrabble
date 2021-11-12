@@ -125,4 +125,21 @@ describe('GameManager', () => {
         const expected = trie.contains('aa') && trie.contains('bb') && trie.contains('cc');
         expect(expected).to.equal(true);
     });
+
+    it('isCentered returns correct value', () => {
+        const word = 'mossy';
+        const coordAcrossBefore = { x: 7, y: 0 };
+        const coordAcrossCentered = { x: 7, y: 5 };
+        const coordAcrossAfter = { x: 7, y: 9 };
+        const coordDownBefore = { x: 0, y: 7 };
+        const coordDownCentered = { x: 5, y: 7 };
+        const coordDownAfter = { x: 9, y: 7 };
+
+        expect(gameManager.isCentered(word, coordAcrossBefore, true)).to.equal(false);
+        expect(gameManager.isCentered(word, coordAcrossCentered, true)).to.equal(true);
+        expect(gameManager.isCentered(word, coordAcrossAfter, true)).to.equal(false);
+        expect(gameManager.isCentered(word, coordDownBefore, false)).to.equal(false);
+        expect(gameManager.isCentered(word, coordDownCentered, false)).to.equal(true);
+        expect(gameManager.isCentered(word, coordDownAfter, false)).to.equal(false);
+    });
 });

@@ -70,6 +70,7 @@ export class GameManager {
     swapPlayers() {
         this.players.reverse();
         this.moveGenerator.calculateAnchorsAndCrossChecks(this.board.data);
+        this.moveGenerator.generateLegalMoves(this.board.data, this.players[0].easel.letters.join(''));
     }
 
     /**
@@ -190,6 +191,6 @@ export class GameManager {
      */
     isCentered(word: string, coord: Vec2, across: boolean): boolean {
         const center = Math.floor(this.board.data.length / 2);
-        return across ? coord.y < center && coord.y + word.length > center : coord.x < center && coord.x + word.length > center;
+        return across ? coord.y <= center && coord.y + word.length >= center : coord.x <= center && coord.x + word.length >= center;
     }
 }
