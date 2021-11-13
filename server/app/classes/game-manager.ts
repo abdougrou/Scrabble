@@ -1,5 +1,6 @@
-import { CLASSIC_RESERVE } from '@app/constants';
+import { CLASSIC_RESERVE, EASEL_SIZE } from '@app/constants';
 import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
+import { readFileSync } from 'fs';
 import { Board } from './board';
 import { transpose } from './board-utils';
 import { Easel } from './easel';
@@ -14,12 +15,13 @@ export class GameManager {
     reserve: Reserve;
     board: Board;
     moveGenerator: MoveGenerator;
+    firstMove: boolean = true;
 
     constructor() {
         this.players = [];
         this.reserve = new Reserve(CLASSIC_RESERVE);
         this.board = new Board();
-        this.moveGenerator = new MoveGenerator(new Trie()); // TODO Fill trie with words
+        this.moveGenerator = new MoveGenerator(this.readDictionary('app/assets/dictionary.json'));
         this.board = new Board();
         this.board.initialize(false);
     }
@@ -34,9 +36,7 @@ export class GameManager {
         if (this.players.length > 1) return false;
         else if (this.players[0]?.name === name) return false;
         const startingLetterCount = 7;
-        console.log('Reserve: ', this.reserve.size);
         const player = { name, easel: new Easel(this.reserve.getRandomLetters(startingLetterCount)), score: 0 };
-        console.log('Player Esael: ', player.easel.toString());
         this.players.push(player);
         return true;
     }
@@ -69,6 +69,8 @@ export class GameManager {
 
     swapPlayers() {
         this.players.reverse();
+        this.moveGenerator.calculateAnchorsAndCrossChecks(this.board.data);
+        this.moveGenerator.generateLegalMoves(this.board.data, this.players[0].easel.letters.join(''));
     }
 
     /**
@@ -80,12 +82,13 @@ export class GameManager {
     passTurn(player: Player): PassResult {
         if (player.name !== this.players[0].name) return PassResult.NotCurrentPlayer;
         this.swapPlayers();
-        // reset timer
         return PassResult.Success;
     }
 
     /**
      * Places a word on the board if it is possible
+     *
+     * Refills the player's easel if letters are placed
      *
      * @param player player to place letters
      * @param word word to place on the board
@@ -95,7 +98,10 @@ export class GameManager {
      */
     placeLetters(player: Player, word: string, coord: Vec2, across: boolean): PlaceResult {
         if (player.name !== this.players[0].name) return PlaceResult.NotCurrentPlayer;
-        this.moveGenerator.legalMove(word, coord, across);
+        if (this.firstMove && this.moveGenerator.dictionary.contains(word) && this.isCentered(word, coord, across)) {
+            this.moveGenerator.legalMove(word, coord, across);
+            this.firstMove = false;
+        }
         const move: Move | undefined = this.moveGenerator.legalMoves.find(
             (_move) => _move.word === word && _move.coord.x === coord.x && _move.coord.y === coord.y && _move.across === across,
         );
@@ -122,9 +128,11 @@ export class GameManager {
             else nextCoord.x++;
         }
         points += this.moveGenerator.calculateWordPoints(move, row, pointRow);
-
-        // place the word on the board, recalculate anchors and cross checks
         player.score += points;
+
+        const letterCount = EASEL_SIZE - player.easel.count;
+        player.easel.addLetters(this.reserve.getRandomLetters(letterCount));
+
         return PlaceResult.Success;
     }
 
@@ -155,5 +163,34 @@ export class GameManager {
      */
     printReserve(): string {
         return this.reserve.toString();
+    }
+
+    /**
+     * Creates a Trie from the dictionary at the path provided
+     *
+     * @param dictionary dictionary path
+     * @returns Trie representing the dictionary
+     */
+    readDictionary(dictionary: string): Trie {
+        const trie = new Trie();
+        const raw = readFileSync(dictionary).toString();
+        const words: string[] = JSON.parse(raw).words;
+        words.forEach((word) => {
+            trie.insert(word);
+        });
+        return trie;
+    }
+
+    /**
+     * Checks if a word we try to place is centered
+     *
+     * @param word to place
+     * @param coord word's starting coordinate
+     * @param across whether the word is across or down
+     * @returns true if the word passes by the center of the board
+     */
+    isCentered(word: string, coord: Vec2, across: boolean): boolean {
+        const center = Math.floor(this.board.data.length / 2);
+        return across ? coord.y <= center && coord.y + word.length >= center : coord.x <= center && coord.x + word.length >= center;
     }
 }
