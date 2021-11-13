@@ -1,7 +1,8 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { RouterTestingModule } from '@angular/router/testing';
 import { MultiplayerJoinFormComponent } from './multiplayer-join-form.component';
 
 describe('MultiplayerJoinFormComponent', () => {
@@ -16,9 +17,9 @@ describe('MultiplayerJoinFormComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
+            imports: [HttpClientTestingModule, RouterTestingModule],
             declarations: [MultiplayerJoinFormComponent],
-            providers: [FormBuilder, { provide: MatDialogRef, useValue: dialogMock }],
+            providers: [FormBuilder, { provide: MatDialogRef, useValue: dialogMock }, { provide: MAT_DIALOG_DATA, useValue: {} }],
         }).compileComponents();
     });
 

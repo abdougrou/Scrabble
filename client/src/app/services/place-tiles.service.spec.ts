@@ -1,5 +1,8 @@
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 import { Easel } from '@app/classes/easel';
 import { Dictionary, GameMode } from '@app/classes/game-config';
 import { Tile } from '@app/classes/tile';
@@ -7,9 +10,12 @@ import { Vec2 } from '@app/classes/vec2';
 import { DOWN_ARROW, INVALID_COORDS, RIGHT_ARROW } from '@app/constants';
 import { BoardService } from './board.service';
 import { CalculatePointsService } from './calculate-points.service';
+import { CommunicationService } from './communication.service';
 import { ExchangeTilesService } from './exchange-tiles.service';
+import { GameManagerInterfaceService } from './game-manager-interface.service';
 import { GameManagerService } from './game-manager.service';
 import { GridService } from './grid.service';
+import { MultiplayerGameManagerService } from './multiplayer-game-manager.service';
 import { PlaceTilesService } from './place-tiles.service';
 import { PlayerService } from './player.service';
 import { ReserveService } from './reserve.service';
@@ -26,6 +32,11 @@ describe('PlaceTilesService', () => {
     let reserveService: ReserveService;
     let exchangeTiles: ExchangeTilesService;
     let gameManager: GameManagerService;
+    let gameManagerInterface: GameManagerInterfaceService;
+    let multiGameManager: MultiplayerGameManagerService;
+    let communication: CommunicationService;
+    let router: Router;
+    let http: HttpClient;
 
     beforeEach(() => {
         gridServiceMock = jasmine.createSpyObj(GridService, ['drawBoard']);
@@ -58,7 +69,7 @@ describe('PlaceTilesService', () => {
     });
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
+            imports: [HttpClientTestingModule, HttpClientModule, RouterTestingModule],
             providers: [
                 { provide: GridService, useValue: gridServiceMock },
                 { provide: BoardService, useValue: boardService },
@@ -67,9 +78,20 @@ describe('PlaceTilesService', () => {
                 { provide: CalculatePointsService, useValue: calculatePoints },
                 { provide: ReserveService, useValue: reserveService },
                 { provide: GameManagerService, useValue: gameManager },
+                { provide: GameManagerInterfaceService, useValue: gameManagerInterface },
+                { provide: MultiplayerGameManagerService, useValue: multiGameManager },
+                { provide: CommunicationService, useValue: communication },
             ],
         });
         service = TestBed.inject(PlaceTilesService);
+        // eslint-disable-next-line deprecation/deprecation
+        router = TestBed.get(Router);
+        // eslint-disable-next-line deprecation/deprecation
+        http = TestBed.get(HttpClient);
+        communication = new CommunicationService(http);
+        multiGameManager = new MultiplayerGameManagerService(gridServiceMock, communication, boardService, reserveService);
+        gameManagerInterface = new GameManagerInterfaceService(gameManager, multiGameManager, playerService, router);
+        gameManagerInterface.isMultiplayer = false;
     });
 
     it('should be created', () => {

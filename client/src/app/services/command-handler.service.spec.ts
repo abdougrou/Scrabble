@@ -37,7 +37,7 @@ describe('CommandHandlerService', () => {
     });
 
     it('should call the right functions when the command is valid', () => {
-        const exchange = '!echanger abcdef';
+        const exchange = '!échanger abcdef';
         const place = '!placer a10v abcdef';
         const pass = '!passer';
         const debug = '!debug';
@@ -52,9 +52,9 @@ describe('CommandHandlerService', () => {
     });
 
     it('should call GameManager exchangeTiles when the command is valid', () => {
-        const exchangeGood = '!echanger abcdef';
-        const exchangeGoodStar = '!echanger abcde*';
-        const exchangeBad = 'echanger q';
+        const exchangeGood = '!échanger abcdef';
+        const exchangeGoodStar = '!échanger abcde*';
+        const exchangeBad = 'échanger q';
         service.exchange(exchangeGood, player);
         service.exchange(exchangeGoodStar, player);
         service.exchange(exchangeBad, player);
@@ -88,7 +88,7 @@ describe('CommandHandlerService', () => {
     });
 
     it('should return an error message when the command is invalid', () => {
-        const invalidCmdExchange = 'echanger abcccccas';
+        const invalidCmdExchange = 'échanger abcccccas';
         expect(service.handleCommand(invalidCmdExchange, player).body).toBe("La commande entrée n'est pas valide");
     });
 });
