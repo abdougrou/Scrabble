@@ -7,6 +7,8 @@ import { DatabaseService } from './database.service';
 
 // CHANGE the URL for your database information
 const DATABASE_COLLECTION = 'topscores';
+const MAX = 5;
+let dataSize = 0;
 @Service()
 export class TopscoresService {
     constructor(private databaseService: DatabaseService) {}
@@ -17,11 +19,13 @@ export class TopscoresService {
 
     /**
      *
-     * @returns all data in the database collection
+     * @returns all data in the database collection sorted highest first
      */
-    async getAllCourses(): Promise<Playerscore[]> {
+    async getAllPlayers(): Promise<Playerscore[]> {
         return this.collection
             .find({})
+            .sort({ score: -1 })
+            .limit(MAX)
             .toArray()
             .then((players: Playerscore[]) => {
                 return players;
@@ -46,13 +50,16 @@ export class TopscoresService {
      */
     async addPlayer(playerscore: Playerscore): Promise<void> {
         if (playerscore) {
-            await this.collection.insertOne(playerscore).catch((error: Error) => {
-                // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-                throw new HttpException('Failed to insert', 500);
-            });
+            if (this.validateSize())
+                await this.collection.insertOne(playerscore).catch((error: Error) => {
+                    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+                    throw new HttpException('Failed to insert', 500);
+                });
+            else if (await this.validatePlayer(playerscore)) this.replaceLowestPlayer(playerscore);
         } else {
             throw new Error('Invalid');
         }
+        this.updateSize();
     }
 
     async deletePlayerByName(player: string): Promise<void> {
@@ -68,24 +75,15 @@ export class TopscoresService {
             });
     }
 
-    // async modifyCourse(course: Playerscore): Promise<void> {
-    //     const filterQuery: FilterQuery<Playerscore> = { subjectCode: course.subjectCode };
-    //     const updateQuery: UpdateQuery<Playerscore> = {
-    //         $set: {
-    //             subjectCode: course.subjectCode,
-    //             credits: course.credits,
-    //             name: course.name,
-    //             teacher: course.teacher,
-    //         },
-    //     };
-    //     // Can also use replaceOne if we want to replace the entire object
-    //     return this.collection
-    //         .updateOne(filterQuery, updateQuery)
-    //         .then(() => {})
-    //         .catch(() => {
-    //             throw new Error('Failed to update document');
-    //         });
-    // }
+    async replaceLowestPlayer(player: Playerscore): Promise<void> {
+        // Can also use replaceOne if we want to replace the entire object
+        return this.collection
+            .findOneAndReplace({ score: { $min: '$score' } }, { name: player.name, score: player.score })
+            .then(() => {})
+            .catch(() => {
+                throw new Error('Failed to update document');
+            });
+    }
 
     // async getCourseTeacher(sbjCode: string): Promise<string> {
     //     const filterQuery: FilterQuery<Playerscore> = { subjectCode: sbjCode };
@@ -119,7 +117,27 @@ export class TopscoresService {
     //     private validateCode(subjectCode: string): boolean {
     //         return subjectCode.startsWith('LOG') || subjectCode.startsWith('INF');
     //     }
-    //     private validateCredits(credits: number): boolean {
-    //         return credits > 0 && credits <= 6;
-    //     }
+    private async validatePlayer(player: Playerscore): Promise<boolean> {
+        if ((dataSize = MAX))
+            return (
+                player.score >
+                (await this.collection
+                    .find()
+                    .sort({ score: 1 })
+                    .limit(1)
+                    .toArray()
+                    .then((players: Playerscore[]) => {
+                        return players[0].score;
+                    }))
+            );
+        else return true;
+    }
+
+    private async updateSize() {
+        dataSize = await this.collection.find({}).count();
+    }
+
+    private validateSize() {
+        return dataSize < MAX;
+    }
 }

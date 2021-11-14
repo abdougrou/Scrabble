@@ -18,11 +18,11 @@ export class DatabaseController {
         this.router = Router();
 
         /**
-         * returns all players and their scores in the database
+         * returns all players ordered according to score. Highest first
          */
         this.router.get('/top', async (req: Request, res: Response, next: NextFunction) => {
             this.coursesService
-                .getAllCourses()
+                .getAllPlayers()
                 .then((courses: Playerscore[]) => {
                     res.json(courses);
                 })
@@ -30,8 +30,6 @@ export class DatabaseController {
                     res.status(Httpstatus.NOT_FOUND).send(error.message);
                 });
         });
-
-        // TODO: get that returns an ordered array
 
         //         this.router.get('/:subjectCode', async (req: Request, res: Response, next: NextFunction) => {
         //             this.coursesService
