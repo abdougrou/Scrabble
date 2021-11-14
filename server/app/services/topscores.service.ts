@@ -1,5 +1,7 @@
+import { HttpException } from '@app/classes/http.exception';
 import { Playerscore } from '@app/classes/playerscore';
 import { Collection } from 'mongodb';
+import { FilterQuery, UpdateQuery } from 'mongoose';
 import 'reflect-metadata';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
@@ -14,6 +16,10 @@ export class TopscoresService {
         return this.databaseService.database.collection(DATABASE_COLLECTION);
     }
 
+    /**
+     *
+     * @returns all data in the database collection
+     */
     async getAllCourses(): Promise<Playerscore[]> {
         return this.collection
             .find({})
@@ -23,68 +29,78 @@ export class TopscoresService {
             });
     }
 
-    //     async getCourse(sbjCode: string): Promise<Playerscore> {
-    //         // NB: This can return null if the course does not exist, you need to handle it
-    //         return this.collection.findOne({ subjectCode: sbjCode }).then((course: Playerscore) => {
-    //             return course;
-    //         });
-    //     }
+    /**
+     *
+     * @param player player's name
+     * @returns player's score template
+     */
+    async getCourse(player: string): Promise<Playerscore> {
+        // NB: This can return null if the course does not exist, you need to handle it
+        return this.collection.findOne({ name: player }).then((playerscore: Playerscore) => {
+            return playerscore;
+        });
+    }
 
-    //     async addCourse(course: Playerscore): Promise<void> {
-    //         if (this.validateCourse(course)) {
-    //             await this.collection.insertOne(course).catch((error: Error) => {
-    //                 throw new HttpException(500, 'Failed to insert course');
-    //             });
-    //         } else {
-    //             throw new Error('Invalid course');
-    //         }
-    //     }
+    /**
+     *
+     * @param playerscore player's score template. including name and score
+     */
+    async addCourse(playerscore: Playerscore): Promise<void> {
+        if (playerscore) {
+            await this.collection.insertOne(playerscore).catch((error: Error) => {
+                // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+                throw new HttpException('Failed to insert', 500);
+            });
+        } else {
+            throw new Error('Invalid');
+        }
+    }
 
-    //     async deleteCourse(sbjCode: string): Promise<void> {
-    //         return this.collection
-    //             .findOneAndDelete({ subjectCode: sbjCode })
-    //             .then((res: FindAndModifyWriteOpResultObject<Playerscore>) => {
-    //                 if (!res.value) {
-    //                     throw new Error('Could not find course');
-    //                 }
-    //             })
-    //             .catch(() => {
-    //                 throw new Error('Failed to delete course');
-    //             });
-    //     }
+    async deleteCourse(sbjCode: string): Promise<void> {
+        return this.collection
+            .findOneAndDelete({ name: sbjCode })
+            .then((res: FindAndModifyWriteOpResultObject<Playerscore>) => {
+                if (!res.value) {
+                    throw new Error('Could not find course');
+                }
+            })
+            .catch(() => {
+                throw new Error('Failed to delete course');
+            });
+    }
 
-    //     async modifyCourse(course: Playerscore): Promise<void> {
-    //         const filterQuery: FilterQuery<Playerscore> = { subjectCode: course.subjectCode };
-    //         const updateQuery: UpdateQuery<Playerscore> = {
-    //             $set: {
-    //                 subjectCode: course.subjectCode,
-    //                 credits: course.credits,
-    //                 name: course.name,
-    //                 teacher: course.teacher,
-    //             },
-    //         };
-    //         // Can also use replaceOne if we want to replace the entire object
-    //         return this.collection
-    //             .updateOne(filterQuery, updateQuery)
-    //             .then(() => {})
-    //             .catch(() => {
-    //                 throw new Error('Failed to update document');
-    //             });
-    //     }
+    async modifyCourse(course: Playerscore): Promise<void> {
+        const filterQuery: FilterQuery<Playerscore> = { subjectCode: course.subjectCode };
+        const updateQuery: UpdateQuery<Playerscore> = {
+            $set: {
+                subjectCode: course.subjectCode,
+                credits: course.credits,
+                name: course.name,
+                teacher: course.teacher,
+            },
+        };
+        // Can also use replaceOne if we want to replace the entire object
+        return this.collection
+            .updateOne(filterQuery, updateQuery)
+            .then(() => {})
+            .catch(() => {
+                throw new Error('Failed to update document');
+            });
+    }
 
-    //     async getCourseTeacher(sbjCode: string): Promise<string> {
-    //         const filterQuery: FilterQuery<Playerscore> = { subjectCode: sbjCode };
-    //         // Only get the teacher and not any of the other fields
-    //         const projection: FindOneOptions = { projection: { teacher: 1, _id: 0 } };
-    //         return this.collection
-    //             .findOne(filterQuery, projection)
-    //             .then((course: Playerscore) => {
-    //                 return course.teacher;
-    //             })
-    //             .catch(() => {
-    //                 throw new Error('Failed to get data');
-    //             });
-    //     }
+    async getCourseTeacher(sbjCode: string): Promise<string> {
+        const filterQuery: FilterQuery<Playerscore> = { subjectCode: sbjCode };
+        // Only get the teacher and not any of the other fields
+        const projection: FindOneOptions = { projection: { teacher: 1, _id: 0 } };
+        return this.collection
+            .findOne(filterQuery, projection)
+            .then((course: Playerscore) => {
+                return course.teacher;
+            })
+            .catch(() => {
+                throw new Error('Failed to get data');
+            });
+    }
     //     async getCoursesByTeacher(name: string): Promise<Playerscore[]> {
     //         const filterQuery: FilterQuery<Playerscore> = { teacher: name };
     //         return this.collection

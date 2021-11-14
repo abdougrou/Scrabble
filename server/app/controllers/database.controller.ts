@@ -6,7 +6,7 @@ import * as Httpstatus from 'http-status-codes';
 import { Service } from 'typedi';
 
 @Service()
-export class TopscoresController {
+export class DatabaseController {
     router: Router;
 
     constructor(private coursesService: TopscoresService) {
@@ -16,7 +16,7 @@ export class TopscoresController {
     private configureRouter(): void {
         this.router = Router();
 
-        this.router.get('/', async (req: Request, res: Response, next: NextFunction) => {
+        this.router.get('/topscores', async (req: Request, res: Response, next: NextFunction) => {
             this.coursesService
                 .getAllCourses()
                 .then((courses: Playerscore[]) => {
@@ -25,14 +25,6 @@ export class TopscoresController {
                 .catch((error: Error) => {
                     res.status(Httpstatus.NOT_FOUND).send(error.message);
                 });
-
-            // Can also use the async/await syntax
-            // try {
-            //     const courses = await this.coursesService.getAllCourses();
-            //     res.json(courses);
-            // } catch (error) {
-            //     res.status(Httpstatus.NOT_FOUND).send(error.message);
-            // }
         });
 
         //         this.router.get('/:subjectCode', async (req: Request, res: Response, next: NextFunction) => {
