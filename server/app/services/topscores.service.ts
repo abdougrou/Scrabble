@@ -50,12 +50,12 @@ export class TopscoresService {
      */
     async addPlayer(playerscore: Playerscore): Promise<void> {
         if (playerscore) {
-            if (this.validateSize())
+            if (this.validateSize()) {
                 await this.collection.insertOne(playerscore).catch((error: Error) => {
                     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
                     throw new HttpException('Failed to insert', 500);
                 });
-            else if (await this.validatePlayer(playerscore)) this.replaceLowestPlayer(playerscore);
+            } else if (await this.validatePlayer(playerscore)) this.replaceLowestPlayer(playerscore);
         } else {
             throw new Error('Invalid');
         }
@@ -82,6 +82,18 @@ export class TopscoresService {
             .then(() => {})
             .catch(() => {
                 throw new Error('Failed to update document');
+            });
+    }
+
+    async deleteLowestPlayer(): Promise<void> {
+        this.collection
+            .find()
+            .sort({ score: 1 })
+            .limit(1)
+            .toArray()
+            .then(async (players: Playerscore[]) => {
+                console.log('lowstplayer', players[0]);
+                return await this.collection.findOneAndDelete({ score: players[0].score });
             });
     }
 
@@ -118,18 +130,18 @@ export class TopscoresService {
     //         return subjectCode.startsWith('LOG') || subjectCode.startsWith('INF');
     //     }
     private async validatePlayer(player: Playerscore): Promise<boolean> {
+        this.updateSize();
+        console.log('datasize:', dataSize);
         if ((dataSize = MAX))
-            return (
-                player.score >
-                (await this.collection
-                    .find()
-                    .sort({ score: 1 })
-                    .limit(1)
-                    .toArray()
-                    .then((players: Playerscore[]) => {
-                        return players[0].score;
-                    }))
-            );
+            return this.collection
+                .find()
+                .sort({ score: 1 })
+                .limit(1)
+                .toArray()
+                .then((players: Playerscore[]) => {
+                    console.log('lowest score:', players[0]);
+                    return players[0].score < player.score;
+                });
         else return true;
     }
 

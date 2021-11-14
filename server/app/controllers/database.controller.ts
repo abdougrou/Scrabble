@@ -83,9 +83,22 @@ export class DatabaseController {
         //                 });
         //         });
 
-        this.router.delete('top/:playerName', async (req: Request, res: Response, next: NextFunction) => {
+        this.router.delete('/top/name/:playerName', async (req: Request, res: Response, next: NextFunction) => {
+            console.log(req.params.playerName);
             this.coursesService
                 .deletePlayerByName(req.params.playerName)
+                .then(() => {
+                    res.status(Httpstatus.NO_CONTENT).send();
+                })
+                .catch((error: Error) => {
+                    console.log(error);
+                    res.status(Httpstatus.NOT_FOUND).send(error.message);
+                });
+        });
+
+        this.router.delete('/top/lowest', async (req: Request, res: Response, next: NextFunction) => {
+            this.coursesService
+                .deleteLowestPlayer()
                 .then(() => {
                     res.status(Httpstatus.NO_CONTENT).send();
                 })
