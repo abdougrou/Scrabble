@@ -10,6 +10,8 @@ import { PlayerService } from './player.service';
     providedIn: 'root',
 })
 export class GameManagerInterfaceService {
+    mainPlayer: Player;
+
     isMultiplayer: boolean;
     constructor(
         public soloGameManager: GameManagerService,
@@ -53,5 +55,9 @@ export class GameManagerInterfaceService {
     switchPlayers() {
         if (this.isMultiplayer) this.multiGameManager.switchPlayers();
         else this.soloGameManager.switchPlayers();
+    }
+    exchangeTiles(letters: string, player: Player) {
+        if (this.isMultiplayer) this.multiGameManager.exchangeLetters(letters, player);
+        else this.soloGameManager.exchangeTiles(letters, player);
     }
 }

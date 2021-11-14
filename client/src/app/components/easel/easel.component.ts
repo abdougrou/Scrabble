@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Player } from '@app/classes/player';
 import { EaselTile, TileState } from '@app/classes/tile';
 import { KEYBOARD_EVENT_RECEIVER, MouseButton } from '@app/constants';
+import { GameManagerInterfaceService } from '@app/services/game-manager-interface.service';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { MouseManagerService } from '@app/services/mouse-manager.service';
 import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-manager.service';
@@ -25,6 +26,7 @@ export class EaselComponent implements OnChanges {
     mainPlayerName;
     exchangableTiles = false;
     numTilesReserve;
+    mainPlayer: Player;
 
     constructor(
         readonly playerService: PlayerService,
@@ -32,6 +34,7 @@ export class EaselComponent implements OnChanges {
         private reserve: ReserveService,
         private gameManager: GameManagerService,
         private multiGameManager: MultiplayerGameManagerService,
+        private generalGameManagerService: GameManagerInterfaceService,
         private router: Router,
     ) {
         if (this.router.url === '/multiplayer-game') {
@@ -50,6 +53,7 @@ export class EaselComponent implements OnChanges {
             }
 
         this.numTilesReserve = this.reserve.tileCount;
+        this.mainPlayer = this.generalGameManagerService.mainPlayer;
     }
 
     @HostListener('mousedown', ['$event'])
