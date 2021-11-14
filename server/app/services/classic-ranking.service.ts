@@ -1,19 +1,18 @@
 import { HttpException } from '@app/classes/http.exception';
-import { Playerscore } from '@app/classes/playerscore';
+import { ScoreConfig } from '@app/classes/score-config';
 import { Collection } from 'mongodb';
 import 'reflect-metadata';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
 
-// CHANGE the URL for your database information
-const DATABASE_COLLECTION = 'topscores';
+const DATABASE_COLLECTION = 'classic_ranking';
 const MAX = 5;
 let dataSize = 0;
 @Service()
-export class TopscoresService {
+export class ClassicRankingService {
     constructor(private databaseService: DatabaseService) {}
 
-    get collection(): Collection<Playerscore> {
+    get collection(): Collection<ScoreConfig> {
         return this.databaseService.database.collection(DATABASE_COLLECTION);
     }
 
@@ -21,13 +20,13 @@ export class TopscoresService {
      *
      * @returns all data in the database collection sorted highest first
      */
-    async getAllPlayers(): Promise<Playerscore[]> {
+    async getAllPlayers(): Promise<ScoreConfig[]> {
         return this.collection
             .find({})
             .sort({ score: -1 })
             .limit(MAX)
             .toArray()
-            .then((players: Playerscore[]) => {
+            .then((players: ScoreConfig[]) => {
                 return players;
             });
     }
@@ -37,9 +36,9 @@ export class TopscoresService {
      * @param player player's name
      * @returns player's score template
      */
-    async getPlayerByName(player: string): Promise<Playerscore> {
+    async getPlayerByName(player: string): Promise<ScoreConfig> {
         // NB: This can return null if the course does not exist, you need to handle it
-        return this.collection.findOne({ name: player }).then((playerscore: Playerscore) => {
+        return this.collection.findOne({ name: player }).then((playerscore: ScoreConfig) => {
             return playerscore;
         });
     }
@@ -48,7 +47,7 @@ export class TopscoresService {
      *
      * @param playerscore player's score template. including name and score
      */
-    async addPlayer(playerscore: Playerscore): Promise<void> {
+    async addPlayer(playerscore: ScoreConfig): Promise<void> {
         if (playerscore) {
             if (this.validateSize()) {
                 await this.collection.insertOne(playerscore).catch((error: Error) => {
@@ -75,7 +74,7 @@ export class TopscoresService {
             });
     }
 
-    async replaceLowestPlayer(player: Playerscore): Promise<void> {
+    async replaceLowestPlayer(player: ScoreConfig): Promise<void> {
         // Can also use replaceOne if we want to replace the entire object
         return this.collection
             .findOneAndReplace({ score: { $min: '$score' } }, { name: player.name, score: player.score })
@@ -91,45 +90,13 @@ export class TopscoresService {
             .sort({ score: 1 })
             .limit(1)
             .toArray()
-            .then(async (players: Playerscore[]) => {
+            .then(async (players: ScoreConfig[]) => {
                 console.log('lowstplayer', players[0]);
                 return await this.collection.findOneAndDelete({ score: players[0].score });
             });
     }
 
-    // async getCourseTeacher(sbjCode: string): Promise<string> {
-    //     const filterQuery: FilterQuery<Playerscore> = { subjectCode: sbjCode };
-    //     // Only get the teacher and not any of the other fields
-    //     const projection: FindOneOptions = { projection: { teacher: 1, _id: 0 } };
-    //     return this.collection
-    //         .findOne(filterQuery, projection)
-    //         .then((course: Playerscore) => {
-    //             return course.teacher;
-    //         })
-    //         .catch(() => {
-    //             throw new Error('Failed to get data');
-    //         });
-    // }
-    //     async getCoursesByTeacher(name: string): Promise<Playerscore[]> {
-    //         const filterQuery: FilterQuery<Playerscore> = { teacher: name };
-    //         return this.collection
-    //             .find(filterQuery)
-    //             .toArray()
-    //             .then((courses: Playerscore[]) => {
-    //                 return courses;
-    //             })
-    //             .catch(() => {
-    //                 throw new Error('No courses for that teacher');
-    //             });
-    //     }
-
-    //     private validateCourse(course: Playerscore): boolean {
-    //         return this.validateCode(course.subjectCode) && this.validateCredits(course.credits);
-    //     }
-    //     private validateCode(subjectCode: string): boolean {
-    //         return subjectCode.startsWith('LOG') || subjectCode.startsWith('INF');
-    //     }
-    private async validatePlayer(player: Playerscore): Promise<boolean> {
+    private async validatePlayer(player: ScoreConfig): Promise<boolean> {
         this.updateSize();
         console.log('datasize:', dataSize);
         if ((dataSize = MAX))
@@ -138,7 +105,7 @@ export class TopscoresService {
                 .sort({ score: 1 })
                 .limit(1)
                 .toArray()
-                .then((players: Playerscore[]) => {
+                .then((players: ScoreConfig[]) => {
                     console.log('lowest score:', players[0]);
                     return players[0].score < player.score;
                 });

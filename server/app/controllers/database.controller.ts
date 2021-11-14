@@ -1,7 +1,8 @@
 /* eslint-disable deprecation/deprecation */
 /* eslint-disable import/no-deprecated */
-import { Playerscore } from '@app/classes/playerscore';
-import { TopscoresService } from '@app/services/topscores.service';
+import { ScoreConfig } from '@app/classes/score-config';
+import { ClassicRankingService } from '@app/services/classic-ranking.service';
+import { Log2990RankingService } from '@app/services/log2990-ranking.service';
 import { NextFunction, Request, Response, Router } from 'express';
 import * as Httpstatus from 'http-status-codes';
 import { Service } from 'typedi';
@@ -10,7 +11,7 @@ import { Service } from 'typedi';
 export class DatabaseController {
     router: Router;
 
-    constructor(private coursesService: TopscoresService) {
+    constructor(private classicRanking: ClassicRankingService, private log2990Ranking: Log2990RankingService) {
         this.configureRouter();
     }
 
@@ -20,10 +21,10 @@ export class DatabaseController {
         /**
          * returns all players ordered according to score. Highest first
          */
-        this.router.get('/top', async (req: Request, res: Response, next: NextFunction) => {
-            this.coursesService
+        this.router.get('/ranking/classic', async (req: Request, res: Response, next: NextFunction) => {
+            this.classicRanking
                 .getAllPlayers()
-                .then((courses: Playerscore[]) => {
+                .then((courses: ScoreConfig[]) => {
                     res.json(courses);
                 })
                 .catch((error: Error) => {
@@ -31,23 +32,35 @@ export class DatabaseController {
                 });
         });
 
-        //         this.router.get('/:subjectCode', async (req: Request, res: Response, next: NextFunction) => {
-        //             this.coursesService
-        //                 .getCourse(req.params.subjectCode)
-        //                 .then((course: Playerscore) => {
-        //                     res.json(course);
-        //                 })
-        //                 .catch((error: Error) => {
-        //                     res.status(Httpstatus.NOT_FOUND).send(error.message);
-        //                 });
-        //         });
+        this.router.get('/ranking/log2990', async (req: Request, res: Response, next: NextFunction) => {
+            this.log2990Ranking
+                .getAllPlayers()
+                .then((courses: ScoreConfig[]) => {
+                    res.json(courses);
+                })
+                .catch((error: Error) => {
+                    res.status(Httpstatus.NOT_FOUND).send(error.message);
+                });
+        });
 
         /**
          * adds a player to the top list
          */
-        this.router.post('/top', async (req: Request, res: Response, next: NextFunction) => {
+        this.router.post('/ranking/classic', async (req: Request, res: Response, next: NextFunction) => {
             console.log(req.body);
-            this.coursesService
+            this.classicRanking
+                .addPlayer(req.body)
+                .then(() => {
+                    res.status(Httpstatus.CREATED).send();
+                })
+                .catch((error: Error) => {
+                    res.status(Httpstatus.NOT_FOUND).send(error.message);
+                });
+        });
+
+        this.router.post('/ranking/log2990', async (req: Request, res: Response, next: NextFunction) => {
+            console.log(req.body);
+            this.log2990Ranking
                 .addPlayer(req.body)
                 .then(() => {
                     res.status(Httpstatus.CREATED).send();
@@ -62,7 +75,7 @@ export class DatabaseController {
          */
         this.router.put('/top', async (req: Request, res: Response, next: NextFunction) => {
             console.log(req.body);
-            this.coursesService
+            this.classicRanking
                 .addPlayer(req.body)
                 .then(() => {
                     res.status(Httpstatus.CREATED).send();
@@ -72,20 +85,9 @@ export class DatabaseController {
                 });
         });
 
-        //         this.router.patch('/', async (req: Request, res: Response, next: NextFunction) => {
-        //             this.coursesService
-        //                 .modifyCourse(req.body)
-        //                 .then(() => {
-        //                     res.sendStatus(Httpstatus.OK);
-        //                 })
-        //                 .catch((error: Error) => {
-        //                     res.status(Httpstatus.NOT_FOUND).send(error.message);
-        //                 });
-        //         });
-
-        this.router.delete('/top/name/:playerName', async (req: Request, res: Response, next: NextFunction) => {
+        this.router.delete('/ranking/classic/:playerName', async (req: Request, res: Response, next: NextFunction) => {
             console.log(req.params.playerName);
-            this.coursesService
+            this.classicRanking
                 .deletePlayerByName(req.params.playerName)
                 .then(() => {
                     res.status(Httpstatus.NO_CONTENT).send();
@@ -96,8 +98,8 @@ export class DatabaseController {
                 });
         });
 
-        this.router.delete('/top/lowest', async (req: Request, res: Response, next: NextFunction) => {
-            this.coursesService
+        this.router.delete('/ranking/classic/lowest', async (req: Request, res: Response, next: NextFunction) => {
+            this.classicRanking
                 .deleteLowestPlayer()
                 .then(() => {
                     res.status(Httpstatus.NO_CONTENT).send();
@@ -108,26 +110,16 @@ export class DatabaseController {
                 });
         });
 
-        //         this.router.get('/teachers/code/:subjectCode', async (req: Request, res: Response, next: NextFunction) => {
-        //             this.coursesService
-        //                 .getCourseTeacher(req.params.subjectCode)
-        //                 .then((teacher: string) => {
-        //                     res.send(teacher);
-        //                 })
-        //                 .catch((error: Error) => {
-        //                     res.status(Httpstatus.NOT_FOUND).send(error.message);
-        //                 });
-        //         });
-
-        //         this.router.get('/teachers/name/:name', async (req: Request, res: Response, next: NextFunction) => {
-        //             this.coursesService
-        //                 .getCoursesByTeacher(req.params.name)
-        //                 .then((courses: Playerscore[]) => {
-        //                     res.send(courses);
-        //                 })
-        //                 .catch((error: Error) => {
-        //                     res.status(Httpstatus.NOT_FOUND).send(error.message);
-        //                 });
-        //         });
+        this.router.delete('/ranking/log2990/lowest', async (req: Request, res: Response, next: NextFunction) => {
+            this.log2990Ranking
+                .deleteLowestPlayer()
+                .then(() => {
+                    res.status(Httpstatus.NO_CONTENT).send();
+                })
+                .catch((error: Error) => {
+                    console.log(error);
+                    res.status(Httpstatus.NOT_FOUND).send(error.message);
+                });
+        });
     }
 }

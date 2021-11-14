@@ -1,4 +1,4 @@
-export class Playerscore {
+export class ScoreConfig {
     name: string;
     score: number;
 }
