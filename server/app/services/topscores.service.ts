@@ -1,7 +1,6 @@
 import { HttpException } from '@app/classes/http.exception';
 import { Playerscore } from '@app/classes/playerscore';
 import { Collection } from 'mongodb';
-import { FilterQuery, UpdateQuery } from 'mongoose';
 import 'reflect-metadata';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
@@ -24,8 +23,8 @@ export class TopscoresService {
         return this.collection
             .find({})
             .toArray()
-            .then((courses: Playerscore[]) => {
-                return courses;
+            .then((players: Playerscore[]) => {
+                return players;
             });
     }
 
@@ -34,7 +33,7 @@ export class TopscoresService {
      * @param player player's name
      * @returns player's score template
      */
-    async getCourse(player: string): Promise<Playerscore> {
+    async getPlayerByName(player: string): Promise<Playerscore> {
         // NB: This can return null if the course does not exist, you need to handle it
         return this.collection.findOne({ name: player }).then((playerscore: Playerscore) => {
             return playerscore;
@@ -45,7 +44,7 @@ export class TopscoresService {
      *
      * @param playerscore player's score template. including name and score
      */
-    async addCourse(playerscore: Playerscore): Promise<void> {
+    async addPlayer(playerscore: Playerscore): Promise<void> {
         if (playerscore) {
             await this.collection.insertOne(playerscore).catch((error: Error) => {
                 // eslint-disable-next-line @typescript-eslint/no-magic-numbers
@@ -56,10 +55,10 @@ export class TopscoresService {
         }
     }
 
-    async deleteCourse(sbjCode: string): Promise<void> {
+    async deletePlayerByName(player: string): Promise<void> {
         return this.collection
-            .findOneAndDelete({ name: sbjCode })
-            .then((res: FindAndModifyWriteOpResultObject<Playerscore>) => {
+            .findOneAndDelete({ name: player })
+            .then((res) => {
                 if (!res.value) {
                     throw new Error('Could not find course');
                 }
@@ -69,38 +68,38 @@ export class TopscoresService {
             });
     }
 
-    async modifyCourse(course: Playerscore): Promise<void> {
-        const filterQuery: FilterQuery<Playerscore> = { subjectCode: course.subjectCode };
-        const updateQuery: UpdateQuery<Playerscore> = {
-            $set: {
-                subjectCode: course.subjectCode,
-                credits: course.credits,
-                name: course.name,
-                teacher: course.teacher,
-            },
-        };
-        // Can also use replaceOne if we want to replace the entire object
-        return this.collection
-            .updateOne(filterQuery, updateQuery)
-            .then(() => {})
-            .catch(() => {
-                throw new Error('Failed to update document');
-            });
-    }
+    // async modifyCourse(course: Playerscore): Promise<void> {
+    //     const filterQuery: FilterQuery<Playerscore> = { subjectCode: course.subjectCode };
+    //     const updateQuery: UpdateQuery<Playerscore> = {
+    //         $set: {
+    //             subjectCode: course.subjectCode,
+    //             credits: course.credits,
+    //             name: course.name,
+    //             teacher: course.teacher,
+    //         },
+    //     };
+    //     // Can also use replaceOne if we want to replace the entire object
+    //     return this.collection
+    //         .updateOne(filterQuery, updateQuery)
+    //         .then(() => {})
+    //         .catch(() => {
+    //             throw new Error('Failed to update document');
+    //         });
+    // }
 
-    async getCourseTeacher(sbjCode: string): Promise<string> {
-        const filterQuery: FilterQuery<Playerscore> = { subjectCode: sbjCode };
-        // Only get the teacher and not any of the other fields
-        const projection: FindOneOptions = { projection: { teacher: 1, _id: 0 } };
-        return this.collection
-            .findOne(filterQuery, projection)
-            .then((course: Playerscore) => {
-                return course.teacher;
-            })
-            .catch(() => {
-                throw new Error('Failed to get data');
-            });
-    }
+    // async getCourseTeacher(sbjCode: string): Promise<string> {
+    //     const filterQuery: FilterQuery<Playerscore> = { subjectCode: sbjCode };
+    //     // Only get the teacher and not any of the other fields
+    //     const projection: FindOneOptions = { projection: { teacher: 1, _id: 0 } };
+    //     return this.collection
+    //         .findOne(filterQuery, projection)
+    //         .then((course: Playerscore) => {
+    //             return course.teacher;
+    //         })
+    //         .catch(() => {
+    //             throw new Error('Failed to get data');
+    //         });
+    // }
     //     async getCoursesByTeacher(name: string): Promise<Playerscore[]> {
     //         const filterQuery: FilterQuery<Playerscore> = { teacher: name };
     //         return this.collection
