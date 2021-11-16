@@ -1,6 +1,7 @@
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatTableModule } from '@angular/material/table';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { PlayAreaComponent } from '@app/components/play-area/play-area.component';
@@ -21,6 +22,7 @@ import { MultiGameConfigComponent } from './components/multi-game-config/multi-g
 import { MultiplayerJoinFormComponent } from './components/multiplayer-join-form/multiplayer-join-form.component';
 import { MultiplayerRoomsComponent } from './components/multiplayer-rooms/multiplayer-rooms.component';
 import { PlayerInfoComponent } from './components/player-info/player-info.component';
+import { RankingPopupComponent } from './components/ranking-popup/ranking-popup.component';
 import { WaitingPopupComponent } from './components/waiting-popup/waiting-popup.component';
 import { MultiplayerGamePageComponent } from './pages/multiplayer-game-page/multiplayer-game-page.component';
 
@@ -50,8 +52,18 @@ import { MultiplayerGamePageComponent } from './pages/multiplayer-game-page/mult
         WaitingPopupComponent,
         MultiplayerJoinFormComponent,
         MultiplayerGamePageComponent,
+        RankingPopupComponent,
     ],
-    imports: [AppMaterialModule, AppRoutingModule, BrowserAnimationsModule, BrowserModule, FormsModule, ReactiveFormsModule, HttpClientModule],
+    imports: [
+        AppMaterialModule,
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        BrowserModule,
+        FormsModule,
+        ReactiveFormsModule,
+        HttpClientModule,
+        MatTableModule,
+    ],
     providers: [],
     bootstrap: [AppComponent],
 })

@@ -1,8 +1,10 @@
+/* eslint-disable no-console */
+/* eslint-disable no-unused-vars */
 /* eslint-disable deprecation/deprecation */
 /* eslint-disable import/no-deprecated */
-import { ScoreConfig } from '@app/classes/score-config';
 import { ClassicRankingService } from '@app/services/classic-ranking.service';
 import { Log2990RankingService } from '@app/services/log2990-ranking.service';
+import { ScoreConfig } from '@common/score-config';
 import { NextFunction, Request, Response, Router } from 'express';
 import * as Httpstatus from 'http-status-codes';
 import { Service } from 'typedi';

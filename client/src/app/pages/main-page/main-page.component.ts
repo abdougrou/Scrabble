@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { GameMode } from '@app/classes/game-config';
 import { ModeSelectionComponent } from '@app/components/mode-selection/mode-selection.component';
+import { RankingPopupComponent } from '@app/components/ranking-popup/ranking-popup.component';
 import { DIALOG_HEIGHT, DIALOG_WIDTH } from '@app/constants';
 import { CommunicationService } from '@app/services/communication.service';
 import { BehaviorSubject } from 'rxjs';
@@ -27,6 +28,13 @@ export class MainPageComponent {
     // Press LOG2990 Button
     startLOG() {
         this.start(GameMode.LOG2990);
+    }
+
+    openRanks() {
+        this.dialog.open(RankingPopupComponent, {
+            height: DIALOG_HEIGHT,
+            width: DIALOG_WIDTH,
+        });
     }
 
     // Set the game mode then open the first popup

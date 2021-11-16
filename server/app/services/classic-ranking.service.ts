@@ -1,5 +1,5 @@
 import { HttpException } from '@app/classes/http.exception';
-import { ScoreConfig } from '@app/classes/score-config';
+import { ScoreConfig } from '@common/score-config';
 import { Collection } from 'mongodb';
 import 'reflect-metadata';
 import { Service } from 'typedi';

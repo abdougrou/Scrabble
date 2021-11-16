@@ -7,6 +7,7 @@ import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
 import { LETTER_POINTS } from '@app/constants';
 import { LobbyConfig } from '@common/lobby-config';
+import { ScoreConfig } from '@common/score-config';
 import {
     ExchangeLettersMessage,
     JoinLobbyMessage,
@@ -154,6 +155,18 @@ export class CommunicationService {
         return this.http
             .put<{ key: string }>('http://localhost:3000/api/lobby', lobbyConfig, this.httpOptions)
             .pipe(catchError(this.handleError<{ key: string }>('putLobby')));
+    }
+
+    getClassicRanking(): Observable<ScoreConfig[]> {
+        return this.http
+            .get<ScoreConfig[]>('http://localhost:3000/data/ranking/classic', this.httpOptions)
+            .pipe(catchError(this.handleError<ScoreConfig[]>('getClassicRanking')));
+    }
+
+    getLog2990Ranking(): Observable<ScoreConfig[]> {
+        return this.http
+            .get<ScoreConfig[]>('http://localhost:3000/data/ranking/log2990', this.httpOptions)
+            .pipe(catchError(this.handleError<ScoreConfig[]>('getClassicRanking')));
     }
 
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
