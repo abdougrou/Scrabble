@@ -55,39 +55,16 @@ export class ClassicRankingService {
      */
     async addPlayer(playerscore: ScoreConfig): Promise<void> {
         if (playerscore) {
-            if (this.validateSize()) {
-                await this.collection.insertOne(playerscore).catch((error: Error) => {
-                    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-                    throw new HttpException('Failed to insert', 500);
-                });
-            } else if (await this.validatePlayer(playerscore)) this.replaceLowestPlayer(playerscore);
+            if (await this.validateSize()) {
+                if (await this.validatePlayer(playerscore)) this.deleteLowestPlayer();
+            }
+            await this.collection.insertOne(playerscore).catch((error: Error) => {
+                // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+                throw new HttpException('Failed to insert', 500);
+            });
         } else {
             throw new Error('Invalid');
         }
-        this.updateSize();
-    }
-
-    async deletePlayerByName(player: string): Promise<void> {
-        return this.collection
-            .findOneAndDelete({ name: player })
-            .then((res) => {
-                if (!res.value) {
-                    throw new Error('Could not find course');
-                }
-            })
-            .catch(() => {
-                throw new Error('Failed to delete course');
-            });
-    }
-
-    async replaceLowestPlayer(player: ScoreConfig): Promise<void> {
-        // Can also use replaceOne if we want to replace the entire object
-        return this.collection
-            .findOneAndReplace({ score: { $min: '$score' } }, { name: player.name, score: player.score })
-            .then(() => {})
-            .catch(() => {
-                throw new Error('Failed to update document');
-            });
     }
 
     async deleteLowestPlayer(): Promise<void> {
@@ -97,14 +74,12 @@ export class ClassicRankingService {
             .limit(1)
             .toArray()
             .then(async (players: ScoreConfig[]) => {
-                console.log('lowstplayer', players[0]);
-                return await this.collection.findOneAndDelete({ score: players[0].score });
+                console.log('lowestplayer', players[0]);
+                return this.collection.findOneAndDelete({ score: players[0].score });
             });
     }
 
     private async validatePlayer(player: ScoreConfig): Promise<boolean> {
-        this.updateSize();
-        console.log('datasize:', dataSize);
         if ((dataSize = MAX))
             return this.collection
                 .find()
@@ -118,11 +93,8 @@ export class ClassicRankingService {
         else return true;
     }
 
-    private async updateSize() {
+    private async validateSize() {
         dataSize = await this.collection.find({}).count();
-    }
-
-    private validateSize() {
         return dataSize < MAX;
     }
 }

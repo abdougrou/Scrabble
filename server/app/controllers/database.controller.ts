@@ -46,7 +46,7 @@ export class DatabaseController {
         });
 
         /**
-         * adds a player to the top list
+         * adds a player to the top list, or replaces the lowest player if size = 5
          */
         this.router.post('/ranking/classic', async (req: Request, res: Response, next: NextFunction) => {
             console.log(req.body);
@@ -73,33 +73,8 @@ export class DatabaseController {
         });
 
         /**
-         * TODO: Replaces the player with the lowest score.
+         * deletes lowest player
          */
-        this.router.put('/top', async (req: Request, res: Response, next: NextFunction) => {
-            console.log(req.body);
-            this.classicRanking
-                .addPlayer(req.body)
-                .then(() => {
-                    res.status(Httpstatus.CREATED).send();
-                })
-                .catch((error: Error) => {
-                    res.status(Httpstatus.NOT_FOUND).send(error.message);
-                });
-        });
-
-        this.router.delete('/ranking/classic/:playerName', async (req: Request, res: Response, next: NextFunction) => {
-            console.log(req.params.playerName);
-            this.classicRanking
-                .deletePlayerByName(req.params.playerName)
-                .then(() => {
-                    res.status(Httpstatus.NO_CONTENT).send();
-                })
-                .catch((error: Error) => {
-                    console.log(error);
-                    res.status(Httpstatus.NOT_FOUND).send(error.message);
-                });
-        });
-
         this.router.delete('/ranking/classic/lowest', async (req: Request, res: Response, next: NextFunction) => {
             this.classicRanking
                 .deleteLowestPlayer()
