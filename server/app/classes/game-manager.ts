@@ -34,9 +34,7 @@ export class GameManager {
         if (this.players.length > 1) return false;
         else if (this.players[0]?.name === name) return false;
         const startingLetterCount = 7;
-        console.log('Reserve: ', this.reserve.size);
         const player = { name, easel: new Easel(this.reserve.getRandomLetters(startingLetterCount)), score: 0 };
-        console.log('Player Esael: ', player.easel.toString());
         this.players.push(player);
         return true;
     }
@@ -114,7 +112,9 @@ export class GameManager {
             if (!this.board.getLetter(nextCoord)) {
                 this.board.setLetter(nextCoord, k);
                 const words: string[] = [k];
-                (player.easel as Easel).getLetters(words);
+                (this.players[0].easel as Easel).getLetters(words);
+                const reserveLetters: string[] = this.reserve.getRandomLetters(1);
+                this.players[0].easel.addLetters(reserveLetters);
             }
             points += this.moveGenerator.calculateCrossSum(this.board.data, coord, move.across);
 

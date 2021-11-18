@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Player } from '@app/classes/player';
 import { Vec2 } from '@app/classes/vec2';
 import { LobbyConfig } from '@common/lobby-config';
+import { BehaviorSubject } from 'rxjs';
 import { BoardService } from './board.service';
 import { CommunicationService } from './communication.service';
 import { GridService } from './grid.service';
@@ -11,6 +12,7 @@ import { ReserveService } from './reserve.service';
     providedIn: 'root',
 })
 export class MultiplayerGameManagerService {
+    updatePlayer: BehaviorSubject<string> = new BehaviorSubject('');
     players: Player[] = [];
     turnDuration: number;
     turnDurationLeft: number = 0;
@@ -21,6 +23,8 @@ export class MultiplayerGameManagerService {
     isEnded: boolean;
     endGameMessage: string = '';
     debug: boolean = false;
+    mainPlayer: Player;
+
     constructor(
         public gridService: GridService,
         public communication: CommunicationService,
@@ -48,6 +52,10 @@ export class MultiplayerGameManagerService {
     update() {
         this.communication.update();
         this.gridService.drawBoard();
+    }
+
+    emitChanges() {
+        this.updatePlayer.next('updated');
     }
 
     // startTimer() {

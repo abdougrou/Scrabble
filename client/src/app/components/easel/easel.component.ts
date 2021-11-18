@@ -39,7 +39,7 @@ export class EaselComponent implements OnChanges {
     ) {
         if (this.router.url === '/multiplayer-game') {
             this.players = this.multiGameManager.players;
-            if (this.multiGameManager.getMainPlayer().easel.tiles) this.tiles = this.multiGameManager.getMainPlayer().easel.tiles;
+            this.tiles = this.generalGameManagerService.mainPlayer.easel.tiles;
             this.mainPlayerName = this.multiGameManager.getMainPlayer().name;
         } else {
             this.mainPlayerName = this.gameManager.mainPlayerName;
@@ -54,6 +54,9 @@ export class EaselComponent implements OnChanges {
 
         this.numTilesReserve = this.reserve.tileCount;
         this.mainPlayer = this.generalGameManagerService.mainPlayer;
+        this.multiGameManager.updatePlayer.asObservable().subscribe((msg) => {
+            this.update(msg);
+        });
     }
 
     @HostListener('mousedown', ['$event'])
@@ -99,6 +102,11 @@ export class EaselComponent implements OnChanges {
         }
     }
 
+    update(msg: string) {
+        if (msg === 'updated') {
+            this.tiles = this.generalGameManagerService.mainPlayer.easel.tiles;
+        }
+    }
     resetTileState() {
         for (const easelTile of this.tiles) {
             easelTile.state = TileState.None;
@@ -240,6 +248,7 @@ export class EaselComponent implements OnChanges {
         }
         if (this.router.url === '/multiplayer-game') {
             this.multiGameManager.exchangeLetters(tilesToExchange, this.multiGameManager.getMainPlayer());
+            this.multiGameManager.switchPlayers();
         } else {
             this.gameManager.exchangeTiles(tilesToExchange, this.playerService.getPlayerByName(this.mainPlayerName));
         }

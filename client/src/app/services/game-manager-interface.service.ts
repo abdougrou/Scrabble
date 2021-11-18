@@ -20,6 +20,16 @@ export class GameManagerInterfaceService {
         public router: Router,
     ) {
         this.isMultiplayer = this.router.url === '/multiplayer-game';
+        this.mainPlayer = this.getMainPlayer();
+        this.multiGameManager.updatePlayer.asObservable().subscribe((msg) => {
+            this.update(msg);
+        });
+    }
+
+    update(msg: string) {
+        if (msg === 'updated') {
+            this.mainPlayer = this.getMainPlayer();
+        }
     }
 
     getMainPlayer(): Player {

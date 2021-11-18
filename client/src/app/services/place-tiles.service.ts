@@ -93,7 +93,7 @@ export class PlaceTilesService {
                                 easelLetter = '*';
                                 key = key.toLowerCase();
                             }
-                            if (this.generalGameManager.getCurrentPlayer().easel.containsTiles(easelLetter)) {
+                            if (this.generalGameManager.mainPlayer.easel.containsTiles(easelLetter)) {
                                 this.putEaselTileOnBoard(easelLetter, key);
                                 this.findNextEmptyTile();
                             }
@@ -110,7 +110,7 @@ export class PlaceTilesService {
             const tileToRemove: TileCoords = this.tilesPlacedOnBoard.pop() as TileCoords;
             const tilesToReturn: Tile = this.tilesTakenFromEasel.pop() as Tile;
 
-            this.generalGameManager.getCurrentPlayer().easel.addTiles([tilesToReturn]);
+            this.generalGameManager.mainPlayer.easel.addTiles([tilesToReturn]);
             this.boardService.board.delete(this.boardService.coordToKey(tileToRemove.coords));
 
             this.removeIndicator();
@@ -173,7 +173,12 @@ export class PlaceTilesService {
             this.directionIndicator.tile === DOWN_ARROW,
             this.generalGameManager.getCurrentPlayer(),
         );
-        this.endPlacement();
+        this.removeIndicator();
+        this.directionIndicator.coords = INVALID_COORDS;
+        this.directionIndicator.tile = RIGHT_ARROW;
+        this.tilesPlacedOnBoard.splice(0, this.tilesPlacedOnBoard.length);
+        this.tilesTakenFromEasel.splice(0, this.tilesTakenFromEasel.length);
+        this.gridService.drawBoard();
     }
 
     endPlacement() {
@@ -189,9 +194,7 @@ export class PlaceTilesService {
     }
 
     putEaselTileOnBoard(easelLetter: string, boardLetter: string) {
-        const tileTaken: Tile = this.generalGameManager.getCurrentPlayer().easel.getTiles(easelLetter).pop() as Tile;
-        this.generalGameManager.mainPlayer = this.generalGameManager.getMainPlayer();
-        console.log(this.generalGameManager.getCurrentPlayer().easel.tiles);
+        const tileTaken: Tile = this.generalGameManager.mainPlayer.easel.getTiles(easelLetter).pop() as Tile;
 
         const tileToPlace: Tile = { letter: boardLetter, points: tileTaken.points };
         this.removeIndicator();
@@ -219,6 +222,7 @@ export class PlaceTilesService {
         this.directionIndicator.coords = INVALID_COORDS;
         return false;
     }
+
     validateWordPosition(): boolean {
         //  First placement
         const boardCenter = 7;

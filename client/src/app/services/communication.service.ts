@@ -19,7 +19,7 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
-    UpdateMessage
+    UpdateMessage,
 } from '@common/socket-messages';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -101,6 +101,7 @@ export class CommunicationService {
             this.gameManager.board.multiplayerBoard = gameManager.boardData;
             this.gameManager.board.multiplayerBoardToBoard();
             this.gameManager.gridService.drawBoard();
+            this.gameManager.emitChanges();
         });
     }
 
