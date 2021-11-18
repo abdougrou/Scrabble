@@ -29,7 +29,7 @@ export class MainPageComponent {
     startLOG() {
         this.start(GameMode.LOG2990);
     }
-
+    // Press Meilleurs scores button
     openRanks() {
         this.dialog.open(RankingPopupComponent, {
             height: DIALOG_HEIGHT,

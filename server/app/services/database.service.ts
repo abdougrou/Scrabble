@@ -3,7 +3,6 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Service } from 'typedi';
 const DATABASE_URL = 'mongodb+srv://taha:taha@cluster0.13fmz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
 const DATABASE_NAME = 'scrabble';
-// const DATABASE_COLLECTION = 'topscores';
 
 @Service()
 export class DatabaseService {

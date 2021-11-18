@@ -59,3 +59,11 @@ export const POINT_GRID: number[][] = [
 ];
 
 export const GRID_SIZE = 15;
+
+export const DEFAULT_SCOREBOARD = [
+    { name: 'MafiaBoss', score: 1 },
+    { name: 'Burberry', score: 3 },
+    { name: 'abidine', score: 5 },
+    { name: 'imacutiepie', score: 10 },
+    { name: 'NoobMaster69', score: 12 },
+];

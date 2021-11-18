@@ -1,4 +1,5 @@
 import { HttpException } from '@app/classes/http.exception';
+import { DEFAULT_SCOREBOARD } from '@app/constants';
 import { ScoreConfig } from '@common/score-config';
 import { Collection } from 'mongodb';
 import 'reflect-metadata';
@@ -14,6 +15,11 @@ export class ClassicRankingService {
 
     get collection(): Collection<ScoreConfig> {
         return this.databaseService.database.collection(DATABASE_COLLECTION);
+    }
+
+    async reset() {
+        this.collection.deleteMany({});
+        this.collection.insertMany(DEFAULT_SCOREBOARD);
     }
 
     /**

@@ -123,5 +123,26 @@ export class DatabaseController {
                     res.status(Httpstatus.NOT_FOUND).send(error.message);
                 });
         });
+
+        this.router.delete('/ranking/reset', async (req: Request, res: Response, next: NextFunction) => {
+            this.classicRanking
+                .reset()
+                .then(() => {
+                    res.status(Httpstatus.NO_CONTENT).send();
+                })
+                .catch((error: Error) => {
+                    console.log(error);
+                    res.status(Httpstatus.NOT_FOUND).send(error.message);
+                });
+            this.log2990Ranking
+                .reset()
+                .then(() => {
+                    res.status(Httpstatus.NO_CONTENT).send();
+                })
+                .catch((error: Error) => {
+                    console.log(error);
+                    res.status(Httpstatus.NOT_FOUND).send(error.message);
+                });
+        });
     }
 }
