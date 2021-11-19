@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Player } from '@app/classes/player';
 import { Vec2 } from '@app/classes/vec2';
+import { SECOND_MD } from '@app/constants';
 import { LobbyConfig } from '@common/lobby-config';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, timer } from 'rxjs';
 import { BoardService } from './board.service';
 import { CommunicationService } from './communication.service';
 import { GridService } from './grid.service';
@@ -41,7 +42,7 @@ export class MultiplayerGameManagerService {
         this.turnDurationLeft = lobbyConfig.turnDuration;
         this.isEnded = false;
         this.communication.update();
-        // this.startTimer();
+        this.startTimer();
     }
 
     getMainPlayer(): Player {
@@ -58,9 +59,15 @@ export class MultiplayerGameManagerService {
         this.updatePlayer.next('updated');
     }
 
-    // startTimer() {
-    //     this.communication.startTimer();
-    // }
+    startTimer() {
+        const source = timer(0, SECOND_MD);
+        source.subscribe(() => {
+            this.turnDurationLeft -= 1;
+            if (this.turnDurationLeft === 0) {
+                this.switchPlayers();
+            }
+        });
+    }
 
     switchPlayers() {
         this.communication.switchPlayers();

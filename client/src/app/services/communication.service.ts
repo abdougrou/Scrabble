@@ -19,7 +19,7 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
-    UpdateMessage,
+    UpdateMessage
 } from '@common/socket-messages';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -44,6 +44,10 @@ export class CommunicationService {
     };
     constructor(private readonly http: HttpClient) {
         this.socket = io.io('ws://localhost:3000');
+
+        this.socket.on(SocketEvent.setTimer, () => {
+            this.gameManager.turnDurationLeft = this.gameManager.turnDuration;
+        });
     }
 
     setGameManager(gameManager: MultiplayerGameManagerService) {
