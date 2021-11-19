@@ -1,6 +1,7 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { AppMaterialModule } from '@app/modules/material.module';
 import { MultiplayerRoomsComponent } from './multiplayer-rooms.component';
 
 describe('MultiplayerRoomsComponent', () => {
@@ -15,7 +16,7 @@ describe('MultiplayerRoomsComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule, MatDialogModule],
+            imports: [HttpClientTestingModule, AppMaterialModule],
             declarations: [MultiplayerRoomsComponent],
             providers: [
                 { provide: MatDialogRef, useValue: dialogMock },

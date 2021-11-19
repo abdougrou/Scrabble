@@ -1,5 +1,6 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { AppMaterialModule } from '@app/modules/material.module';
 import { AbandonPageComponent } from './abandon-page.component';
 
 describe('AbandonPageComponent', () => {
@@ -8,7 +9,7 @@ describe('AbandonPageComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
+            imports: [HttpClientTestingModule, AppMaterialModule],
             declarations: [AbandonPageComponent],
         }).compileComponents();
     });

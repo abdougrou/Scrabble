@@ -6,6 +6,7 @@ import { Player } from '@app/classes/player';
 import { EaselComponent } from '@app/components/easel/easel.component';
 import { PlayAreaComponent } from '@app/components/play-area/play-area.component';
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from '@app/constants';
+import { AppMaterialModule } from '@app/modules/material.module';
 import { BoardService } from '@app/services/board.service';
 import { GridService } from '@app/services/grid.service';
 import { PlayerService } from '@app/services/player.service';
@@ -31,7 +32,7 @@ describe('PlayAreaComponent', () => {
     });
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
+            imports: [HttpClientTestingModule, AppMaterialModule],
             declarations: [PlayAreaComponent, EaselComponent],
             providers: [
                 { provide: PlayerService, useValue: playerService },

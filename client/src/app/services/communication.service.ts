@@ -83,9 +83,6 @@ export class CommunicationService {
         this.update();
     }
 
-    // TODO
-    // startTimer() {}
-
     update() {
         this.socket.emit(SocketEvent.update, { lobbyKey: this.lobbyKey } as UpdateMessage);
         this.socket.on(SocketEvent.update, (gameManager: UpdateGameManagerMessage) => {

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { GameManagerService } from '@app/services/game-manager.service';
 
 @Component({
@@ -7,9 +8,10 @@ import { GameManagerService } from '@app/services/game-manager.service';
     styleUrls: ['./abandon-page.component.scss'],
 })
 export class AbandonPageComponent {
-    constructor(private gameManager: GameManagerService) {}
+    constructor(private gameManager: GameManagerService, private router: Router) {}
 
     quit() {
         this.gameManager.reset();
+        this.router.navigateByUrl('./home');
     }
 }
