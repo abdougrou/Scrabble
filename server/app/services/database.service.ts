@@ -7,8 +7,8 @@ const DATABASE_NAME = 'scrabble';
 @Service()
 export class DatabaseService {
     mongoServer: MongoMemoryServer;
-    private db: Db;
-    private client: MongoClient;
+    db: Db;
+    client: MongoClient;
 
     private options: MongoClientOptions = {};
 
