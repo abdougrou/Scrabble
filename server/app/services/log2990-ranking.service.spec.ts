@@ -65,11 +65,35 @@ describe('Log2990 ranking service', () => {
         }
     });
 
-    it('should delete an existing course data if a valid subjectCode is sent', async () => {
+    it('deleteLowestplayer should delete the lowest scored player', async () => {
         await log2990RankingService.deleteLowestPlayer();
-        const courses = await log2990RankingService.collection.find({}).toArray();
-        console.log(courses);
-        expect(courses.length).to.equal(0);
+        const players = await log2990RankingService.collection.find({}).toArray();
+        expect(players.length).to.equal(0);
+    });
+
+    it('reset should reset the database to its default values', async () => {
+        await log2990RankingService.reset();
+        const players = await log2990RankingService.collection.find({}).toArray();
+        expect(players.length).to.equal(5);
+    });
+
+    it('adding a player after max size should delete the lowest', async () => {
+        const player: ScoreConfig = {
+            name: 'Jean',
+            score: 100,
+        };
+        await log2990RankingService.reset();
+        await log2990RankingService.addPlayer(player);
+        const players = await log2990RankingService.collection.find({}).toArray();
+        expect(players.length).to.equal(5);
+    });
+
+    it('Validate player should return true if max size isnt reached ', async () => {
+        const player: ScoreConfig = {
+            name: 'Jean',
+            score: 100,
+        };
+        expect(await log2990RankingService.validatePlayer(player)).to.equal(true);
     });
 
     // Error handling
@@ -91,6 +115,15 @@ describe('Log2990 ranking service', () => {
                 score: 7,
             };
             expect(log2990RankingService.addPlayer(newCourse)).to.eventually.be.rejectedWith(Error);
+        });
+
+        it('should throw an error if we try to add a player with invalid values', async () => {
+            await client.close();
+            const newPlayer = {
+                name: 'sdf',
+                score: -1,
+            };
+            expect(log2990RankingService.addPlayer(newPlayer)).to.eventually.be.rejectedWith(Error);
         });
     });
 });

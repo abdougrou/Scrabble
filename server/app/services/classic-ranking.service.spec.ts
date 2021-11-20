@@ -35,62 +35,95 @@ describe('Classic ranking service', () => {
     });
 
     it('should get all courses from DB', async () => {
-        const courses = await classicRankingService.getAllPlayers();
-        expect(courses.length).to.equal(1);
-        expect(scoreConfig).to.deep.equals(courses[0]);
+        const players = await classicRankingService.getAllPlayers();
+        expect(players.length).to.equal(1);
+        expect(scoreConfig).to.deep.equals(players[0]);
     });
 
     it('should insert a new course', async () => {
-        const secondCourse: ScoreConfig = {
+        const secondPlayer: ScoreConfig = {
             name: 'Jean',
             score: 28,
         };
 
-        await classicRankingService.addPlayer(secondCourse);
-        const courses = await classicRankingService.collection.find({}).toArray();
-        expect(courses.length).to.equal(2);
-        expect(courses.find((x) => x.name === secondCourse.name)).to.deep.equals(secondCourse);
+        await classicRankingService.addPlayer(secondPlayer);
+        const players = await classicRankingService.collection.find({}).toArray();
+        expect(players.length).to.equal(2);
+        expect(players.find((x) => x.name === secondPlayer.name)).to.deep.equals(secondPlayer);
     });
 
     it('should not insert a new course if it has an invalid subjectCode and credits', async () => {
-        const secondCourse: ScoreConfig = {
+        const secondPlayer: ScoreConfig = {
             name: 'Jean',
             score: -1,
         };
         try {
-            await classicRankingService.addPlayer(secondCourse);
+            await classicRankingService.addPlayer(secondPlayer);
         } catch {
-            const courses = await classicRankingService.collection.find({}).toArray();
-            expect(courses.length).to.equal(1);
+            const players = await classicRankingService.collection.find({}).toArray();
+            expect(players.length).to.equal(1);
         }
     });
 
-    it('should delete an existing course data if a valid subjectCode is sent', async () => {
+    it('deleteLowestplayer should delete the lowest scored player', async () => {
         await classicRankingService.deleteLowestPlayer();
-        await classicRankingService.deleteLowestPlayer();
-        const courses = await classicRankingService.collection.find({}).toArray();
-        expect(courses.length).to.equal(0);
+        const players = await classicRankingService.collection.find({}).toArray();
+        expect(players.length).to.equal(0);
+    });
+
+    it('reset should reset the database to its default values', async () => {
+        await classicRankingService.reset();
+        const players = await classicRankingService.collection.find({}).toArray();
+        expect(players.length).to.equal(5);
+    });
+
+    it('adding a player after max size should delete the lowest', async () => {
+        const player: ScoreConfig = {
+            name: 'Jean',
+            score: 100,
+        };
+        await classicRankingService.reset();
+        await classicRankingService.addPlayer(player);
+        const players = await classicRankingService.collection.find({}).toArray();
+        expect(players.length).to.equal(5);
+    });
+
+    it('Validate player should return true if max size isnt reached ', async () => {
+        const player: ScoreConfig = {
+            name: 'Jean',
+            score: 100,
+        };
+        expect(await classicRankingService.validatePlayer(player)).to.equal(true);
     });
 
     // Error handling
     describe('Error handling', async () => {
-        it('should throw an error if we try to get all courses on a closed connection', async () => {
+        it('should throw an error if we try to get all players on a closed connection', async () => {
             await client.close();
             expect(classicRankingService.getAllPlayers()).to.eventually.be.rejectedWith(Error);
         });
 
-        it('should throw an error if we try to delete a specific course on a closed connection', async () => {
+        it('should throw an error if we try to delete lowest player', async () => {
             await client.close();
             expect(classicRankingService.deleteLowestPlayer()).to.eventually.be.rejectedWith(Error);
         });
 
-        it('should throw an error if we try to get all courses of a specific teacher on a closed connection', async () => {
+        it('should throw an error if we try to get all players when connection closed', async () => {
             await client.close();
             const newCourse = {
                 name: 'John Doe',
                 score: 7,
             };
             expect(classicRankingService.addPlayer(newCourse)).to.eventually.be.rejectedWith(Error);
+        });
+
+        it('should throw an error if we try to add a player with invalid values', async () => {
+            await client.close();
+            const newPlayer = {
+                name: 'sdf',
+                score: -1,
+            };
+            expect(classicRankingService.addPlayer(newPlayer)).to.eventually.be.rejectedWith(Error);
         });
     });
 });

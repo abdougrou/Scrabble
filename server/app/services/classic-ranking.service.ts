@@ -1,16 +1,16 @@
 import { HttpException } from '@app/classes/http.exception';
 import { DEFAULT_SCOREBOARD } from '@app/constants';
 import { ScoreConfig } from '@common/score-config';
-import { Collection } from 'mongodb';
+import { Collection, ModifyResult } from 'mongodb';
 import 'reflect-metadata';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
 
 const DATABASE_COLLECTION = 'classic_ranking';
 const MAX = 5;
-let dataSize = 0;
 @Service()
 export class ClassicRankingService {
+    dataSize = 0;
     constructor(private databaseService: DatabaseService) {}
 
     get collection(): Collection<ScoreConfig> {
@@ -20,6 +20,7 @@ export class ClassicRankingService {
     async reset() {
         this.collection.deleteMany({});
         this.collection.insertMany(DEFAULT_SCOREBOARD);
+        this.dataSize = 5;
     }
 
     /**
@@ -39,23 +40,11 @@ export class ClassicRankingService {
 
     /**
      *
-     * @param player player's name
-     * @returns player's score template
-     */
-    async getPlayerByName(player: string): Promise<ScoreConfig> {
-        // NB: This can return null if the course does not exist, you need to handle it
-        return this.collection.findOne({ name: player }).then((playerscore: ScoreConfig) => {
-            return playerscore;
-        });
-    }
-
-    /**
-     *
      * @param playerscore player's score template. including name and score
      */
     async addPlayer(playerscore: ScoreConfig): Promise<void> {
         if (this.validateScoreConfig(playerscore)) {
-            if (await this.validateSize()) {
+            if (!(await this.validateSize())) {
                 if (await this.validatePlayer(playerscore)) this.deleteLowestPlayer();
             }
             await this.collection.insertOne(playerscore).catch((error: Error) => {
@@ -67,34 +56,31 @@ export class ClassicRankingService {
         }
     }
 
-    async deleteLowestPlayer(): Promise<void> {
-        this.collection
+    async deleteLowestPlayer(): Promise<ModifyResult<ScoreConfig>> {
+        return this.collection
             .find()
             .sort({ score: 1 })
             .limit(1)
             .toArray()
             .then(async (players: ScoreConfig[]) => {
-                return this.collection.findOneAndDelete({ score: players[0].score });
+                return this.collection.findOneAndDelete(players[0]);
             });
     }
 
-    private async validatePlayer(player: ScoreConfig): Promise<boolean> {
-        if ((dataSize = MAX))
-            return this.collection
-                .find()
-                .sort({ score: 1 })
-                .limit(1)
-                .toArray()
-                .then((players: ScoreConfig[]) => {
-                    console.log('lowest score:', players[0]);
-                    return players[0].score < player.score;
-                });
-        else return true;
+    async validatePlayer(player: ScoreConfig): Promise<boolean> {
+        return this.collection
+            .find()
+            .sort({ score: 1 })
+            .limit(1)
+            .toArray()
+            .then((players: ScoreConfig[]) => {
+                return players[0].score < player.score;
+            });
     }
 
     private async validateSize() {
-        dataSize = await this.collection.find({}).count();
-        return dataSize < MAX;
+        this.dataSize = await this.collection.find({}).count();
+        return this.dataSize < MAX;
     }
 
     private validateScoreConfig(player: ScoreConfig) {
