@@ -46,6 +46,7 @@ export class MultiplayerRoomsComponent {
             turnDuration: DURATION_INIT,
             bonusEnabled: false,
             dictionary: Dictionary.French,
+            gameMode: this.data.mode,
         };
 
         return this.dialog.open(MultiGameConfigComponent, {

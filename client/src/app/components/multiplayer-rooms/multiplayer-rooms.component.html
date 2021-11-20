@@ -1,7 +1,7 @@
 <div class="container">
     <div class="lobbies">
         <div *ngFor="let lobby of lobbies" class="lobby">
-            <mat-card>
+            <mat-card *ngIf="lobby.gameMode === data.mode">
                 <mat-card-title-group>
                     <mat-card-title>{{ lobby.host }}</mat-card-title>
                     <mat-card-subtitle>Durée : {{ lobby.turnDuration }}<br>
@@ -13,7 +13,7 @@
         </div>
     </div>
     <div class="button">
-        <button *ngIf="lobbies.length > 0" mat-raised-button id="random" (click)="joinRandomLobby()">Rejoindre une salle aléatoire</button>
+        <button mat-raised-button class="random" *ngIf="lobbies.length > 0" [disabled]="lobbies.length === 1"  (click)="joinRandomLobby()">Rejoindre une salle aléatoire</button>
         <button mat-raised-button id="refresh" (click)="getLobbies()"><mat-icon>autorenew</mat-icon></button>
         <button mat-raised-button (click)="createLobby()" class="warn">Créer une salle</button>
     </div>
