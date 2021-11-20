@@ -4,6 +4,7 @@ import { Vec2 } from '@app/classes/vec2';
 import { CANVAS_HEIGHT, CANVAS_WIDTH, INVALID_COORDS, KEYBOARD_EVENT_RECEIVER } from '@app/constants';
 import { GridService } from '@app/services/grid.service';
 import { PlaceTilesService } from '@app/services/place-tiles.service';
+// import { PlaceTilesService } from '@app/services/place-tiles.service';
 import { PlayerService } from '@app/services/player.service';
 @Component({
     selector: 'app-play-area',

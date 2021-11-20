@@ -107,10 +107,6 @@ export class CommandHandlerService {
     }
 
     reserveDisplay(): string {
-        let display = '';
-        this.reserveService.tiles.forEach((letter) => {
-            display += `${letter.tile.letter}: ${letter.count}\n`;
-        });
-        return display;
+        return this.reserveService.toString();
     }
 }

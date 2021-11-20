@@ -7,6 +7,7 @@ import { GameManagerService } from '@app/services/game-manager.service';
 import { GridService } from '@app/services/grid.service';
 import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-manager.service';
 import { PlayerService } from '@app/services/player.service';
+import { ReserveService } from '@app/services/reserve.service';
 // eslint-disable-next-line no-restricted-imports
 import { AbandonPageComponent } from '../abandon-page/abandon-page.component';
 
@@ -25,6 +26,7 @@ export class PlayerInfoComponent implements DoCheck, OnDestroy {
         private playerService: PlayerService,
         private gameManager: GameManagerService,
         private multiplayerGameManager: MultiplayerGameManagerService,
+        private reserve: ReserveService,
         private router: Router,
         private gridService: GridService,
         public matDialog: MatDialog,
@@ -53,15 +55,15 @@ export class PlayerInfoComponent implements DoCheck, OnDestroy {
     }
 
     get reserveCount() {
-        if (this.router.url === '/multiplayer-game') return this.multiplayerGameManager.reserve.tileCount;
-        else return this.gameManager.reserveCount;
+        if (this.router.url === '/multiplayer-game') return this.multiplayerGameManager.reserve.size;
+        else return this.reserve.size;
     }
 
     ngDoCheck() {
         if (this.players === undefined) return;
         if (this.players[0].easel.count === 0 || this.players[1].easel.count === 0) {
             if (this.router.url !== '/multiplayer-game') {
-                if (this.gameManager.reserveCount === 0) this.endGame();
+                if (this.reserve.size === 0) this.endGame();
             }
         }
     }

@@ -1,14 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
-import { Tile } from '@app/classes/tile';
 import { CommandHandlerService } from './command-handler.service';
 import { GameManagerService } from './game-manager.service';
 
 describe('CommandHandlerService', () => {
     let service: CommandHandlerService;
     let gameManagerSpy: jasmine.SpyObj<GameManagerService>;
-    let tiles: Tile[];
+    let letters: string[];
     let player: Player;
 
     beforeEach(() => {
@@ -19,16 +18,11 @@ describe('CommandHandlerService', () => {
             providers: [{ provide: GameManagerService, useValue: gameManagerSpy }],
         });
         service = TestBed.inject(CommandHandlerService);
-        tiles = [
-            { letter: 'a', points: 0 },
-            { letter: 'b', points: 0 },
-            { letter: 'c', points: 0 },
-            { letter: 'd', points: 0 },
-        ];
+        letters = ['a', 'b', 'c', 'd'];
         player = {
             name: 'player',
             score: 0,
-            easel: new Easel(tiles),
+            easel: new Easel(letters),
         };
     });
 

@@ -1,7 +1,5 @@
 import { TestBed } from '@angular/core/testing';
 import { Player } from '@app/classes/player';
-import { Tile } from '@app/classes/tile';
-
 import { PlayerService } from './player.service';
 
 describe('PlayerService', () => {
@@ -11,12 +9,7 @@ describe('PlayerService', () => {
         TestBed.configureTestingModule({});
         service = TestBed.inject(PlayerService);
 
-        const tiles: Tile[] = [
-            { letter: 'A', points: 0 },
-            { letter: 'B', points: 0 },
-            { letter: 'C', points: 0 },
-            { letter: 'D', points: 0 },
-        ];
+        const tiles: string[] = ['a', 'b', 'c', 'd'];
         service.createPlayer('player1', tiles);
         service.createPlayer('player2', tiles);
     });

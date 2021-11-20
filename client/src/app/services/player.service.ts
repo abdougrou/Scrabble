@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
-import { Tile } from '@app/classes/tile';
-import { VirtualPlayer } from '@app/classes/virtual-player';
+// import { VirtualPlayer } from '@app/classes/virtual-player';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -17,18 +16,23 @@ export class PlayerService {
     }
     mainPlayer: Player;
 
-    createPlayer(name: string, tiles: Tile[]) {
+    createPlayer(name: string, letters: string[]) {
         const player: Player = {
             name,
-            easel: new Easel(tiles),
+            easel: new Easel(letters),
             score: 0,
         };
         this.players.push(player);
     }
 
-    createVirtualPlayer(name: string, tiles: Tile[]) {
-        const vPlayer: VirtualPlayer = new VirtualPlayer(name, new Easel(tiles));
-        this.players.push(vPlayer);
+    createVirtualPlayer(name: string, letters: string[]) {
+        // TODO change to virtual player
+        const player: Player = {
+            name,
+            easel: new Easel(letters),
+            score: 0,
+        };
+        this.players.push(player);
     }
 
     switchPlayers() {

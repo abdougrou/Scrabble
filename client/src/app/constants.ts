@@ -43,7 +43,7 @@ export const enum MouseButton {
 }
 
 // Reserve constants
-export const MIN_EXCHANGE_RESERVE_COUNT = 7;
+export const RESERVE_EXCHANGE_LIMIT = 7;
 export const FULL_RESERVE_COUNT = 102;
 export const CLASSIC_RESERVE = `a,9,1
 b,2,3
@@ -122,8 +122,8 @@ export const CANVAS_HEIGHT = 600;
 export const GRID_WIDTH = 563.5;
 export const GRID_HEIGHT = 563.5;
 export const NUMBER_LINES = 16;
-export const GRID_SIZE = 15;
-export const STEP = CANVAS_HEIGHT / (GRID_SIZE + 1);
+export const BOARD_SIZE = 15;
+export const STEP = CANVAS_HEIGHT / (BOARD_SIZE + 1);
 export const LETTER_OFFSET = STEP / 2;
 const POINT_NUM = 5.7;
 const POINT_DENUM = 6;
@@ -139,7 +139,7 @@ const NUM = 5;
 const DENUM = 6;
 export const INDEX_OFFSET = STEP * (NUM / DENUM);
 export const COLS: number[] = [];
-for (let i = 1; i <= GRID_SIZE; i++) {
+for (let i = 1; i <= BOARD_SIZE; i++) {
     COLS.push(i);
 }
 export const ROWS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'];
@@ -167,7 +167,7 @@ export const TILE_TEXT_COLOR = '#060606';
 export const TEMP_TILE_COLOR = '#76B947';
 //  the index to tiles of red colors
 const RED_MULTIPLIER_INDEX = 4;
-export const BOARD_MULTIPLIER = [
+export const POINT_GRID = [
     [RED_MULTIPLIER_INDEX, 0, 0, 1, 0, 0, 0, RED_MULTIPLIER_INDEX, 0, 0, 0, 1, 0, 0, RED_MULTIPLIER_INDEX],
     [0, 3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 3, 0],
     [0, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 0, 3, 0, 0],

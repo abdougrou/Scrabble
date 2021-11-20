@@ -1,8 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { CanvasTestHelper } from '@app/classes/canvas-test-helper';
-import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { CANVAS_HEIGHT, CANVAS_WIDTH, STEP, TILE_COLORS, LETTER_FONT_SIZE_MODIFIER } from '@app/constants';
+import { CANVAS_HEIGHT, CANVAS_WIDTH, LETTER_FONT_SIZE_MODIFIER, STEP, TILE_COLORS } from '@app/constants';
 import { GridService } from '@app/services/grid.service';
 import { BoardService } from './board.service';
 
@@ -111,18 +110,18 @@ describe('GridService', () => {
 
     it('drawTile should call fillText 2 times', () => {
         const matrixCoord: Vec2 = { x: 20, y: 20 };
-        const tile: Tile = { letter: 'A', points: 10 };
+        const letter = 'A';
         const spy = spyOn(ctxStub, 'fillText').and.callThrough();
-        service.drawTile(matrixCoord, tile, LETTER_FONT_SIZE_MODIFIER);
+        service.drawTile(matrixCoord, letter, LETTER_FONT_SIZE_MODIFIER);
 
         expect(spy).toHaveBeenCalledTimes(2);
     });
 
     it('drawTile should call colorTile 1 time', () => {
         const matrixCoord: Vec2 = { x: 20, y: 20 };
-        const tile: Tile = { letter: 'A', points: 10 };
+        const letter = 'A';
         const spy = spyOn(service, 'colorTile').and.callThrough();
-        service.drawTile(matrixCoord, tile, LETTER_FONT_SIZE_MODIFIER);
+        service.drawTile(matrixCoord, letter, LETTER_FONT_SIZE_MODIFIER);
 
         expect(spy).toHaveBeenCalledTimes(1);
     });
@@ -144,10 +143,10 @@ describe('GridService', () => {
 
         const numberOfPlacedTilesExpected = 4;
         const numberOfVirginTilesExpected = 221;
-        boardService.placeTile({ x: 7, y: 7 }, { letter: 'a', points: 1 });
-        boardService.placeTile({ x: 7, y: 8 }, { letter: 'a', points: 1 });
-        boardService.placeTile({ x: 7, y: 9 }, { letter: 'a', points: 1 });
-        boardService.placeTile({ x: 7, y: 10 }, { letter: 'a', points: 1 });
+        boardService.setLetter({ x: 7, y: 7 }, 'a');
+        boardService.setLetter({ x: 7, y: 8 }, 'a');
+        boardService.setLetter({ x: 7, y: 9 }, 'a');
+        boardService.setLetter({ x: 7, y: 10 }, 'a');
         service.drawBoard();
 
         expect(spyPlaced).toHaveBeenCalledTimes(numberOfPlacedTilesExpected);

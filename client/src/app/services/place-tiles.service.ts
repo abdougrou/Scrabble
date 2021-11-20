@@ -1,13 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Tile, TileCoords } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
-import { DOWN_ARROW, GRID_HEIGHT, GRID_SIZE, GRID_WIDTH, INVALID_COORDS, RIGHT_ARROW } from '@app/constants';
+import { BOARD_SIZE, DOWN_ARROW, GRID_HEIGHT, GRID_WIDTH, INVALID_COORDS, LETTER_POINTS, RIGHT_ARROW } from '@app/constants';
 import { BoardService } from './board.service';
-import { CalculatePointsService } from './calculate-points.service';
 import { GameManagerInterfaceService } from './game-manager-interface.service';
 import { GridService } from './grid.service';
-import { ReserveService } from './reserve.service';
-import { WordValidationService } from './word-validation.service';
+// import { ReserveService } from './reserve.service';
 
 @Injectable({
     providedIn: 'root',
@@ -20,9 +18,7 @@ export class PlaceTilesService {
     constructor(
         private gridService: GridService,
         private boardService: BoardService,
-        private wordValidation: WordValidationService,
-        private calculatePoints: CalculatePointsService,
-        private reserveService: ReserveService,
+        // private reserveService: ReserveService,
         private generalGameManager: GameManagerInterfaceService,
     ) {}
 
@@ -35,12 +31,12 @@ export class PlaceTilesService {
 
     setCurrentTile(tileCoord: Vec2) {
         if (this.tilesPlacedOnBoard.length === 0) {
-            if (!this.boardService.getTile(tileCoord)) {
+            if (!this.boardService.getLetter(tileCoord)) {
                 if (this.directionIndicator.coords !== INVALID_COORDS) this.removeIndicator();
                 this.directionIndicator.tile = RIGHT_ARROW;
                 this.directionIndicator.coords = tileCoord;
                 this.placeIndicator();
-            } else if ((this.boardService.getTile(tileCoord) as Tile).points === RIGHT_ARROW.points) {
+            } else if (LETTER_POINTS.get(this.boardService.getLetter(tileCoord) as string) === RIGHT_ARROW.points) {
                 this.changeDirection();
             }
         }
@@ -48,13 +44,13 @@ export class PlaceTilesService {
 
     removeIndicator() {
         if (this.directionIndicator.coords !== INVALID_COORDS) {
-            this.boardService.board.delete(this.boardService.coordToKey(this.directionIndicator.coords));
+            this.boardService.data[this.directionIndicator.coords.x][this.directionIndicator.coords.y] = null;
         }
         this.gridService.drawBoard();
     }
 
     placeIndicator() {
-        this.boardService.placeTile(this.directionIndicator.coords, this.directionIndicator.tile);
+        this.boardService.setLetter(this.directionIndicator.coords, this.directionIndicator.tile.letter);
         this.gridService.drawBoard();
     }
 
@@ -93,7 +89,7 @@ export class PlaceTilesService {
                                 easelLetter = '*';
                                 key = key.toLowerCase();
                             }
-                            if (this.generalGameManager.getCurrentPlayer().easel.containsTiles(easelLetter)) {
+                            if (this.generalGameManager.getCurrentPlayer().easel.contains(easelLetter.split(''))) {
                                 this.putEaselTileOnBoard(easelLetter, key);
                                 this.findNextEmptyTile();
                             }
@@ -110,8 +106,8 @@ export class PlaceTilesService {
             const tileToRemove: TileCoords = this.tilesPlacedOnBoard.pop() as TileCoords;
             const tilesToReturn: Tile = this.tilesTakenFromEasel.pop() as Tile;
 
-            this.generalGameManager.getCurrentPlayer().easel.addTiles([tilesToReturn]);
-            this.boardService.board.delete(this.boardService.coordToKey(tileToRemove.coords));
+            this.generalGameManager.getCurrentPlayer().easel.addLetters([tilesToReturn.letter]);
+            this.boardService.data[tileToRemove.coords.x][tileToRemove.coords.y] = null;
 
             this.removeIndicator();
             this.directionIndicator.coords = tileToRemove.coords;
@@ -120,30 +116,26 @@ export class PlaceTilesService {
     }
 
     validatePlacement() {
-        if (this.tilesPlacedOnBoard.length !== 0) {
-            this.removeIndicator();
-            if (this.validateWordPosition() && this.wordValidation.validateWords(this.tilesPlacedOnBoard)) {
-                const scoreNewTiles = this.calculatePoints.calculatePoints(this.tilesPlacedOnBoard);
-
-                if (this.generalGameManager.isMultiplayer) this.placeTilesServer();
-
-                this.generalGameManager.getCurrentPlayer().score += scoreNewTiles;
-                this.generalGameManager.getCurrentPlayer().easel.addTiles(this.reserveService.getLetters(this.tilesPlacedOnBoard.length));
-
-                this.directionIndicator.coords = INVALID_COORDS;
-                this.directionIndicator.tile = RIGHT_ARROW;
-                this.tilesPlacedOnBoard.splice(0, this.tilesPlacedOnBoard.length);
-                this.tilesTakenFromEasel.splice(0, this.tilesTakenFromEasel.length);
-            } else this.endPlacement();
-
-            this.generalGameManager.switchPlayers();
-        }
+        // if (this.tilesPlacedOnBoard.length !== 0) {
+        //     this.removeIndicator();
+        //     if (this.validateWordPosition() && this.wordValidation.validateWords(this.tilesPlacedOnBoard)) {
+        //         const scoreNewTiles = this.calculatePoints.calculatePoints(this.tilesPlacedOnBoard);
+        //         if (this.generalGameManager.isMultiplayer) this.placeTilesServer();
+        //         this.generalGameManager.getCurrentPlayer().score += scoreNewTiles;
+        //         this.generalGameManager.getCurrentPlayer().easel.addTiles(this.reserveService.getLetters(this.tilesPlacedOnBoard.length));
+        //         this.directionIndicator.coords = INVALID_COORDS;
+        //         this.directionIndicator.tile = RIGHT_ARROW;
+        //         this.tilesPlacedOnBoard.splice(0, this.tilesPlacedOnBoard.length);
+        //         this.tilesTakenFromEasel.splice(0, this.tilesTakenFromEasel.length);
+        //     } else this.endPlacement();
+        //     this.generalGameManager.switchPlayers();
+        // }
     }
 
     placeTilesServer() {
         let initialCoord: Vec2 = this.tilesPlacedOnBoard[0].coords;
         while (
-            this.boardService.getTile(
+            this.boardService.getLetter(
                 this.directionIndicator.tile === RIGHT_ARROW
                     ? { x: initialCoord.x - 1, y: initialCoord.y }
                     : { x: initialCoord.x, y: initialCoord.y - 1 },
@@ -158,8 +150,8 @@ export class PlaceTilesService {
         let coordIterator: Vec2 = initialCoord;
         window.alert(coordIterator.x);
         let word = '';
-        while (this.boardService.getTile(coordIterator)) {
-            word += this.boardService.getTile(coordIterator)?.letter;
+        while (this.boardService.getLetter(coordIterator)) {
+            word += this.boardService.getLetter(coordIterator);
             coordIterator =
                 this.directionIndicator.tile === RIGHT_ARROW
                     ? { x: coordIterator.x + 1, y: coordIterator.y }
@@ -186,27 +178,28 @@ export class PlaceTilesService {
         this.gridService.drawBoard();
     }
 
+    // eslint-disable-next-line no-unused-vars
     putEaselTileOnBoard(easelLetter: string, boardLetter: string) {
-        const tileTaken: Tile = this.generalGameManager.getCurrentPlayer().easel.getTiles(easelLetter).pop() as Tile;
+        // const tileTaken: string = this.generalGameManager.getCurrentPlayer().easel.getLetters([easelLetter]).pop() as string;
 
-        const tileToPlace: Tile = { letter: boardLetter, points: tileTaken.points };
-        this.removeIndicator();
-        this.boardService.placeTile(this.directionIndicator.coords, tileToPlace);
+        // const tileToPlace: Tile = { letter: boardLetter, points: tileTaken.points };
+        // this.removeIndicator();
+        // this.boardService.setLetter(this.directionIndicator.coords, boardLetter);
 
-        this.tilesTakenFromEasel.push(tileTaken);
-        this.tilesPlacedOnBoard.push({ tile: tileToPlace, coords: this.directionIndicator.coords });
+        // this.tilesTakenFromEasel.push(tileTaken);
+        // this.tilesPlacedOnBoard.push({ tile: tileToPlace, coords: this.directionIndicator.coords });
 
         this.gridService.drawBoard();
     }
 
     findNextEmptyTile(): boolean {
         const index = this.directionIndicator.tile === RIGHT_ARROW ? this.directionIndicator.coords.x + 1 : this.directionIndicator.coords.y + 1;
-        for (let i = index; i < GRID_SIZE; i++) {
+        for (let i = index; i < BOARD_SIZE; i++) {
             const coord: Vec2 =
                 this.directionIndicator.tile === RIGHT_ARROW
                     ? { x: i, y: this.directionIndicator.coords.y }
                     : { x: this.directionIndicator.coords.x, y: i };
-            if (!this.boardService.getTile(coord)) {
+            if (!this.boardService.getLetter(coord)) {
                 this.directionIndicator.coords = coord;
                 this.placeIndicator();
                 return true;
@@ -217,36 +210,37 @@ export class PlaceTilesService {
     }
     validateWordPosition(): boolean {
         //  First placement
-        const boardCenter = 7;
-        if (this.boardService.board.size === this.tilesPlacedOnBoard.length) {
-            //  Check if word is on center tile
-            for (const tile of this.tilesPlacedOnBoard) {
-                if (tile.coords.x === boardCenter && tile.coords.y === boardCenter) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        for (const tile of this.tilesPlacedOnBoard) {
-            this.boardService.board.delete(this.boardService.coordToKey(tile.coords));
-        }
-        //  Check if word has adjacent tiles
-        let hasNeighbor = false;
-        for (const tile of this.tilesPlacedOnBoard) {
-            if (this.boardService.getTile({ x: tile.coords.x - 1, y: tile.coords.y })) hasNeighbor = true;
-            if (this.boardService.getTile({ x: tile.coords.x + 1, y: tile.coords.y })) hasNeighbor = true;
-            if (this.boardService.getTile({ x: tile.coords.x, y: tile.coords.y - 1 })) hasNeighbor = true;
-            if (this.boardService.getTile({ x: tile.coords.x, y: tile.coords.y + 1 })) hasNeighbor = true;
-        }
-        for (const tile of this.tilesPlacedOnBoard) {
-            this.boardService.placeTile(tile.coords, tile.tile);
-        }
-        return hasNeighbor;
+        // const boardCenter = 7;
+        // if (this.boardService.board.size === this.tilesPlacedOnBoard.length) {
+        //     //  Check if word is on center tile
+        //     for (const tile of this.tilesPlacedOnBoard) {
+        //         if (tile.coords.x === boardCenter && tile.coords.y === boardCenter) {
+        //             return true;
+        //         }
+        //     }
+        //     return false;
+        // }
+        // for (const tile of this.tilesPlacedOnBoard) {
+        //     this.boardService.board.delete(this.boardService.coordToKey(tile.coords));
+        // }
+        // //  Check if word has adjacent tiles
+        // let hasNeighbor = false;
+        // for (const tile of this.tilesPlacedOnBoard) {
+        //     if (this.boardService.getLetter({ x: tile.coords.x - 1, y: tile.coords.y })) hasNeighbor = true;
+        //     if (this.boardService.getLetter({ x: tile.coords.x + 1, y: tile.coords.y })) hasNeighbor = true;
+        //     if (this.boardService.getTile({ x: tile.coords.x, y: tile.coords.y - 1 })) hasNeighbor = true;
+        //     if (this.boardService.getTile({ x: tile.coords.x, y: tile.coords.y + 1 })) hasNeighbor = true;
+        // }
+        // for (const tile of this.tilesPlacedOnBoard) {
+        //     this.boardService.placeTile(tile.coords, tile.tile);
+        // }
+        // return hasNeighbor;
+        return false;
     }
 
     getBoardTileFromMouse(mouseCoords: Vec2): Vec2 {
-        const tileWidth = GRID_WIDTH / GRID_SIZE;
-        const tileHeight = GRID_HEIGHT / GRID_SIZE;
+        const tileWidth = GRID_WIDTH / BOARD_SIZE;
+        const tileHeight = GRID_HEIGHT / BOARD_SIZE;
         const x = (mouseCoords.x - (mouseCoords.x % tileWidth)) / tileWidth;
         const y = (mouseCoords.y - (mouseCoords.y % tileHeight)) / tileHeight;
         return { x, y };

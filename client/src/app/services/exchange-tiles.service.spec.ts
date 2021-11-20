@@ -1,15 +1,15 @@
-import { TestBed } from '@angular/core/testing';
-import { ExchangeTilesService } from './exchange-tiles.service';
+// import { TestBed } from '@angular/core/testing';
+// import { ExchangeTilesService } from './exchange-tiles.service';
 
-describe('ExchangeTilesService', () => {
-    let service: ExchangeTilesService;
+// describe('ExchangeTilesService', () => {
+//     let service: ExchangeTilesService;
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({});
-        service = TestBed.inject(ExchangeTilesService);
-    });
+//     beforeEach(() => {
+//         TestBed.configureTestingModule({});
+//         service = TestBed.inject(ExchangeTilesService);
+//     });
 
-    it('should be created', () => {
-        expect(service).toBeTruthy();
-    });
-});
+//     it('should be created', () => {
+//         expect(service).toBeTruthy();
+//     });
+// });

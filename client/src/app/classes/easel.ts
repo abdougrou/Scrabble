@@ -1,77 +1,65 @@
-import { EaselTile, Tile, TileState } from './tile';
-
 export class Easel {
-    tiles: EaselTile[] = [];
+    letters: string[] = [];
     get count(): number {
-        return this.tiles.length;
+        return this.letters.length;
     }
 
-    constructor(tiles: Tile[] = []) {
-        this.tiles = this.tileToEaselTile(tiles);
+    constructor(letters: string[] = []) {
+        this.letters = this.letters.concat(letters);
     }
 
-    tileToEaselTile(tiles: Tile[]): EaselTile[] {
-        const easelTiles: EaselTile[] = [];
-        for (const tile of tiles) {
-            easelTiles.push({ tile, state: TileState.None });
-        }
-        return easelTiles;
+    /**
+     * Adds letters to the easel
+     *
+     * @param letters array containing letters to add
+     */
+    addLetters(letters: string[]) {
+        this.letters = this.letters.concat(letters);
     }
 
-    easelTileToTile(easelTiles: EaselTile[]): Tile[] {
-        const tiles: Tile[] = [];
-        for (const easelTile of easelTiles) {
-            tiles.push(easelTile.tile);
-        }
-        return tiles;
-    }
+    /**
+     * Takes letters from the easel
+     *
+     * @param letters letters to remove from the easel
+     * @return array of letters
+     */
+    getLetters(letters: string[]): string[] {
+        const output: string[] = [];
 
-    addTiles(tiles: Tile[]) {
-        this.tiles.push(...this.tileToEaselTile(tiles));
-    }
-
-    getTiles(tilesStr: string): Tile[] {
-        const tiles: Tile[] = [];
-        for (const letter of tilesStr) {
-            const easelTile = this.tiles.find((item) => item.tile.letter === letter);
-            if (easelTile) {
-                const index = this.tiles.indexOf(easelTile);
-                this.tiles.splice(index, 1);
-                tiles.push(easelTile.tile);
+        for (const letterToTake of letters) {
+            const letter = this.letters.find((item) => item === letterToTake);
+            if (letter) {
+                const index = this.letters.indexOf(letter);
+                this.letters.splice(index, 1);
+                output.push(letter);
             }
         }
-        return tiles;
+
+        return output;
     }
 
-    containsTiles(tilesStr: string): boolean {
-        if (tilesStr.length > this.count) return false;
+    /**
+     * Checks if the easel contains the letters
+     *
+     * @param letters letters to check for existence
+     * @returns true if all letters exist, false otherwise
+     */
+    contains(letters: string[]): boolean {
+        if (letters.length > this.letters.length) return false;
 
-        const tileOccurrences: Map<string, number> = new Map();
-        this.tiles.forEach((easelTile) => {
-            const letter = easelTile.tile.letter;
-            const occurrences = tileOccurrences.get(letter);
-            if (occurrences) {
-                tileOccurrences.set(letter, occurrences + 1);
-            } else {
-                tileOccurrences.set(letter, 1);
-            }
-        });
-        for (const letter of tilesStr) {
-            const occurrences = tileOccurrences.get(letter);
-            if (occurrences && occurrences > 0) {
-                tileOccurrences.set(letter, occurrences - 1);
-            } else {
-                return false;
-            }
+        const getLetters = this.getLetters(letters);
+        if (getLetters.length < letters.length) {
+            this.addLetters(getLetters);
+            return false;
         }
+        this.addLetters(getLetters);
         return true;
     }
 
+    /**
+     * @returns string containing all letters, comma separated
+     */
     toString(): string {
-        let easelStr = '';
-        this.tiles.forEach((easelTile) => {
-            easelStr += easelTile.tile.letter;
-        });
-        return easelStr;
+        return this.letters.join();
     }
 }

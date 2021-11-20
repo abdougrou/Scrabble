@@ -1,51 +1,71 @@
 import { TestBed } from '@angular/core/testing';
-import { Tile } from '@app/classes/tile';
-import { Vec2 } from '@app/classes/vec2';
-
+import { POINT_GRID } from '@app/constants';
 import { BoardService } from './board.service';
 
+const BOARD_SIZE = 15;
+
 describe('BoardService', () => {
-    let service: BoardService;
+    let board: BoardService;
 
     beforeEach(() => {
         TestBed.configureTestingModule({});
-        service = TestBed.inject(BoardService);
+        board = TestBed.inject(BoardService);
     });
 
-    it('should be created', () => {
-        expect(service).toBeTruthy();
+    it('board is 15 by 15', () => {
+        board.initialize(false);
+        expect(board.data.length).toEqual(BOARD_SIZE);
+        expect(board.data[0].length).toEqual(BOARD_SIZE);
     });
 
-    it('should not place tile on existing tile', () => {
-        const tile: Tile = { letter: 'a', points: 2 };
-        service.board.set(service.coordToKey({ x: 7, y: 7 }), tile);
-        expect(service.placeTile({ x: 7, y: 7 }, { letter: 'b', points: 2 })).toBeFalse();
-    })
-    it('placeTile places the tile in the board, returns true if no tile exists at coord', () => {
-        const coord: Vec2 = { x: 3, y: 3 };
-        const tile: Tile = { letter: 'x', points: 0 };
-        service.placeTile(coord, tile);
-        expect(service.getTile(coord)).toEqual(tile);
-        expect(service.getTile({ x: 3, y: 3 })).toEqual(tile);
+    it('new board is filled with null', () => {
+        board.initialize(false);
+        const rows: string[] = [];
+        for (let i = 0; i < BOARD_SIZE; i++) {
+            rows.push(board.data[i].join(''));
+        }
+        const boardString = rows.join('');
+        expect(boardString).toEqual('');
     });
 
-    it('getTile returns true if tile exist at coord, undefined otherwise', () => {
-        const coord: Vec2 = { x: 3, y: 3 };
-        const tile: Tile = { letter: 'x', points: 0 };
-        service.placeTile(coord, tile);
-        expect(service.getTile(coord)).toEqual(tile);
-        expect(service.getTile({ x: 3, y: 3 })).toEqual(tile);
-        expect(service.getTile({ x: 3, y: 4 })).toBeUndefined();
+    it('new board has one centered anchor', () => {
+        board.initialize(false);
     });
 
-    it('coordToKey returns correct key', () => {
-        const coordVec1: Vec2 = { x: 3, y: 3 };
-        const coordVec2: Vec2 = { x: 40, y: 99 };
-        const coordKey1 = service.coordToKey(coordVec1);
-        const coordKey2 = service.coordToKey(coordVec2);
-        const coordNum1 = 303;
-        const coordNum2 = 4099;
-        expect(coordKey1).toEqual(coordNum1);
-        expect(coordKey2).toEqual(coordNum2);
+    it('clone should return a copy of the board', () => {
+        board.data = [
+            ['1', '2', '3'],
+            ['4', '5', '6'],
+            ['7', '8', '9'],
+        ];
+        const clone = board.clone();
+        expect(clone).toEqual(board.data);
+        expect(clone).not.toBe(board.data);
+    });
+
+    it('setLetters places the letter in the board', () => {
+        board.initialize(false);
+        const letter = 'x';
+        const coord = { x: 3, y: 8 };
+        board.setLetter(coord, letter);
+        expect(board.data[coord.x][coord.y]).toEqual(letter);
+    });
+
+    it('getLetter returns the letter at coord if it exists, null otherwise', () => {
+        board.initialize(false);
+        const coord = { x: 5, y: 11 };
+        const letter = 'x';
+        board.setLetter(coord, letter);
+        expect(board.getLetter(coord)).toEqual(letter);
+    });
+
+    it('randomizeBonuses randomizes pointGrid if randombonus is true', () => {
+        board.initialize(true);
+        expect(board.pointGrid).not.toEqual(POINT_GRID);
+    });
+
+    it('randomizeBonuses do not randomizes pointGrid if randombonus is false', () => {
+        board.initialize(false);
+        expect(board.pointGrid).toEqual(POINT_GRID);
     });
 });
