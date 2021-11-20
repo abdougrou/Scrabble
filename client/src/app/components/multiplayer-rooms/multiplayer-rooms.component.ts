@@ -70,6 +70,12 @@ export class MultiplayerRoomsComponent {
             });
     }
 
+    joinRandomLobby(): void {
+        const randomIndex = Math.floor(Math.random() * this.lobbies.length);
+        const key = this.lobbies[randomIndex].key;
+        this.joinLobby(key as string);
+    }
+
     openJoinPopup(key: string): MatDialogRef<unknown, unknown> {
         const lobbyToJoin = this.lobbies.filter((lobby) => lobby.key === key)[0];
         return this.dialog.open(MultiplayerJoinFormComponent, {

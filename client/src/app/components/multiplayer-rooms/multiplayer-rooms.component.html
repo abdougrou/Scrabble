@@ -4,16 +4,17 @@
             <mat-card>
                 <mat-card-title-group>
                     <mat-card-title>{{ lobby.host }}</mat-card-title>
-                    <mat-card-subtitle>Duration : {{ lobby.turnDuration }}</mat-card-subtitle>
-                    <mat-card-subtitle>Bonus Aleatoire : {{ lobby.bonusEnabled }}</mat-card-subtitle>
-                    <mat-card-subtitle>Dictionnaire : {{ lobby.dictionary }}</mat-card-subtitle>
+                    <mat-card-subtitle>Durée : {{ lobby.turnDuration }}<br>
+                        Bonus Aleatoire : {{ lobby.bonusEnabled }}<br>
+                        Dictionnaire : {{ lobby.dictionary }}</mat-card-subtitle>
                     <button mat-raised-button (click)="joinLobby(lobby.key!)">Rejoindre</button>
                 </mat-card-title-group>
             </mat-card>
         </div>
     </div>
     <div class="button">
-        <button mat-raised-button (click)="getLobbies()"><mat-icon>autorenew</mat-icon></button>
+        <button *ngIf="lobbies.length > 0" mat-raised-button id="random" (click)="joinRandomLobby()">Rejoindre une salle aléatoire</button>
+        <button mat-raised-button id="refresh" (click)="getLobbies()"><mat-icon>autorenew</mat-icon></button>
         <button mat-raised-button (click)="createLobby()" class="warn">Créer une salle</button>
     </div>
 </div>

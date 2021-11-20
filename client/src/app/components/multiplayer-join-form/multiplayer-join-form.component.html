@@ -1,12 +1,19 @@
-<h1 mat-dialog-title>Entrez votre nom:</h1>
-<form [formGroup]="joinForm">
-    <mat-form-field hintLabel="Lettres seulement" appearance="outline">
-        <mat-label>Nom d'utilisateur</mat-label>
-        <input type="text" formControlName="name" pattern="[a-zA-Z]*" matInput />
-        <mat-hint align="end">{{ this.joinForm.get('name')?.value?.length || 0 }}/20</mat-hint>
-    </mat-form-field>
-</form>
-<button mat-raised-button id="back" class="button" (click)="back()">Retour</button>
-<button mat-raised-button class="button" [disabled]="this.joinForm.get('name')?.value === this.data.message.host" (click)="joinLobby()">
-    Rejoindre la salle
-</button>
+<div class="container">
+    <div class="justified">
+        <h2 mat-dialog-title>Entrez votre nom:</h2>
+        <form [formGroup]="joinForm">
+            <mat-form-field hintLabel="Lettres seulement" appearance="outline">
+                <mat-label>Nom d'utilisateur</mat-label>
+                <input type="text" formControlName="name" pattern="[a-zA-Z]*" matInput />
+                <mat-hint align="end">{{ this.joinForm.get('name')?.value?.length || 0 }}/20</mat-hint>
+            </mat-form-field>
+        </form>
+    </div>
+    <div>
+        <button mat-raised-button id="back" class="button" (click)="back()">Retour</button>
+        <button mat-raised-button class="button" [disabled]="this.joinForm.get('name')?.value === this.data.message.host" (click)="joinLobby()">
+            Rejoindre la salle
+        </button>
+    </div>
+</div>
+

@@ -11,7 +11,7 @@ export class AbandonPageComponent {
     constructor(private gameManager: GameManagerService, private router: Router) {}
 
     quit() {
-        this.gameManager.reset();
         this.router.navigateByUrl('./home');
+        this.gameManager.reset();
     }
 }
