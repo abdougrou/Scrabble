@@ -54,7 +54,7 @@ export class ClassicRankingService {
      * @param playerscore player's score template. including name and score
      */
     async addPlayer(playerscore: ScoreConfig): Promise<void> {
-        if (playerscore) {
+        if (this.validateScoreConfig(playerscore)) {
             if (await this.validateSize()) {
                 if (await this.validatePlayer(playerscore)) this.deleteLowestPlayer();
             }
@@ -74,7 +74,6 @@ export class ClassicRankingService {
             .limit(1)
             .toArray()
             .then(async (players: ScoreConfig[]) => {
-                console.log('lowestplayer', players[0]);
                 return this.collection.findOneAndDelete({ score: players[0].score });
             });
     }
@@ -96,5 +95,9 @@ export class ClassicRankingService {
     private async validateSize() {
         dataSize = await this.collection.find({}).count();
         return dataSize < MAX;
+    }
+
+    private validateScoreConfig(player: ScoreConfig) {
+        return player.score >= 0 && player.name !== undefined && player.name !== '' && player.name && player !== undefined;
     }
 }

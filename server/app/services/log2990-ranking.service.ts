@@ -55,7 +55,7 @@ export class Log2990RankingService {
      * @param playerscore player's score template. including name and score
      */
     async addPlayer(playerscore: ScoreConfig): Promise<void> {
-        if (playerscore) {
+        if (this.validateScoreConfig(playerscore)) {
             if (await this.validateSize()) {
                 if (await this.validatePlayer(playerscore)) this.deleteLowestPlayer();
             }
@@ -97,5 +97,9 @@ export class Log2990RankingService {
     private async validateSize() {
         dataSize = await this.collection.find({}).count();
         return dataSize < MAX;
+    }
+
+    private validateScoreConfig(player: ScoreConfig) {
+        return player.score >= 0 && player.name !== undefined && player.name !== '' && player.name && player !== undefined;
     }
 }

@@ -45,12 +45,17 @@ describe('Database service', () => {
         }
     });
 
-    // it('should no longer be connected if close is called', async () => {
-    //     const mongoUri = await mongoServer.getUri();
-    //     await databaseService.start(mongoUri);
-    //     await databaseService.closeConnection();
-    //     expect(databaseService.client.isConnected()).to.be.equal(false);
-    // });
+    it('should no longer be connected if close is called', async () => {
+        const mongoUri = await mongoServer.getUri();
+        await databaseService.start(mongoUri);
+        await databaseService.closeConnection();
+        expect(databaseService.client).to.not.be.equal(undefined);
+    });
+
+    it('should return void if client didnt start yet', async () => {
+        await databaseService.closeConnection();
+        expect(databaseService.client).to.be.equal(undefined);
+    });
 
     it('should populate the database with a helper function', async () => {
         const mongoUri = mongoServer.getUri();
@@ -59,5 +64,14 @@ describe('Database service', () => {
         await databaseService.database.collection('classic_ranking').insertMany(DEFAULT_SCOREBOARD);
         const courses = await databaseService.database.collection('classic_ranking').find({}).toArray();
         expect(courses.length).to.equal(5);
+    });
+
+    it('should not start another client if its already', async () => {
+        const mongoUri = await mongoServer.getUri();
+        await databaseService.start(mongoUri);
+        expect(await databaseService.start(mongoUri)).to.be.equal(databaseService.client);
+    });
+    it('client should start with default uri', async () => {
+        expect(await databaseService.start()).to.be.instanceOf(MongoClient);
     });
 });
