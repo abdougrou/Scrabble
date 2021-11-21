@@ -5,6 +5,7 @@ import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
 import { EaselTile, TileState } from '@app/classes/tile';
 import { KEYBOARD_EVENT_RECEIVER, MouseButton, STARTING_TILE_AMOUNT } from '@app/constants';
+import { AppMaterialModule } from '@app/modules/material.module';
 import { MouseManagerService } from '@app/services/mouse-manager.service';
 import { PlayerService } from '@app/services/player.service';
 import { EaselComponent } from './easel.component';
@@ -27,7 +28,7 @@ describe('EaselComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule, RouterTestingModule],
+            imports: [HttpClientTestingModule, RouterTestingModule, AppMaterialModule],
             declarations: [EaselComponent],
             providers: [
                 { provide: PlayerService, useValue: playerService },

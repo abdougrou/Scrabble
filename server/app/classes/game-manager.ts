@@ -34,7 +34,8 @@ export class GameManager {
         if (this.players.length > 1) return false;
         else if (this.players[0]?.name === name) return false;
         const startingLetterCount = 7;
-        this.players.push({ name, easel: new Easel(this.reserve.getRandomLetters(startingLetterCount)), score: 0 });
+        const player = { name, easel: new Easel(this.reserve.getRandomLetters(startingLetterCount)), score: 0 };
+        this.players.push(player);
         return true;
     }
 
@@ -91,14 +92,10 @@ export class GameManager {
      * @returns PlaceResult
      */
     placeLetters(player: Player, word: string, coord: Vec2, across: boolean): PlaceResult {
-        console.log(player);
-        console.log(word);
-        console.log(coord);
-        console.log(across);
         if (player.name !== this.players[0].name) return PlaceResult.NotCurrentPlayer;
-
+        this.moveGenerator.legalMove(word, coord, across);
         const move: Move | undefined = this.moveGenerator.legalMoves.find(
-            (_move) => _move.word === word && _move.coord === coord && _move.across === across,
+            (_move) => _move.word === word && _move.coord.x === coord.x && _move.coord.y === coord.y && _move.across === across,
         );
         if (!move) return PlaceResult.NotValid;
 
@@ -114,7 +111,10 @@ export class GameManager {
         for (const k of word) {
             if (!this.board.getLetter(nextCoord)) {
                 this.board.setLetter(nextCoord, k);
-                player.easel.getLetters([k]);
+                const words: string[] = [k];
+                (this.players[0].easel as Easel).getLetters(words);
+                const reserveLetters: string[] = this.reserve.getRandomLetters(1);
+                this.players[0].easel.addLetters(reserveLetters);
             }
             points += this.moveGenerator.calculateCrossSum(this.board.data, coord, move.across);
 

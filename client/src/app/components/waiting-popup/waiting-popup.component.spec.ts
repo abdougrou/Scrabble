@@ -2,6 +2,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
 import { RouterTestingModule } from '@angular/router/testing';
+import { AppMaterialModule } from '@app/modules/material.module';
 import { WaitingPopupComponent } from './waiting-popup.component';
 
 describe('WaitingPopupComponent', () => {
@@ -16,7 +17,7 @@ describe('WaitingPopupComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule, RouterTestingModule],
+            imports: [HttpClientTestingModule, RouterTestingModule, AppMaterialModule],
             declarations: [WaitingPopupComponent],
             providers: [{ provide: MatDialogRef, useValue: dialogMock }],
         }).compileComponents();

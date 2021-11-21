@@ -1,0 +1,50 @@
+.lobbies{
+    max-height: 60vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-radius: 15px;
+    border: 1px solid #ccc;
+}
+
+.button {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.mat-raised-button {
+    color: white;
+    background-color: #76b947;
+}
+
+.random {
+    color: white;
+    background-color: #1e81b0;
+}
+
+#refresh{
+    color: white;
+    background-color: #1e81b0;
+    margin: 0 .5rem 0 .5rem;
+}
+
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+ 
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888; 
+}
+  
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}

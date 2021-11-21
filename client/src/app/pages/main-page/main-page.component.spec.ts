@@ -1,9 +1,9 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogModule } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { GameMode } from '@app/classes/game-config';
+import { AppMaterialModule } from '@app/modules/material.module';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 // import { CommunicationService } from '@app/services/communication.service';
 // import SpyObj = jasmine.SpyObj;
@@ -19,7 +19,7 @@ describe('MainPageComponent', () => {
         // communicationServiceSpy.basicPost.and.returnValue(of());
 
         await TestBed.configureTestingModule({
-            imports: [RouterTestingModule, BrowserAnimationsModule, HttpClientModule, MatDialogModule],
+            imports: [RouterTestingModule, BrowserAnimationsModule, HttpClientModule, AppMaterialModule],
             declarations: [MainPageComponent],
         }).compileComponents();
     });

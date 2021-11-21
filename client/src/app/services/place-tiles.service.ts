@@ -89,7 +89,7 @@ export class PlaceTilesService {
                                 easelLetter = '*';
                                 key = key.toLowerCase();
                             }
-                            if (this.generalGameManager.getCurrentPlayer().easel.contains(easelLetter.split(''))) {
+                            if (this.generalGameManager.mainPlayer.easel.contains(easelLetter.split(''))) {
                                 this.putEaselTileOnBoard(easelLetter, key);
                                 this.findNextEmptyTile();
                             }
@@ -119,16 +119,21 @@ export class PlaceTilesService {
         // if (this.tilesPlacedOnBoard.length !== 0) {
         //     this.removeIndicator();
         //     if (this.validateWordPosition() && this.wordValidation.validateWords(this.tilesPlacedOnBoard)) {
-        //         const scoreNewTiles = this.calculatePoints.calculatePoints(this.tilesPlacedOnBoard);
         //         if (this.generalGameManager.isMultiplayer) this.placeTilesServer();
-        //         this.generalGameManager.getCurrentPlayer().score += scoreNewTiles;
-        //         this.generalGameManager.getCurrentPlayer().easel.addTiles(this.reserveService.getLetters(this.tilesPlacedOnBoard.length));
-        //         this.directionIndicator.coords = INVALID_COORDS;
-        //         this.directionIndicator.tile = RIGHT_ARROW;
-        //         this.tilesPlacedOnBoard.splice(0, this.tilesPlacedOnBoard.length);
-        //         this.tilesTakenFromEasel.splice(0, this.tilesTakenFromEasel.length);
-        //     } else this.endPlacement();
-        //     this.generalGameManager.switchPlayers();
+        //         else {
+        //             const scoreNewTiles = this.calculatePoints.calculatePoints(this.tilesPlacedOnBoard);
+        //             this.generalGameManager.getCurrentPlayer().score += scoreNewTiles;
+        //             this.generalGameManager.getCurrentPlayer().easel.addTiles(this.reserveService.getLetters(this.tilesPlacedOnBoard.length));
+        //             this.directionIndicator.coords = INVALID_COORDS;
+        //             this.directionIndicator.tile = RIGHT_ARROW;
+        //             this.tilesPlacedOnBoard.splice(0, this.tilesPlacedOnBoard.length);
+        //             this.tilesTakenFromEasel.splice(0, this.tilesTakenFromEasel.length);
+        //             this.generalGameManager.switchPlayers();
+        //         }
+        //     } else {
+        //         this.endPlacement();
+        //         this.generalGameManager.switchPlayers();
+        //     }
         // }
     }
 
@@ -148,7 +153,6 @@ export class PlaceTilesService {
         }
 
         let coordIterator: Vec2 = initialCoord;
-        window.alert(coordIterator.x);
         let word = '';
         while (this.boardService.getLetter(coordIterator)) {
             word += this.boardService.getLetter(coordIterator);
@@ -157,13 +161,18 @@ export class PlaceTilesService {
                     ? { x: coordIterator.x + 1, y: coordIterator.y }
                     : { x: coordIterator.x, y: coordIterator.y + 1 };
         }
-        window.alert(word);
         this.generalGameManager.placeTilesMouse(
             word,
             initialCoord,
             this.directionIndicator.tile === DOWN_ARROW,
             this.generalGameManager.getCurrentPlayer(),
         );
+        this.removeIndicator();
+        this.directionIndicator.coords = INVALID_COORDS;
+        this.directionIndicator.tile = RIGHT_ARROW;
+        this.tilesPlacedOnBoard.splice(0, this.tilesPlacedOnBoard.length);
+        this.tilesTakenFromEasel.splice(0, this.tilesTakenFromEasel.length);
+        this.gridService.drawBoard();
     }
 
     endPlacement() {
@@ -180,7 +189,7 @@ export class PlaceTilesService {
 
     // eslint-disable-next-line no-unused-vars
     putEaselTileOnBoard(easelLetter: string, boardLetter: string) {
-        // const tileTaken: string = this.generalGameManager.getCurrentPlayer().easel.getLetters([easelLetter]).pop() as string;
+        // const tileTaken: Tile = this.generalGameManager.mainPlayer.easel.getTiles(easelLetter).pop() as Tile;
 
         // const tileToPlace: Tile = { letter: boardLetter, points: tileTaken.points };
         // this.removeIndicator();
@@ -208,6 +217,7 @@ export class PlaceTilesService {
         this.directionIndicator.coords = INVALID_COORDS;
         return false;
     }
+
     validateWordPosition(): boolean {
         //  First placement
         // const boardCenter = 7;

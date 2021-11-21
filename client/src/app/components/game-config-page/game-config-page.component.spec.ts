@@ -1,9 +1,10 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Dictionary, GameConfig } from '@app/classes/game-config';
 import { DURATION_INIT, MAX_USERNAME_LENGTH, MIN_USERNAME_LENGTH } from '@app/constants';
+import { AppMaterialModule } from '@app/modules/material.module';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { GameConfigPageComponent } from './game-config-page.component';
 
@@ -24,7 +25,7 @@ describe('GameConfigPageComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [MatDialogModule, HttpClientModule],
+            imports: [HttpClientModule, AppMaterialModule],
             declarations: [GameConfigPageComponent],
             providers: [
                 { provide: MAT_DIALOG_DATA, useValue: {} },

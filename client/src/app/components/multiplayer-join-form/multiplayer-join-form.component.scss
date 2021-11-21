@@ -1,3 +1,19 @@
+.container {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+h2 {
+    color: #3f51b5;
+}
+
+.justified {
+    align-items: center;
+}
+
 .button {
     margin-left: 10px;
     text-align: center;
@@ -5,7 +21,7 @@
 
 .mat-raised-button {
     color: white;
-    background-color: #1e81b0;
+    background-color: #76b947;
 }
 
 #back {

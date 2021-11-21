@@ -4,6 +4,7 @@ export interface LobbyConfig {
     turnDuration: number;
     bonusEnabled: boolean;
     dictionary: string;
+    gameMode: GameMode;
 }
 
 export interface GameConfig {

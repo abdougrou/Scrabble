@@ -46,6 +46,7 @@ export class MultiplayerRoomsComponent {
             turnDuration: DURATION_INIT,
             bonusEnabled: false,
             dictionary: Dictionary.French,
+            gameMode: this.data.mode,
         };
 
         return this.dialog.open(MultiGameConfigComponent, {
@@ -68,6 +69,12 @@ export class MultiplayerRoomsComponent {
                 if (!result) return;
                 this.dialogRef.close(result);
             });
+    }
+
+    joinRandomLobby(): void {
+        const randomIndex = Math.floor(Math.random() * this.lobbies.length);
+        const key = this.lobbies[randomIndex].key;
+        this.joinLobby(key as string);
     }
 
     openJoinPopup(key: string): MatDialogRef<unknown, unknown> {

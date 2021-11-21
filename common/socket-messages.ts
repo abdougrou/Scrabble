@@ -1,4 +1,3 @@
-import { Player } from '@app/classes/player';
 import { Vec2 } from '@app/classes/vec2';
 import { LobbyConfig } from './lobby-config';
 
@@ -7,7 +6,7 @@ export const SocketEvent = {
     playerLeaveLobby: 'player leave lobby',
     setConfig: 'set config',
     chatMessage: 'message',
-    startTimer: 'start timer',
+    setTimer: 'set timer',
     switchPlayers: 'switch players',
     placeLetters: 'place letters',
     exchangeLetters: 'exchange letters',
@@ -34,9 +33,9 @@ export interface SetConfigMessage {
 }
 
 // I dont know how it will work currently
-export interface StartTimerMessage {
+export interface SetTimerMessage {
     lobbyKey: string;
-    playerName: string;
+    duration: number;
 }
 
 export interface SwitchPlayersMessage {
@@ -45,7 +44,7 @@ export interface SwitchPlayersMessage {
 
 export interface PlaceLettersMessage {
     lobbyKey: string;
-    player: Player;
+    playerData: PlayerData;
     word: string;
     coord: Vec2;
     across: boolean;
@@ -53,19 +52,16 @@ export interface PlaceLettersMessage {
 
 export interface ExchangeLettersMessage {
     lobbyKey: string;
-    player: Player;
+    playerData: PlayerData;
     letters: string;
 }
 
 export interface SkipTurnMessage {
     lobbyKey: string;
-    player: Player;
-}
-export interface ShowReserveMessage {
-    lobbyKey: string;
+    playerData: PlayerData;
 }
 
-export interface UpdateMessage {
+export interface ShowReserveMessage {
     lobbyKey: string;
 }
 
@@ -74,11 +70,17 @@ export interface NormalChatMessage {
     playerName: string;
     message: string;
 }
+
 export interface PlayerData {
     name: string;
     score: number;
     easel: string;
 }
+
+export interface UpdateMessage {
+    lobbyKey: string;
+}
+
 export interface UpdateGameManagerMessage {
     players: PlayerData[];
     reserveData: Map<string, number>;

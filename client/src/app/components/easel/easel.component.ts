@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Player } from '@app/classes/player';
 import { EaselTile, TileState } from '@app/classes/tile';
 import { KEYBOARD_EVENT_RECEIVER, MouseButton } from '@app/constants';
+import { GameManagerInterfaceService } from '@app/services/game-manager-interface.service';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { MouseManagerService } from '@app/services/mouse-manager.service';
 import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-manager.service';
@@ -25,6 +26,7 @@ export class EaselComponent implements OnChanges {
     mainPlayerName;
     exchangableTiles = false;
     numTilesReserve;
+    mainPlayer: Player;
 
     constructor(
         readonly playerService: PlayerService,
@@ -32,11 +34,12 @@ export class EaselComponent implements OnChanges {
         private reserve: ReserveService,
         private gameManager: GameManagerService,
         private multiGameManager: MultiplayerGameManagerService,
+        private generalGameManagerService: GameManagerInterfaceService,
         private router: Router,
     ) {
         if (this.router.url === '/multiplayer-game') {
             this.players = this.multiGameManager.players;
-            // if (this.multiGameManager.getMainPlayer().easel) this.tiles = this.multiGameManager.getMainPlayer().easel.tiles;
+            // this.tiles = this.generalGameManagerService.mainPlayer.easel.letters;
             this.mainPlayerName = this.multiGameManager.getMainPlayer().name;
         } else {
             this.mainPlayerName = this.gameManager.mainPlayerName;
@@ -50,6 +53,10 @@ export class EaselComponent implements OnChanges {
             }
 
         this.numTilesReserve = this.reserve.size;
+        this.mainPlayer = this.generalGameManagerService.mainPlayer;
+        this.multiGameManager.updatePlayer.asObservable().subscribe((msg) => {
+            this.update(msg);
+        });
     }
 
     @HostListener('mousedown', ['$event'])
@@ -95,6 +102,11 @@ export class EaselComponent implements OnChanges {
         }
     }
 
+    update(msg: string) {
+        if (msg === 'updated') {
+            this.tiles = this.generalGameManagerService.mainPlayer.easel.tiles;
+        }
+    }
     resetTileState() {
         for (const easelTile of this.tiles) {
             easelTile.state = TileState.None;
@@ -236,6 +248,7 @@ export class EaselComponent implements OnChanges {
         }
         if (this.router.url === '/multiplayer-game') {
             this.multiGameManager.exchangeLetters(tilesToExchange, this.multiGameManager.getMainPlayer());
+            this.multiGameManager.switchPlayers();
         } else {
             this.gameManager.exchangeTiles(tilesToExchange, this.playerService.getPlayerByName(this.mainPlayerName));
         }

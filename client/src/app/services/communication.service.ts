@@ -42,6 +42,10 @@ export class CommunicationService {
     };
     constructor(private readonly http: HttpClient) {
         this.socket = io.io('ws://localhost:3000');
+
+        this.socket.on(SocketEvent.setTimer, () => {
+            this.gameManager.turnDurationLeft = this.gameManager.turnDuration;
+        });
     }
 
     setGameManager(gameManager: MultiplayerGameManagerService) {
@@ -77,9 +81,6 @@ export class CommunicationService {
         this.update();
     }
 
-    // TODO
-    // startTimer() {}
-
     update() {
         this.socket.emit(SocketEvent.update, { lobbyKey: this.lobbyKey } as UpdateMessage);
         this.socket.on(SocketEvent.update, (gameManager: UpdateGameManagerMessage) => {
@@ -92,6 +93,8 @@ export class CommunicationService {
             this.gameManager.reserve.data = gameManager.reserveData;
             this.gameManager.reserve.size = gameManager.reserveCount;
             this.gameManager.board.data = gameManager.boardData;
+            this.gameManager.gridService.drawBoard();
+            this.gameManager.emitChanges();
         });
     }
 
@@ -101,17 +104,20 @@ export class CommunicationService {
     }
 
     exchangeLetters(letters: string, player: Player) {
-        this.socket.emit(SocketEvent.exchangeLetters, { lobbyKey: this.lobbyKey, player, letters } as ExchangeLettersMessage);
+        const playerData = { name: player.name, score: player.score, easel: player.easel.toString() };
+        this.socket.emit(SocketEvent.exchangeLetters, { lobbyKey: this.lobbyKey, playerData, letters } as ExchangeLettersMessage);
         this.update();
     }
 
     placeLetters(player: Player, word: string, coord: Vec2, across: boolean) {
-        this.socket.emit(SocketEvent.placeLetters, { lobbyKey: this.lobbyKey, player, word, coord, across } as PlaceLettersMessage);
+        const playerData = { name: player.name, score: player.score, easel: player.easel.toString() };
+        this.socket.emit(SocketEvent.placeLetters, { lobbyKey: this.lobbyKey, playerData, word, coord, across } as PlaceLettersMessage);
         this.update();
     }
 
     skipTurn(player: Player) {
-        this.socket.emit(SocketEvent.skipTurn, { lobbyKey: this.lobbyKey, player } as SkipTurnMessage);
+        const playerData = { name: player.name, score: player.score, easel: player.easel.toString() };
+        this.socket.emit(SocketEvent.skipTurn, { lobbyKey: this.lobbyKey, playerData } as SkipTurnMessage);
         this.update();
     }
 
