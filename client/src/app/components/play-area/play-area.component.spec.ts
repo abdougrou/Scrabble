@@ -1,5 +1,7 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterTestingModule } from '@angular/router/testing';
 import { CanvasTestHelper } from '@app/classes/canvas-test-helper';
 import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
@@ -32,7 +34,7 @@ describe('PlayAreaComponent', () => {
     });
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule, AppMaterialModule],
+            imports: [HttpClientTestingModule, BrowserAnimationsModule, RouterTestingModule, AppMaterialModule],
             declarations: [PlayAreaComponent, EaselComponent],
             providers: [
                 { provide: PlayerService, useValue: playerService },

@@ -14,7 +14,7 @@ import { LobbyConfig } from '@common/lobby-config';
     styleUrls: ['./multiplayer-rooms.component.scss'],
 })
 export class MultiplayerRoomsComponent {
-    lobbies: LobbyConfig[];
+    lobbies: LobbyConfig[] = [];
 
     constructor(
         public dialogRef: MatDialogRef<MultiplayerRoomsComponent>,

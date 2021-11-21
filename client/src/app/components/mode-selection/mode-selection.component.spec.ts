@@ -1,8 +1,9 @@
-import { HttpClient, HttpHandler } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { AppMaterialModule } from '@app/modules/material.module';
 import { of } from 'rxjs';
@@ -18,16 +19,22 @@ describe('ModeSelectionComponent', () => {
         },
     };
 
+    const routerStub = {
+        // eslint-disable-next-line no-unused-vars
+        navigateByUrl: (url: string) => {
+            // Do nothing
+        },
+    };
+
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [BrowserAnimationsModule, RouterTestingModule, AppMaterialModule],
+            imports: [HttpClientModule, BrowserAnimationsModule, RouterTestingModule, AppMaterialModule],
             declarations: [ModeSelectionComponent],
             providers: [
                 FormBuilder,
+                { provide: Router, useValue: routerStub },
                 { provide: MAT_DIALOG_DATA, useValue: {} },
                 { provide: MatDialogRef, useValue: dialogMock },
-                HttpClient,
-                HttpHandler,
             ],
         }).compileComponents();
     });

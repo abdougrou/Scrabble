@@ -104,7 +104,7 @@ export class EaselComponent implements OnChanges {
 
     update(msg: string) {
         if (msg === 'updated') {
-            this.tiles = this.generalGameManagerService.mainPlayer.easel.tiles;
+            // this.tiles = this.generalGameManagerService.mainPlayer.easel.letters;
         }
     }
     resetTileState() {
