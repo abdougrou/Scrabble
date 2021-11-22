@@ -7,6 +7,7 @@ import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
 import { LETTER_POINTS } from '@app/constants';
 import { LobbyConfig } from '@common/lobby-config';
+import { PlayerName } from '@common/player-name';
 import { ScoreConfig } from '@common/score-config';
 import {
     ExchangeLettersMessage,
@@ -20,7 +21,7 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
-    UpdateMessage
+    UpdateMessage,
 } from '@common/socket-messages';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -169,6 +170,11 @@ export class CommunicationService {
             .pipe(catchError(this.handleError<ScoreConfig[]>('getClassicRanking')));
     }
 
+    getPlayerNames(): Observable<PlayerName[]> {
+        return this.http
+            .get<PlayerName[]>('http://localhost:3000/data/player-names', this.httpOptions)
+            .pipe(catchError(this.handleError<PlayerName[]>('getPlayerNames')));
+    }
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
         return () => of(result as T);
     }

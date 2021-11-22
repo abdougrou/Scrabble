@@ -21,8 +21,10 @@ import { MultiGameConfigComponent } from './components/multi-game-config/multi-g
 import { MultiplayerJoinFormComponent } from './components/multiplayer-join-form/multiplayer-join-form.component';
 import { MultiplayerRoomsComponent } from './components/multiplayer-rooms/multiplayer-rooms.component';
 import { PlayerInfoComponent } from './components/player-info/player-info.component';
+import { PlayerNamesPopupComponent } from './components/player-names-popup/player-names-popup.component';
 import { RankingPopupComponent } from './components/ranking-popup/ranking-popup.component';
 import { WaitingPopupComponent } from './components/waiting-popup/waiting-popup.component';
+import { AdminPageComponent } from './pages/admin-page/admin-page.component';
 import { MultiplayerGamePageComponent } from './pages/multiplayer-game-page/multiplayer-game-page.component';
 
 /**
@@ -52,6 +54,8 @@ import { MultiplayerGamePageComponent } from './pages/multiplayer-game-page/mult
         MultiplayerJoinFormComponent,
         MultiplayerGamePageComponent,
         RankingPopupComponent,
+        AdminPageComponent,
+        PlayerNamesPopupComponent,
     ],
     imports: [AppMaterialModule, AppRoutingModule, BrowserAnimationsModule, BrowserModule, FormsModule, ReactiveFormsModule, HttpClientModule],
     providers: [],
