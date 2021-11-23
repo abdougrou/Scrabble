@@ -1,0 +1,18 @@
+import { Observable } from 'rxjs';
+import { Easel } from './easel';
+import { Move } from './move-generator';
+import { Player } from './player';
+
+export enum PlayAction {
+    Pass,
+    Exchange,
+    Place,
+}
+
+export interface VirtualPlayer extends Player {
+    name: string;
+    easel: Easel;
+    score: number;
+
+    chooseAction: (legalMoves: Move[]) => Observable<PlayAction>;
+}
