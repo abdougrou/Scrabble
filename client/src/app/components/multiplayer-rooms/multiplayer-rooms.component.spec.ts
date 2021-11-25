@@ -1,6 +1,7 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppMaterialModule } from '@app/modules/material.module';
 import { GameMode } from '@common/lobby-config';
 import { MultiplayerRoomsComponent } from './multiplayer-rooms.component';
@@ -17,7 +18,7 @@ describe('MultiplayerRoomsComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule, AppMaterialModule],
+            imports: [HttpClientTestingModule, BrowserAnimationsModule, AppMaterialModule],
             declarations: [MultiplayerRoomsComponent],
             providers: [
                 { provide: MatDialogRef, useValue: dialogMock },
@@ -35,5 +36,33 @@ describe('MultiplayerRoomsComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('create lobby should open form popup', async () => {
+        const spy = spyOn(component, 'openFormPopup').and.callThrough();
+        component.createLobby();
+        fixture.detectChanges();
+        expect(spy).toHaveBeenCalled();
+    });
+
+    it('should refresh lobbies list after creating lobby', () => {
+        const spy = spyOn(component, 'getLobbies').and.callThrough();
+        component.createLobby();
+        fixture.detectChanges();
+        expect(spy).toBeTruthy();
+    });
+
+    it('should open form popup', () => {
+        const spy = spyOn(component.dialog, 'open').and.callThrough();
+        component.openFormPopup();
+        fixture.detectChanges();
+        expect(spy).toBeTruthy();
+    });
+
+    it('should refreh lobbies', () => {
+        const spy = spyOn(component.communication, 'getLobbies').and.callThrough();
+        component.getLobbies();
+        fixture.detectChanges();
+        expect(spy).toHaveBeenCalled();
     });
 });

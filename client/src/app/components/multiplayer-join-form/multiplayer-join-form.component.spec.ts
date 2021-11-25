@@ -48,4 +48,24 @@ describe('MultiplayerJoinFormComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
+
+    it('should close popup when started equals true', () => {
+        const spy = spyOn(component.dialogRef, 'close').and.callThrough();
+        component.communication.started = true;
+        expect(spy).toHaveBeenCalled();
+    });
+
+    it('should join lobby', () => {
+        const spyJoinLobby = spyOn(component.communication, 'joinLobby').and.callThrough();
+        const spySetConfig = spyOn(component.communication, 'setConfig').and.callThrough();
+        component.joinLobby();
+        expect(spyJoinLobby).toHaveBeenCalled();
+        expect(spySetConfig).toHaveBeenCalled();
+    });
+
+    it('should close popup when back button clicked', () => {
+        const spyClose = spyOn(component.dialogRef, 'close').and.callThrough();
+        component.back();
+        expect(spyClose).toHaveBeenCalled();
+    });
 });
