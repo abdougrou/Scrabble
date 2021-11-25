@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { Anchor } from '@app/classes/anchor';
 import { coordToKey, transpose } from '@app/classes/board-utils';
 import { CrossCheck } from '@app/classes/cross-check';
-import { Move } from '@app/classes/move-generator';
+import { Move } from '@app/classes/move';
 import { Trie, TrieNode } from '@app/classes/trie';
 import { Vec2 } from '@app/classes/vec2';
 import { CLASSIC_RESERVE, DARK_BLUE_MULTIPLIER, LIGHT_BLUE_MULTIPLIER, PINK_MULTIPLIER, RED_MULTIPLIER } from '@app/constants';
+import { BoardService } from './board.service';
 
 @Injectable({
     providedIn: 'root',
@@ -17,7 +18,7 @@ export class MoveGeneratorService {
     legalMoves: Move[] = [];
     pointMap: Map<string, number> = new Map();
 
-    constructor() {
+    constructor(private board: BoardService) {
         const lettersData: string[] = CLASSIC_RESERVE.split(/\r?\n/);
         lettersData.forEach((letterData) => {
             const data = letterData.split(',');
@@ -30,18 +31,18 @@ export class MoveGeneratorService {
      *
      * @param board board to calculate anchors and cross-checks for
      */
-    calculateAnchorsAndCrossChecks(board: (string | null)[][]) {
-        this.anchors = Anchor.findAnchors(board);
+    calculateAnchorsAndCrossChecks() {
+        this.anchors = Anchor.findAnchors(this.board.data);
         this.crossChecks = new Map();
         this.anchors.forEach((anchor) => {
             const coord: Vec2 = { x: anchor.x, y: anchor.y };
-            const crossCheck = CrossCheck.crossCheck(board, coord, this.dictionary);
+            const crossCheck = CrossCheck.crossCheck(this.board.data, coord, this.dictionary);
             this.crossChecks.set(coordToKey(coord), crossCheck);
         });
     }
 
-    calculateCrossSum(board: (string | null)[][], coord: Vec2, across: boolean): number {
-        const row = across ? board[coord.x] : (transpose(board)[coord.y] as (string | null)[]);
+    calculateCrossSum(coord: Vec2, across: boolean): number {
+        const row = across ? this.board.data[coord.x] : (transpose(this.board.data)[coord.y] as (string | null)[]);
         const coord1D = across ? coord.y : coord.x;
         return this.calculateCrossSumOneDimension(row, coord1D);
     }
@@ -72,14 +73,14 @@ export class MoveGeneratorService {
      * @param board board to generate moves for
      * @param easel current player's easel
      */
-    generateLegalMoves(board: (string | null)[][], easel: string) {
+    generateLegalMoves(easel: string) {
         this.anchors.forEach((anchor) => {
             if (anchor.leftPart.length > 0) {
                 const node = this.dictionary.getNode(anchor.leftPart);
                 if (node) {
-                    this.extendLeft(board, easel, anchor.leftPart, anchor, node, 0);
+                    this.extendLeft(easel, anchor.leftPart, anchor, node, 0);
                 }
-            } else this.extendLeft(board, easel, '', anchor, this.dictionary.root, anchor.leftLength);
+            } else this.extendLeft(easel, '', anchor, this.dictionary.root, anchor.leftLength);
         });
     }
 
@@ -93,14 +94,14 @@ export class MoveGeneratorService {
      * @param node last letter's node, root if partialWord is empty string
      * @param limit anchor.leftLength if anchor.leftPart is empty string, 0 otherwise
      */
-    extendLeft(board: (string | null)[][], easel: string, partialWord: string, anchor: Anchor, node: TrieNode, limit: number) {
-        this.extendRight(board, easel, partialWord, anchor, node, { x: anchor.x, y: anchor.y });
+    extendLeft(easel: string, partialWord: string, anchor: Anchor, node: TrieNode, limit: number) {
+        this.extendRight(easel, partialWord, anchor, node, { x: anchor.x, y: anchor.y });
         if (limit > 0) {
             node.children.forEach((edge) => {
                 if (edge.value && easel.includes(edge.value)) {
                     const nextNode = edge;
                     const nextEasel = easel.replace(edge.value, '');
-                    this.extendLeft(board, nextEasel, partialWord + edge.value, anchor, nextNode, limit - 1);
+                    this.extendLeft(nextEasel, partialWord + edge.value, anchor, nextNode, limit - 1);
                 }
             });
         }
@@ -116,10 +117,10 @@ export class MoveGeneratorService {
      * @param node last letter's node
      * @param square square to fill
      */
-    extendRight(board: (string | null)[][], easel: string, partialWord: string, anchor: Anchor, node: TrieNode, square: Vec2) {
-        if (square.x >= board.length && square.y >= board.length) return;
+    extendRight(easel: string, partialWord: string, anchor: Anchor, node: TrieNode, square: Vec2) {
+        if (square.x >= this.board.data.length && square.y >= this.board.data.length) return;
 
-        const boardLetter = board[square.x][square.y];
+        const boardLetter = this.board.data[square.x][square.y];
         if (!boardLetter) {
             if (node.terminal) this.legalMove(partialWord, square, anchor.across);
 
@@ -129,15 +130,15 @@ export class MoveGeneratorService {
                     const nextNode = edge;
                     const nextEasel = easel.replace(edge.value, '');
                     const nextSquare = anchor.across ? { x: square.x, y: square.y + 1 } : { x: square.x + 1, y: square.y };
-                    if (nextSquare.x < board.length && nextSquare.y < board.length)
-                        this.extendRight(board, nextEasel, partialWord + edge.value, anchor, nextNode, nextSquare);
+                    if (nextSquare.x < this.board.data.length && nextSquare.y < this.board.data.length)
+                        this.extendRight(nextEasel, partialWord + edge.value, anchor, nextNode, nextSquare);
                 }
             });
         } else {
             const nextNode = node.children.get(boardLetter);
             if (nextNode) {
                 const nextSquare = anchor.across ? { x: square.x, y: square.y + 1 } : { x: square.x + 1, y: square.y };
-                this.extendRight(board, easel, partialWord + boardLetter, anchor, nextNode, nextSquare);
+                this.extendRight(easel, partialWord + boardLetter, anchor, nextNode, nextSquare);
             }
         }
     }
@@ -146,12 +147,25 @@ export class MoveGeneratorService {
      * Stores the generated legal move
      *
      * @param word word to save
-     * @param square word's starting coordinate
+     * @param coord word's starting coordinate
      * @param across whether the word is across or down
      */
-    legalMove(word: string, square: Vec2, across: boolean) {
-        const coord = across ? { x: square.x, y: square.y - word.length } : { x: square.x - word.length, y: square.y };
-        this.legalMoves.push({ word, coord, across });
+    legalMove(word: string, coord: Vec2, across: boolean) {
+        const move = { word, coord, across, points: 0 };
+        const nextCoord = coord;
+        let points = 0;
+        const row: (string | null)[] = (across ? this.board.data : transpose(this.board.data))[across ? coord.x : coord.y] as (string | null)[];
+        const pointRow: number[] = (across ? this.board.pointGrid : transpose(this.board.pointGrid))[across ? coord.x : coord.y] as number[];
+        for (const k of word) {
+            if (!this.board.getLetter(nextCoord)) this.board.setLetter(nextCoord, k);
+            points += this.calculateCrossSum(coord, across);
+
+            if (across) nextCoord.y++;
+            else nextCoord.x++;
+        }
+        points += this.calculateWordPoints(move, row, pointRow);
+        move.points = points;
+        this.legalMoves.push(move);
     }
 
     calculateWordPoints(move: Move, row: (string | null)[], pointRow: number[]): number {

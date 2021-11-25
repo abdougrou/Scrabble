@@ -250,7 +250,7 @@ export class EaselComponent implements OnChanges {
             this.multiGameManager.exchangeLetters(tilesToExchange, this.multiGameManager.getMainPlayer());
             this.multiGameManager.switchPlayers();
         } else {
-            this.gameManager.exchangeTiles(tilesToExchange, this.playerService.getPlayerByName(this.mainPlayerName));
+            this.gameManager.exchangeLetters(tilesToExchange, this.playerService.getPlayerByName(this.mainPlayerName));
         }
         this.resetTileState();
     }

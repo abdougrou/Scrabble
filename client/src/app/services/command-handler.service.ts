@@ -32,7 +32,7 @@ export class CommandHandlerService {
         let commandResult: ChatMessage = { user: '', body: '' };
         const regex = new RegExp(/^!échanger ([a-z]|\*){0,7}/g);
         if (regex.test(command)) {
-            commandResult = this.gameManager.exchangeTiles(command.split(' ')[1], player);
+            commandResult = this.gameManager.exchangeLetters(command.split(' ')[1], player);
         } else {
             commandResult.user = SYSTEM_NAME;
             commandResult.body = 'Erreur de syntaxe, pour échanger des lettres, il faut suivre le format suivant : !échanger (lettre)...';

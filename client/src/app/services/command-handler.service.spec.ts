@@ -11,7 +11,12 @@ describe('CommandHandlerService', () => {
     let player: Player;
 
     beforeEach(() => {
-        gameManagerSpy = jasmine.createSpyObj<GameManagerService>('GameManagerService', ['exchangeTiles', 'placeTiles', 'skipTurn', 'activateDebug']);
+        gameManagerSpy = jasmine.createSpyObj<GameManagerService>('GameManagerService', [
+            'exchangeLetters',
+            'placeTiles',
+            'skipTurn',
+            'activateDebug',
+        ]);
     });
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -39,7 +44,7 @@ describe('CommandHandlerService', () => {
         service.handleCommand(place, player);
         service.handleCommand(pass, player);
         service.handleCommand(debug, player);
-        expect(gameManagerSpy.exchangeTiles).toHaveBeenCalledTimes(1);
+        expect(gameManagerSpy.exchangeLetters).toHaveBeenCalledTimes(1);
         expect(gameManagerSpy.placeTiles).toHaveBeenCalledTimes(1);
         expect(gameManagerSpy.skipTurn).toHaveBeenCalledTimes(1);
         expect(gameManagerSpy.activateDebug).toHaveBeenCalledTimes(1);
@@ -52,7 +57,7 @@ describe('CommandHandlerService', () => {
         service.exchange(exchangeGood, player);
         service.exchange(exchangeGoodStar, player);
         service.exchange(exchangeBad, player);
-        expect(gameManagerSpy.exchangeTiles).toHaveBeenCalledTimes(2);
+        expect(gameManagerSpy.exchangeLetters).toHaveBeenCalledTimes(2);
     });
 
     it('should call GameManager placeTiles when command is valid', () => {
