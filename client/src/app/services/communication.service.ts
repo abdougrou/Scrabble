@@ -219,9 +219,7 @@ export class CommunicationService {
     }
 
     postFile(fileToUpload: File): Observable<HttpEvent<boolean>> {
-        const formData: FormData = new FormData();
-        formData.append('dictionary', fileToUpload, fileToUpload.name);
-        return this.http.post<boolean>('http://localhost:3000/data/dictionary', formData, {
+        return this.http.post<boolean>('http://localhost:3000/data/dictionary', fileToUpload, {
             reportProgress: true,
             observe: 'events',
         });

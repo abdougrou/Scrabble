@@ -22,10 +22,7 @@ export class DatabaseController {
     ) {
         this.configureRouter();
     }
-    consoleDictionary(a: FormData) {
-        const formData = a.get('dictionnary');
-        if (formData) console.log(formData[0]);
-    }
+
     private configureRouter(): void {
         this.router = Router();
 
@@ -169,7 +166,7 @@ export class DatabaseController {
         });
 
         this.router.post('/dictionary', async (req: Request, res: Response, next: NextFunction) => {
-            this.consoleDictionary(req.body);
+            console.log(req.body);
         });
     }
 }
