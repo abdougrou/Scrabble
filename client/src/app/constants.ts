@@ -15,7 +15,7 @@ export const MAX_SKIP_COUNT = 6;
 
 // Game Manager constants
 export const FIRST_PLAYER_COIN_FLIP = 0.5;
-export const STARTING_TILE_AMOUNT = 7;
+export const STARTING_LETTER_AMOUNT = 7;
 export const SECOND_MD = 1000;
 
 export const COMMANDS = {

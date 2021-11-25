@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { GameConfig } from '@app/classes/game-config';
 import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
-import { COMMAND_RESULT, MAX_SKIP_COUNT, SECOND_MD, STARTING_TILE_AMOUNT, SYSTEM_NAME } from '@app/constants';
+import { COMMAND_RESULT, MAX_SKIP_COUNT, SECOND_MD, STARTING_LETTER_AMOUNT, SYSTEM_NAME } from '@app/constants';
 import { BehaviorSubject, Subscription, timer } from 'rxjs';
 import { BoardService } from './board.service';
 import { ExchangeTilesService } from './exchange-tiles.service';
@@ -75,9 +75,9 @@ export class GameManagerService {
     // }
 
     initializePlayers(playerNames: string[]) {
-        this.players.createPlayer(playerNames[0], this.reserve.getRandomLetters(STARTING_TILE_AMOUNT));
-        if (this.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_TILE_AMOUNT));
-        else this.players.createVirtualPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_TILE_AMOUNT));
+        this.players.createPlayer(playerNames[0], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
+        if (this.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
+        else this.players.createVirtualPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
         // if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
     }
 
@@ -91,8 +91,8 @@ export class GameManagerService {
         // if (this.players.current instanceof VirtualPlayer) this.playVirtualPlayer();
     }
 
-    exchangeTiles(tiles: string, player: Player): ChatMessage {
-        const message = this.exchangeTileService.exchangeTiles(tiles, player);
+    exchangeLetters(tiles: string, player: Player): ChatMessage {
+        const message = this.exchangeTileService.exchangeLetters(tiles, player);
         if (message.body === '') {
             this.players.skipCounter = 0;
             this.switchPlayers();

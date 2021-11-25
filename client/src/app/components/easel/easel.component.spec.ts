@@ -4,7 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
 import { EaselTile, TileState } from '@app/classes/tile';
-import { KEYBOARD_EVENT_RECEIVER, MouseButton, STARTING_TILE_AMOUNT } from '@app/constants';
+import { KEYBOARD_EVENT_RECEIVER, MouseButton, STARTING_LETTER_AMOUNT } from '@app/constants';
 import { AppMaterialModule } from '@app/modules/material.module';
 import { MouseManagerService } from '@app/services/mouse-manager.service';
 import { PlayerService } from '@app/services/player.service';
@@ -150,14 +150,14 @@ describe('EaselComponent', () => {
 
     it('should reset all tiles', () => {
         const tileA: EaselTile = { tile: { letter: 'a', points: 0 }, state: TileState.Manipulation };
-        for (let i = 0; i < STARTING_TILE_AMOUNT; i++) component.tiles.push(tileA);
+        for (let i = 0; i < STARTING_LETTER_AMOUNT; i++) component.tiles.push(tileA);
         component.resetTileState();
-        for (let i = 0; i < STARTING_TILE_AMOUNT; i++) expect(component.tiles[i].state).toBe(TileState.None);
+        for (let i = 0; i < STARTING_LETTER_AMOUNT; i++) expect(component.tiles[i].state).toBe(TileState.None);
     });
 
     it('containsTile should return the good value', () => {
         const letters: string[] = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
-        for (let i = 0; i < STARTING_TILE_AMOUNT; i++) {
+        for (let i = 0; i < STARTING_LETTER_AMOUNT; i++) {
             const tile: EaselTile = { tile: { letter: letters[i], points: 0 }, state: TileState.None };
             component.tiles.push(tile);
         }
@@ -169,7 +169,7 @@ describe('EaselComponent', () => {
 
     it('containsTile should return the good value', () => {
         const letters: string[] = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
-        for (let i = 0; i < STARTING_TILE_AMOUNT; i++) {
+        for (let i = 0; i < STARTING_LETTER_AMOUNT; i++) {
             const tile: EaselTile = { tile: { letter: letters[i], points: 0 }, state: TileState.None };
             component.tiles.push(tile);
         }
@@ -181,7 +181,7 @@ describe('EaselComponent', () => {
 
     it('tileKeyboardClicked should return the first occurance of a tile when there is no selected tile', () => {
         const letters: string[] = ['a', 'b', 'c', 'b', 'e', 'b', 'e'];
-        for (let i = 0; i < STARTING_TILE_AMOUNT; i++) {
+        for (let i = 0; i < STARTING_LETTER_AMOUNT; i++) {
             const tile: EaselTile = { tile: { letter: letters[i], points: 0 }, state: TileState.None };
             component.tiles.push(tile);
         }
@@ -195,7 +195,7 @@ describe('EaselComponent', () => {
 
     it('tileKeyboardClicked should always return the same tile if there is only one occurance of it', () => {
         const letters: string[] = ['a', 'b', 'c', 'b', 'e', 'b', 'e'];
-        for (let i = 0; i < STARTING_TILE_AMOUNT; i++) {
+        for (let i = 0; i < STARTING_LETTER_AMOUNT; i++) {
             const tile: EaselTile = { tile: { letter: letters[i], points: 0 }, state: TileState.None };
             component.tiles.push(tile);
         }
@@ -207,7 +207,7 @@ describe('EaselComponent', () => {
 
     it('tileKeyboardClicked should return the next occuranced tile if the first occurance is selected', () => {
         const letters: string[] = ['a', 'b', 'c', 'b', 'e', 'b', 'e'];
-        for (let i = 0; i < STARTING_TILE_AMOUNT; i++) {
+        for (let i = 0; i < STARTING_LETTER_AMOUNT; i++) {
             const tile: EaselTile = { tile: { letter: letters[i], points: 0 }, state: TileState.None };
             component.tiles.push(tile);
         }
@@ -220,7 +220,7 @@ describe('EaselComponent', () => {
 
     it('tileKeyboardClicked should return the first occuranced tile if there is no more occurances on the right of the selected tile', () => {
         const letters: string[] = ['a', 'b', 'c', 'b', 'e', 'b', 'e'];
-        for (let i = 0; i < STARTING_TILE_AMOUNT; i++) {
+        for (let i = 0; i < STARTING_LETTER_AMOUNT; i++) {
             const tile: EaselTile = { tile: { letter: letters[i], points: 0 }, state: TileState.None };
             component.tiles.push(tile);
         }
