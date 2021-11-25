@@ -18,7 +18,9 @@ export class ClassicRankingService {
     }
 
     async reset() {
-        this.collection.deleteMany({});
+        this.collection.deleteMany({}).catch(() => {
+            throw new HttpException('Failed to reset', 500);
+        });
         this.collection.insertMany(DEFAULT_SCOREBOARD);
         this.dataSize = 5;
     }

@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Easel } from '@app/classes/easel';
 import { ChatMessage } from '@app/classes/message';
@@ -21,7 +21,7 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
-    UpdateMessage,
+    UpdateMessage
 } from '@common/socket-messages';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -170,6 +170,18 @@ export class CommunicationService {
             .pipe(catchError(this.handleError<ScoreConfig[]>('getClassicRanking')));
     }
 
+    putClassicPlayerScore(scoreConfig: ScoreConfig): Observable<unknown> {
+        return this.http.post('http://localhost:3000/data/ranking/classic', scoreConfig, this.httpOptions);
+    }
+
+    putLog2990PlayerScore(scoreConfig: ScoreConfig): Observable<unknown> {
+        return this.http.post('http://localhost:3000/data/ranking/log2990', scoreConfig, this.httpOptions);
+    }
+
+    resetPlayerScores(): Observable<unknown> {
+        return this.http.delete('http://localhost:3000/data/ranking/reset', this.httpOptions);
+    }
+
     getPlayerNames(): Observable<PlayerName[]> {
         return this.http
             .get<PlayerName[]>('http://localhost:3000/data/player-names', this.httpOptions)
@@ -205,6 +217,16 @@ export class CommunicationService {
     resetPlayerNames(): Observable<unknown> {
         return this.http.delete('http://localhost:3000/data/player-names/reset', this.httpOptions);
     }
+
+    postFile(fileToUpload: File): Observable<HttpEvent<boolean>> {
+        const formData: FormData = new FormData();
+        formData.append('fileKey', fileToUpload, fileToUpload.name);
+        return this.http.post<boolean>('http://localhost:3000/data/dictionary', formData, {
+            reportProgress: true,
+            observe: 'events',
+        });
+    }
+
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
         return () => of(result as T);
     }

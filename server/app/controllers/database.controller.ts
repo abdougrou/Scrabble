@@ -78,33 +78,6 @@ export class DatabaseController {
                 });
         });
 
-        /**
-         * deletes lowest player
-         */
-        this.router.delete('/ranking/classic/lowest', async (req: Request, res: Response, next: NextFunction) => {
-            this.classicRanking
-                .deleteLowestPlayer()
-                .then(() => {
-                    res.status(Httpstatus.NO_CONTENT).send();
-                })
-                .catch((error: Error) => {
-                    console.log(error);
-                    res.status(Httpstatus.NOT_FOUND).send(error.message);
-                });
-        });
-
-        this.router.delete('/ranking/log2990/lowest', async (req: Request, res: Response, next: NextFunction) => {
-            this.log2990Ranking
-                .deleteLowestPlayer()
-                .then(() => {
-                    res.status(Httpstatus.NO_CONTENT).send();
-                })
-                .catch((error: Error) => {
-                    console.log(error);
-                    res.status(Httpstatus.NOT_FOUND).send(error.message);
-                });
-        });
-
         this.router.delete('/ranking/reset', async (req: Request, res: Response, next: NextFunction) => {
             this.classicRanking
                 .reset()
@@ -113,6 +86,7 @@ export class DatabaseController {
                 })
                 .catch((error: Error) => {
                     console.log(error);
+                    console.log('bro theres a mistake here dude omg wth gee');
                     res.status(Httpstatus.NOT_FOUND).send(error.message);
                 });
             this.log2990Ranking
@@ -185,6 +159,18 @@ export class DatabaseController {
                 .getBeginnerPlayerNames()
                 .then((names: PlayerName[]) => {
                     res.json(names);
+                })
+                .catch((error: Error) => {
+                    res.status(Httpstatus.NOT_FOUND).send(error.message);
+                });
+        });
+
+        this.router.post('/dictionary', async (req: Request, res: Response, next: NextFunction) => {
+            console.log(req.body);
+            this.log2990Ranking
+                .addPlayer(req.body)
+                .then(() => {
+                    res.status(Httpstatus.CREATED).send();
                 })
                 .catch((error: Error) => {
                     res.status(Httpstatus.NOT_FOUND).send(error.message);
