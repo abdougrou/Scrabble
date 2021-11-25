@@ -1,6 +1,6 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormBuilder } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -18,11 +18,20 @@ describe('MultiGameConfigComponent', () => {
         },
     };
 
+    const config = {
+        key: '',
+        host: '',
+        turnDuration: 60,
+        bonusEnabled: false,
+        dictionary: 'francais',
+        gameMode: GameMode.Classic,
+    };
+
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [HttpClientModule, BrowserAnimationsModule, RouterTestingModule, AppMaterialModule],
+            imports: [HttpClientModule, BrowserAnimationsModule, RouterTestingModule, AppMaterialModule, ReactiveFormsModule],
             declarations: [MultiGameConfigComponent],
-            providers: [FormBuilder, { provide: MatDialogRef, useValue: dialogMock }, { provide: MAT_DIALOG_DATA, useValue: {} }],
+            providers: [FormBuilder, { provide: MatDialogRef, useValue: dialogMock }, { provide: MAT_DIALOG_DATA, useValue: { data: config } }],
         }).compileComponents();
     });
 

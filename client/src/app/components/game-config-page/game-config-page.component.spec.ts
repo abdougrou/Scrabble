@@ -1,6 +1,6 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Dictionary, GameConfig } from '@app/classes/game-config';
@@ -26,9 +26,10 @@ describe('GameConfigPageComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [HttpClientModule, BrowserAnimationsModule, AppMaterialModule],
+            imports: [HttpClientModule, BrowserAnimationsModule, AppMaterialModule, ReactiveFormsModule],
             declarations: [GameConfigPageComponent],
             providers: [
+                FormBuilder,
                 { provide: MAT_DIALOG_DATA, useValue: {} },
                 { provide: MatDialogRef, useValue: dialogMock },
                 FormBuilder,

@@ -65,4 +65,19 @@ describe('MultiplayerRoomsComponent', () => {
         fixture.detectChanges();
         expect(spy).toHaveBeenCalled();
     });
+
+    it('should join random lobby', () => {
+        const spyJoin = spyOn(component, 'joinLobby').and.callThrough();
+        component.joinRandomLobby();
+        fixture.detectChanges();
+        expect(spyJoin).toHaveBeenCalled();
+    });
+
+    it('should open join form popup', () => {
+        const spyJoin = spyOn(component.dialog, 'open').and.callThrough();
+        const key = 'key';
+        component.openJoinPopup(key);
+        fixture.detectChanges();
+        expect(spyJoin).toHaveBeenCalled();
+    });
 });
