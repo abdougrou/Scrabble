@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-useless-constructor */
 import { Overlay } from '@angular/cdk/overlay';
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { PlayerNamesPopupComponent } from '@app/components/player-names-popup/player-names-popup.component';
+import { PlayerNameOptionsComponent } from '@app/components/player-name-options/player-name-options.component';
 import { DIALOG_HEIGHT, DIALOG_WIDTH } from '@app/constants';
+import { CommunicationService } from '@app/services/communication.service';
 
 @Component({
     selector: 'app-admin-page',
@@ -12,14 +12,17 @@ import { DIALOG_HEIGHT, DIALOG_WIDTH } from '@app/constants';
     providers: [MatDialog, Overlay],
 })
 export class AdminPageComponent {
-    // eslint-disable-next-line @typescript-eslint/no-useless-constructor
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    constructor(public dialog: MatDialog) {}
+    constructor(public dialog: MatDialog, private communication: CommunicationService) {}
 
     openNames() {
-        this.dialog.open(PlayerNamesPopupComponent, {
+        this.dialog.open(PlayerNameOptionsComponent, {
             height: DIALOG_HEIGHT,
             width: DIALOG_WIDTH,
         });
+    }
+
+    reset() {
+        window.alert('reset');
+        this.communication.resetPlayerNames().subscribe();
     }
 }

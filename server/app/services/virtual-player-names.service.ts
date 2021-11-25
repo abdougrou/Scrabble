@@ -1,6 +1,6 @@
 import { HttpException } from '@app/classes/http.exception';
 import { DEFAULT_VIRTUAL_PLAYER_NAMES } from '@app/constants';
-import { PlayerName } from '@common/player-name';
+import { Difficulty, PlayerName } from '@common/player-name';
 import { Collection } from 'mongodb';
 import 'reflect-metadata';
 import { Service } from 'typedi';
@@ -29,11 +29,39 @@ export class VirtualPlayerNamesService {
                 return players;
             });
     }
+    async getExpertPlayerNames(): Promise<PlayerName[]> {
+        return this.collection
+            .find({ difficulty: Difficulty.Expert })
+            .toArray()
+            .then((players: PlayerName[]) => {
+                return players;
+            });
+    }
+    async getBeginnerPlayerNames(): Promise<PlayerName[]> {
+        return this.collection
+            .find({ difficulty: Difficulty.Beginner })
+            .toArray()
+            .then((players: PlayerName[]) => {
+                return players;
+            });
+    }
 
-    async addPlayer(playerName: PlayerName): Promise<void> {
-        await this.collection.insertOne(playerName).catch(() => {
+    async addPlayer(playerName: PlayerName): Promise<boolean> {
+        if ((await this.collection.find({ name: playerName.name }).toArray()).length === 0) {
+            await this.collection.insertOne(playerName).catch(() => {
+                // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+                throw new HttpException('Failed to insert', 500);
+            });
+            return true;
+        }
+        return false;
+    }
+
+    async deletePlayer(playerName: PlayerName): Promise<boolean> {
+        await this.collection.findOneAndDelete({ name: playerName.name }).catch(() => {
             // eslint-disable-next-line @typescript-eslint/no-magic-numbers
             throw new HttpException('Failed to insert', 500);
         });
+        return true;
     }
 }

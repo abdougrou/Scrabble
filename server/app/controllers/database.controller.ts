@@ -138,12 +138,22 @@ export class DatabaseController {
                 });
         });
 
+        this.router.post('/player-names/delete', async (req: Request, res: Response, next: NextFunction) => {
+            this.virtualPlayerNames
+                .deletePlayer(req.body)
+                .then((success) => {
+                    res.json(success);
+                })
+                .catch((error: Error) => {
+                    res.status(Httpstatus.NOT_FOUND).send(error.message);
+                });
+        });
+
         this.router.post('/player-names', async (req: Request, res: Response, next: NextFunction) => {
-            console.log(req.body);
             this.virtualPlayerNames
                 .addPlayer(req.body)
-                .then(() => {
-                    res.status(Httpstatus.CREATED).send();
+                .then((success) => {
+                    res.json(success);
                 })
                 .catch((error: Error) => {
                     res.status(Httpstatus.NOT_FOUND).send(error.message);
@@ -153,6 +163,26 @@ export class DatabaseController {
         this.router.get('/player-names', async (req: Request, res: Response, next: NextFunction) => {
             this.virtualPlayerNames
                 .getAllNames()
+                .then((names: PlayerName[]) => {
+                    res.json(names);
+                })
+                .catch((error: Error) => {
+                    res.status(Httpstatus.NOT_FOUND).send(error.message);
+                });
+        });
+        this.router.get('/player-names/expert', async (req: Request, res: Response, next: NextFunction) => {
+            this.virtualPlayerNames
+                .getExpertPlayerNames()
+                .then((names: PlayerName[]) => {
+                    res.json(names);
+                })
+                .catch((error: Error) => {
+                    res.status(Httpstatus.NOT_FOUND).send(error.message);
+                });
+        });
+        this.router.get('/player-names/beginner', async (req: Request, res: Response, next: NextFunction) => {
+            this.virtualPlayerNames
+                .getBeginnerPlayerNames()
                 .then((names: PlayerName[]) => {
                     res.json(names);
                 })

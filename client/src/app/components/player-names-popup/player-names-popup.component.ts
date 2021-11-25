@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { Component, Inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatTableDataSource } from '@angular/material/table';
 import { CommunicationService } from '@app/services/communication.service';
-import { PlayerName } from '@common/player-name';
-import { GameConfigPageComponent } from '../game-config-page/game-config-page.component';
+import { Difficulty, PlayerName } from '@common/player-name';
 
 @Component({
     selector: 'app-player-names-popup',
@@ -10,18 +10,50 @@ import { GameConfigPageComponent } from '../game-config-page/game-config-page.co
     styleUrls: ['./player-names-popup.component.scss'],
 })
 export class PlayerNamesPopupComponent {
-    columnsToDisplay = ['name', 'difficulty'];
-    playerNames: PlayerName[] = [];
-    constructor(private communication: CommunicationService, public dialogRef: MatDialogRef<GameConfigPageComponent>) {
+    displayedColumns = ['name', 'difficulty', 'edit', 'delete'];
+    playerNames: MatTableDataSource<PlayerName>;
+
+    constructor(
+        private communication: CommunicationService,
+        public dialogRef: MatDialogRef<PlayerNamesPopupComponent>,
+        @Inject(MAT_DIALOG_DATA) public playerType: string,
+    ) {
         this.getPlayerNames();
     }
 
     getPlayerNames() {
-        this.communication.getPlayerNames().subscribe((names) => {
-            this.playerNames = names;
-        });
+        if (this.playerType === 'expert') {
+            this.communication.getExpertPlayerNames().subscribe((names) => {
+                this.playerNames = new MatTableDataSource<PlayerName>(names);
+            });
+        } else if (this.playerType === 'beginner') {
+            this.communication.getBeginnerPlayerNames().subscribe((names) => {
+                this.playerNames = new MatTableDataSource<PlayerName>(names);
+            });
+        }
     }
+
     back() {
         this.dialogRef.close();
+    }
+
+    editPlayerName() {
+        window.alert('edit');
+    }
+
+    deletePlayerName(element: PlayerName) {
+        this.communication.deletePlayerName(element).subscribe((success) => {
+            if (success) {
+                this.getPlayerNames();
+            }
+        });
+    }
+    addPlayer() {
+        const playerName: PlayerName = { name: 'newPlayer5', difficulty: Difficulty.Beginner };
+        this.communication.addPlayerName(playerName).subscribe((success) => {
+            if (success) {
+                this.getPlayerNames();
+            }
+        });
     }
 }

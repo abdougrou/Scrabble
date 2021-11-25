@@ -175,6 +175,36 @@ export class CommunicationService {
             .get<PlayerName[]>('http://localhost:3000/data/player-names', this.httpOptions)
             .pipe(catchError(this.handleError<PlayerName[]>('getPlayerNames')));
     }
+    getExpertPlayerNames(): Observable<PlayerName[]> {
+        return this.http
+            .get<PlayerName[]>('http://localhost:3000/data/player-names/expert', this.httpOptions)
+            .pipe(catchError(this.handleError<PlayerName[]>('getPlayerNames')));
+    }
+    getBeginnerPlayerNames(): Observable<PlayerName[]> {
+        return this.http
+            .get<PlayerName[]>('http://localhost:3000/data/player-names/beginner', this.httpOptions)
+            .pipe(catchError(this.handleError<PlayerName[]>('getPlayerNames')));
+    }
+
+    // addPlayerName(playerName: PlayerName) {
+    //     this.http.post('http://localhost:3000/data/player-names', JSON.stringify(playerName), this.httpOptions);
+    // }
+
+    addPlayerName(playerName: PlayerName): Observable<boolean> {
+        return this.http
+            .post<boolean>('http://localhost:3000/data/player-names', playerName, this.httpOptions)
+            .pipe(catchError(this.handleError<boolean>('postPlayerName')));
+    }
+
+    deletePlayerName(playerName: PlayerName): Observable<boolean> {
+        return this.http
+            .post<boolean>('http://localhost:3000/data/player-names/delete', playerName, this.httpOptions)
+            .pipe(catchError(this.handleError<boolean>('deletePlayerName')));
+    }
+
+    resetPlayerNames(): Observable<unknown> {
+        return this.http.delete('http://localhost:3000/data/player-names/reset', this.httpOptions);
+    }
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
         return () => of(result as T);
     }
