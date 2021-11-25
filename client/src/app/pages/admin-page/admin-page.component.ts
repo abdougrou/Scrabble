@@ -44,7 +44,7 @@ export class AdminPageComponent {
         if (file) {
             this.fileName = file.name;
 
-            const upload$ = this.communication.postFile(file).pipe(finalize(() => this.reset()));
+            const upload$ = this.communication.postFile(file).pipe(finalize(() => this.resetFile()));
             this.uploadSub = upload$.subscribe((httpEvent: HttpEvent<unknown>) => {
                 if (httpEvent.type === HttpEventType.UploadProgress && httpEvent.total) {
                     this.uploadProgress = Math.round(PERCENT * (httpEvent.loaded / httpEvent.total));
