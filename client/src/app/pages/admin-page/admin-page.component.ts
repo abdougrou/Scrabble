@@ -1,6 +1,6 @@
 import { Overlay } from '@angular/cdk/overlay';
 import { HttpEvent, HttpEventType } from '@angular/common/http';
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { PlayerNameOptionsComponent } from '@app/components/player-name-options/player-name-options.component';
 import { DIALOG_HEIGHT, DIALOG_WIDTH } from '@app/constants';
@@ -17,8 +17,7 @@ const PERCENT = 100;
     providers: [MatDialog, Overlay],
 })
 export class AdminPageComponent {
-    @Input()
-    requiredFileType: string;
+    requiredFileType = '.json';
     uploadProgress: number | null;
     uploadSub: Subscription | null;
     fileName = '';

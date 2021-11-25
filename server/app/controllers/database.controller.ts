@@ -22,7 +22,10 @@ export class DatabaseController {
     ) {
         this.configureRouter();
     }
-
+    consoleDictionary(a: FormData) {
+        const formData = a.get('dictionnary');
+        if (formData) console.log(formData[0]);
+    }
     private configureRouter(): void {
         this.router = Router();
 
@@ -166,15 +169,7 @@ export class DatabaseController {
         });
 
         this.router.post('/dictionary', async (req: Request, res: Response, next: NextFunction) => {
-            console.log(req.body);
-            this.log2990Ranking
-                .addPlayer(req.body)
-                .then(() => {
-                    res.status(Httpstatus.CREATED).send();
-                })
-                .catch((error: Error) => {
-                    res.status(Httpstatus.NOT_FOUND).send(error.message);
-                });
+            this.consoleDictionary(req.body);
         });
     }
 }

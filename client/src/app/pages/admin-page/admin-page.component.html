@@ -4,7 +4,7 @@
         <div class="justified">
             <input type="file" class="file-input" [accept]="requiredFileType" (change)="onFileSelected($event)" #fileUpload>
             <button mat-raised-button class="button" (click)="fileUpload.click()" >Téléverser dictionnaire</button>
-            <div class="file-upload">
+            <div class="file-upload" >
                 {{fileName || ""}}
         </div>
 
