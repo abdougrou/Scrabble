@@ -89,8 +89,9 @@ export class SocketManagerService {
                     case PlaceResult.NotValid:
                         socket.emit(SocketEvent.chatMessage, `${player} : Commande impossible à realiser`);
                         break;
-                    case: PlaceResult.NotInEasel:
+                    case PlaceResult.NotInEasel:
                         socket.emit(SocketEvent.chatMessage, `${player} : Commande impossible à realiser`);
+                        break;
                     case PlaceResult.Success: {
                         this.io.to(message.lobbyKey).emit(SocketEvent.setTimer);
                         this.io
