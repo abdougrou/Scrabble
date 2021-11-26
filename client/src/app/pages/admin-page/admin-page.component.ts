@@ -7,6 +7,7 @@ import { DisplayDictionaryPopupComponent } from '@app/components/display-diction
 import { PlayerNameOptionsComponent } from '@app/components/player-name-options/player-name-options.component';
 import { DIALOG_HEIGHT, DIALOG_WIDTH } from '@app/constants';
 import { CommunicationService } from '@app/services/communication.service';
+import { DictionaryTemplate } from '@common/dictionaryTemplate';
 import { FileTemplate } from '@common/fileTemplate';
 import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -25,7 +26,7 @@ export class AdminPageComponent {
     uploadSub: Subscription | null;
     fileName = '';
     fileToUpload: File | null = null;
-    textDictionary: string;
+    dictionary: DictionaryTemplate;
 
     constructor(public dialog: MatDialog, private communication: CommunicationService) {}
 
@@ -61,8 +62,8 @@ export class AdminPageComponent {
             const reader: FileReader = new FileReader();
             reader.readAsText(file);
             reader.onload = () => {
-                this.textDictionary = reader.result as string;
-                const template: FileTemplate = { fileName: file.name, file: JSON.parse(reader.result as string) };
+                this.dictionary = JSON.parse(reader.result as string);
+                const template: FileTemplate = { fileName: file.name, file: this.dictionary };
                 const upload$ = this.communication.postFile(template).pipe(finalize(() => this.resetFile()));
                 this.uploadSub = upload$.subscribe((httpEvent: HttpEvent<unknown>) => {
                     if (httpEvent.type === HttpEventType.UploadProgress && httpEvent.total) {
@@ -84,14 +85,13 @@ export class AdminPageComponent {
         this.uploadProgress = null;
         this.uploadSub = null;
         this.fileName = '';
-        this.textDictionary = '';
     }
 
     displayDictionary() {
         this.dialog.open(DisplayDictionaryPopupComponent, {
             height: DIALOG_HEIGHT,
             width: DIALOG_WIDTH,
-            data: { text: this.textDictionary },
+            data: { dictionary: this.dictionary },
         });
     }
 }
