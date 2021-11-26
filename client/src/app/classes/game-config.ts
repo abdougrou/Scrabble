@@ -6,6 +6,7 @@ export interface GameConfig {
     duration: number;
     bonusEnabled: boolean;
     dictionary: Dictionary;
+    expert?: boolean;
 }
 
 export enum GameMode {

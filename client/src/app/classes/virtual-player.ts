@@ -14,7 +14,7 @@ export interface VirtualPlayer extends Player {
     easel: Easel;
     score: number;
 
-    chooseAction: (legalMoves: Move[]) => Observable<PlayAction>;
+    chooseAction: () => Observable<PlayAction>;
     place: () => Move;
-    exchange: () => void;
+    exchange: () => string[];
 }

@@ -1,13 +1,21 @@
+/* eslint-disable max-lines */
 import { Injectable } from '@angular/core';
+import { transpose } from '@app/classes/board-utils';
 import { GameConfig } from '@app/classes/game-config';
 import { ChatMessage } from '@app/classes/message';
+import { Move } from '@app/classes/move';
 import { Player } from '@app/classes/player';
+import { Vec2 } from '@app/classes/vec2';
+import { PlayAction, VirtualPlayer } from '@app/classes/virtual-player';
 import { COMMAND_RESULT, MAX_SKIP_COUNT, SECOND_MD, STARTING_LETTER_AMOUNT, SYSTEM_NAME } from '@app/constants';
+import { BoardService } from '@app/services/board.service';
+import { ExchangeTilesService } from '@app/services/exchange-tiles.service';
+import { MoveGeneratorService } from '@app/services/move-generator.service';
+import { PlayerService } from '@app/services/player.service';
+import { ReserveService } from '@app/services/reserve.service';
+import { VirtualPlayerService } from '@app/services/virtual-player.service';
+import { PlaceResult } from '@common/command-result';
 import { BehaviorSubject, Subscription, timer } from 'rxjs';
-import { BoardService } from './board.service';
-import { ExchangeTilesService } from './exchange-tiles.service';
-import { PlayerService } from './player.service';
-import { ReserveService } from './reserve.service';
 
 @Injectable({
     providedIn: 'root',
@@ -32,7 +40,9 @@ export class GameManagerService {
         public players: PlayerService,
         private reserve: ReserveService,
         private board: BoardService,
+        private moveGeneratorService: MoveGeneratorService,
         private exchangeTileService: ExchangeTilesService,
+        private virtualPlayerService: VirtualPlayerService,
     ) {}
 
     initialize(gameConfig: GameConfig) {
@@ -42,6 +52,7 @@ export class GameManagerService {
         this.turnDuration = gameConfig.duration;
         this.currentTurnDurationLeft = gameConfig.duration;
         this.isEnded = false;
+        this.board.initialize(gameConfig.bonusEnabled);
         this.initializePlayers([this.mainPlayerName, this.enemyPlayerName]);
         this.players.mainPlayer = this.players.getPlayerByName(this.mainPlayerName);
         this.startTimer();
@@ -79,6 +90,8 @@ export class GameManagerService {
         if (this.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
         else this.players.createVirtualPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
         // if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
+
+        this.moveGeneratorService.generateLegalMoves(this.players.current.easel.letters.join(''));
     }
 
     switchPlayers() {
@@ -88,16 +101,74 @@ export class GameManagerService {
         this.startTimer();
         // Send player switch event
         this.endTurn.next(this.players.current.name);
-        // if (this.players.current instanceof VirtualPlayer) this.playVirtualPlayer();
+        if ((this.players.current as VirtualPlayer).chooseAction !== undefined) this.playVirtualPlayer();
+
+        this.moveGeneratorService.generateLegalMoves(this.players.current.easel.letters.join(''));
     }
 
-    exchangeLetters(tiles: string, player: Player): ChatMessage {
-        const message = this.exchangeTileService.exchangeLetters(tiles, player);
+    playVirtualPlayer() {
+        const vPlayer = this.virtualPlayerService.virtualPlayer;
+        const choice = vPlayer.chooseAction();
+        choice.subscribe((action) => {
+            switch (action) {
+                case PlayAction.Pass:
+                    break;
+                case PlayAction.Exchange:
+                    this.exchangeLetters(vPlayer, vPlayer.exchange());
+                    break;
+                case PlayAction.Place: {
+                    const move: Move = vPlayer.place();
+                    this.placeLetters(vPlayer, move.word, move.coord, move.across);
+                    break;
+                }
+            }
+        });
+    }
+
+    exchangeLetters(player: Player, letters: string[]): ChatMessage {
+        const message = this.exchangeTileService.exchangeLetters(letters, player);
         if (message.body === '') {
             this.players.skipCounter = 0;
             this.switchPlayers();
-            return { user: COMMAND_RESULT, body: `${player.name} a échangé les lettres ${tiles}` };
+            return { user: COMMAND_RESULT, body: `${player.name} a échangé les lettres ${letters}` };
         } else return message;
+    }
+
+    placeLetters(player: Player, word: string, coord: Vec2, across: boolean): PlaceResult {
+        if (player.name !== this.players.current.name) return PlaceResult.NotCurrentPlayer;
+        this.moveGeneratorService.legalMove(word, coord, across);
+        const move: Move | undefined = this.moveGeneratorService.legalMoves.find(
+            (_move) => _move.word === word && _move.coord.x === coord.x && _move.coord.y === coord.y && _move.across === across,
+        );
+        if (!move) return PlaceResult.NotValid;
+
+        const nextCoord = coord;
+        let points = 0;
+        const row: (string | null)[] = (move.across ? this.board.data : transpose(this.board.data))[move.across ? move.coord.x : move.coord.y] as (
+            | string
+            | null
+        )[];
+        const pointRow: number[] = (move.across ? this.board.pointGrid : transpose(this.board.pointGrid))[
+            move.across ? move.coord.x : move.coord.y
+        ] as number[];
+        for (const k of word) {
+            if (!this.board.getLetter(nextCoord)) {
+                this.board.setLetter(nextCoord, k);
+                const words: string[] = [k];
+                player.easel.getLetters(words);
+                const reserveLetters: string[] = this.reserve.getRandomLetters(1);
+                player.easel.addLetters(reserveLetters);
+            }
+            points += this.moveGeneratorService.calculateCrossSum(coord, across);
+
+            if (across) nextCoord.y++;
+            else nextCoord.x++;
+        }
+        points += this.moveGeneratorService.calculateWordPoints(move, row, pointRow);
+
+        // place the word on the board, recalculate anchors and cross checks
+        player.score += points;
+        return PlaceResult.Success;
     }
 
     // playVirtualPlayer() {
@@ -281,14 +352,6 @@ export class GameManagerService {
     //     }
     //     return tileCoords;
     // }
-
-    // getCoordinateFromString(coordStr: string): Vec2 {
-    //     const CHAR_OFFSET = 'a'.charCodeAt(0);
-    //     const coordX = parseInt(coordStr.substr(1, coordStr.length), 10) - 1;
-    //     const coordY = coordStr[0].toLowerCase().charCodeAt(0) - CHAR_OFFSET;
-    //     return { x: coordX, y: coordY } as Vec2;
-    // }
-
     // private getStringToRetrieve(tileCoords: TileCoords[]): string {
     //     let stringToRetrieve = '';
     //     for (const aLetter of tileCoords) {

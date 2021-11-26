@@ -64,6 +64,6 @@ export class GameManagerInterfaceService {
     }
     exchangeTiles(letters: string, player: Player) {
         if (this.isMultiplayer) this.multiGameManager.exchangeLetters(letters, player);
-        else this.soloGameManager.exchangeLetters(letters, player);
+        else this.soloGameManager.exchangeLetters(player, letters.split(''));
     }
 }

@@ -62,3 +62,10 @@ export const transpose = (arr: unknown[][]): unknown[][] => {
 export const transposeCoord = (coord: Vec2): Vec2 => {
     return { x: coord.y, y: coord.x };
 };
+
+export const getCoordinateFromString = (coordStr: string): Vec2 => {
+    const CHAR_OFFSET = 'a'.charCodeAt(0);
+    const coordX = parseInt(coordStr.substr(1, coordStr.length), 10) - 1;
+    const coordY = coordStr[0].toLowerCase().charCodeAt(0) - CHAR_OFFSET;
+    return { x: coordX, y: coordY } as Vec2;
+};

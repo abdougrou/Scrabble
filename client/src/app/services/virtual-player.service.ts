@@ -109,7 +109,7 @@ export class VirtualPlayerService {
         return this.moveGenerator.legalMoves.sort(() => SORT_RANDOM - Math.random())[0];
     }
 
-    beginnerExchange() {
-        //
+    beginnerExchange(): string[] {
+        return [];
     }
 }
