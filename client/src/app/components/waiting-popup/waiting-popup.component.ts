@@ -1,6 +1,8 @@
 import { Component, DoCheck, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { Dictionary } from '@app/classes/game-config';
+import { RANDOM_PLAYER_NAMES } from '@app/constants';
 import { CommunicationService } from '@app/services/communication.service';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { LobbyConfig } from '@common/lobby-config';
@@ -31,7 +33,18 @@ export class WaitingPopupComponent implements DoCheck {
         }
     }
     switchMode() {
-        // nothing
+        const gameConfig = {
+            playerName1: this.data.config.host,
+            playerName2: this.pickPlayerName(this.data.config.host),
+            gameMode: this.data.config.gameMode,
+            isMultiPlayer: false,
+            duration: this.data.config.turnDuration,
+            bonusEnabled: this.data.config.bonusEnabled,
+            dictionary: this.data.config.dictionary === '0' ? Dictionary.French : Dictionary.English,
+        };
+        this.gameManager.initialize(gameConfig);
+        this.router.navigateByUrl('/game');
+        this.dialogRef.close();
     }
 
     back() {
@@ -42,5 +55,11 @@ export class WaitingPopupComponent implements DoCheck {
     startGame() {
         this.router.navigateByUrl('/game');
         this.dialogRef.close();
+    }
+
+    pickPlayerName(name: string): string {
+        let vPlayerName = RANDOM_PLAYER_NAMES[Math.floor(Math.random() * RANDOM_PLAYER_NAMES.length)];
+        while (vPlayerName === name) vPlayerName = RANDOM_PLAYER_NAMES[Math.floor(Math.random() * RANDOM_PLAYER_NAMES.length)];
+        return vPlayerName;
     }
 }

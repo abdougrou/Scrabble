@@ -11,17 +11,17 @@ import { ReserveService } from './reserve.service';
 export class ExchangeTilesService {
     constructor(private reserve: ReserveService, private players: PlayerService) {}
 
-    exchangeLetters(letters: string, player: Player): ChatMessage {
+    exchangeLetters(letters: string[], player: Player): ChatMessage {
         const message: ChatMessage = { user: SYSTEM_NAME, body: '' };
 
         if (this.players.current !== player) {
             message.body = "Ce n'est pas votre tour";
         } else if (!this.reserve.isExchangePossible(letters.length)) {
             message.body = "Il n'y a pas assez de tuiles dans la réserve";
-        } else if (!player.easel.contains(letters.split(''))) {
+        } else if (!player.easel.contains(letters)) {
             message.body = 'Votre chevalet ne contient pas les lettres nécessaires';
         } else {
-            const easelLetters: string[] = player.easel.getLetters(letters.split('')); // getTiles remove and get the tiles
+            const easelLetters: string[] = player.easel.getLetters(letters); // getTiles remove and get the tiles
             const reserveLetters: string[] = this.reserve.getRandomLetters(letters.length);
             player.easel.addLetters(reserveLetters);
             this.reserve.returnLetters(easelLetters);

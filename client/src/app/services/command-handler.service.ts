@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
+import { getCoordinateFromString } from '@app/classes/board-utils';
 import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
 import { COMMANDS, COMMAND_RESULT, SYSTEM_NAME } from '@app/constants';
+import { PlaceResult } from '@common/command-result';
 import { GameManagerService } from './game-manager.service';
 import { ReserveService } from './reserve.service';
 
@@ -32,7 +34,7 @@ export class CommandHandlerService {
         let commandResult: ChatMessage = { user: '', body: '' };
         const regex = new RegExp(/^!échanger ([a-z]|\*){0,7}/g);
         if (regex.test(command)) {
-            commandResult = this.gameManager.exchangeLetters(command.split(' ')[1], player);
+            commandResult = this.gameManager.exchangeLetters(player, command.split(' ')[1].split(''));
         } else {
             commandResult.user = SYSTEM_NAME;
             commandResult.body = 'Erreur de syntaxe, pour échanger des lettres, il faut suivre le format suivant : !échanger (lettre)...';
@@ -49,7 +51,10 @@ export class CommandHandlerService {
             const coordStrDir = command.split(' ')[1];
             const coordStr = coordStrDir.slice(0, coordStrDir.length - 1);
             commandResult.user = COMMAND_RESULT;
-            commandResult.body = this.gameManager.placeTiles(command.split(' ')[2], coordStr, direction === 'v', player);
+            const placeResult = this.gameManager.placeLetters(player, command.split(' ')[2], getCoordinateFromString(coordStr), direction === 'h');
+            if (placeResult === PlaceResult.Success) {
+                // TODO print to chatbox
+            }
         } else {
             commandResult.user = SYSTEM_NAME;
             commandResult.body = 'Erreur de syntaxe, pour placer un mot, il faut suivre le format suivant : !placer (ligne)(colonne)(h | v) (mot)';

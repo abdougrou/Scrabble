@@ -7,7 +7,6 @@ import { GameManagerInterfaceService } from '@app/services/game-manager-interfac
 import { GameManagerService } from '@app/services/game-manager.service';
 import { MouseManagerService } from '@app/services/mouse-manager.service';
 import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-manager.service';
-import { PlayerService } from '@app/services/player.service';
 import { ReserveService } from '@app/services/reserve.service';
 
 @Component({
@@ -30,7 +29,6 @@ export class EaselComponent implements OnChanges {
     letterPoints: Map<string, number> = LETTER_POINTS;
 
     constructor(
-        readonly playerService: PlayerService,
         private mouseManager: MouseManagerService,
         private reserve: ReserveService,
         private gameManager: GameManagerService,
@@ -46,10 +44,10 @@ export class EaselComponent implements OnChanges {
             this.mainPlayerName = this.multiGameManager.getMainPlayer().name;
         } else {
             this.mainPlayerName = this.gameManager.mainPlayerName;
-            this.tiles = this.playerService.mainPlayer.easel.letters.map((letter) => {
+            this.tiles = this.gameManager.players.mainPlayer.easel.letters.map((letter) => {
                 return { letter, state: TileState.None } as EaselTile;
             });
-            this.players = this.playerService.players;
+            this.players = this.gameManager.players.players;
         }
 
         if (this.keyboardReceiver !== KEYBOARD_EVENT_RECEIVER.easel)
@@ -252,7 +250,7 @@ export class EaselComponent implements OnChanges {
             this.multiGameManager.exchangeLetters(tilesToExchange, this.multiGameManager.getMainPlayer());
             this.multiGameManager.switchPlayers();
         } else {
-            this.gameManager.exchangeLetters(tilesToExchange, this.playerService.getPlayerByName(this.mainPlayerName));
+            this.gameManager.exchangeLetters(this.gameManager.players.getPlayerByName(this.mainPlayerName), tilesToExchange.split(''));
         }
         this.resetTileState();
     }
