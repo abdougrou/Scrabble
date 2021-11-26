@@ -57,6 +57,18 @@ describe('ReserveService', () => {
         expect(reserve.isExchangePossible(exchangeAmount)).toEqual(false);
     });
 
+    it('isExchangePossibleBot returns true when conditions are met, false otherwise', () => {
+        const exchangeAmountTrue = 3;
+        expect(reserve.isExchangePossibleBot(exchangeAmountTrue)).toEqual(true);
+        // Exchange more than available in reserve
+        reserve.size = 10;
+        const exchangeAmountFalse = 20;
+        expect(reserve.isExchangePossibleBot(exchangeAmountFalse)).toEqual(false);
+        // Exchange when reserve is low
+        reserve.size = 5;
+        expect(reserve.isExchangePossibleBot(exchangeAmountTrue)).toEqual(true);
+    });
+
     it('exchangeLetters exchanges letters with the reserve', () => {
         const res = new Map<string, number>();
         const aCount = 5;

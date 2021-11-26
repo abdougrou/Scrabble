@@ -52,11 +52,25 @@ export class ReserveService {
     /**
      * Checks if exchange is possible with the current reserve
      *
+     * Use this function when the player is the one exchanging
+     *
      * @returns true if exchange is possible
      */
     isExchangePossible(quantity: number): boolean {
         if (this.size < RESERVE_EXCHANGE_LIMIT) return false;
         else if (this.size - quantity < 0) return false;
+        return true;
+    }
+
+    /**
+     * Checks if exchange is possible with the current reserve
+     *
+     * Use this function when the virtual player is the one exchaning
+     *
+     * @returns true if exchange is possible
+     */
+    isExchangePossibleBot(quantity: number): boolean {
+        if (this.size - quantity < 0) return false;
         return true;
     }
 

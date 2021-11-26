@@ -56,8 +56,8 @@ describe('MoveGeneratorService', () => {
 
         service.extendLeft(easel, 'a', anchor, service.dictionary.getNode('a') as TrieNode, anchor.leftPart.length > 0 ? 0 : anchor.leftLength);
         const expectedLegalMoves = [
-            { word: 'abc', coord: { x: 3, y: 1 }, across: true, points: 0 },
-            { word: 'abcde', coord: { x: 3, y: 1 }, across: true, points: 13 },
+            { word: 'abc', coord: { x: 3, y: 1 }, across: true, points: 4 },
+            { word: 'abcde', coord: { x: 3, y: 1 }, across: true, points: 5 },
         ];
         expect(service.legalMoves).toEqual(expectedLegalMoves);
     });
@@ -85,8 +85,8 @@ describe('MoveGeneratorService', () => {
 
         service.extendLeft(easel, '', anchor, service.dictionary.root, anchor.leftPart.length > 0 ? 0 : anchor.leftLength);
         const expectedLegalMoves = [
-            { word: 'bcde', coord: { x: 3, y: 2 }, across: true, points: 0 },
-            { word: 'abcde', coord: { x: 3, y: 1 }, across: true, points: 27 },
+            { word: 'bcde', coord: { x: 3, y: 2 }, across: true, points: 16 },
+            { word: 'abcde', coord: { x: 3, y: 1 }, across: true, points: 4 },
         ];
         expect(service.legalMoves).toEqual(expectedLegalMoves);
     });
@@ -125,10 +125,10 @@ describe('MoveGeneratorService', () => {
         service.generateLegalMoves(easel);
         const coord = { x: 3, y: 2 };
         const expectedMoves = [
-            { word: 'cab', coord, across: false, points: 0 },
-            { word: 'cba', coord, across: false, points: 0 },
-            { word: 'cat', coord, across: true, points: 0 },
-            { word: 'cbt', coord, across: true, points: 0 },
+            { word: 'cab', coord, across: false, points: 3 },
+            { word: 'cba', coord, across: false, points: 3 },
+            { word: 'cat', coord, across: true, points: 4 },
+            { word: 'cbt', coord, across: true, points: 4 },
         ];
         expect(service.legalMoves).toEqual(expectedMoves);
     });

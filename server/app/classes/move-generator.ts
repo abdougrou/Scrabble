@@ -129,7 +129,10 @@ export class MoveGenerator {
 
         const boardLetter = board[square.x][square.y];
         if (!boardLetter) {
-            if (node.terminal) this.legalMove(partialWord, square, anchor.across);
+            if (node.terminal) {
+                const coord = anchor.across ? { x: square.x, y: square.y - partialWord.length } : { x: square.x - partialWord.length, y: square.y };
+                this.legalMove(partialWord, coord, anchor.across);
+            }
 
             node.children.forEach((edge) => {
                 const crossCheck = this.crossChecks.get(coordToKey(square));

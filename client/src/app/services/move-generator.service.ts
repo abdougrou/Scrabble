@@ -122,7 +122,10 @@ export class MoveGeneratorService {
 
         const boardLetter = this.board.data[square.x][square.y];
         if (!boardLetter) {
-            if (node.terminal) this.legalMove(partialWord, square, anchor.across);
+            if (node.terminal) {
+                const coord = anchor.across ? { x: square.x, y: square.y - partialWord.length } : { x: square.x - partialWord.length, y: square.y };
+                this.legalMove(partialWord, coord, anchor.across);
+            }
 
             node.children.forEach((edge) => {
                 const crossCheck = this.crossChecks.get(coordToKey(square));
@@ -152,17 +155,16 @@ export class MoveGeneratorService {
      */
     legalMove(word: string, coord: Vec2, across: boolean) {
         const move = { word, coord, across, points: 0 };
-        const nextCoord = coord;
+        const nextCoord = { x: coord.x, y: coord.y };
         let points = 0;
-        const row: (string | null)[] = (across ? this.board.data : transpose(this.board.data))[across ? coord.x : coord.y] as (string | null)[];
-        const pointRow: number[] = (across ? this.board.pointGrid : transpose(this.board.pointGrid))[across ? coord.x : coord.y] as number[];
-        for (const k of word) {
-            if (!this.board.getLetter(nextCoord)) this.board.setLetter(nextCoord, k);
+        const row: (string | null)[] = across ? this.board.data[coord.x] : (transpose(this.board.data)[coord.y] as (string | null)[]);
+        const pointRow: number[] = across ? this.board.pointGrid[coord.x] : (transpose(this.board.pointGrid)[coord.y] as number[]);
+        word.split('').forEach(() => {
             points += this.calculateCrossSum(coord, across);
 
             if (across) nextCoord.y++;
             else nextCoord.x++;
-        }
+        });
         points += this.calculateWordPoints(move, row, pointRow);
         move.points = points;
         this.legalMoves.push(move);

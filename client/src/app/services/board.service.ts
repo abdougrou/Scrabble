@@ -14,10 +14,6 @@ export class BoardService {
     data: (string | null)[][] = [];
     pointGrid: number[][] = [];
 
-    constructor() {
-        this.initialize(false);
-    }
-
     /**
      * Initializes a 15x15 null matrix
      */

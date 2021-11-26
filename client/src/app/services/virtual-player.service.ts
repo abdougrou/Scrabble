@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Easel } from '@app/classes/easel';
 import { Move } from '@app/classes/move';
 import { PlayAction, VirtualPlayer } from '@app/classes/virtual-player';
-import { RESERVE_EXCHANGE_LIMIT } from '@app/constants';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { MoveGeneratorService } from './move-generator.service';
@@ -46,7 +45,7 @@ export class VirtualPlayerService {
     expertChoose(): Observable<PlayAction> {
         let action: PlayAction = PlayAction.Pass;
         if (this.moveGenerator.legalMoves.length > 0) action = PlayAction.Place;
-        else if (this.reserve.isExchangePossible(1)) action = PlayAction.Exchange; // We can exchange at least 1 letter
+        else if (this.reserve.isExchangePossibleBot(1)) action = PlayAction.Exchange; // We can exchange at least 1 letter
 
         return new BehaviorSubject<PlayAction>(action).pipe(delay(IDLE_TIME_MS));
     }
@@ -66,8 +65,8 @@ export class VirtualPlayerService {
      * @returns array of letters to exchange
      */
     expertExchange(): string[] {
-        for (let i = RESERVE_EXCHANGE_LIMIT; i >= 0; i--) {
-            if (!this.reserve.isExchangePossible(i)) continue;
+        for (let i = this.virtualPlayer.easel.letters.length; i >= 0; i--) {
+            if (!this.reserve.isExchangePossibleBot(i)) continue;
 
             const easelLetters = this.virtualPlayer.easel.letters.sort(() => SORT_RANDOM - Math.random());
             while (easelLetters.length > i) easelLetters.pop();
