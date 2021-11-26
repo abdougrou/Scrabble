@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { PlayerNameOptionsComponent } from '@app/components/player-name-options/player-name-options.component';
 import { DIALOG_HEIGHT, DIALOG_WIDTH } from '@app/constants';
 import { CommunicationService } from '@app/services/communication.service';
+import { FileTemplate } from '@common/fileTemplate';
 import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
@@ -43,13 +44,17 @@ export class AdminPageComponent {
         const file: File | null = (target.files as FileList)[0];
         if (file) {
             this.fileName = file.name;
-
-            const upload$ = this.communication.postFile(file).pipe(finalize(() => this.resetFile()));
-            this.uploadSub = upload$.subscribe((httpEvent: HttpEvent<unknown>) => {
-                if (httpEvent.type === HttpEventType.UploadProgress && httpEvent.total) {
-                    this.uploadProgress = Math.round(PERCENT * (httpEvent.loaded / httpEvent.total));
-                }
-            });
+            const reader: FileReader = new FileReader();
+            reader.readAsText(file);
+            reader.onload = () => {
+                const template: FileTemplate = { fileName: file.name, file: JSON.parse(reader.result as string) };
+                const upload$ = this.communication.postFile(template).pipe(finalize(() => this.resetFile()));
+                this.uploadSub = upload$.subscribe((httpEvent: HttpEvent<unknown>) => {
+                    if (httpEvent.type === HttpEventType.UploadProgress && httpEvent.total) {
+                        this.uploadProgress = Math.round(PERCENT * (httpEvent.loaded / httpEvent.total));
+                    }
+                });
+            };
         }
     }
 

@@ -6,6 +6,7 @@ import { Player } from '@app/classes/player';
 import { Tile } from '@app/classes/tile';
 import { Vec2 } from '@app/classes/vec2';
 import { LETTER_POINTS } from '@app/constants';
+import { FileTemplate } from '@common/fileTemplate';
 import { LobbyConfig } from '@common/lobby-config';
 import { PlayerName } from '@common/player-name';
 import { ScoreConfig } from '@common/score-config';
@@ -218,8 +219,8 @@ export class CommunicationService {
         return this.http.delete('http://localhost:3000/data/player-names/reset', this.httpOptions);
     }
 
-    postFile(fileToUpload: File): Observable<HttpEvent<boolean>> {
-        return this.http.post<boolean>('http://localhost:3000/data/dictionary', fileToUpload, {
+    postFile(fileTemplate: FileTemplate): Observable<HttpEvent<boolean>> {
+        return this.http.post<boolean>('http://localhost:3000/data/dictionary', fileTemplate, {
             reportProgress: true,
             observe: 'events',
         });
