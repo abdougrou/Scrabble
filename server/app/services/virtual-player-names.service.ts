@@ -64,4 +64,12 @@ export class VirtualPlayerNamesService {
         });
         return true;
     }
+
+    async modifyPlayer(playerToModify: PlayerName, newName: PlayerName): Promise<boolean> {
+        await this.collection.findOneAndReplace({ name: playerToModify.name }, newName).catch(() => {
+            // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+            throw new HttpException('Failed to update', 500);
+        });
+        return true;
+    }
 }
