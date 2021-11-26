@@ -12,6 +12,7 @@
             <mat-progress-bar class="progress-bar" mode="determinate" [value]="uploadProgress" *ngIf="uploadProgress"></mat-progress-bar>
             <mat-icon class="cancel-upload" (click)="cancelUpload()" *ngIf="uploadProgress">delete_forever</mat-icon>   
         </div>
+            <button mat-raised-button class="button"  (click)="displayDictionary()">afficher le dictionnaire ajouté</button>
             <button mat-raised-button class="button">dictionaires</button>
             <button mat-raised-button class="button" (click)="openNames()">noms joueurs virtuels</button>
             <button mat-raised-button class="button" id="reset-button" (click)="reset()">réinitialiser</button>
