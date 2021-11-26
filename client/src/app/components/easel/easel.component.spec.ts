@@ -95,7 +95,7 @@ describe('EaselComponent', () => {
     });
 
     it('should call selectTileForManipulation when the key is in the easel', () => {
-        const tileA: EaselTile = { tile: { letter: 'a', points: 0 }, state: TileState.None };
+        const tileA: EaselTile = { letter: 'a', state: TileState.None };
         component.tiles = [tileA];
         component.keyboardReceiver = KEYBOARD_EVENT_RECEIVER.easel;
         spyOn(component, 'selectTileForManipulation');
@@ -107,7 +107,7 @@ describe('EaselComponent', () => {
     });
 
     it('should not call selectTileForManipulation when the key pressed is not in the easel', () => {
-        const tileA: EaselTile = { tile: { letter: 'a', points: 0 }, state: TileState.None };
+        const tileA: EaselTile = { letter: 'a', state: TileState.None };
         component.tiles = [tileA];
         component.keyboardReceiver = KEYBOARD_EVENT_RECEIVER.easel;
         spyOn(component, 'selectTileForManipulation');
@@ -117,7 +117,7 @@ describe('EaselComponent', () => {
     });
 
     it('should call resetTileState when the key pressed is not in the easel', () => {
-        const tileA: EaselTile = { tile: { letter: 'a', points: 0 }, state: TileState.None };
+        const tileA: EaselTile = { letter: 'a', state: TileState.None };
         component.tiles = [tileA];
         component.keyboardReceiver = KEYBOARD_EVENT_RECEIVER.easel;
         spyOn(component, 'resetTileState');
@@ -149,7 +149,7 @@ describe('EaselComponent', () => {
     });
 
     it('should reset all tiles', () => {
-        const tileA: EaselTile = { tile: { letter: 'a', points: 0 }, state: TileState.Manipulation };
+        const tileA: EaselTile = { letter: 'a', state: TileState.Manipulation };
         for (let i = 0; i < STARTING_LETTER_AMOUNT; i++) component.tiles.push(tileA);
         component.resetTileState();
         for (let i = 0; i < STARTING_LETTER_AMOUNT; i++) expect(component.tiles[i].state).toBe(TileState.None);
@@ -158,7 +158,7 @@ describe('EaselComponent', () => {
     it('containsTile should return the good value', () => {
         const letters: string[] = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
         for (let i = 0; i < STARTING_LETTER_AMOUNT; i++) {
-            const tile: EaselTile = { tile: { letter: letters[i], points: 0 }, state: TileState.None };
+            const tile: EaselTile = { letter: letters[i], state: TileState.None };
             component.tiles.push(tile);
         }
         const goodTile = 'a';
@@ -170,7 +170,7 @@ describe('EaselComponent', () => {
     it('containsTile should return the good value', () => {
         const letters: string[] = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
         for (let i = 0; i < STARTING_LETTER_AMOUNT; i++) {
-            const tile: EaselTile = { tile: { letter: letters[i], points: 0 }, state: TileState.None };
+            const tile: EaselTile = { letter: letters[i], state: TileState.None };
             component.tiles.push(tile);
         }
         const goodTile = 'a';
@@ -182,7 +182,7 @@ describe('EaselComponent', () => {
     it('tileKeyboardClicked should return the first occurance of a tile when there is no selected tile', () => {
         const letters: string[] = ['a', 'b', 'c', 'b', 'e', 'b', 'e'];
         for (let i = 0; i < STARTING_LETTER_AMOUNT; i++) {
-            const tile: EaselTile = { tile: { letter: letters[i], points: 0 }, state: TileState.None };
+            const tile: EaselTile = { letter: letters[i], state: TileState.None };
             component.tiles.push(tile);
         }
         const secondTile = 'b';
@@ -196,7 +196,7 @@ describe('EaselComponent', () => {
     it('tileKeyboardClicked should always return the same tile if there is only one occurance of it', () => {
         const letters: string[] = ['a', 'b', 'c', 'b', 'e', 'b', 'e'];
         for (let i = 0; i < STARTING_LETTER_AMOUNT; i++) {
-            const tile: EaselTile = { tile: { letter: letters[i], points: 0 }, state: TileState.None };
+            const tile: EaselTile = { letter: letters[i], state: TileState.None };
             component.tiles.push(tile);
         }
         const selectedTileIndex = 2;
@@ -208,7 +208,7 @@ describe('EaselComponent', () => {
     it('tileKeyboardClicked should return the next occuranced tile if the first occurance is selected', () => {
         const letters: string[] = ['a', 'b', 'c', 'b', 'e', 'b', 'e'];
         for (let i = 0; i < STARTING_LETTER_AMOUNT; i++) {
-            const tile: EaselTile = { tile: { letter: letters[i], points: 0 }, state: TileState.None };
+            const tile: EaselTile = { letter: letters[i], state: TileState.None };
             component.tiles.push(tile);
         }
         const selectedTileIndex = 3;
@@ -221,7 +221,7 @@ describe('EaselComponent', () => {
     it('tileKeyboardClicked should return the first occuranced tile if there is no more occurances on the right of the selected tile', () => {
         const letters: string[] = ['a', 'b', 'c', 'b', 'e', 'b', 'e'];
         for (let i = 0; i < STARTING_LETTER_AMOUNT; i++) {
-            const tile: EaselTile = { tile: { letter: letters[i], points: 0 }, state: TileState.None };
+            const tile: EaselTile = { letter: letters[i], state: TileState.None };
             component.tiles.push(tile);
         }
         const firstOccuranceTileIndex = 1;

@@ -17,7 +17,7 @@ export interface ReserveTile {
 }
 
 export interface EaselTile {
-    tile: Tile;
+    letter: string;
     state: TileState;
 }
 
