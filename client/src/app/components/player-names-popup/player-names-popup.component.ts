@@ -1,6 +1,8 @@
 import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
+import { FormConfig, FormType } from '@app/classes/form-config';
+import { PlayerNameFormComponent } from '@app/components/player-name-form/player-name-form.component';
 import { CommunicationService } from '@app/services/communication.service';
 import { Difficulty, PlayerName } from '@common/player-name';
 
@@ -16,6 +18,7 @@ export class PlayerNamesPopupComponent {
     constructor(
         private communication: CommunicationService,
         public dialogRef: MatDialogRef<PlayerNamesPopupComponent>,
+        public dialog: MatDialog,
         @Inject(MAT_DIALOG_DATA) public playerType: string,
     ) {
         this.getPlayerNames();
@@ -37,8 +40,26 @@ export class PlayerNamesPopupComponent {
         this.dialogRef.close();
     }
 
-    editPlayerName() {
-        window.alert('edit');
+    editPlayerName(element: PlayerName) {
+        const formConfig: FormConfig = { formType: FormType.EditForm, data: element.name };
+        const dialogRef = this.dialog.open(PlayerNameFormComponent, {
+            disableClose: true,
+            height: '220px',
+            width: '550px',
+            data: formConfig,
+        });
+
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result !== '') {
+                this.communication
+                    .modifyPlayerName(element, { name: result, difficulty: this.playerType === 'expert' ? Difficulty.Expert : Difficulty.Beginner })
+                    .subscribe((response) => {
+                        if (response) {
+                            this.getPlayerNames();
+                        }
+                    });
+            }
+        });
     }
 
     deletePlayerName(element: PlayerName) {
@@ -48,11 +69,25 @@ export class PlayerNamesPopupComponent {
             }
         });
     }
+
     addPlayer() {
-        const playerName: PlayerName = { name: 'newPlayer5', difficulty: Difficulty.Beginner };
-        this.communication.addPlayerName(playerName).subscribe((success) => {
-            if (success) {
-                this.getPlayerNames();
+        const formConfig: FormConfig = { formType: FormType.AddForm, data: '' };
+        const dialogRef = this.dialog.open(PlayerNameFormComponent, {
+            disableClose: true,
+            height: '220px',
+            width: '550px',
+            data: formConfig,
+        });
+
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result !== '') {
+                this.communication
+                    .addPlayerName({ name: result, difficulty: this.playerType === 'expert' ? Difficulty.Expert : Difficulty.Beginner })
+                    .subscribe((response) => {
+                        if (response) {
+                            this.getPlayerNames();
+                        }
+                    });
             }
         });
     }

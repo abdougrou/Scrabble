@@ -1,0 +1,8 @@
+<mat-card class="mat-elevation-z0 wrapper">
+    <mat-card-title>Voulez-vous abandonner la partie?</mat-card-title>
+    <mat-card-subtitle>Appuyez sur abandonner pour confirmer l'abandon</mat-card-subtitle>
+    <mat-card-actions class="buttons">
+        <button mat-button mat-dialog-close id="abandon" (click)="quit(false)">Annuler</button>
+        <button mat-button mat-dialog-close (click)="quit(true)">Confirm</button>
+    </mat-card-actions>
+</mat-card>

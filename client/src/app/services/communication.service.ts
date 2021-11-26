@@ -205,6 +205,14 @@ export class CommunicationService {
     resetPlayerNames(): Observable<unknown> {
         return this.http.delete('http://localhost:3000/data/player-names/reset', this.httpOptions);
     }
+
+    modifyPlayerName(playerName: PlayerName, newName: PlayerName): Observable<boolean> {
+        const playerNames: PlayerName[] = [playerName, newName];
+        return this.http
+            .post<boolean>('http://localhost:3000/data/player-names/modify', playerNames, this.httpOptions)
+            .pipe(catchError(this.handleError<boolean>('modifyPlayerName')));
+    }
+
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
         return () => of(result as T);
     }

@@ -190,5 +190,16 @@ export class DatabaseController {
                     res.status(Httpstatus.NOT_FOUND).send(error.message);
                 });
         });
+        this.router.post('/player-names/modify', async (req: Request, res: Response, next: NextFunction) => {
+            console.log(req.body);
+            this.virtualPlayerNames
+                .modifyPlayer(req.body[0], req.body[1])
+                .then((response: boolean) => {
+                    res.json(response);
+                })
+                .catch((error: Error) => {
+                    res.status(Httpstatus.NOT_FOUND).send(error.message);
+                });
+        });
     }
 }

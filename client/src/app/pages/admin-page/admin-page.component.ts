@@ -1,6 +1,7 @@
 import { Overlay } from '@angular/cdk/overlay';
 import { Component } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { ConfirmationPopupComponent } from '@app/components/confirmation-popup/confirmation-popup.component';
 import { PlayerNameOptionsComponent } from '@app/components/player-name-options/player-name-options.component';
 import { DIALOG_HEIGHT, DIALOG_WIDTH } from '@app/constants';
 import { CommunicationService } from '@app/services/communication.service';
@@ -22,7 +23,16 @@ export class AdminPageComponent {
     }
 
     reset() {
-        window.alert('reset');
-        this.communication.resetPlayerNames().subscribe();
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = true;
+        dialogConfig.id = 'abandon-page-component';
+        dialogConfig.height = '200px';
+        dialogConfig.width = '550px';
+        const dialogRef = this.dialog.open(ConfirmationPopupComponent, dialogConfig);
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this.communication.resetPlayerNames().subscribe();
+            }
+        });
     }
 }

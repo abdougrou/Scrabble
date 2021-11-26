@@ -28,6 +28,8 @@ import { GamePageComponent } from '@app/pages/game-page/game-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { MaterialPageComponent } from '@app/pages/material-page/material-page.component';
 import { MultiplayerGamePageComponent } from '@app/pages/multiplayer-game-page/multiplayer-game-page.component';
+import { ConfirmationPopupComponent } from './components/confirmation-popup/confirmation-popup.component';
+import { PlayerNameFormComponent } from './components/player-name-form/player-name-form.component';
 
 /**
  * Main module that is used in main.ts.
@@ -59,6 +61,8 @@ import { MultiplayerGamePageComponent } from '@app/pages/multiplayer-game-page/m
         AdminPageComponent,
         PlayerNamesPopupComponent,
         PlayerNameOptionsComponent,
+        ConfirmationPopupComponent,
+        PlayerNameFormComponent,
     ],
     imports: [
         AppMaterialModule,
