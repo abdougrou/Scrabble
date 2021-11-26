@@ -8,6 +8,7 @@ import { VirtualPlayerNamesService } from '@app/services/virtual-player-names.se
 import { PlayerName } from '@common/player-name';
 import { ScoreConfig } from '@common/score-config';
 import { NextFunction, Request, Response, Router } from 'express';
+import { writeFileSync } from 'fs';
 import * as Httpstatus from 'http-status-codes';
 import { Service } from 'typedi';
 
@@ -165,8 +166,10 @@ export class DatabaseController {
                 });
         });
 
+        // TODO: create a service for this
         this.router.post('/dictionary', async (req: Request, res: Response, next: NextFunction) => {
-            console.log(req.body);
+            const fileTemplate = req.body;
+            writeFileSync(`app/assets/${fileTemplate.fileName}`, JSON.stringify(fileTemplate.file));
         });
     }
 }
