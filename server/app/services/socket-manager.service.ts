@@ -84,11 +84,13 @@ export class SocketManagerService {
                         ?.gameManager.placeLetters(player as Player, message.word, message.coord, message.across)
                 ) {
                     case PlaceResult.NotCurrentPlayer:
-                        socket.emit(SocketEvent.chatMessage, `${player} : "Ce n'est pas votre tour"`);
+                        socket.emit(SocketEvent.chatMessage, `${player} : Ce n'est pas votre tour`);
                         break;
                     case PlaceResult.NotValid:
-                        socket.emit(SocketEvent.chatMessage, `${player} : 'Commande impossible à realiser'`);
+                        socket.emit(SocketEvent.chatMessage, `${player} : Commande impossible à realiser`);
                         break;
+                    case: PlaceResult.NotInEasel:
+                        socket.emit(SocketEvent.chatMessage, `${player} : Commande impossible à realiser`);
                     case PlaceResult.Success: {
                         this.io.to(message.lobbyKey).emit(SocketEvent.setTimer);
                         this.io
