@@ -47,7 +47,7 @@ export class Log2990RankingService {
             if (!(await this.validateSize())) {
                 if (await this.validatePlayer(playerscore)) this.deleteLowestPlayer();
             }
-            await this.collection.insertOne(playerscore).catch((error: Error) => {
+            await this.collection.insertOne(playerscore).catch(() => {
                 // eslint-disable-next-line @typescript-eslint/no-magic-numbers
                 throw new HttpException('Failed to insert', 500);
             });
