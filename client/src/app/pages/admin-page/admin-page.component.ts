@@ -43,6 +43,7 @@ export class AdminPageComponent {
         dialogConfig.id = 'abandon-page-component';
         dialogConfig.height = '200px';
         dialogConfig.width = '550px';
+        dialogConfig.data = 'reset';
         const dialogRef = this.dialog.open(ConfirmationPopupComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {

@@ -15,13 +15,13 @@
     <ng-container matColumnDef="edit">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let element" class="action-link">
-            <button mat-raised-button id="action" class="button" (click)="editPlayerName(element)">Edit</button>
+            <button mat-raised-button class="button" (click)="editPlayerName(element)" [disabled]="isDefault(element)">Edit</button>
         </td>
     </ng-container>
     <ng-container matColumnDef="delete">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let element" class="action-link">
-            <button mat-raised-button id="action" class="button" (click)="deletePlayerName(element)">Delete</button>
+            <button mat-raised-button class="button" (click)="deletePlayerName(element)" [disabled]="isDefault(element)">Delete</button>
         </td>
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

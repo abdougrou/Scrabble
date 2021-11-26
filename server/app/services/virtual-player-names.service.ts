@@ -1,5 +1,5 @@
 import { HttpException } from '@app/classes/http.exception';
-import { DEFAULT_VIRTUAL_PLAYER_NAMES } from '@app/constants';
+import { DEFAULT_VIRTUAL_PLAYER_NAMES } from '@common/constants';
 import { Difficulty, PlayerName } from '@common/player-name';
 import { Collection } from 'mongodb';
 import 'reflect-metadata';

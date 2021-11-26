@@ -1,5 +1,3 @@
-import { Difficulty } from '@common/player-name';
-
 export const BOARD_SIZE = 15;
 export const RESERVE_EXCHANGE_LIMIT = 7;
 export const EASEL_SIZE = 7;
@@ -68,13 +66,4 @@ export const DEFAULT_SCOREBOARD = [
     { name: 'abidine', score: 5 },
     { name: 'imacutiepie', score: 10 },
     { name: 'NoobMaster69', score: 12 },
-];
-
-export const DEFAULT_VIRTUAL_PLAYER_NAMES = [
-    { name: 'Nikolay', difficulty: Difficulty.Expert },
-    { name: 'Bob', difficulty: Difficulty.Expert },
-    { name: 'Graton', difficulty: Difficulty.Expert },
-    { name: 'Sami', difficulty: Difficulty.Beginner },
-    { name: 'Rami', difficulty: Difficulty.Beginner },
-    { name: 'Steve', difficulty: Difficulty.Beginner },
 ];

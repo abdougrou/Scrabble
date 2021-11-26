@@ -1,9 +1,11 @@
 import { Component, Inject } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog, MatDialogConfig, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { FormConfig, FormType } from '@app/classes/form-config';
+import { ConfirmationPopupComponent } from '@app/components/confirmation-popup/confirmation-popup.component';
 import { PlayerNameFormComponent } from '@app/components/player-name-form/player-name-form.component';
 import { CommunicationService } from '@app/services/communication.service';
+import { DEFAULT_VIRTUAL_PLAYER_NAMES } from '@common/constants';
 import { Difficulty, PlayerName } from '@common/player-name';
 
 @Component({
@@ -63,9 +65,20 @@ export class PlayerNamesPopupComponent {
     }
 
     deletePlayerName(element: PlayerName) {
-        this.communication.deletePlayerName(element).subscribe((success) => {
-            if (success) {
-                this.getPlayerNames();
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = true;
+        dialogConfig.id = 'abandon-page-component';
+        dialogConfig.height = '200px';
+        dialogConfig.width = '550px';
+        dialogConfig.data = 'delete';
+        const dialogRef = this.dialog.open(ConfirmationPopupComponent, dialogConfig);
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this.communication.deletePlayerName(element).subscribe((success) => {
+                    if (success) {
+                        this.getPlayerNames();
+                    }
+                });
             }
         });
     }
@@ -90,5 +103,14 @@ export class PlayerNamesPopupComponent {
                     });
             }
         });
+    }
+
+    isDefault(element: PlayerName): boolean {
+        for (const playerName of DEFAULT_VIRTUAL_PLAYER_NAMES) {
+            if (element.name === playerName.name) {
+                return true;
+            }
+        }
+        return false;
     }
 }
