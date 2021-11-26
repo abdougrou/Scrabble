@@ -66,6 +66,11 @@ export class VirtualPlayerNamesService {
     }
 
     async modifyPlayer(playerToModify: PlayerName, newName: PlayerName): Promise<boolean> {
+        for (const playerName of DEFAULT_VIRTUAL_PLAYER_NAMES) {
+            if (newName.name === playerName.name) {
+                return false;
+            }
+        }
         await this.collection.findOneAndReplace({ name: playerToModify.name }, newName).catch(() => {
             // eslint-disable-next-line @typescript-eslint/no-magic-numbers
             throw new HttpException('Failed to update', 500);

@@ -50,7 +50,6 @@ export class AdminPageComponent {
                 this.communication.resetPlayerNames().subscribe();
             }
         });
-        //  window.alert('reset');
         this.communication.resetPlayerNames().subscribe();
         this.communication.resetPlayerScores().subscribe();
     }
