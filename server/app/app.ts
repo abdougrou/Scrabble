@@ -5,6 +5,7 @@ import * as express from 'express';
 import { StatusCodes } from 'http-status-codes';
 import * as logger from 'morgan';
 import { Service } from 'typedi';
+import { DatabaseController } from './controllers/database.controller';
 import { LobbyController } from './controllers/lobby.controller';
 
 @Service()
@@ -12,7 +13,7 @@ export class Application {
     app: express.Application;
     private readonly internalError: number = StatusCodes.INTERNAL_SERVER_ERROR;
 
-    constructor(public lobbyController: LobbyController) {
+    constructor(public lobbyController: LobbyController, public databaseController: DatabaseController) {
         this.app = express();
         this.config();
         this.bindRoutes();
@@ -20,6 +21,7 @@ export class Application {
 
     bindRoutes(): void {
         this.app.use('/api/lobby', this.lobbyController.router);
+        this.app.use('/data', this.databaseController.router);
         this.errorHandling();
     }
 

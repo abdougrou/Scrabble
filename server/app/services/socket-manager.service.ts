@@ -1,6 +1,4 @@
-import { transpose } from '@app/classes/board-utils';
 import { Easel } from '@app/classes/easel';
-import { GameManager } from '@app/classes/game-manager';
 import { Player } from '@app/classes/player';
 import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
 import {
@@ -38,6 +36,7 @@ export class SocketManagerService {
                 const lobby = this.lobbyService.getLobby(message.lobbyKey);
                 if (lobby?.gameManager.players.length === 2) lobby.started = true;
                 socket.join(message.lobbyKey);
+                this.update(message.lobbyKey);
             });
 
             socket.on(SocketEvent.setConfig, (message: SetConfigMessage) => {
@@ -111,14 +110,9 @@ export class SocketManagerService {
                             };
                             serverPlayers.push(playerData);
                         }
-                        (gameManager as GameManager).board.data = transpose(gameManager?.board.data as (string | null)[][]) as (string | null)[][];
-                        this.io.to(message.lobbyKey).emit(SocketEvent.update, {
-                            players: serverPlayers,
-                            reserveData: gameManager?.reserve.data,
-                            reserveCount: gameManager?.reserve.size,
-                            boardData: gameManager?.board.data,
-                        } as UpdateGameManagerMessage);
-                        (gameManager as GameManager).board.data = transpose(gameManager?.board.data as (string | null)[][]) as (string | null)[][];
+                        // (gameManager as GameManager).board.data = transpose(gameManager?.board.data as (string | null)[][]) as (string | null)[][];
+                        this.update(message.lobbyKey);
+                        // (gameManager as GameManager).board.data = transpose(gameManager?.board.data as (string | null)[][]) as (string | null)[][];
                         break;
                     }
                 }
@@ -152,18 +146,7 @@ export class SocketManagerService {
             });
 
             socket.on(SocketEvent.update, (message: UpdateMessage) => {
-                const gameManager = this.lobbyService.getLobby(message.lobbyKey)?.gameManager;
-                const serverPlayers: PlayerData[] = [];
-                for (const serverPlayer of gameManager?.players as Player[]) {
-                    const player: PlayerData = { name: serverPlayer.name, score: serverPlayer.score, easel: serverPlayer.easel.toString() };
-                    serverPlayers.push(player);
-                }
-                this.io.to(message.lobbyKey).emit(SocketEvent.update, {
-                    players: serverPlayers,
-                    reserveData: gameManager?.reserve.data,
-                    reserveCount: gameManager?.reserve.size,
-                    boardData: gameManager?.board.data,
-                } as UpdateGameManagerMessage);
+                this.update(message.lobbyKey);
             });
 
             socket.on('disconnection', () => {
@@ -173,5 +156,20 @@ export class SocketManagerService {
                 });
             });
         });
+    }
+
+    update(key: string) {
+        const gameManager = this.lobbyService.getLobby(key)?.gameManager;
+        const serverPlayers: PlayerData[] = [];
+        for (const serverPlayer of gameManager?.players as Player[]) {
+            const player: PlayerData = { name: serverPlayer.name, score: serverPlayer.score, easel: serverPlayer.easel.toString() };
+            serverPlayers.push(player);
+        }
+        this.io.to(key).emit(SocketEvent.update, {
+            players: serverPlayers,
+            reserveData: gameManager?.reserve.data,
+            reserveCount: gameManager?.reserve.size,
+            boardData: gameManager?.board.data,
+        } as UpdateGameManagerMessage);
     }
 }

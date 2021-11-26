@@ -1,0 +1,33 @@
+.wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    flex-direction: column;
+}
+.buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
+}
+#abandon {
+    background-color: #cf000f;
+    color: white;
+}
+body {
+    background-color: bisque;
+}
+.mat-raised-button {
+    color: white;
+    background-color: #1e81b0;
+}
+#back {
+    background-color: #cf000f;
+    color: white;
+}
+.button {
+    margin-left: 10px;
+    text-align: center;
+}

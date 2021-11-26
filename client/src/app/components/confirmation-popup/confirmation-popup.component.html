@@ -1,0 +1,8 @@
+<mat-card class="mat-elevation-z0 wrapper">
+    <mat-card-title>{{ message }}</mat-card-title>
+    <mat-card-subtitle>Appuyez sur Confirmer pour confirmer cette action</mat-card-subtitle>
+    <mat-card-actions class="buttons">
+        <button mat-raised-button mat-dialog-close id="back" class="button" (click)="quit(false)">Annuler</button>
+        <button mat-raised-button mat-dialog-close (click)="quit(true)" class="button">Confirmer</button>
+    </mat-card-actions>
+</mat-card>

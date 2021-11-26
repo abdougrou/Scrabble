@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ChatMessage } from '@app/classes/message';
 import { SYSTEM_NAME } from '@app/constants';
+import { AppMaterialModule } from '@app/modules/material.module';
 import { CommandHandlerService } from '@app/services/command-handler.service';
 import { PlayerService } from '@app/services/player.service';
 import { ChatBoxComponent } from './chat-box.component';
@@ -20,7 +21,7 @@ describe('ChatBoxComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [HttpClientModule, RouterTestingModule],
+            imports: [HttpClientModule, RouterTestingModule, AppMaterialModule],
             declarations: [ChatBoxComponent],
             providers: [
                 { provide: CommandHandlerService, useValue: commandHandlerSpy },

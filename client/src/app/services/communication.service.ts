@@ -1,10 +1,13 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Easel } from '@app/classes/easel';
 import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
 import { Vec2 } from '@app/classes/vec2';
+import { FileTemplate } from '@common/fileTemplate';
 import { LobbyConfig } from '@common/lobby-config';
+import { PlayerName } from '@common/player-name';
+import { ScoreConfig } from '@common/score-config';
 import {
     ExchangeLettersMessage,
     JoinLobbyMessage,
@@ -17,7 +20,7 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
-    UpdateMessage,
+    UpdateMessage
 } from '@common/socket-messages';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -64,7 +67,6 @@ export class CommunicationService {
         this.lobbyKey = key;
         this.playerName = playerName;
         this.socket.emit(SocketEvent.playerJoinLobby, { lobbyKey: key, playerName } as JoinLobbyMessage);
-        this.update();
     }
 
     setConfig(config: LobbyConfig, guestName: string) {
@@ -100,30 +102,25 @@ export class CommunicationService {
 
     switchPlayers() {
         this.socket.emit(SocketEvent.switchPlayers, { lobbyKey: this.lobbyKey } as SwitchPlayersMessage);
-        this.update();
     }
 
     exchangeLetters(letters: string, player: Player) {
         const playerData = { name: player.name, score: player.score, easel: player.easel.toString() };
         this.socket.emit(SocketEvent.exchangeLetters, { lobbyKey: this.lobbyKey, playerData, letters } as ExchangeLettersMessage);
-        this.update();
     }
 
     placeLetters(player: Player, word: string, coord: Vec2, across: boolean) {
         const playerData = { name: player.name, score: player.score, easel: player.easel.toString() };
         this.socket.emit(SocketEvent.placeLetters, { lobbyKey: this.lobbyKey, playerData, word, coord, across } as PlaceLettersMessage);
-        this.update();
     }
 
     skipTurn(player: Player) {
         const playerData = { name: player.name, score: player.score, easel: player.easel.toString() };
         this.socket.emit(SocketEvent.skipTurn, { lobbyKey: this.lobbyKey, playerData } as SkipTurnMessage);
-        this.update();
     }
 
     showReserve() {
         this.socket.emit(SocketEvent.reserve, { lobbyKey: this.lobbyKey } as ShowReserveMessage);
-        this.update();
     }
 
     sendMessage(message: ChatMessage) {
@@ -154,6 +151,79 @@ export class CommunicationService {
         return this.http
             .put<{ key: string }>('http://localhost:3000/api/lobby', lobbyConfig, this.httpOptions)
             .pipe(catchError(this.handleError<{ key: string }>('putLobby')));
+    }
+
+    getClassicRanking(): Observable<ScoreConfig[]> {
+        return this.http
+            .get<ScoreConfig[]>('http://localhost:3000/data/ranking/classic', this.httpOptions)
+            .pipe(catchError(this.handleError<ScoreConfig[]>('getClassicRanking')));
+    }
+
+    getLog2990Ranking(): Observable<ScoreConfig[]> {
+        return this.http
+            .get<ScoreConfig[]>('http://localhost:3000/data/ranking/log2990', this.httpOptions)
+            .pipe(catchError(this.handleError<ScoreConfig[]>('getClassicRanking')));
+    }
+
+    putClassicPlayerScore(scoreConfig: ScoreConfig): Observable<unknown> {
+        return this.http.post('http://localhost:3000/data/ranking/classic', scoreConfig, this.httpOptions);
+    }
+
+    putLog2990PlayerScore(scoreConfig: ScoreConfig): Observable<unknown> {
+        return this.http.post('http://localhost:3000/data/ranking/log2990', scoreConfig, this.httpOptions);
+    }
+
+    resetPlayerScores(): Observable<unknown> {
+        return this.http.delete('http://localhost:3000/data/ranking/reset', this.httpOptions);
+    }
+
+    getPlayerNames(): Observable<PlayerName[]> {
+        return this.http
+            .get<PlayerName[]>('http://localhost:3000/data/player-names', this.httpOptions)
+            .pipe(catchError(this.handleError<PlayerName[]>('getPlayerNames')));
+    }
+    getExpertPlayerNames(): Observable<PlayerName[]> {
+        return this.http
+            .get<PlayerName[]>('http://localhost:3000/data/player-names/expert', this.httpOptions)
+            .pipe(catchError(this.handleError<PlayerName[]>('getPlayerNames')));
+    }
+    getBeginnerPlayerNames(): Observable<PlayerName[]> {
+        return this.http
+            .get<PlayerName[]>('http://localhost:3000/data/player-names/beginner', this.httpOptions)
+            .pipe(catchError(this.handleError<PlayerName[]>('getPlayerNames')));
+    }
+
+    // addPlayerName(playerName: PlayerName) {
+    //     this.http.post('http://localhost:3000/data/player-names', JSON.stringify(playerName), this.httpOptions);
+    // }
+
+    addPlayerName(playerName: PlayerName): Observable<boolean> {
+        return this.http
+            .post<boolean>('http://localhost:3000/data/player-names', playerName, this.httpOptions)
+            .pipe(catchError(this.handleError<boolean>('postPlayerName')));
+    }
+
+    deletePlayerName(playerName: PlayerName): Observable<boolean> {
+        return this.http
+            .post<boolean>('http://localhost:3000/data/player-names/delete', playerName, this.httpOptions)
+            .pipe(catchError(this.handleError<boolean>('deletePlayerName')));
+    }
+
+    resetPlayerNames(): Observable<unknown> {
+        return this.http.delete('http://localhost:3000/data/player-names/reset', this.httpOptions);
+    }
+
+    postFile(fileTemplate: FileTemplate): Observable<HttpEvent<boolean>> {
+        return this.http.post<boolean>('http://localhost:3000/data/dictionary', fileTemplate, {
+            reportProgress: true,
+            observe: 'events',
+        });
+    }
+    modifyPlayerName(playerName: PlayerName, newName: PlayerName): Observable<boolean> {
+        const playerNames: PlayerName[] = [playerName, newName];
+        return this.http
+            .post<boolean>('http://localhost:3000/data/player-names/modify', playerNames, this.httpOptions)
+            .pipe(catchError(this.handleError<boolean>('modifyPlayerName')));
     }
 
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {

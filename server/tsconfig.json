@@ -2,7 +2,7 @@
     "compilerOptions": {
         "baseUrl": "./",
         "target": "es6",
-        "types": ["reflect-metadata", "@types/mocha", "mocha"],
+        "types": ["@types/node", "reflect-metadata", "@types/mocha", "mocha"],
         "module": "commonjs",
         "moduleResolution": "node",
         "sourceMap": true,
@@ -19,7 +19,8 @@
         "paths": {
             "@app/*": ["./app/*"],
             "@common/*": ["../common/*"],
-            "@static/*": ["../static/*"]
-        }
+            "@static/*": ["../static/*"],
+            "@assets/*": ["../assets/*"]
+        },
     }
 }

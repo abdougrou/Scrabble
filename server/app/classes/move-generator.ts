@@ -157,11 +157,10 @@ export class MoveGenerator {
      * Stores the generated legal move
      *
      * @param word word to save
-     * @param square word's starting coordinate
+     * @param coord word's starting coordinate
      * @param across whether the word is across or down
      */
-    legalMove(word: string, square: Vec2, across: boolean) {
-        const coord = { x: square.x, y: square.y };
+    legalMove(word: string, coord: Vec2, across: boolean) {
         this.legalMoves.push({ word, coord, across });
     }
 
