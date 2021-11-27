@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Player } from '@app/classes/player';
-import { Vec2 } from '@app/classes/vec2';
 import { SECOND_MD } from '@app/constants';
 import { LobbyConfig } from '@common/lobby-config';
+import { Vec2 } from '@common/vec2';
 import { BehaviorSubject, timer } from 'rxjs';
 import { BoardService } from './board.service';
 import { CommunicationService } from './communication.service';

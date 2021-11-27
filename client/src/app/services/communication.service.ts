@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import { Easel } from '@app/classes/easel';
 import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
-import { Vec2 } from '@app/classes/vec2';
 import { FileTemplate } from '@common/fileTemplate';
 import { LobbyConfig } from '@common/lobby-config';
 import { PlayerName } from '@common/player-name';
@@ -20,8 +19,9 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
-    UpdateMessage
+    UpdateMessage,
 } from '@common/socket-messages';
+import { Vec2 } from '@common/vec2';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import * as io from 'socket.io-client';

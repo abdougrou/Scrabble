@@ -1,4 +1,4 @@
-import { Vec2 } from './vec2';
+import { Vec2 } from '@common/vec2';
 
 export enum TileState {
     None = 0,
@@ -6,13 +6,8 @@ export enum TileState {
     Exchange = 2,
 }
 
-export interface Tile {
-    letter: string;
-    points: number;
-}
-
 export interface ReserveTile {
-    tile: Tile;
+    letter: string;
     count: number;
 }
 
@@ -22,7 +17,7 @@ export interface EaselTile {
 }
 
 export interface TileCoords {
-    tile: Tile;
+    letter: string;
     coords: Vec2;
 }
 

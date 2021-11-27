@@ -1,5 +1,4 @@
-import { Tile } from './classes/tile';
-import { Vec2 } from './classes/vec2';
+import { Vec2 } from '@common/vec2';
 
 // Game Config constants
 export const DURATION_INIT = 60;
@@ -77,6 +76,10 @@ z,1,10
 const F_POINTS = 4;
 const J_POINTS = 8;
 const K_POINTS = 10;
+
+export const RIGHT_ARROW = '➞';
+export const DOWN_ARROW = '🠗';
+
 export const LETTER_POINTS: Map<string, number> = new Map<string, number>([
     ['a', 1],
     ['b', 3],
@@ -128,9 +131,6 @@ export const LETTER_OFFSET = STEP / 2;
 const POINT_NUM = 5.7;
 const POINT_DENUM = 6;
 export const POINT_OFFSET = STEP * (POINT_NUM / POINT_DENUM);
-
-export const RIGHT_ARROW: Tile = { letter: '➞', points: -1 };
-export const DOWN_ARROW: Tile = { letter: '🠗', points: -1 };
 export const INVALID_COORDS: Vec2 = { x: -1, y: -1 };
 export const INVALID_POINT = -1;
 

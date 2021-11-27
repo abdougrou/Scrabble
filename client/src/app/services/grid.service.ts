@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Vec2 } from '@app/classes/vec2';
 import {
     BASE_LETTER_FONT_SIZE,
     BASE_POINT_FONT_SIZE,
@@ -7,6 +6,7 @@ import {
     CANVAS_HEIGHT,
     CANVAS_WIDTH,
     COLS,
+    DOWN_ARROW,
     GRID_HEIGHT,
     GRID_WIDTH,
     LETTER_FONT_SIZE_MODIFIER,
@@ -15,6 +15,7 @@ import {
     POINT_FONT_SIZE_MODIFIER,
     POINT_GRID,
     POINT_OFFSET,
+    RIGHT_ARROW,
     ROWS,
     STEP,
     TEMP_TILE_COLOR,
@@ -23,6 +24,7 @@ import {
     TILE_TEXT_COLOR,
     TILE_TYPE,
 } from '@app/constants';
+import { Vec2 } from '@common/vec2';
 import { BoardService } from './board.service';
 
 @Injectable({
@@ -114,10 +116,12 @@ export class GridService {
         this.gridContext.font = `${letterFont}px system-ui`;
         this.gridContext.fillText(letter.toUpperCase(), coord.x * STEP + LETTER_OFFSET, coord.y * STEP + LETTER_OFFSET);
 
-        this.gridContext.textBaseline = 'bottom';
-        this.gridContext.textAlign = 'right';
-        this.gridContext.font = `${pointFont}px system-ui`;
-        this.gridContext.fillText(`${LETTER_POINTS.get(letter)}`, coord.x * STEP + POINT_OFFSET, coord.y * STEP + POINT_OFFSET);
+        if (letter !== RIGHT_ARROW && letter !== DOWN_ARROW) {
+            this.gridContext.textBaseline = 'bottom';
+            this.gridContext.textAlign = 'right';
+            this.gridContext.font = `${pointFont}px system-ui`;
+            this.gridContext.fillText(`${LETTER_POINTS.get(letter)}`, coord.x * STEP + POINT_OFFSET, coord.y * STEP + POINT_OFFSET);
+        }
     }
 
     clearBoard() {

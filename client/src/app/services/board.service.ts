@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Vec2 } from '@app/classes/vec2';
 import { BOARD_SIZE, POINT_GRID } from '@app/constants';
+import { Vec2 } from '@common/vec2';
 
 const BONUS_STR = '4444444433333333333333332222222222222111111111111111111111111';
 

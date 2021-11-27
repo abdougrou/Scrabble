@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Easel } from '@app/classes/easel';
-import { Move } from '@app/classes/move';
 import { PlayAction, VirtualPlayer } from '@app/classes/virtual-player';
+import { Move } from '@common/move';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { MoveGeneratorService } from './move-generator.service';
