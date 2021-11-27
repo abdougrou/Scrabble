@@ -1,6 +1,6 @@
+import { Move } from '@common/move';
 import { Observable } from 'rxjs';
 import { Easel } from './easel';
-import { Move } from './move';
 import { Player } from './player';
 
 export enum PlayAction {

@@ -7,13 +7,9 @@ export class Lobby {
     gameManager: GameManager;
     started: boolean = false;
 
-    // get lobbyIO() {
-    //     return this.socketManager.io.to(this.key);
-    // }
-
     constructor(key: string, config: LobbyConfig) {
         this.key = key;
         this.config = config;
-        this.gameManager = new GameManager();
+        this.gameManager = new GameManager(config);
     }
 }

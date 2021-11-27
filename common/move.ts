@@ -5,4 +5,5 @@ export interface Move {
     coord: Vec2;
     across: boolean;
     points: number;
+    formedWords: number;
 }

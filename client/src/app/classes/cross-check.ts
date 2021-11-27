@@ -1,7 +1,7 @@
 /* eslint-disable no-bitwise */
+import { Vec2 } from '@common/vec2';
 import { transpose } from './board-utils';
 import { Trie } from './trie';
-import { Vec2 } from './vec2';
 
 const CHAR_CODE_A = 'a'.charCodeAt(0);
 const CHAR_CODE_Z = 'z'.charCodeAt(0);

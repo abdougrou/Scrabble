@@ -1,20 +1,15 @@
 import { CLASSIC_RESERVE } from '@app/constants';
+import { Move } from '@common/move';
+import { Vec2 } from '@common/vec2';
 import { Anchor } from './anchor';
 import { coordToKey, transpose } from './board-utils';
 import { CrossCheck } from './cross-check';
 import { Trie, TrieNode } from './trie';
-import { Vec2 } from './vec2';
 
 const LIGHT_BLUE_MULTIPLIER = 2;
 const DARK_BLUE_MULTIPLIER = 3;
 const PINK_MULTIPLIER = 2;
 const RED_MULTIPLIER = 3;
-
-export interface Move {
-    word: string;
-    coord: Vec2;
-    across: boolean;
-}
 
 export class MoveGenerator {
     anchors: Anchor[] = [];
@@ -22,6 +17,7 @@ export class MoveGenerator {
     dictionary: Trie;
     legalMoves: Move[] = [];
     pointMap: Map<string, number> = new Map();
+    pointGrid: number[][] = [];
 
     constructor(dictionary: Trie) {
         this.dictionary = dictionary;
@@ -131,7 +127,7 @@ export class MoveGenerator {
         if (!boardLetter) {
             if (node.terminal) {
                 const coord = anchor.across ? { x: square.x, y: square.y - partialWord.length } : { x: square.x - partialWord.length, y: square.y };
-                this.legalMove(partialWord, coord, anchor.across);
+                this.legalMove(board, partialWord, coord, anchor.across);
             }
 
             node.children.forEach((edge) => {
@@ -160,8 +156,23 @@ export class MoveGenerator {
      * @param coord word's starting coordinate
      * @param across whether the word is across or down
      */
-    legalMove(word: string, coord: Vec2, across: boolean) {
-        this.legalMoves.push({ word, coord, across });
+    legalMove(board: (string | null)[][], word: string, coord: Vec2, across: boolean) {
+        const move = { word, coord, across, points: 0, formedWords: 1 };
+        const nextCoord = { x: coord.x, y: coord.y };
+        const row: (string | null)[] = across ? board[coord.x] : (transpose(board)[coord.y] as (string | null)[]);
+        const pointRow: number[] = across ? this.pointGrid[coord.x] : (transpose(this.pointGrid)[coord.y] as number[]);
+        word.split('').forEach(() => {
+            const crossPoints = this.calculateCrossSum(board, coord, across);
+            if (crossPoints > 0) {
+                move.points += crossPoints;
+                move.formedWords++;
+            }
+
+            if (across) nextCoord.y++;
+            else nextCoord.x++;
+        });
+        move.points += this.calculateWordPoints(move, row, pointRow);
+        this.legalMoves.push(move);
     }
 
     calculateWordPoints(move: Move, row: (string | null)[], pointRow: number[]): number {

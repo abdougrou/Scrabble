@@ -1,9 +1,10 @@
 import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
+import { GameMode } from '@common/lobby-config';
+import { Move } from '@common/move';
 import { expect } from 'chai';
 import { describe } from 'mocha';
 import { Easel } from './easel';
 import { GameManager } from './game-manager';
-import { Move } from './move-generator';
 import { Player } from './player';
 import { Reserve } from './reserve';
 
@@ -11,7 +12,14 @@ describe('GameManager', () => {
     let gameManager: GameManager;
 
     beforeEach(() => {
-        gameManager = new GameManager();
+        gameManager = new GameManager({
+            key: 'key',
+            host: 'player1',
+            turnDuration: 60,
+            bonusEnabled: false,
+            dictionary: 'french',
+            gameMode: GameMode.Classic,
+        });
     });
 
     it('addPlayer adds players', () => {
@@ -105,7 +113,7 @@ describe('GameManager', () => {
         gameManager.board.pointGrid = pointGrid;
 
         const coord = { x: 3, y: 2 };
-        const move: Move = { word: 'cat', coord, across: true };
+        const move: Move = { word: 'cat', coord, across: true, points: 14, formedWords: 2 };
         gameManager.moveGenerator.legalMoves.push(move);
 
         const player: Player = { name: 'player', easel: new Easel(['c', 'a']), score: 0 };

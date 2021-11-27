@@ -1,14 +1,16 @@
 import { CLASSIC_RESERVE, EASEL_SIZE } from '@app/constants';
 import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
+import { GameMode, LobbyConfig } from '@common/lobby-config';
+import { Move } from '@common/move';
+import { Vec2 } from '@common/vec2';
 import { readFileSync } from 'fs';
 import { Board } from './board';
-import { transpose } from './board-utils';
 import { Easel } from './easel';
-import { Move, MoveGenerator } from './move-generator';
+import { MoveGenerator } from './move-generator';
+import { Objective, OBJECTIVES } from './objective';
 import { Player } from './player';
 import { Reserve } from './reserve';
 import { Trie } from './trie';
-import { Vec2 } from './vec2';
 
 export class GameManager {
     players: Player[];
@@ -17,13 +19,18 @@ export class GameManager {
     moveGenerator: MoveGenerator;
     firstMove: boolean = true;
 
-    constructor() {
+    objectives: Objective[];
+
+    constructor(config: LobbyConfig) {
         this.players = [];
         this.reserve = new Reserve(CLASSIC_RESERVE);
-        this.board = new Board();
         this.moveGenerator = new MoveGenerator(this.readDictionary('app/assets/dictionary.json'));
         this.board = new Board();
         this.board.initialize(false);
+
+        if (config.gameMode === GameMode.LOG2990) {
+            this.objectives.push(...OBJECTIVES);
+        }
     }
 
     /**
@@ -99,7 +106,7 @@ export class GameManager {
     placeLetters(player: Player, word: string, coord: Vec2, across: boolean): PlaceResult {
         if (player.name !== this.players[0].name) return PlaceResult.NotCurrentPlayer;
         if (this.firstMove && this.moveGenerator.dictionary.contains(word) && this.isCentered(word, coord, across)) {
-            this.moveGenerator.legalMove(word, coord, across);
+            this.moveGenerator.legalMove(this.board.data, word, coord, across);
             this.firstMove = false;
         }
         const move: Move | undefined = this.moveGenerator.legalMoves.find(
@@ -108,14 +115,6 @@ export class GameManager {
         if (!move) return PlaceResult.NotValid;
 
         const nextCoord = coord;
-        let points = 0;
-        const row: (string | null)[] = (move.across ? this.board.data : transpose(this.board.data))[move.across ? move.coord.x : move.coord.y] as (
-            | string
-            | null
-        )[];
-        const pointRow: number[] = (move.across ? this.board.pointGrid : transpose(this.board.pointGrid))[
-            move.across ? move.coord.x : move.coord.y
-        ] as number[];
         for (const k of word) {
             if (!this.board.getLetter(nextCoord)) {
                 this.board.setLetter(nextCoord, k);
@@ -124,13 +123,11 @@ export class GameManager {
                 const reserveLetters: string[] = this.reserve.getRandomLetters(1);
                 this.players[0].easel.addLetters(reserveLetters);
             }
-            points += this.moveGenerator.calculateCrossSum(this.board.data, coord, move.across);
 
             if (across) nextCoord.y++;
             else nextCoord.x++;
         }
-        points += this.moveGenerator.calculateWordPoints(move, row, pointRow);
-        player.score += points;
+        player.score += move.points;
 
         const letterCount = EASEL_SIZE - player.easel.count;
         player.easel.addLetters(this.reserve.getRandomLetters(letterCount));
@@ -193,6 +190,6 @@ export class GameManager {
      */
     isCentered(word: string, coord: Vec2, across: boolean): boolean {
         const center = Math.floor(this.board.data.length / 2);
-        return across ? coord.y <= center && coord.y + word.length >= center : coord.x <= center && coord.x + word.length >= center;
+        return across ? coord.y <= center && coord.y + word.length - 1 >= center : coord.x <= center && coord.x + word.length - 1 >= center;
     }
 }

@@ -1,11 +1,8 @@
 /* eslint-disable max-lines */
 import { Injectable } from '@angular/core';
-import { transpose } from '@app/classes/board-utils';
 import { GameConfig } from '@app/classes/game-config';
 import { ChatMessage } from '@app/classes/message';
-import { Move } from '@app/classes/move';
 import { Player } from '@app/classes/player';
-import { Vec2 } from '@app/classes/vec2';
 import { PlayAction, VirtualPlayer } from '@app/classes/virtual-player';
 import { COMMAND_RESULT, MAX_SKIP_COUNT, SECOND_MD, STARTING_LETTER_AMOUNT, SYSTEM_NAME } from '@app/constants';
 import { BoardService } from '@app/services/board.service';
@@ -15,6 +12,8 @@ import { PlayerService } from '@app/services/player.service';
 import { ReserveService } from '@app/services/reserve.service';
 import { VirtualPlayerService } from '@app/services/virtual-player.service';
 import { PlaceResult } from '@common/command-result';
+import { Move } from '@common/move';
+import { Vec2 } from '@common/vec2';
 import { BehaviorSubject, Subscription, timer } from 'rxjs';
 
 @Injectable({
@@ -143,14 +142,6 @@ export class GameManagerService {
         if (!move) return PlaceResult.NotValid;
 
         const nextCoord = coord;
-        let points = 0;
-        const row: (string | null)[] = (move.across ? this.board.data : transpose(this.board.data))[move.across ? move.coord.x : move.coord.y] as (
-            | string
-            | null
-        )[];
-        const pointRow: number[] = (move.across ? this.board.pointGrid : transpose(this.board.pointGrid))[
-            move.across ? move.coord.x : move.coord.y
-        ] as number[];
         for (const k of word) {
             if (!this.board.getLetter(nextCoord)) {
                 this.board.setLetter(nextCoord, k);
@@ -159,15 +150,12 @@ export class GameManagerService {
                 const reserveLetters: string[] = this.reserve.getRandomLetters(1);
                 player.easel.addLetters(reserveLetters);
             }
-            points += this.moveGeneratorService.calculateCrossSum(coord, across);
 
             if (across) nextCoord.y++;
             else nextCoord.x++;
         }
-        points += this.moveGeneratorService.calculateWordPoints(move, row, pointRow);
 
-        // place the word on the board, recalculate anchors and cross checks
-        player.score += points;
+        player.score += move.points;
         return PlaceResult.Success;
     }
 

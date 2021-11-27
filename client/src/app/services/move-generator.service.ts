@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { Anchor } from '@app/classes/anchor';
 import { coordToKey, transpose } from '@app/classes/board-utils';
 import { CrossCheck } from '@app/classes/cross-check';
-import { Move } from '@app/classes/move';
 import { Trie, TrieNode } from '@app/classes/trie';
-import { Vec2 } from '@app/classes/vec2';
 import { CLASSIC_RESERVE, DARK_BLUE_MULTIPLIER, LIGHT_BLUE_MULTIPLIER, PINK_MULTIPLIER, RED_MULTIPLIER } from '@app/constants';
+import { Move } from '@common/move';
+import { Vec2 } from '@common/vec2';
 import { BoardService } from './board.service';
 
 @Injectable({
@@ -154,19 +154,21 @@ export class MoveGeneratorService {
      * @param across whether the word is across or down
      */
     legalMove(word: string, coord: Vec2, across: boolean) {
-        const move = { word, coord, across, points: 0 };
+        const move = { word, coord, across, points: 0, formedWords: 1 };
         const nextCoord = { x: coord.x, y: coord.y };
-        let points = 0;
         const row: (string | null)[] = across ? this.board.data[coord.x] : (transpose(this.board.data)[coord.y] as (string | null)[]);
         const pointRow: number[] = across ? this.board.pointGrid[coord.x] : (transpose(this.board.pointGrid)[coord.y] as number[]);
         word.split('').forEach(() => {
-            points += this.calculateCrossSum(coord, across);
+            const crossPoints = this.calculateCrossSum(coord, across);
+            if (crossPoints > 0) {
+                move.points += crossPoints;
+                move.formedWords++;
+            }
 
             if (across) nextCoord.y++;
             else nextCoord.x++;
         });
-        points += this.calculateWordPoints(move, row, pointRow);
-        move.points = points;
+        move.points += this.calculateWordPoints(move, row, pointRow);
         this.legalMoves.push(move);
     }
 

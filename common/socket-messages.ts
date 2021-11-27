@@ -1,4 +1,4 @@
-import { Vec2 } from '@app/classes/vec2';
+import { Vec2 } from '@common/vec2';
 import { LobbyConfig } from './lobby-config';
 
 export const SocketEvent = {
