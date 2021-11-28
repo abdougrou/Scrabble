@@ -1,4 +1,4 @@
-import { CLASSIC_RESERVE, EASEL_SIZE } from '@app/constants';
+import { CLASSIC_RESERVE } from '@app/constants';
 import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
 import { GameMode, LobbyConfig } from '@common/lobby-config';
 import { Move } from '@common/move';
@@ -27,6 +27,7 @@ export class GameManager {
 
     constructor(private config: LobbyConfig) {
         this.players = [];
+        this.objectives = [];
         this.reserve = new Reserve(CLASSIC_RESERVE);
         this.moveGenerator = new MoveGenerator(this.readDictionary('app/assets/dictionary.json'));
         this.board = new Board();
@@ -137,10 +138,10 @@ export class GameManager {
             if (!this.board.getLetter(nextCoord)) {
                 this.board.setLetter(nextCoord, k);
                 usedLetters.push(k);
-                const words: string[] = [k];
-                (this.players[0].easel as Easel).getLetters(words);
-                const reserveLetters: string[] = this.reserve.getRandomLetters(1);
-                this.players[0].easel.addLetters(reserveLetters);
+                const letter: string[] = [k];
+                player.easel.getLetters(letter);
+                const reserveLetter: string[] = this.reserve.getRandomLetters(1);
+                player.easel.addLetters(reserveLetter);
             }
 
             if (across) nextCoord.y++;
@@ -148,11 +149,7 @@ export class GameManager {
         }
         player.score += move.points;
 
-        const letterCount = EASEL_SIZE - player.easel.count;
-        player.easel.addLetters(this.reserve.getRandomLetters(letterCount));
-
         this.placedWords.insert(move.word);
-
         // Objectives
         for (const objective of this.objectives) {
             if (!objective.achieved && (!objective.private || objective.playerName === player.name)) {

@@ -1,6 +1,6 @@
+import { Trie } from '@app/classes/trie';
 import { Move } from '@common/move';
 import { Vec2 } from '@common/vec2';
-import { Trie } from './trie';
 
 export interface Objective {
     reward: number;
@@ -15,8 +15,8 @@ export interface Objective {
 export const useFourOrMoreLetters: Objective = {
     reward: 35,
     description: 'Former mot en utilisant 4 ou plus de letters de votre chevalet',
-    check: (move: Move, usedLetters: string[]): boolean => {
-        return usedLetters.length > 3;
+    check: (move: Move, usedLetters?: string[]): boolean => {
+        return usedLetters ? usedLetters.length > 3 : false;
     },
 };
 
@@ -63,17 +63,18 @@ export const formTenLetterWord: Objective = {
 export const formWordAlreadyOnBoard: Objective = {
     reward: 30,
     description: 'Former un mot deja dans le tableau',
-    check: (move: Move, lettersUsed: string[], placedWords: Trie): boolean => {
-        return placedWords.contains(move.word);
+    check: (move: Move, lettersUsed?: string[], placedWords?: Trie): boolean => {
+        return placedWords ? placedWords.contains(move.word) : false;
     },
 };
 
 export const useOddPointLetters: Objective = {
     reward: 35,
     description: 'Former un mot en utilisant juste des lettres de point impair',
-    check: (move: Move, usedLetters: string[], placedWords: Trie, pointMap: Map<string, number>): boolean => {
-        for (const letter of usedLetters) {
-            const point = pointMap.get(letter);
+    check: (move: Move, usedLetters?: string[], placedWords?: Trie, pointMap?: Map<string, number>): boolean => {
+        if (!usedLetters && !placedWords && !pointMap) return false;
+        for (const letter of usedLetters as string[]) {
+            const point = (pointMap as Map<string, number>).get(letter);
             if (point && point % 2 === 0) return false;
         }
         return true;
@@ -83,7 +84,8 @@ export const useOddPointLetters: Objective = {
 export const placeLetterX: Objective = {
     reward: 40,
     description: 'Placer la lettre X',
-    check: (move: Move, usedLetters: string[]): boolean => {
+    check: (move: Move, usedLetters?: string[]): boolean => {
+        if (!usedLetters) return false;
         for (const letter of usedLetters) {
             if (letter === 'x') return true;
         }
