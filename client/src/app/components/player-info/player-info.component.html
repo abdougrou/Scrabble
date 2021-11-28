@@ -1,6 +1,6 @@
 <div class="container">
-    <mat-card class="card">
-        <mat-card-title > Minuterie : {{ this.timer }}</mat-card-title>
+    <mat-card class="card timer">
+        <mat-card-title> Temps restant: {{ this.timer }}</mat-card-title>
     </mat-card>
 
     <div *ngFor="let player of players; first as isFirst" >
@@ -25,7 +25,7 @@
         </mat-card>
     </div>
     <div class="align">
-        <span matBadge="{{this.reserveCount}}" matBadgeColor="warn" ><img src="../../../assets/reserve.png" width="100%" ></span>    
+        <span matBadge="{{this.reserveCount}}" matBadgeColor="warn" ><img class='reserve' src="../../../assets/reserve.png" width="100%" ></span>    
         <div class="justified-right">
             <button mat-raised-button [disabled]="this.players[0].name !== this.mainPlayerName || this.isEnded" (click)= "skipTurn()">Passer le tour</button>
             <button mat-raised-button *ngIf="!this.isEnded" (click)="openAbandonPage()" class="warn">Abandonner</button>
@@ -33,4 +33,10 @@
         </div>
     </div>
     <app-end-game-popup *ngIf="this.isEnded" [players]="players" [winnerName]="this.winner" [isEqual]="this.players[0].score === this.players[1].score"></app-end-game-popup>
+    <mat-tab-group class="goals" dynamicHeight>
+        <mat-tab label="Objectifs privés">
+             <div class="goals" *ngFor="let goal of privateGoals"><mat-checkbox>{{goal}}</mat-checkbox></div> 
+            </mat-tab>
+        <mat-tab label="Objectifs publics"> <div class="goals" *ngFor="let goal of publicGoals"><mat-checkbox> {{goal}}</mat-checkbox></div> </mat-tab>
+      </mat-tab-group>
 </div>

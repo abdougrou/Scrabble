@@ -2,7 +2,7 @@ import { Component, DoCheck, OnDestroy } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { Player } from '@app/classes/player';
-import { MAX_FONT_MULTIPLIER, MIN_FONT_MULTIPLIER } from '@app/constants';
+import { DURATION_INIT, MAX_FONT_MULTIPLIER, MIN_FONT_MULTIPLIER } from '@app/constants';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { GridService } from '@app/services/grid.service';
 import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-manager.service';
@@ -19,6 +19,8 @@ import { AbandonPageComponent } from '../abandon-page/abandon-page.component';
 export class PlayerInfoComponent implements DoCheck, OnDestroy {
     fontSize: number = 0;
     players: Player[] = [];
+    privateGoals: string[] = ['Run', 'Run Faster'];
+    publicGoals: string[] = ['Stay', 'Stay Longer'];
     mainPlayerName: string;
     isEnded: boolean;
 
@@ -46,8 +48,14 @@ export class PlayerInfoComponent implements DoCheck, OnDestroy {
         this.quit();
     }
     get timer() {
-        if (this.router.url === '/multiplayer-game') return this.multiplayerGameManager.turnDurationLeft;
-        else return this.gameManager.currentTurnDurationLeft;
+        let timerValue = 0;
+        if (this.router.url === '/multiplayer-game') timerValue = this.multiplayerGameManager.turnDurationLeft;
+        else timerValue = this.gameManager.currentTurnDurationLeft;
+        const mins = Math.floor(timerValue / DURATION_INIT);
+        const secs = timerValue % DURATION_INIT;
+        if (timerValue >= DURATION_INIT) return `0${mins}: ${secs}`;
+        else if (timerValue >= 10) return `00:${secs}`;
+        else return `00:0${secs}`;
     }
 
     get winner() {

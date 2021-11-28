@@ -8,6 +8,11 @@
     margin-bottom: 8px;
     background-color: #abdbe3;
 }
+
+.reserve {
+  max-height: 40px;
+}
+
 mat-card-title {
   color: black;
 }
@@ -41,7 +46,7 @@ mat-card-subtitle {
 .align {
   display: flex;
   flex-direction: row;
-  align-content: center;
+  justify-content: space-between;
 }
 
 .first {
@@ -64,4 +69,9 @@ mat-card-subtitle {
 .warn {
   background-color: #cf000f;
   color: white;
+}
+
+.goals {
+  padding-top: 10px;
+  min-height: min-content;
 }
