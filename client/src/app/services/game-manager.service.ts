@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { GameConfig } from '@app/classes/game-config';
+import { GameConfig, GameMode } from '@app/classes/game-config';
 import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
+import { Trie } from '@app/classes/trie';
 import { PlayAction, VirtualPlayer } from '@app/classes/virtual-player';
 import { COMMAND_RESULT, MAX_SKIP_COUNT, SECOND_MD, STARTING_LETTER_AMOUNT, SYSTEM_NAME } from '@app/constants';
 import { BoardService } from '@app/services/board.service';
@@ -14,6 +15,7 @@ import { PlaceResult } from '@common/command-result';
 import { Move } from '@common/move';
 import { Vec2 } from '@common/vec2';
 import { BehaviorSubject, Subscription, timer } from 'rxjs';
+import { ObjectiveService } from './objective.service';
 
 @Injectable({
     providedIn: 'root',
@@ -33,6 +35,9 @@ export class GameManagerService {
     endGameMessage: string = '';
     debug: boolean = false;
     isMultiPlayer: boolean;
+    gameConfig: GameConfig;
+
+    placedWords: Trie;
 
     constructor(
         public players: PlayerService,
@@ -41,9 +46,11 @@ export class GameManagerService {
         private moveGeneratorService: MoveGeneratorService,
         private exchangeTileService: ExchangeTilesService,
         private virtualPlayerService: VirtualPlayerService,
+        private objectiveService: ObjectiveService,
     ) {}
 
     initialize(gameConfig: GameConfig) {
+        this.gameConfig = gameConfig;
         this.mainPlayerName = gameConfig.playerName1;
         this.enemyPlayerName = gameConfig.playerName2;
         this.isMultiPlayer = gameConfig.isMultiPlayer;
@@ -54,6 +61,10 @@ export class GameManagerService {
         this.initializePlayers([this.mainPlayerName, this.enemyPlayerName]);
         this.players.mainPlayer = this.players.getPlayerByName(this.mainPlayerName);
         this.startTimer();
+        if (this.gameConfig.gameMode === GameMode.LOG2990) {
+            this.placedWords = new Trie();
+            this.objectiveService.initialize();
+        }
     }
 
     startTimer() {
@@ -87,6 +98,9 @@ export class GameManagerService {
         if (this.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
         else this.players.createVirtualPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
         // if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
+        for (const player of this.players.players) {
+            this.objectiveService.assignObjective(player.name);
+        }
 
         this.moveGeneratorService.generateLegalMoves(this.players.current.easel.letters.join(''));
     }
@@ -139,12 +153,14 @@ export class GameManagerService {
         );
         if (!move) return PlaceResult.NotValid;
 
+        const usedLetters: string[] = [];
         const nextCoord = coord;
         for (const k of word) {
             if (!this.board.getLetter(nextCoord)) {
                 this.board.setLetter(nextCoord, k);
-                const words: string[] = [k];
-                player.easel.getLetters(words);
+                usedLetters.push(k);
+                const letter: string[] = [k];
+                player.easel.getLetters(letter);
                 const reserveLetters: string[] = this.reserve.getRandomLetters(1);
                 player.easel.addLetters(reserveLetters);
             }
@@ -152,8 +168,11 @@ export class GameManagerService {
             if (across) nextCoord.y++;
             else nextCoord.x++;
         }
-
         player.score += move.points;
+
+        this.placedWords.insert(move.word);
+        this.objectiveService.check(player, move, usedLetters, this.placedWords, this.moveGeneratorService.pointMap);
+
         return PlaceResult.Success;
     }
     // TODO: COPY MESSAGES THEN DELETE THIS
