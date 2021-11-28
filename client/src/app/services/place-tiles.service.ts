@@ -33,9 +33,13 @@ export class PlaceTilesService {
                 this.directionIndicator.letter = RIGHT_ARROW;
                 this.directionIndicator.coords = tileCoord;
                 this.placeIndicator();
-            } else if ((this.boardService.getLetter(tileCoord) as string) === RIGHT_ARROW) {
+            } else if (
+                (this.boardService.getLetter(tileCoord) as string) === RIGHT_ARROW ||
+                (this.boardService.getLetter(tileCoord) as string) === DOWN_ARROW
+            ) {
                 this.changeDirection();
             }
+            this.gridService.borderTile(this.directionIndicator.coords);
         }
     }
 
@@ -113,38 +117,43 @@ export class PlaceTilesService {
         }
     }
 
+    getFirstLetterPosition(vertical: boolean): Vec2 {
+        let start: Vec2 = this.tilesPlacedOnBoard[0].coords;
+        if ((vertical && start.y !== 0) || (!vertical && start.x !== 0)) {
+            while (this.boardService.getLetter(vertical ? { x: start.x, y: start.y - 1 } : { x: start.x - 1, y: start.y })) {
+                start = vertical ? { x: start.x, y: start.y - 1 } : { x: start.x - 1, y: start.y };
+            }
+        }
+        return start;
+    }
+
+    getFullWord(start: Vec2, vertical: boolean): string {
+        let coordIterator: Vec2 = start;
+        let word = '';
+
+        while (this.boardService.getLetter(coordIterator)) {
+            if (this.boardService.getLetter(coordIterator) === RIGHT_ARROW || this.boardService.getLetter(coordIterator) === DOWN_ARROW) {
+                break;
+            }
+            word += this.boardService.getLetter(coordIterator);
+            coordIterator = vertical ? { x: coordIterator.x, y: coordIterator.y + 1 } : { x: coordIterator.x + 1, y: coordIterator.y };
+        }
+        return word;
+    }
+
     placeTiles() {
-        let initialCoord: Vec2 = this.tilesPlacedOnBoard[0].coords;
-        while (
-            this.boardService.getLetter(
-                this.directionIndicator.letter === RIGHT_ARROW
-                    ? { x: initialCoord.x - 1, y: initialCoord.y }
-                    : { x: initialCoord.x, y: initialCoord.y - 1 },
-            )
-        ) {
-            initialCoord =
-                this.directionIndicator.letter === RIGHT_ARROW
-                    ? { x: initialCoord.x - 1, y: initialCoord.y }
-                    : { x: initialCoord.x, y: initialCoord.y - 1 };
+        const vertical = this.directionIndicator.letter === DOWN_ARROW;
+        const start: Vec2 = this.getFirstLetterPosition(vertical);
+        const word = this.getFullWord(start, vertical);
+
+        for (const tile of this.tilesPlacedOnBoard) {
+            this.boardService.setLetter(tile.coords, '');
+            this.removeIndicator();
         }
 
-        let coordIterator: Vec2 = initialCoord;
-        let word = '';
-        while (this.boardService.getLetter(coordIterator)) {
-            word += this.boardService.getLetter(coordIterator);
-            coordIterator =
-                this.directionIndicator.letter === RIGHT_ARROW
-                    ? { x: coordIterator.x + 1, y: coordIterator.y }
-                    : { x: coordIterator.x, y: coordIterator.y + 1 };
-        }
-        if (
-            this.generalGameManager.placeTilesMouse(
-                word,
-                initialCoord,
-                this.directionIndicator.letter === DOWN_ARROW,
-                this.generalGameManager.getCurrentPlayer(),
-            ) === PlaceResult.Success
-        ) {
+        const placementResult: PlaceResult = this.generalGameManager.placeWord(word, start, vertical, this.generalGameManager.getMainPlayer());
+
+        if (placementResult === PlaceResult.Success) {
             this.removeIndicator();
             this.directionIndicator.coords = INVALID_COORDS;
             this.directionIndicator.letter = RIGHT_ARROW;
@@ -154,6 +163,7 @@ export class PlaceTilesService {
         } else {
             this.endPlacement();
         }
+        this.generalGameManager.switchPlayers();
     }
 
     endPlacement() {
@@ -168,7 +178,6 @@ export class PlaceTilesService {
         this.gridService.drawBoard();
     }
 
-    // eslint-disable-next-line no-unused-vars
     putEaselTileOnBoard(easelLetter: string, boardLetter: string) {
         const tileTaken: string = this.generalGameManager.mainPlayer.easel.getLetters([easelLetter]).pop() as string;
 

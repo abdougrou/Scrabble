@@ -32,20 +32,28 @@ export class PlayAreaComponent implements AfterViewInit {
     buttonDetect(event: KeyboardEvent) {
         if (this.keyboardReceiver === KEYBOARD_EVENT_RECEIVER.board) {
             this.placeTilesService.manageKeyboard(event.key);
-            for (const tile of this.tilesPlacedOnBoard) {
-                this.gridService.borderTile(tile.coords);
-            }
-            if (this.placeTilesService.directionIndicator.coords !== INVALID_COORDS) {
-                this.gridService.borderTile(this.placeTilesService.directionIndicator.coords);
-            }
+            this.drawTempTileBorders();
         } else {
             this.placeTilesService.endPlacement();
+        }
+    }
+
+    drawTempTileBorders() {
+        for (const tile of this.tilesPlacedOnBoard) {
+            this.gridService.borderTile(tile.coords);
+        }
+        if (
+            this.placeTilesService.directionIndicator.coords.x !== INVALID_COORDS.x &&
+            this.placeTilesService.directionIndicator.coords.y !== INVALID_COORDS.y
+        ) {
+            this.gridService.borderTile(this.placeTilesService.directionIndicator.coords);
         }
     }
 
     manageEndTurn(msg: string) {
         if (msg === 'a') this.placeTilesService.endPlacement();
     }
+
     clickOnBoard(event: MouseEvent) {
         this.changeKeyboardReceiver(KEYBOARD_EVENT_RECEIVER.board);
         this.clickedInside(true);

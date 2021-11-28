@@ -50,11 +50,11 @@ export class GameManagerInterfaceService {
         else this.soloGameManager.skipTurn();
     }
 
-    placeTilesMouse(word: string, coordStr: Vec2, vertical: boolean, player: Player): PlaceResult {
+    placeWord(word: string, coord: Vec2, vertical: boolean, player: Player): PlaceResult {
         if (this.isMultiplayer) {
-            this.multiGameManager.placeMouseLetters(word, coordStr, vertical, player);
+            this.multiGameManager.placeMouseLetters(word, coord, vertical, player);
             return PlaceResult.Success;
-        } else return this.soloGameManager.placeLetters(player, word, coordStr, vertical);
+        } else return this.soloGameManager.placeLetters(player, word, coord, vertical);
     }
 
     switchPlayers() {
