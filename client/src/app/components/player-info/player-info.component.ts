@@ -1,11 +1,13 @@
 import { Component, DoCheck, OnDestroy } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { Objective } from '@app/classes/objective';
 import { Player } from '@app/classes/player';
 import { DURATION_INIT, MAX_FONT_MULTIPLIER, MIN_FONT_MULTIPLIER } from '@app/constants';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { GridService } from '@app/services/grid.service';
 import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-manager.service';
+import { ObjectiveService } from '@app/services/objective.service';
 import { PlayerService } from '@app/services/player.service';
 import { ReserveService } from '@app/services/reserve.service';
 // eslint-disable-next-line no-restricted-imports
@@ -19,13 +21,14 @@ import { AbandonPageComponent } from '../abandon-page/abandon-page.component';
 export class PlayerInfoComponent implements DoCheck, OnDestroy {
     fontSize: number = 0;
     players: Player[] = [];
-    privateGoals: string[] = ['Run', 'Run Faster'];
-    publicGoals: string[] = ['Stay', 'Stay Longer'];
+    privateObjectives: Objective[] = [];
+    publicObjectives: Objective[] = [];
     mainPlayerName: string;
     isEnded: boolean;
 
     constructor(
         private playerService: PlayerService,
+        private objective: ObjectiveService,
         private gameManager: GameManagerService,
         private multiplayerGameManager: MultiplayerGameManagerService,
         private reserve: ReserveService,
@@ -42,6 +45,9 @@ export class PlayerInfoComponent implements DoCheck, OnDestroy {
             this.mainPlayerName = this.gameManager.mainPlayerName;
             this.isEnded = this.gameManager.isEnded;
         }
+
+        this.publicObjectives = this.objective.objectives.filter((obj) => !obj.private && !obj.playerName);
+        this.privateObjectives = this.objective.objectives.filter((obj) => obj.playerName && obj.playerName === this.mainPlayerName);
     }
 
     ngOnDestroy(): void {

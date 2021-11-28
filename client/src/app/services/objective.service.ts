@@ -24,6 +24,7 @@ export class ObjectiveService {
      * @param name player's name
      */
     assignObjective(name: string) {
+        this.objectives.reverse();
         const objective = this.objectives.pop() as Objective;
         objective.playerName = name;
         objective.private = true;

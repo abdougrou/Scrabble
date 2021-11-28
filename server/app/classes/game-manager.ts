@@ -57,6 +57,7 @@ export class GameManager {
 
         // Assign private objective
         if (this.config.gameMode === GameMode.LOG2990) {
+            this.objectives.reverse();
             const objective = this.objectives.pop() as Objective;
             objective.playerName = name;
             objective.private = true;

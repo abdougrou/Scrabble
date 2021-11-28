@@ -58,13 +58,13 @@ export class GameManagerService {
         this.currentTurnDurationLeft = gameConfig.duration;
         this.isEnded = false;
         this.board.initialize(gameConfig.bonusEnabled);
-        this.initializePlayers([this.mainPlayerName, this.enemyPlayerName]);
-        this.players.mainPlayer = this.players.getPlayerByName(this.mainPlayerName);
-        this.startTimer();
         if (this.gameConfig.gameMode === GameMode.LOG2990) {
             this.placedWords = new Trie();
             this.objectiveService.initialize();
         }
+        this.initializePlayers([this.mainPlayerName, this.enemyPlayerName]);
+        this.players.mainPlayer = this.players.getPlayerByName(this.mainPlayerName);
+        this.startTimer();
     }
 
     startTimer() {
@@ -98,8 +98,8 @@ export class GameManagerService {
         if (this.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
         else this.players.createVirtualPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
         // if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
-        for (const player of this.players.players) {
-            this.objectiveService.assignObjective(player.name);
+        for (const name of playerNames) {
+            this.objectiveService.assignObjective(name);
         }
 
         this.moveGeneratorService.generateLegalMoves(this.players.current.easel.letters.join(''));

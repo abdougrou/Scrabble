@@ -9,7 +9,7 @@ export interface Objective {
 
     playerName?: string;
     private?: boolean;
-    achieved?: boolean;
+    achieved: boolean;
 }
 
 export const useFourOrMoreLetters: Objective = {
@@ -18,6 +18,7 @@ export const useFourOrMoreLetters: Objective = {
     check: (move: Move, usedLetters?: string[]): boolean => {
         return usedLetters ? usedLetters.length > 3 : false;
     },
+    achieved: false,
 };
 
 export const placeInCorner: Objective = {
@@ -41,6 +42,7 @@ export const placeInCorner: Objective = {
         }
         return false;
     },
+    achieved: false,
 };
 
 export const formThreeWords: Objective = {
@@ -49,6 +51,7 @@ export const formThreeWords: Objective = {
     check: (move: Move): boolean => {
         return move.formedWords >= 3;
     },
+    achieved: false,
 };
 
 export const formTenLetterWord: Objective = {
@@ -58,6 +61,7 @@ export const formTenLetterWord: Objective = {
         const TEN_LETTER_WORD_LENGTH = 10;
         return move.word.length >= TEN_LETTER_WORD_LENGTH;
     },
+    achieved: false,
 };
 
 export const formWordAlreadyOnBoard: Objective = {
@@ -66,6 +70,7 @@ export const formWordAlreadyOnBoard: Objective = {
     check: (move: Move, lettersUsed?: string[], placedWords?: Trie): boolean => {
         return placedWords ? placedWords.contains(move.word) : false;
     },
+    achieved: false,
 };
 
 export const useOddPointLetters: Objective = {
@@ -79,6 +84,7 @@ export const useOddPointLetters: Objective = {
         }
         return true;
     },
+    achieved: false,
 };
 
 export const placeLetterX: Objective = {
@@ -91,6 +97,7 @@ export const placeLetterX: Objective = {
         }
         return false;
     },
+    achieved: false,
 };
 
 export const formPalindrome: Objective = {
@@ -99,6 +106,7 @@ export const formPalindrome: Objective = {
     check: (move: Move): boolean => {
         return move.word === move.word.split('').reverse().join();
     },
+    achieved: false,
 };
 
 export const OBJECTIVES: Objective[] = [
