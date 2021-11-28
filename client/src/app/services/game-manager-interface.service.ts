@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Player } from '@app/classes/player';
+import { GameManagerService } from '@app/services/game-manager.service';
 import { PlaceResult } from '@common/command-result';
 import { Vec2 } from '@common/vec2';
-import { GameManagerService } from './game-manager.service';
 import { MultiplayerGameManagerService } from './multiplayer-game-manager.service';
 import { PlayerService } from './player.service';
 

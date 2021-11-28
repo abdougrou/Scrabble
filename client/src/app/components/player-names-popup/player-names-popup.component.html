@@ -1,27 +1,27 @@
-<button mat-button (click)="addPlayer()" mat-flat-button color="primary">Add Row</button>
+<button mat-button (click)="addPlayer()" mat-flat-button color="primary">Ajouter un nom</button>
 
 <mat-card>Noms des joueurs virtuels</mat-card>
 <table mat-table [dataSource]="playerNames">
     <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <th mat-header-cell *matHeaderCellDef>Nom</th>
         <td mat-cell *matCellDef="let user">{{ user.name }}</td>
     </ng-container>
 
     <ng-container matColumnDef="difficulty">
         <th mat-header-cell *matHeaderCellDef>Score</th>
-        <td mat-cell *matCellDef="let user">{{ user.difficulty === 0 ? 'Expert' : 'Beginner' }}</td>
+        <td mat-cell *matCellDef="let user">{{ user.difficulty === 0 ? 'Expert' : 'Debutant' }}</td>
     </ng-container>
 
     <ng-container matColumnDef="edit">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let element" class="action-link">
-            <button mat-raised-button class="button" (click)="editPlayerName(element)" [disabled]="isDefault(element)">Edit</button>
+            <button mat-raised-button class="button" (click)="editPlayerName(element)" [disabled]="isDefault(element)">Modifier</button>
         </td>
     </ng-container>
     <ng-container matColumnDef="delete">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let element" class="action-link">
-            <button mat-raised-button class="button" (click)="deletePlayerName(element)" [disabled]="isDefault(element)">Delete</button>
+            <button mat-raised-button class="button" (click)="deletePlayerName(element)" [disabled]="isDefault(element)">Supprimer</button>
         </td>
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

@@ -11,8 +11,8 @@ export class ConfirmationPopupComponent {
     constructor(public dialogRef: MatDialogRef<ConfirmationPopupComponent>, @Inject(MAT_DIALOG_DATA) public popupType: string) {
         this.message =
             popupType === 'delete'
-                ? 'Etes vous sure de vouloir supprimer ce nom de joueur'
-                : 'Etes vous sure de vouloir reinitialiser la base de donnee';
+                ? 'Êtes-vous sûr de vouloir supprimer ce nom de joueur ?'
+                : 'Êtes vous sûr de vouloir reinitialiser la base de donnée ?';
     }
 
     quit(confirmation: boolean) {

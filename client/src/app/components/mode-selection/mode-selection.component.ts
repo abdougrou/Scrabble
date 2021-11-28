@@ -42,6 +42,10 @@ export class ModeSelectionComponent {
             .afterClosed()
             .subscribe((result) => {
                 if (!result) return;
+                if (result === true) {
+                    this.closeSelf();
+                    return;
+                }
                 const parameters: { config: LobbyConfig; playerName: string; mainPlayerName: string } = result as {
                     config: LobbyConfig;
                     playerName: string;

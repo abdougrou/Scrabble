@@ -2,6 +2,7 @@ import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
 import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
 import {
+    DeleteLobbyMessage,
     ExchangeLettersMessage,
     JoinLobbyMessage,
     LeaveLobbyMessage,
@@ -45,6 +46,10 @@ export class SocketManagerService {
                     this.io
                         .to(message.lobbyKey)
                         .emit('start game', { lobbyKey: message.lobbyKey, config: message.config, guest: message.guest } as SetConfigMessage);
+            });
+
+            socket.on(SocketEvent.deleteLobby, (message: DeleteLobbyMessage) => {
+                this.lobbyService.deleteLobby(message.lobbyKey);
             });
 
             socket.on(SocketEvent.switchPlayers, (message: SwitchPlayersMessage) => {

@@ -1,7 +1,7 @@
 <mat-card>Classement Classique</mat-card>
 <table mat-table [dataSource]="classicRanking">
     <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef> Name </th>
+        <th mat-header-cell *matHeaderCellDef> Nom </th>
         <td mat-cell *matCellDef="let user"> {{user.name}} </td>
       </ng-container>
       <ng-container matColumnDef="score">
@@ -14,7 +14,7 @@
 <mat-card>Classement LOG2990</mat-card>
 <table mat-table [dataSource]="log2990Ranking">
     <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef> Name </th>
+        <th mat-header-cell *matHeaderCellDef> Nom </th>
         <td mat-cell *matCellDef="let user"> {{user.name}} </td>
       </ng-container>
       <ng-container matColumnDef="score">

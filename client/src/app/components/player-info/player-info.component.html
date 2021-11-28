@@ -1,6 +1,6 @@
 <div class="container">
     <mat-card class="card">
-        <mat-card-title > Timer : {{ this.timer }}</mat-card-title>
+        <mat-card-title > Minuterie : {{ this.timer }}</mat-card-title>
     </mat-card>
 
     <div *ngFor="let player of players; first as isFirst" >
@@ -8,7 +8,7 @@
             <mat-card-title-group >
             <mat-card-title>{{ player.name }}</mat-card-title>
             <mat-card-subtitle>Score : {{ player.score }}</mat-card-subtitle>
-            <mat-card-subtitle>Tiles : {{ player.easel.count }}</mat-card-subtitle>
+            <mat-card-subtitle>Lettres : {{ player.easel.count }}</mat-card-subtitle>
             <div *ngIf="player.name === this.mainPlayerName">
                 <img *ngIf="isFirst;else other_content" mat-card-sm-image src="../../../assets/profile-pic-first.jpg" >
                 <ng-template #other_content><img  mat-card-sm-image src="../../../assets/profile-pic.jpg" ></ng-template>
@@ -24,11 +24,13 @@
             <button mat-raised-button (click)="increaseFont()">+</button>
         </mat-card>
     </div>
-    <div class="justified-right">
-        <button mat-raised-button [disabled]="this.players[0].name !== this.mainPlayerName || this.isEnded" (click)= "skipTurn()">Passer le tour</button>
-        <button mat-raised-button *ngIf="!this.isEnded" (click)="openAbandonPage()" class="warn">Abandonner</button>
-        <button mat-raised-button *ngIf="this.isEnded" [routerLink]="['/home']" (click)="quit()" class="warn">Quitter</button>
+    <div class="align">
+        <span matBadge="{{this.reserveCount}}" matBadgeColor="warn" ><img src="../../../assets/reserve.png" width="100%" ></span>    
+        <div class="justified-right">
+            <button mat-raised-button [disabled]="this.players[0].name !== this.mainPlayerName || this.isEnded" (click)= "skipTurn()">Passer le tour</button>
+            <button mat-raised-button *ngIf="!this.isEnded" (click)="openAbandonPage()" class="warn">Abandonner</button>
+            <button mat-raised-button *ngIf="this.isEnded" [routerLink]="['/home']" (click)="quit()" class="warn">Quitter</button>
+        </div>
     </div>
-    <div><span matBadge="{{this.reserveCount}}" matBadgeColor="warn" ><img src="../../../assets/reserve.png" width="8%" ></span></div>
     <app-end-game-popup *ngIf="this.isEnded" [players]="players" [winnerName]="this.winner" [isEqual]="this.players[0].score === this.players[1].score"></app-end-game-popup>
 </div>

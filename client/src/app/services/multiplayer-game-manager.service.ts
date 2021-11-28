@@ -7,6 +7,7 @@ import { BehaviorSubject, timer } from 'rxjs';
 import { BoardService } from './board.service';
 import { CommunicationService } from './communication.service';
 import { GridService } from './grid.service';
+import { PlayerService } from './player.service';
 import { ReserveService } from './reserve.service';
 
 @Injectable({
@@ -31,6 +32,7 @@ export class MultiplayerGameManagerService {
         public communication: CommunicationService,
         public board: BoardService,
         public reserve: ReserveService,
+        public player: PlayerService,
     ) {
         this.communication.setGameManager(this);
     }
@@ -42,10 +44,16 @@ export class MultiplayerGameManagerService {
         this.turnDurationLeft = lobbyConfig.turnDuration;
         this.isEnded = false;
         this.communication.update();
+        this.mainPlayer = this.getMainPlayer();
         this.startTimer();
+        console.log('Players: (initialize): ', this.players);
     }
 
     getMainPlayer(): Player {
+        console.log('Players: (getMain): ', this.player.players);
+        console.log('First player in the array: ', this.player.players[0]);
+        const result = this.players.find((player) => player.name === this.mainPlayerName);
+        console.log(result);
         if (this.players[0].name === this.mainPlayerName) return this.players[0];
         else return this.players[1];
     }

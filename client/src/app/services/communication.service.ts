@@ -8,6 +8,7 @@ import { LobbyConfig } from '@common/lobby-config';
 import { PlayerName } from '@common/player-name';
 import { ScoreConfig } from '@common/score-config';
 import {
+    DeleteLobbyMessage,
     ExchangeLettersMessage,
     JoinLobbyMessage,
     LeaveLobbyMessage,
@@ -63,6 +64,11 @@ export class CommunicationService {
         return this.lobbyKey;
     }
 
+    deleteLobby(key: string) {
+        this.socket.emit(SocketEvent.deleteLobby, { lobbyKey: key } as DeleteLobbyMessage);
+        this.getLobbies();
+    }
+
     joinLobby(key: string, playerName: string) {
         this.lobbyKey = key;
         this.playerName = playerName;
@@ -85,11 +91,11 @@ export class CommunicationService {
 
     update() {
         this.socket.emit(SocketEvent.update, { lobbyKey: this.lobbyKey } as UpdateMessage);
+        let playerIndex = 0;
         this.socket.on(SocketEvent.update, (gameManager: UpdateGameManagerMessage) => {
-            let playerIndex = 0;
             for (const serverPlayer of gameManager.players) {
-                const player: Player = { name: serverPlayer.name, score: serverPlayer.score, easel: new Easel(serverPlayer.easel.split('')) };
-                this.gameManager.players[playerIndex] = player;
+                const player: Player = { name: serverPlayer.name, score: serverPlayer.score, easel: new Easel(serverPlayer.easel.split(',')) };
+                this.gameManager.player.players[playerIndex] = player;
                 playerIndex++;
             }
             this.gameManager.reserve.data = gameManager.reserveData;

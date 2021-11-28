@@ -38,6 +38,12 @@ mat-card-subtitle {
   margin-right: 1em;
 }
 
+.align {
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+}
+
 .first {
   background-color: #1e81b0;
 }

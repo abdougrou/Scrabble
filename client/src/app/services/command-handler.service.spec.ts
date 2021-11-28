@@ -13,7 +13,7 @@ describe('CommandHandlerService', () => {
     beforeEach(() => {
         gameManagerSpy = jasmine.createSpyObj<GameManagerService>('GameManagerService', [
             'exchangeLetters',
-            'placeTiles',
+            'placeLetters',
             'skipTurn',
             'activateDebug',
         ]);
@@ -45,7 +45,7 @@ describe('CommandHandlerService', () => {
         service.handleCommand(pass, player);
         service.handleCommand(debug, player);
         expect(gameManagerSpy.exchangeLetters).toHaveBeenCalledTimes(1);
-        expect(gameManagerSpy.placeTiles).toHaveBeenCalledTimes(1);
+        expect(gameManagerSpy.placeLetters).toHaveBeenCalledTimes(1);
         expect(gameManagerSpy.skipTurn).toHaveBeenCalledTimes(1);
         expect(gameManagerSpy.activateDebug).toHaveBeenCalledTimes(1);
     });
@@ -67,7 +67,7 @@ describe('CommandHandlerService', () => {
         service.place(placeGood, player);
         service.place(placeCapital, player);
         service.place(placeBad, player);
-        expect(gameManagerSpy.placeTiles).toHaveBeenCalledTimes(2);
+        expect(gameManagerSpy.placeLetters).toHaveBeenCalledTimes(2);
     });
 
     it('should call GameManager skipTurn when command is valid', () => {
