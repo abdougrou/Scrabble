@@ -7,6 +7,7 @@ import { GameManagerInterfaceService } from '@app/services/game-manager-interfac
 import { GameManagerService } from '@app/services/game-manager.service';
 import { MouseManagerService } from '@app/services/mouse-manager.service';
 import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-manager.service';
+import { PlaceTilesService } from '@app/services/place-tiles.service';
 import { ReserveService } from '@app/services/reserve.service';
 
 @Component({
@@ -35,6 +36,7 @@ export class EaselComponent implements OnChanges {
         private multiGameManager: MultiplayerGameManagerService,
         private generalGameManagerService: GameManagerInterfaceService,
         private router: Router,
+        private placeTilesService: PlaceTilesService,
     ) {
         if (this.router.url === '/multiplayer-game') {
             this.players = this.multiGameManager.players;
@@ -59,6 +61,9 @@ export class EaselComponent implements OnChanges {
         this.mainPlayer = this.generalGameManagerService.mainPlayer;
         this.multiGameManager.updatePlayer.asObservable().subscribe((msg) => {
             this.update(msg);
+        });
+        this.placeTilesService.updateEasel.asObservable().subscribe((msg) => {
+            this.updateEasel(msg);
         });
     }
 
@@ -111,6 +116,15 @@ export class EaselComponent implements OnChanges {
             // this.tiles = this.generalGameManagerService.mainPlayer.easel.letters;
         }
     }
+
+    updateEasel(msg: string) {
+        if (msg === 'update') {
+            this.tiles = this.generalGameManagerService.mainPlayer.easel.letters.map((letter) => {
+                return { letter, state: TileState.None } as EaselTile;
+            });
+        }
+    }
+
     resetTileState() {
         for (const easelTile of this.tiles) {
             easelTile.state = TileState.None;

@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { TileCoords } from '@app/classes/tile';
 import { BOARD_SIZE, DOWN_ARROW, GRID_HEIGHT, GRID_WIDTH, INVALID_COORDS, RIGHT_ARROW } from '@app/constants';
+import { PlaceResult } from '@common/command-result';
 import { Vec2 } from '@common/vec2';
+import { BehaviorSubject } from 'rxjs';
 import { BoardService } from './board.service';
 import { GameManagerInterfaceService } from './game-manager-interface.service';
 import { GridService } from './grid.service';
@@ -13,6 +15,7 @@ export class PlaceTilesService {
     directionIndicator: TileCoords = { letter: RIGHT_ARROW, coords: { x: -1, y: -1 } };
     tilesTakenFromEasel: string[] = [];
     tilesPlacedOnBoard: TileCoords[] = [];
+    updateEasel: BehaviorSubject<string> = new BehaviorSubject('');
 
     constructor(private gridService: GridService, private boardService: BoardService, private generalGameManager: GameManagerInterfaceService) {}
 
@@ -66,7 +69,7 @@ export class PlaceTilesService {
                     break;
                 }
                 case 'Enter': {
-                    this.validatePlacement();
+                    this.placeTiles();
                     break;
                 }
                 case 'Escape': {
@@ -93,6 +96,7 @@ export class PlaceTilesService {
                 }
             }
         }
+        this.updateEasel.next('update');
     }
 
     returnLastTileToEasel() {
@@ -109,23 +113,7 @@ export class PlaceTilesService {
         }
     }
 
-    validatePlacement() {
-        if (this.tilesPlacedOnBoard.length !== 0) {
-            this.removeIndicator();
-            if (this.generalGameManager.isMultiplayer) this.placeTilesServer();
-            else {
-                // TODO: add points to player after placement
-                // TODO: put new letters in player easel
-                this.directionIndicator.coords = INVALID_COORDS;
-                this.directionIndicator.letter = RIGHT_ARROW;
-                this.tilesPlacedOnBoard.splice(0, this.tilesPlacedOnBoard.length);
-                this.tilesTakenFromEasel.splice(0, this.tilesTakenFromEasel.length);
-                this.generalGameManager.switchPlayers();
-            }
-        }
-    }
-
-    placeTilesServer() {
+    placeTiles() {
         let initialCoord: Vec2 = this.tilesPlacedOnBoard[0].coords;
         while (
             this.boardService.getLetter(
@@ -149,18 +137,23 @@ export class PlaceTilesService {
                     ? { x: coordIterator.x + 1, y: coordIterator.y }
                     : { x: coordIterator.x, y: coordIterator.y + 1 };
         }
-        this.generalGameManager.placeTilesMouse(
-            word,
-            initialCoord,
-            this.directionIndicator.letter === DOWN_ARROW,
-            this.generalGameManager.getCurrentPlayer(),
-        );
-        this.removeIndicator();
-        this.directionIndicator.coords = INVALID_COORDS;
-        this.directionIndicator.letter = RIGHT_ARROW;
-        this.tilesPlacedOnBoard.splice(0, this.tilesPlacedOnBoard.length);
-        this.tilesTakenFromEasel.splice(0, this.tilesTakenFromEasel.length);
-        this.gridService.drawBoard();
+        if (
+            this.generalGameManager.placeTilesMouse(
+                word,
+                initialCoord,
+                this.directionIndicator.letter === DOWN_ARROW,
+                this.generalGameManager.getCurrentPlayer(),
+            ) === PlaceResult.Success
+        ) {
+            this.removeIndicator();
+            this.directionIndicator.coords = INVALID_COORDS;
+            this.directionIndicator.letter = RIGHT_ARROW;
+            this.tilesPlacedOnBoard.splice(0, this.tilesPlacedOnBoard.length);
+            this.tilesTakenFromEasel.splice(0, this.tilesTakenFromEasel.length);
+            this.gridService.drawBoard();
+        } else {
+            this.endPlacement();
+        }
     }
 
     endPlacement() {
