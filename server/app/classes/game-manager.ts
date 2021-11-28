@@ -19,9 +19,13 @@ export class GameManager {
     moveGenerator: MoveGenerator;
     firstMove: boolean = true;
 
+    /**
+     * Objectives related variables
+     */
     objectives: Objective[];
+    placedWords: Trie = new Trie();
 
-    constructor(config: LobbyConfig) {
+    constructor(private config: LobbyConfig) {
         this.players = [];
         this.reserve = new Reserve(CLASSIC_RESERVE);
         this.moveGenerator = new MoveGenerator(this.readDictionary('app/assets/dictionary.json'));
@@ -29,12 +33,16 @@ export class GameManager {
         this.board.initialize(false);
 
         if (config.gameMode === GameMode.LOG2990) {
-            this.objectives.push(...OBJECTIVES);
+            const SORT_RANDOM = 0.5;
+            const OBJECTIVES_COUNT = 4;
+            this.objectives = OBJECTIVES.map((objective) => Object.assign({}, objective));
+            this.objectives.sort(() => SORT_RANDOM - Math.random());
+            while (this.objectives.length > OBJECTIVES_COUNT) this.objectives.pop();
         }
     }
 
     /**
-     * Adds a player to the game
+     * Adds a player to the game and assigns private objective if LOG2990 mode
      *
      * @param name player name, must be different than current player's name
      * @returns true if the player is added successfully
@@ -45,6 +53,15 @@ export class GameManager {
         const startingLetterCount = 7;
         const player = { name, easel: new Easel(this.reserve.getRandomLetters(startingLetterCount)), score: 0 };
         this.players.push(player);
+
+        // Assign private objective
+        if (this.config.gameMode === GameMode.LOG2990) {
+            const objective = this.objectives.pop() as Objective;
+            objective.playerName = name;
+            objective.private = true;
+            this.objectives.push(objective);
+        }
+
         return true;
     }
 
@@ -114,10 +131,12 @@ export class GameManager {
         );
         if (!move) return PlaceResult.NotValid;
 
+        const usedLetters: string[] = [];
         const nextCoord = coord;
         for (const k of word) {
             if (!this.board.getLetter(nextCoord)) {
                 this.board.setLetter(nextCoord, k);
+                usedLetters.push(k);
                 const words: string[] = [k];
                 (this.players[0].easel as Easel).getLetters(words);
                 const reserveLetters: string[] = this.reserve.getRandomLetters(1);
@@ -131,6 +150,19 @@ export class GameManager {
 
         const letterCount = EASEL_SIZE - player.easel.count;
         player.easel.addLetters(this.reserve.getRandomLetters(letterCount));
+
+        this.placedWords.insert(move.word);
+
+        // Objectives
+        for (const objective of this.objectives) {
+            if (!objective.achieved && (!objective.private || objective.playerName === player.name)) {
+                const objectiveResult = objective.check(move, usedLetters, this.placedWords, this.moveGenerator.pointMap);
+                if (objectiveResult) {
+                    player.score += objective.reward;
+                    objective.achieved = true;
+                }
+            }
+        }
 
         return PlaceResult.Success;
     }
