@@ -98,9 +98,7 @@ export class GameManagerService {
         if (this.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
         else this.players.createVirtualPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
         // if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
-        for (const name of playerNames) {
-            this.objectiveService.assignObjective(name);
-        }
+        if (this.gameConfig.gameMode === GameMode.LOG2990) for (const name of playerNames) this.objectiveService.assignObjective(name);
 
         this.moveGeneratorService.generateLegalMoves(this.players.current.easel.letters.join(''));
     }

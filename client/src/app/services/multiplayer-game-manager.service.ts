@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { GameMode } from '@app/classes/game-config';
 import { Player } from '@app/classes/player';
 import { SECOND_MD } from '@app/constants';
 import { LobbyConfig } from '@common/lobby-config';
@@ -17,12 +18,14 @@ export class MultiplayerGameManagerService {
     updatePlayer: BehaviorSubject<string> = new BehaviorSubject('');
     players: Player[] = [];
     turnDuration: number;
-    turnDurationLeft: number = 0;
-    mainPlayerName: string;
-    isFirstTurn: boolean = true;
     hostName: string;
     guestName: string;
+    turnDurationLeft: number = 0;
     isEnded: boolean;
+    mainPlayerName: string;
+    gameMode: GameMode;
+
+    isFirstTurn: boolean = true;
     endGameMessage: string = '';
     debug: boolean = false;
     mainPlayer: Player;
@@ -43,15 +46,13 @@ export class MultiplayerGameManagerService {
         this.turnDuration = lobbyConfig.turnDuration;
         this.turnDurationLeft = lobbyConfig.turnDuration;
         this.isEnded = false;
+        this.gameMode = lobbyConfig.gameMode;
         this.communication.update();
         this.mainPlayer = this.getMainPlayer();
         this.startTimer();
-        console.log('Players: (initialize): ', this.players);
     }
 
     getMainPlayer(): Player {
-        console.log('Players: (getMain): ', this.player.players);
-        console.log('First player in the array: ', this.player.players[0]);
         const result = this.players.find((player) => player.name === this.mainPlayerName);
         console.log(result);
         if (this.players[0].name === this.mainPlayerName) return this.players[0];

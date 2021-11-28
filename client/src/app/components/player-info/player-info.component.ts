@@ -1,6 +1,7 @@
 import { Component, DoCheck, OnDestroy } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { GameMode } from '@app/classes/game-config';
 import { Objective } from '@app/classes/objective';
 import { Player } from '@app/classes/player';
 import { DURATION_INIT, MAX_FONT_MULTIPLIER, MIN_FONT_MULTIPLIER } from '@app/constants';
@@ -21,10 +22,11 @@ import { AbandonPageComponent } from '../abandon-page/abandon-page.component';
 export class PlayerInfoComponent implements DoCheck, OnDestroy {
     fontSize: number = 0;
     players: Player[] = [];
-    privateObjectives: Objective[] = [];
-    publicObjectives: Objective[] = [];
     mainPlayerName: string;
     isEnded: boolean;
+    privateObjectives: Objective[] = [];
+    publicObjectives: Objective[] = [];
+    gameMode: GameMode;
 
     constructor(
         private playerService: PlayerService,
@@ -40,14 +42,17 @@ export class PlayerInfoComponent implements DoCheck, OnDestroy {
             this.players = this.multiplayerGameManager.players;
             this.mainPlayerName = this.multiplayerGameManager.getMainPlayer().name;
             this.isEnded = false;
+            this.gameMode = this.multiplayerGameManager.gameMode;
         } else {
             this.players = this.playerService.players;
             this.mainPlayerName = this.gameManager.mainPlayerName;
             this.isEnded = this.gameManager.isEnded;
+            this.gameMode = this.gameManager.gameConfig.gameMode;
         }
-
-        this.publicObjectives = this.objective.objectives.filter((obj) => !obj.private && !obj.playerName);
-        this.privateObjectives = this.objective.objectives.filter((obj) => obj.playerName && obj.playerName === this.mainPlayerName);
+        if (this.gameMode === GameMode.LOG2990) {
+            this.publicObjectives = this.objective.objectives.filter((obj) => !obj.private && !obj.playerName);
+            this.privateObjectives = this.objective.objectives.filter((obj) => obj.playerName && obj.playerName === this.mainPlayerName);
+        }
     }
 
     ngOnDestroy(): void {
