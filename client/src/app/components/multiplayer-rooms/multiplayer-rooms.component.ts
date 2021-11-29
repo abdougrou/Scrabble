@@ -31,10 +31,7 @@ export class MultiplayerRoomsComponent {
             .afterClosed()
             .subscribe((result) => {
                 if (!result) return;
-                else if (result === true) {
-                    // TODO Delete Lobby
-                    this.dialogRef.close(result);
-                }
+                this.dialogRef.close(result);
             });
 
         const delay = 250;

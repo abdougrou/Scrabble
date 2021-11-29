@@ -1,6 +1,5 @@
 import { HttpClient, HttpEvent, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Easel } from '@app/classes/easel';
 import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
 import { FileTemplate } from '@common/fileTemplate';
@@ -20,7 +19,7 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
-    UpdateMessage,
+    UpdateMessage
 } from '@common/socket-messages';
 import { Vec2 } from '@common/vec2';
 import { BehaviorSubject, Observable, of } from 'rxjs';
@@ -82,6 +81,7 @@ export class CommunicationService {
             this.started = true;
             this.config = message.config;
             this.guestName = message.guest;
+            this.gameManager.players = message.players as Player[];
         });
     }
 
@@ -91,13 +91,14 @@ export class CommunicationService {
 
     update() {
         this.socket.emit(SocketEvent.update, { lobbyKey: this.lobbyKey } as UpdateMessage);
-        let playerIndex = 0;
+        // let playerIndex = 0;
         this.socket.on(SocketEvent.update, (gameManager: UpdateGameManagerMessage) => {
-            for (const serverPlayer of gameManager.players) {
+            /* for (const serverPlayer of gameManager.players) {
                 const player: Player = { name: serverPlayer.name, score: serverPlayer.score, easel: new Easel(serverPlayer.easel.split(',')) };
                 this.gameManager.player.players[playerIndex] = player;
                 playerIndex++;
-            }
+            }*/
+            this.gameManager.players = gameManager.players;
             this.gameManager.reserve.data = gameManager.reserveData;
             this.gameManager.reserve.size = gameManager.reserveCount;
             this.gameManager.board.data = gameManager.boardData;

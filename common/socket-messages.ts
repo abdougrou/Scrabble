@@ -1,3 +1,4 @@
+import { Player } from '@app/classes/player';
 import { Vec2 } from '@common/vec2';
 import { LobbyConfig } from './lobby-config';
 
@@ -35,6 +36,7 @@ export interface SetConfigMessage {
     lobbyKey: string;
     config: LobbyConfig;
     guest: string;
+    players?: Player[];
 }
 
 // I dont know how it will work currently
@@ -87,7 +89,7 @@ export interface UpdateMessage {
 }
 
 export interface UpdateGameManagerMessage {
-    players: PlayerData[];
+    players: Player[];
     reserveData: Map<string, number>;
     reserveCount: number;
     boardData: (string | null)[][];

@@ -8,7 +8,6 @@ import {
     LeaveLobbyMessage,
     NormalChatMessage,
     PlaceLettersMessage,
-    PlayerData,
     SetConfigMessage,
     ShowReserveMessage,
     SkipTurnMessage,
@@ -37,15 +36,17 @@ export class SocketManagerService {
                 const lobby = this.lobbyService.getLobby(message.lobbyKey);
                 if (lobby?.gameManager.players.length === 2) lobby.started = true;
                 socket.join(message.lobbyKey);
-                this.update(message.lobbyKey);
             });
 
             socket.on(SocketEvent.setConfig, (message: SetConfigMessage) => {
                 const lobby = this.lobbyService.getLobby(message.lobbyKey);
                 if (lobby?.started)
-                    this.io
-                        .to(message.lobbyKey)
-                        .emit('start game', { lobbyKey: message.lobbyKey, config: message.config, guest: message.guest } as SetConfigMessage);
+                    this.io.to(message.lobbyKey).emit('start game', {
+                        lobbyKey: message.lobbyKey,
+                        config: message.config,
+                        guest: message.guest,
+                        players: lobby.gameManager.players,
+                    } as SetConfigMessage);
             });
 
             socket.on(SocketEvent.deleteLobby, (message: DeleteLobbyMessage) => {
@@ -108,7 +109,7 @@ export class SocketManagerService {
                                 }ment à la case ${message.coord}`,
                             );
                         this.lobbyService.getLobby(message.lobbyKey)?.gameManager.swapPlayers();
-                        const gameManager = this.lobbyService.getLobby(message.lobbyKey)?.gameManager;
+                        /* const gameManager = this.lobbyService.getLobby(message.lobbyKey)?.gameManager;
                         const serverPlayers: PlayerData[] = [];
                         for (const serverPlayer of gameManager?.players as Player[]) {
                             const playerData: PlayerData = {
@@ -117,7 +118,7 @@ export class SocketManagerService {
                                 easel: serverPlayer.easel.toString(),
                             };
                             serverPlayers.push(playerData);
-                        }
+                        } */
                         // (gameManager as GameManager).board.data = transpose(gameManager?.board.data as (string | null)[][]) as (string | null)[][];
                         this.update(message.lobbyKey);
                         // (gameManager as GameManager).board.data = transpose(gameManager?.board.data as (string | null)[][]) as (string | null)[][];
@@ -168,13 +169,13 @@ export class SocketManagerService {
 
     update(key: string) {
         const gameManager = this.lobbyService.getLobby(key)?.gameManager;
-        const serverPlayers: PlayerData[] = [];
+        /* const serverPlayers: PlayerData[] = [];
         for (const serverPlayer of gameManager?.players as Player[]) {
             const player: PlayerData = { name: serverPlayer.name, score: serverPlayer.score, easel: serverPlayer.easel.toString() };
             serverPlayers.push(player);
-        }
+        }*/
         this.io.to(key).emit(SocketEvent.update, {
-            players: serverPlayers,
+            players: gameManager?.players,
             reserveData: gameManager?.reserve.data,
             reserveCount: gameManager?.reserve.size,
             boardData: gameManager?.board.data,

@@ -48,13 +48,14 @@ export class MultiplayerGameManagerService {
         this.isEnded = false;
         this.gameMode = lobbyConfig.gameMode;
         this.communication.update();
+        console.log(this.gameMode);
         this.mainPlayer = this.getMainPlayer();
         this.startTimer();
     }
 
     getMainPlayer(): Player {
-        const result = this.players.find((player) => player.name === this.mainPlayerName);
-        console.log(result);
+        // const result = this.players.find((player) => player.name === this.mainPlayerName);
+        // console.log(result);
         if (this.players[0].name === this.mainPlayerName) return this.players[0];
         else return this.players[1];
     }
