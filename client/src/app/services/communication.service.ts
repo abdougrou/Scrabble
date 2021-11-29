@@ -249,6 +249,12 @@ export class CommunicationService {
             .pipe(catchError(this.handleError<boolean>('deleteDictionary')));
     }
 
+    getDictionaryFile(dictionaryName: DictionaryInfo): Observable<string> {
+        return this.http
+            .post<string>('http://localhost:3000/data/dictionary/file', dictionaryName, this.httpOptions)
+            .pipe(catchError(this.handleError<string>('deleteDictionary')));
+    }
+
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
         return () => of(result as T);
     }

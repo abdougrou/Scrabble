@@ -27,7 +27,7 @@
     <ng-container matColumnDef="download">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let element" class="action-link">
-            <mat-icon>get_app</mat-icon>
+            <mat-icon class="cancel-upload" (click)="downloadDictionary(element)">download</mat-icon>
         </td>
     </ng-container>
 

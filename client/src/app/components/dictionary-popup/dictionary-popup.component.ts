@@ -52,4 +52,16 @@ export class DictionaryPopupComponent {
     isDefault(element: DictionaryInfo): boolean {
         return element.title === DEFAULT_DICTIONARY_NAME;
     }
+
+    downloadDictionary(element: DictionaryInfo) {
+        this.communication.getDictionaryFile(element).subscribe((data) => {
+            const file = new Blob([data], { type: '.json' });
+            const a = document.createElement('a');
+            const objectUrl = URL.createObjectURL(file);
+            a.href = objectUrl;
+            a.download = `${element.title}.json`;
+            a.click();
+            URL.revokeObjectURL(objectUrl);
+        });
+    }
 }

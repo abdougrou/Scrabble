@@ -199,5 +199,10 @@ export class DatabaseController {
         this.router.post('/dictionary/delete', async (req: Request, res: Response, next: NextFunction) => {
             this.dictionaryService.deleteDictionary(req.body);
         });
+
+        this.router.post('/dictionary/file', async (req: Request, res: Response, next: NextFunction) => {
+            console.log(req.body);
+            res.json(this.dictionaryService.sendDictionaryFile(req.body));
+        });
     }
 }

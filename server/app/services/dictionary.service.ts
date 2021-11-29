@@ -88,4 +88,9 @@ export class DictionaryService {
         }
         return dictionaryNames;
     }
+
+    sendDictionaryFile(dictionaryName: DictionaryInfo): string {
+        const path = this.getFilePathFromName(dictionaryName.title);
+        return fs.readFileSync(`${DICTIONARY_DIRECTORY}${path}`).toString();
+    }
 }
