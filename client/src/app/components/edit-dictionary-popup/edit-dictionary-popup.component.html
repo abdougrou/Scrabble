@@ -1,0 +1,19 @@
+<h1 mat-dialog-title>{{ message }}</h1>
+<form [formGroup]="titleForm">
+    <mat-form-field appearance="outline">
+        <mat-label>Titre dictionnaire</mat-label>
+        <input type="text" formControlName="title" pattern="[a-zA-Z ]*" matInput />
+        <mat-hint align="end">{{ this.titleForm.get('title')?.value?.length || 0 }}/20</mat-hint>
+    </mat-form-field>
+</form>
+<form [formGroup]="descriptionForm">
+    <mat-form-field appearance="outline">
+        <mat-label>Description dictionnaire</mat-label>
+        <input type="text" formControlName="description" pattern="[a-zA-Z ]*" matInput />
+        <mat-hint align="end">{{ this.descriptionForm.get('description')?.value?.length || 0 }}/50</mat-hint>
+    </mat-form-field>
+</form>
+<button mat-raised-button id="back" class="button" (click)="cancel()">Retour</button>
+<button mat-raised-button class="button" (click)="confirm()" [disabled]="!this.titleForm.valid || !this.descriptionForm.valid">
+    Confirmer modification
+</button>

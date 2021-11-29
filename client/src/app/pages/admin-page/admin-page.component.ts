@@ -3,6 +3,7 @@ import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ConfirmationPopupComponent } from '@app/components/confirmation-popup/confirmation-popup.component';
+import { DictionaryPopupComponent } from '@app/components/dictionary-popup/dictionary-popup.component';
 import { DisplayDictionaryPopupComponent } from '@app/components/display-dictionary-popup/display-dictionary-popup.component';
 import { PlayerNameOptionsComponent } from '@app/components/player-name-options/player-name-options.component';
 import { DIALOG_HEIGHT, DIALOG_WIDTH } from '@app/constants';
@@ -37,6 +38,13 @@ export class AdminPageComponent {
         });
     }
 
+    openDictionary() {
+        this.dialog.open(DictionaryPopupComponent, {
+            height: DIALOG_HEIGHT,
+            width: DIALOG_WIDTH,
+        });
+    }
+
     reset() {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = true;
@@ -51,7 +59,8 @@ export class AdminPageComponent {
             }
         });
         this.communication.resetPlayerNames().subscribe();
-        this.communication.resetPlayerScores().subscribe();
+        // this.communication.resetPlayerScores().subscribe();
+        this.communication.resetDictionary().subscribe();
     }
 
     onFileSelected(event: Event) {
@@ -63,15 +72,26 @@ export class AdminPageComponent {
             reader.readAsText(file);
             reader.onload = () => {
                 this.dictionary = JSON.parse(reader.result as string);
-                const template: FileTemplate = { fileName: file.name, file: this.dictionary };
-                const upload$ = this.communication.postFile(template).pipe(finalize(() => this.resetFile()));
-                this.uploadSub = upload$.subscribe((httpEvent: HttpEvent<unknown>) => {
-                    if (httpEvent.type === HttpEventType.UploadProgress && httpEvent.total) {
-                        this.uploadProgress = Math.round(PERCENT * (httpEvent.loaded / httpEvent.total));
-                    }
-                });
+                if (this.validateDictionary(this.dictionary)) {
+                    const template: FileTemplate = { fileName: file.name, file: this.dictionary };
+                    const upload$ = this.communication.postFile(template).pipe(finalize(() => this.resetFile()));
+                    this.uploadSub = upload$.subscribe((httpEvent: HttpEvent<unknown>) => {
+                        if (httpEvent.type === HttpEventType.UploadProgress && httpEvent.total) {
+                            this.uploadProgress = Math.round(PERCENT * (httpEvent.loaded / httpEvent.total));
+                        }
+                    });
+                } else {
+                    this.cancelUpload();
+                }
             };
         }
+    }
+
+    validateDictionary(dictionary: DictionaryTemplate) {
+        if (dictionary.title === '' || dictionary.description === '' || dictionary.words.length === 0) {
+            return false;
+        }
+        return true;
     }
 
     cancelUpload() {

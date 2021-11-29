@@ -4,6 +4,7 @@ import { Easel } from '@app/classes/easel';
 import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
 import { Vec2 } from '@app/classes/vec2';
+import { DictionaryInfo } from '@common/dictionaryTemplate';
 import { FileTemplate } from '@common/fileTemplate';
 import { LobbyConfig } from '@common/lobby-config';
 import { PlayerName } from '@common/player-name';
@@ -20,7 +21,7 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
-    UpdateMessage
+    UpdateMessage,
 } from '@common/socket-messages';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -213,6 +214,10 @@ export class CommunicationService {
         return this.http.delete('http://localhost:3000/data/player-names/reset', this.httpOptions);
     }
 
+    resetDictionary() {
+        return this.http.delete('http://localhost:3000/data/dictionary/reset');
+    }
+
     postFile(fileTemplate: FileTemplate): Observable<HttpEvent<boolean>> {
         return this.http.post<boolean>('http://localhost:3000/data/dictionary', fileTemplate, {
             reportProgress: true,
@@ -224,6 +229,24 @@ export class CommunicationService {
         return this.http
             .post<boolean>('http://localhost:3000/data/player-names/modify', playerNames, this.httpOptions)
             .pipe(catchError(this.handleError<boolean>('modifyPlayerName')));
+    }
+
+    getDictionaryInfo(): Observable<DictionaryInfo[]> {
+        return this.http
+            .get<DictionaryInfo[]>('http://localhost:3000/data/dictionary', this.httpOptions)
+            .pipe(catchError(this.handleError<DictionaryInfo[]>('getDictionaryNames')));
+    }
+
+    modifyDictionary(dictionaryToModify: string, newDictionaryInfo: DictionaryInfo): Observable<boolean> {
+        return this.http
+            .post<boolean>('http://localhost:3000/data/dictionary/modify', [dictionaryToModify, newDictionaryInfo], this.httpOptions)
+            .pipe(catchError(this.handleError<boolean>('modifyDictionary')));
+    }
+
+    deleteDictionary(dictionary: DictionaryInfo): Observable<boolean> {
+        return this.http
+            .post<boolean>('http://localhost:3000/data/dictionary/delete', dictionary, this.httpOptions)
+            .pipe(catchError(this.handleError<boolean>('deleteDictionary')));
     }
 
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
