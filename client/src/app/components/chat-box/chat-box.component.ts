@@ -70,12 +70,12 @@ export class ChatBoxComponent implements OnChanges {
         if (this.messageInput.nativeElement.value !== '') {
             this.chatMessage.user = this.mainPlayerName;
             this.chatMessage.body = this.message;
-            this.player = this.multiplayerGameManager.getMainPlayer();
             this.messageInput.nativeElement.value = '';
             if (this.router.url === '/game') {
                 this.showMessage(this.chatMessage);
                 this.showMessage(this.checkCommand(this.chatMessage, this.player));
             } else if (this.router.url === '/multiplayer-game') {
+                this.player = this.multiplayerGameManager.getMainPlayer();
                 if (!this.isCommand(this.chatMessage.body)) {
                     this.communication.sendMessage(this.chatMessage);
                 } else {

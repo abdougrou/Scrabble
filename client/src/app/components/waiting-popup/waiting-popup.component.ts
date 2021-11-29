@@ -49,8 +49,8 @@ export class WaitingPopupComponent implements DoCheck {
     }
 
     back() {
-        this.dialogRef.close();
         this.communication.leaveLobby();
+        this.dialogRef.close();
     }
 
     startGame() {

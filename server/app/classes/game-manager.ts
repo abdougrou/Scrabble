@@ -31,7 +31,7 @@ export class GameManager {
         this.reserve = new Reserve(CLASSIC_RESERVE);
         this.moveGenerator = new MoveGenerator(this.readDictionary('app/assets/dictionary.json'));
         this.board = new Board();
-        this.board.initialize(false);
+        this.board.initialize(config.bonusEnabled);
 
         if (config.gameMode === GameMode.LOG2990) {
             const SORT_RANDOM = 0.5;

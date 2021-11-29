@@ -63,6 +63,7 @@ export class MultiplayerRoomsComponent {
     }
 
     joinLobby(key: string): void {
+        if (!this.lobbies.find((lobby) => lobby.key === key)) window.alert("La salle n'est pas disponible, veuillez actualiser la liste des salles.");
         this.openJoinPopup(key)
             .afterClosed()
             .subscribe((result) => {
