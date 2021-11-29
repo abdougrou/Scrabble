@@ -2,6 +2,7 @@ import { Overlay } from '@angular/cdk/overlay';
 import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmationPopupComponent } from '@app/components/confirmation-popup/confirmation-popup.component';
 import { DictionaryPopupComponent } from '@app/components/dictionary-popup/dictionary-popup.component';
 import { DisplayDictionaryPopupComponent } from '@app/components/display-dictionary-popup/display-dictionary-popup.component';
@@ -29,7 +30,7 @@ export class AdminPageComponent {
     fileToUpload: File | null = null;
     dictionary: DictionaryTemplate;
 
-    constructor(public dialog: MatDialog, private communication: CommunicationService) {}
+    constructor(public dialog: MatDialog, private communication: CommunicationService, private snackBar: MatSnackBar) {}
 
     openNames() {
         this.dialog.open(PlayerNameOptionsComponent, {
@@ -78,9 +79,22 @@ export class AdminPageComponent {
                     this.uploadSub = upload$.subscribe((httpEvent: HttpEvent<unknown>) => {
                         if (httpEvent.type === HttpEventType.UploadProgress && httpEvent.total) {
                             this.uploadProgress = Math.round(PERCENT * (httpEvent.loaded / httpEvent.total));
+                            if (this.uploadProgress === 100) {
+                                const snackBarRef = this.snackBar.open('Le dictionnaire est téléversé avec succés', 'Afficher', {
+                                    duration: 3000,
+                                    panelClass: ['green-snackbar'],
+                                });
+                                snackBarRef.onAction().subscribe(() => {
+                                    this.displayDictionary();
+                                });
+                            }
                         }
                     });
                 } else {
+                    this.snackBar.open("Le dictionnaire téléversé n'est pas valide", 'Fermer', {
+                        duration: 3000,
+                        panelClass: ['red-snackbar'],
+                    });
                     this.cancelUpload();
                 }
             };
@@ -88,9 +102,8 @@ export class AdminPageComponent {
     }
 
     validateDictionary(dictionary: DictionaryTemplate) {
-        if (dictionary.title === '' || dictionary.description === '' || dictionary.words.length === 0) {
-            return false;
-        }
+        if (!dictionary.title || !dictionary.description || !dictionary.words) return false;
+        if (dictionary.title === '' || dictionary.description === '' || dictionary.words.length === 0) return false;
         return true;
     }
 

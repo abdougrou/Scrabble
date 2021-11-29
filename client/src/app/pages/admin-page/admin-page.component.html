@@ -4,18 +4,15 @@
         <div class="justified">
             <input type="file" class="file-input" [accept]="requiredFileType" (change)="onFileSelected($event)" #fileUpload />
             <button mat-raised-button class="button" (click)="fileUpload.click()">Téléverser dictionnaire</button>
-            <div class="file-upload">
+            <!------------ I'm not sure abt deleting this part ----------->
+            <!--<div class="file-upload">
                 {{ fileName || '' }}
             </div>
-
             <div class="progress">
                 <mat-progress-bar class="progress-bar" mode="determinate" [value]="uploadProgress" *ngIf="uploadProgress"></mat-progress-bar>
                 <mat-icon class="cancel-upload" (click)="cancelUpload()" *ngIf="uploadProgress">delete_forever</mat-icon>
-            </div>
-            <button mat-raised-button class="button" *ngIf="uploadProgress === 100" (click)="displayDictionary()">
-                afficher le dictionnaire ajouté
-            </button>
-            <p>progress value: {{ this.uploadProgress }}</p>
+            </div> -->
+            <!--------------------------------------------------------->
             <button mat-raised-button class="button" (click)="openDictionary()">dictionaires</button>
             <button mat-raised-button class="button" (click)="openNames()">noms joueurs virtuels</button>
             <button mat-raised-button class="button" id="reset-button" (click)="reset()">réinitialiser</button>
