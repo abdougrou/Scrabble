@@ -13,7 +13,6 @@ import {
     LETTER_OFFSET,
     LETTER_POINTS,
     POINT_FONT_SIZE_MODIFIER,
-    POINT_GRID,
     POINT_OFFSET,
     RIGHT_ARROW,
     ROWS,
@@ -22,7 +21,7 @@ import {
     TILE_COLORS,
     TILE_MULTIPLIER,
     TILE_TEXT_COLOR,
-    TILE_TYPE,
+    TILE_TYPE
 } from '@app/constants';
 import { Vec2 } from '@common/vec2';
 import { BoardService } from './board.service';
@@ -165,7 +164,7 @@ export class GridService {
                 const coord: Vec2 = { x: i, y: j };
                 const letter: string | null = this.board.getLetter(coord);
                 if (letter) this.drawTile(coord, letter, fontSizeModifier);
-                else this.drawMultiplierTile(coord, POINT_GRID[i][j]);
+                else this.drawMultiplierTile(coord, this.board.pointGrid[i][j]);
             }
         }
     }

@@ -132,6 +132,7 @@ export class GameManagerService {
         choice.subscribe((action) => {
             switch (action) {
                 case PlayAction.Pass:
+                    this.buttonSkipTurn();
                     break;
                 case PlayAction.Exchange:
                     this.exchangeLetters(vPlayer, vPlayer.exchange());

@@ -1,4 +1,4 @@
-import { Component, DoCheck, Inject } from '@angular/core';
+import { Component, DoCheck, HostListener, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { Dictionary } from '@app/classes/game-config';
@@ -21,6 +21,15 @@ export class WaitingPopupComponent implements DoCheck {
         public gameManager: GameManagerService,
         public router: Router,
     ) {}
+    @HostListener('window:unload', ['$event'])
+    unloadHandler() {
+        this.communication.leaveLobby();
+    }
+
+    @HostListener('window:beforeunload', ['$event'])
+    beforeUnloadHandler() {
+        this.communication.leaveLobby();
+    }
 
     ngDoCheck() {
         if (this.communication.started) {
