@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Easel } from '@app/classes/easel';
 import { GameConfig, GameMode } from '@app/classes/game-config';
@@ -37,6 +38,7 @@ export class GameManagerService {
     debug: boolean = false;
     isMultiPlayer: boolean;
     gameConfig: GameConfig;
+    firstMove: boolean = true;
 
     placedWords: Trie;
 
@@ -48,6 +50,7 @@ export class GameManagerService {
         private exchangeTileService: ExchangeTilesService,
         private virtualPlayerService: VirtualPlayerService,
         private objectiveService: ObjectiveService,
+        private http: HttpClient,
     ) {}
 
     initialize(gameConfig: GameConfig) {
@@ -59,6 +62,7 @@ export class GameManagerService {
         this.currentTurnDurationLeft = gameConfig.duration;
         this.isEnded = false;
         this.board.initialize(gameConfig.bonusEnabled);
+        this.moveGeneratorService.dictionary = this.readDictionary('app/assets/dictionary.json');
         if (this.gameConfig.gameMode === GameMode.LOG2990) {
             this.placedWords = new Trie();
             this.objectiveService.initialize();
@@ -149,7 +153,10 @@ export class GameManagerService {
 
     placeLetters(player: Player, word: string, coord: Vec2, across: boolean): PlaceResult {
         if (player.name !== this.players.current.name) return PlaceResult.NotCurrentPlayer;
-        this.moveGeneratorService.legalMove(word, coord, across);
+        if (this.firstMove && this.moveGeneratorService.dictionary.contains(word) && this.isCentered(word, coord, across)) {
+            this.moveGeneratorService.legalMove(word, coord, across);
+            this.firstMove = false;
+        }
         const move: Move | undefined = this.moveGeneratorService.legalMoves.find(
             (_move) => _move.word === word && _move.coord.x === coord.x && _move.coord.y === coord.y && _move.across === across,
         );
@@ -273,5 +280,19 @@ export class GameManagerService {
             this.debug = true;
             return 'affichages de débogage activés';
         }
+    }
+
+    readDictionary(dictionary: string): Trie {
+        const trie = new Trie();
+        this.http.get(dictionary).subscribe((data) => {
+            const words: string[] = JSON.parse(JSON.stringify(data)).words;
+            for (const word of words) trie.insert(word);
+        });
+        return trie;
+    }
+
+    isCentered(word: string, coord: Vec2, across: boolean): boolean {
+        const center = Math.floor(this.board.data.length / 2);
+        return across ? coord.y <= center && coord.y + word.length - 1 >= center : coord.x <= center && coord.x + word.length - 1 >= center;
     }
 }
