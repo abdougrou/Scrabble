@@ -17,6 +17,7 @@ import { PlaceResult } from '@common/command-result';
 import { Move } from '@common/move';
 import { Vec2 } from '@common/vec2';
 import { BehaviorSubject, Subscription, timer } from 'rxjs';
+import { GridService } from './grid.service';
 import { ObjectiveService } from './objective.service';
 
 @Injectable({
@@ -51,9 +52,11 @@ export class GameManagerService {
         private virtualPlayerService: VirtualPlayerService,
         private objectiveService: ObjectiveService,
         private http: HttpClient,
+        private gridService: GridService,
     ) {}
 
     initialize(gameConfig: GameConfig) {
+        this.placedWords = new Trie();
         this.gameConfig = gameConfig;
         this.mainPlayerName = gameConfig.playerName1;
         this.enemyPlayerName = gameConfig.playerName2;
@@ -157,14 +160,11 @@ export class GameManagerService {
             this.moveGeneratorService.legalMove(word, coord, across);
             this.firstMove = false;
         }
-        console.log(word);
-        console.log(this.moveGeneratorService.dictionary.root.children.size);
         const move: Move | undefined = this.moveGeneratorService.legalMoves.find(
             (_move) => _move.word === word && _move.coord.x === coord.x && _move.coord.y === coord.y && _move.across === across,
         );
         if (!move) return PlaceResult.NotValid;
 
-        console.log(word);
         const usedLetters: string[] = [];
         const nextCoord = coord;
         for (const k of word) {
@@ -183,8 +183,11 @@ export class GameManagerService {
         player.score += move.points;
 
         this.placedWords.insert(move.word);
-        this.objectiveService.check(player, move, usedLetters, this.placedWords, this.moveGeneratorService.pointMap);
+        if (this.gameConfig.gameMode === GameMode.LOG2990) {
+            this.objectiveService.check(player, move, usedLetters, this.placedWords, this.moveGeneratorService.pointMap);
+        }
 
+        this.gridService.drawBoard();
         return PlaceResult.Success;
     }
     // TODO: COPY MESSAGES THEN DELETE THIS
@@ -289,7 +292,6 @@ export class GameManagerService {
         const trie = new Trie();
         this.http.get(dictionary).subscribe((data) => {
             const words: string[] = JSON.parse(JSON.stringify(data)).words;
-            console.log(words.length);
             for (const word of words) trie.insert(word);
         });
         return trie;

@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { TileCoords } from '@app/classes/tile';
 import { BOARD_SIZE, DOWN_ARROW, GRID_HEIGHT, GRID_WIDTH, INVALID_COORDS, RIGHT_ARROW } from '@app/constants';
-import { PlaceResult } from '@common/command-result';
 import { Vec2 } from '@common/vec2';
 import { BehaviorSubject } from 'rxjs';
 import { BoardService } from './board.service';
@@ -146,23 +145,20 @@ export class PlaceTilesService {
         const start: Vec2 = this.getFirstLetterPosition(vertical);
         const word = this.getFullWord(start, vertical);
 
-        for (const tile of this.tilesPlacedOnBoard) {
-            this.boardService.setLetter(tile.coords, '');
-            this.removeIndicator();
+        while (this.tilesPlacedOnBoard.length > 0) {
+            this.returnLastTileToEasel();
         }
+        this.removeIndicator();
 
-        const placementResult: PlaceResult = this.generalGameManager.placeWord(word, start, vertical, this.generalGameManager.getMainPlayer());
+        this.generalGameManager.placeWord(word, start, vertical, this.generalGameManager.getMainPlayer());
+        this.gridService.drawBoard();
+        this.updateEasel.next('update');
 
-        if (placementResult === PlaceResult.Success) {
-            this.removeIndicator();
-            this.directionIndicator.coords = INVALID_COORDS;
-            this.directionIndicator.letter = RIGHT_ARROW;
-            this.tilesPlacedOnBoard.splice(0, this.tilesPlacedOnBoard.length);
-            this.tilesTakenFromEasel.splice(0, this.tilesTakenFromEasel.length);
-            this.gridService.drawBoard();
-        } else {
-            this.endPlacement();
-        }
+        this.directionIndicator.coords = INVALID_COORDS;
+        this.directionIndicator.letter = RIGHT_ARROW;
+        this.tilesPlacedOnBoard.splice(0, this.tilesPlacedOnBoard.length);
+        this.tilesTakenFromEasel.splice(0, this.tilesTakenFromEasel.length);
+
         this.generalGameManager.switchPlayers();
     }
 
