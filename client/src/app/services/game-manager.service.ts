@@ -62,7 +62,7 @@ export class GameManagerService {
         this.currentTurnDurationLeft = gameConfig.duration;
         this.isEnded = false;
         this.board.initialize(gameConfig.bonusEnabled);
-        this.moveGeneratorService.dictionary = this.readDictionary('app/assets/dictionary.json');
+        this.moveGeneratorService.dictionary = this.readDictionary('@app/../assets/dictionnary.json');
         if (this.gameConfig.gameMode === GameMode.LOG2990) {
             this.placedWords = new Trie();
             this.objectiveService.initialize();
@@ -157,11 +157,14 @@ export class GameManagerService {
             this.moveGeneratorService.legalMove(word, coord, across);
             this.firstMove = false;
         }
+        console.log(word);
+        console.log(this.moveGeneratorService.dictionary.root.children.size);
         const move: Move | undefined = this.moveGeneratorService.legalMoves.find(
             (_move) => _move.word === word && _move.coord.x === coord.x && _move.coord.y === coord.y && _move.across === across,
         );
         if (!move) return PlaceResult.NotValid;
 
+        console.log(word);
         const usedLetters: string[] = [];
         const nextCoord = coord;
         for (const k of word) {
@@ -286,6 +289,7 @@ export class GameManagerService {
         const trie = new Trie();
         this.http.get(dictionary).subscribe((data) => {
             const words: string[] = JSON.parse(JSON.stringify(data)).words;
+            console.log(words.length);
             for (const word of words) trie.insert(word);
         });
         return trie;
