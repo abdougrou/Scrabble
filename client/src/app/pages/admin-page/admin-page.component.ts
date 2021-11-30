@@ -79,7 +79,7 @@ export class AdminPageComponent {
                     this.uploadSub = upload$.subscribe((httpEvent: HttpEvent<unknown>) => {
                         if (httpEvent.type === HttpEventType.UploadProgress && httpEvent.total) {
                             this.uploadProgress = Math.round(PERCENT * (httpEvent.loaded / httpEvent.total));
-                            if (this.uploadProgress === 100) {
+                            if (this.uploadProgress === PERCENT) {
                                 const snackBarRef = this.snackBar.open('Le dictionnaire est téléversé avec succés', 'Afficher', {
                                     duration: 3000,
                                     panelClass: ['green-snackbar'],

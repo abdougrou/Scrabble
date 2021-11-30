@@ -3,7 +3,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Dictionary, GameConfig } from '@app/classes/game-config';
 import { DURATION_INIT, MAX_USERNAME_LENGTH, MIN_USERNAME_LENGTH, RANDOM_PLAYER_NAMES } from '@app/constants';
+import { CommunicationService } from '@app/services/communication.service';
 import { GameManagerService } from '@app/services/game-manager.service';
+import { DictionaryInfo } from '@common/dictionaryTemplate';
 
 @Component({
     selector: 'app-game-config-page',
@@ -14,8 +16,8 @@ import { GameManagerService } from '@app/services/game-manager.service';
 export class GameConfigPageComponent implements DoCheck {
     // Form Builder Group to collect data from inputs then assign it to gameConfig instance using ngModel in the template
     gameConfigForm: FormGroup;
-    dictionary: string;
-
+    dictionary: DictionaryInfo | string;
+    dictionaries: DictionaryInfo[];
     randomPlayerNameIndex: number;
     randomPlayerName: string;
 
@@ -24,9 +26,14 @@ export class GameConfigPageComponent implements DoCheck {
         @Inject(MAT_DIALOG_DATA) public data: { config: GameConfig },
         private formBuilder: FormBuilder,
         public gameManagerService: GameManagerService,
+        public communication: CommunicationService,
     ) {
         this.randomPlayerNameIndex = Math.floor(Math.random() * RANDOM_PLAYER_NAMES.length);
         this.randomPlayerName = RANDOM_PLAYER_NAMES[this.randomPlayerNameIndex];
+
+        this.communication.getDictionaryInfo().subscribe((dict) => {
+            this.dictionaries = dict;
+        });
 
         this.gameConfigForm = this.formBuilder.group({
             name: ['', [Validators.required, Validators.minLength(MIN_USERNAME_LENGTH), Validators.maxLength(MAX_USERNAME_LENGTH)]],
