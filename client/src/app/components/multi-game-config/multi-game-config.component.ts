@@ -7,6 +7,7 @@ import { WaitingPopupComponent } from '@app/components/waiting-popup/waiting-pop
 import { DIALOG_HEIGHT, DIALOG_WIDTH, DURATION_INIT, MAX_USERNAME_LENGTH, MIN_USERNAME_LENGTH } from '@app/constants';
 import { CommunicationService } from '@app/services/communication.service';
 import { GameManagerService } from '@app/services/game-manager.service';
+import { DictionaryInfo } from '@common/dictionaryTemplate';
 import { LobbyConfig } from '@common/lobby-config';
 
 @Component({
@@ -16,6 +17,7 @@ import { LobbyConfig } from '@common/lobby-config';
 })
 export class MultiGameConfigComponent {
     gameConfigForm: FormGroup;
+    dictionaries: DictionaryInfo[];
 
     constructor(
         public dialogRef: MatDialogRef<MultiGameConfigComponent>,
@@ -31,6 +33,10 @@ export class MultiGameConfigComponent {
             duration: [DURATION_INIT],
             bonusEnabled: [false],
             dictionary: [Dictionary.French, Validators.required],
+        });
+
+        this.communication.getDictionaryInfo().subscribe((dict) => {
+            this.dictionaries = dict;
         });
     }
 

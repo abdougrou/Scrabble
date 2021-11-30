@@ -16,7 +16,7 @@ import { DictionaryInfo } from '@common/dictionaryTemplate';
 export class GameConfigPageComponent implements DoCheck {
     // Form Builder Group to collect data from inputs then assign it to gameConfig instance using ngModel in the template
     gameConfigForm: FormGroup;
-    dictionary: DictionaryInfo | string;
+    dictionary: string;
     dictionaries: DictionaryInfo[];
     randomPlayerNameIndex: number;
     randomPlayerName: string;

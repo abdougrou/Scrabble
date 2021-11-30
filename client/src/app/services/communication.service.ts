@@ -28,7 +28,6 @@ import { catchError, map } from 'rxjs/operators';
 import * as io from 'socket.io-client';
 import { MultiplayerGameManagerService } from './multiplayer-game-manager.service';
 
-
 @Injectable({
     providedIn: 'root',
 })
