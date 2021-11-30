@@ -1,5 +1,7 @@
 import { CLASSIC_RESERVE } from '@app/constants';
+import { DictionaryService } from '@app/services/dictionary.service';
 import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
+import { DictionaryInfo } from '@common/dictionaryTemplate';
 import { GameMode, LobbyConfig } from '@common/lobby-config';
 import { Move } from '@common/move';
 import { Vec2 } from '@common/vec2';
@@ -18,6 +20,7 @@ export class GameManager {
     board: Board;
     moveGenerator: MoveGenerator;
     firstMove: boolean = true;
+    dictionaryService: DictionaryService = new DictionaryService();
 
     /**
      * Objectives related variables
@@ -29,7 +32,11 @@ export class GameManager {
         this.players = [];
         this.objectives = [];
         this.reserve = new Reserve(CLASSIC_RESERVE);
-        this.moveGenerator = new MoveGenerator(this.readDictionary('app/assets/dictionary.json'));
+        let trie = new Trie();
+        if (config.dictionary as DictionaryInfo)
+            trie = this.readStringDictionary(this.dictionaryService.sendDictionaryFile(config.dictionary as DictionaryInfo));
+        else trie = this.readDictionary('@app/../assets/dictionnary.json');
+        this.moveGenerator = new MoveGenerator(trie);
         this.board = new Board();
         this.board.initialize(config.bonusEnabled);
 
@@ -207,6 +214,19 @@ export class GameManager {
         words.forEach((word) => {
             trie.insert(word);
         });
+        return trie;
+    }
+
+    /**
+     * Read stringified dictionary in a trie.
+     *
+     * @param dictionary takes a stringed dictionary
+     * @returns trie
+     */
+    readStringDictionary(dictionary: string): Trie {
+        const trie = new Trie();
+        const words: string[] = JSON.parse(dictionary).words;
+        for (const word of words) trie.insert(word);
         return trie;
     }
 
