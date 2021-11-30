@@ -14,7 +14,7 @@
     </div>
     <div class="button">
         <button mat-raised-button class="random" *ngIf="lobbies.length > 0" [disabled]="lobbies.length === 1"  (click)="joinRandomLobby()">Rejoindre une salle aléatoire</button>
-        <button mat-raised-button id="refresh" (click)="getLobbies()"><mat-icon>actualiser</mat-icon></button>
+        <button mat-raised-button id="refresh" (click)="getLobbies()"><mat-icon>autorenew</mat-icon></button>
         <button mat-raised-button (click)="createLobby()" class="warn">Créer une salle</button>
     </div>
 </div>

@@ -33,6 +33,7 @@ export class GameConfigPageComponent implements DoCheck {
             duration: [DURATION_INIT],
             bonusEnabled: [false],
             dictionary: [Dictionary.French, Validators.required],
+            expert: [false],
         });
         this.dictionary = 'Francais';
     }
@@ -51,6 +52,7 @@ export class GameConfigPageComponent implements DoCheck {
         this.data.config.duration = this.gameConfigForm.get('duration')?.value;
         this.data.config.bonusEnabled = this.gameConfigForm.get('bonusEnabled')?.value;
         this.data.config.dictionary = this.gameConfigForm.get('dictionary')?.value;
+        this.data.config.expert = Boolean(this.gameConfigForm.get('expert')?.value);
         this.dialogRef.close(this.data.config);
     }
 

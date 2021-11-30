@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Easel } from '@app/classes/easel';
 import { GameConfig, GameMode } from '@app/classes/game-config';
 import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
@@ -62,7 +63,7 @@ export class GameManagerService {
             this.placedWords = new Trie();
             this.objectiveService.initialize();
         }
-        this.initializePlayers([this.mainPlayerName, this.enemyPlayerName]);
+        this.initializePlayers([this.mainPlayerName, this.enemyPlayerName], gameConfig.expert as boolean);
         this.players.mainPlayer = this.players.getPlayerByName(this.mainPlayerName);
         this.startTimer();
     }
@@ -93,10 +94,13 @@ export class GameManagerService {
     //     });
     // }
 
-    initializePlayers(playerNames: string[]) {
+    initializePlayers(playerNames: string[], expert: boolean) {
         this.players.createPlayer(playerNames[0], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
         if (this.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
-        else this.players.createVirtualPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
+        else {
+            this.virtualPlayerService.setupVirtualPlayer(playerNames[1], new Easel(this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT)), 0, expert);
+            this.players.players.push(this.virtualPlayerService.virtualPlayer);
+        }
         // if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
         if (this.gameConfig.gameMode === GameMode.LOG2990) for (const name of playerNames) this.objectiveService.assignObjective(name);
 

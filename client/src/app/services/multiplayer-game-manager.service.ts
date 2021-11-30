@@ -48,7 +48,6 @@ export class MultiplayerGameManagerService {
         this.isEnded = false;
         this.gameMode = lobbyConfig.gameMode;
         this.communication.update();
-        console.log(this.gameMode);
         this.mainPlayer = this.getMainPlayer();
         this.startTimer();
     }

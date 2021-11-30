@@ -51,7 +51,9 @@ export class PlayerInfoComponent implements DoCheck, OnDestroy {
         }
         if (this.gameMode === GameMode.LOG2990) {
             this.publicObjectives = this.objective.objectives.filter((obj) => !obj.private && !obj.playerName);
-            this.privateObjectives = this.objective.objectives.filter((obj) => obj.playerName && obj.playerName === this.mainPlayerName);
+            this.privateObjectives = this.objective.objectives.filter(
+                (obj) => (obj.playerName && obj.playerName === this.mainPlayerName) || (obj.private && obj.achieved),
+            );
         }
     }
 

@@ -44,7 +44,7 @@ export class WaitingPopupComponent implements DoCheck {
         };
         this.gameManager.initialize(gameConfig);
         this.router.navigateByUrl('/game');
-        this.communication.deleteLobby(this.data.config.key as string);
+        this.communication.leaveLobby();
         this.dialogRef.close(true); // set param true to close all dialogs
     }
 
