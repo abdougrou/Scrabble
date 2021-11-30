@@ -67,3 +67,6 @@ export const DEFAULT_SCOREBOARD = [
     { name: 'imacutiepie', score: 10 },
     { name: 'NoobMaster69', score: 12 },
 ];
+
+export const DICTIONARY_DIRECTORY = 'app/assets/';
+export const DEFAULT_DICTIONARY_FILE_NAME = 'dictionary.json';
