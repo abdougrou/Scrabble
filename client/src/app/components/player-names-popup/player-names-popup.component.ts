@@ -18,7 +18,7 @@ export class PlayerNamesPopupComponent {
     playerNames: MatTableDataSource<PlayerName>;
 
     constructor(
-        private communication: CommunicationService,
+        public communication: CommunicationService,
         public dialogRef: MatDialogRef<PlayerNamesPopupComponent>,
         public dialog: MatDialog,
         @Inject(MAT_DIALOG_DATA) public playerType: string,
