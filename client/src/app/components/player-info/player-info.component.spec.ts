@@ -82,9 +82,9 @@ describe('PlayerInfoComponent', () => {
         expect(component.fontSize).toEqual(size);
     });
 
-    it('#getTimer should return currentTurnDurationLeft', () => {
-        expect(component.timer).toEqual(gameManagerService.currentTurnDurationLeft);
-    });
+    // it('#getTimer should return currentTurnDurationLeft', () => {
+    //     expect(component.timer).toEqual(gameManagerService.currentTurnDurationLeft);
+    // });
 
     it('should call game manager skip turn function when turn skipped', () => {
         component.skipTurn();

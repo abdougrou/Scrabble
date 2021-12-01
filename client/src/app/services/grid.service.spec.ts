@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { CanvasTestHelper } from '@app/classes/canvas-test-helper';
-import { Vec2 } from '@app/classes/vec2';
 import { CANVAS_HEIGHT, CANVAS_WIDTH, LETTER_FONT_SIZE_MODIFIER, STEP, TILE_COLORS } from '@app/constants';
 import { GridService } from '@app/services/grid.service';
+import { Vec2 } from '@common/vec2';
 import { BoardService } from './board.service';
 
 describe('GridService', () => {

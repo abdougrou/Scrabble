@@ -47,6 +47,7 @@ export class MultiplayerGameManagerService {
         this.turnDurationLeft = lobbyConfig.turnDuration;
         this.isEnded = false;
         this.gameMode = lobbyConfig.gameMode;
+        this.board.initialize(lobbyConfig.bonusEnabled);
         this.communication.update();
         this.mainPlayer = this.getMainPlayer();
         this.startTimer();

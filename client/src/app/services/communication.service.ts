@@ -1,5 +1,6 @@
 import { HttpClient, HttpEvent, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Easel } from '@app/classes/easel';
 import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
 import { FileTemplate } from '@common/fileTemplate';
@@ -19,7 +20,7 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
-    UpdateMessage
+    UpdateMessage,
 } from '@common/socket-messages';
 import { Vec2 } from '@common/vec2';
 import { BehaviorSubject, Observable, of } from 'rxjs';
@@ -48,6 +49,20 @@ export class CommunicationService {
 
         this.socket.on(SocketEvent.setTimer, () => {
             this.gameManager.turnDurationLeft = this.gameManager.turnDuration;
+        });
+        this.socket.on(SocketEvent.update, (gameManager: UpdateGameManagerMessage) => {
+            /* for (const serverPlayer of gameManager.players) {
+                const player: Player = { name: serverPlayer.name, score: serverPlayer.score, easel: new Easel(serverPlayer.easel.split(',')) };
+                this.gameManager.player.players[playerIndex] = player;
+                playerIndex++;
+            }*/
+            this.gameManager.players = gameManager.players;
+            this.gameManager.players.forEach((player) => (player.easel = new Easel(player.easel.letters)));
+            this.gameManager.reserve.data = gameManager.reserveData;
+            this.gameManager.reserve.size = gameManager.reserveCount;
+            this.gameManager.board.data = gameManager.boardData;
+            this.gameManager.gridService.drawBoard();
+            this.gameManager.emitChanges();
         });
     }
 

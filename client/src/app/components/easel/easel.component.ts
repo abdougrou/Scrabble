@@ -265,10 +265,11 @@ export class EaselComponent implements OnChanges {
             this.multiGameManager.exchangeLetters(tilesToExchange, this.multiGameManager.getMainPlayer());
             this.multiGameManager.switchPlayers();
         } else {
-            this.gameManager.exchangeLetters(this.gameManager.players.getPlayerByName(this.mainPlayerName), tilesToExchange.split(''));
+            this.gameManager.exchangeLetters(this.generalGameManagerService.getMainPlayer(), tilesToExchange.split(''));
         }
         this.resetTileState();
+        this.tiles = this.generalGameManagerService.mainPlayer.easel.letters.map((letter) => {
+            return { letter, state: TileState.None } as EaselTile;
+        });
     }
-
-    // selectTileWithKeyboard(event: KeyboardEvent) {}
 }

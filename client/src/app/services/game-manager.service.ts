@@ -150,7 +150,7 @@ export class GameManagerService {
         const message = this.exchangeTileService.exchangeLetters(letters, player);
         if (message.body === '') {
             this.players.skipCounter = 0;
-            this.switchPlayers();
+            // this.switchPlayers();
             return { user: COMMAND_RESULT, body: `${player.name} a échangé les lettres ${letters}` };
         } else return message;
     }

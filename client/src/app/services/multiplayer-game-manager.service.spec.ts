@@ -2,8 +2,8 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TestBed, tick } from '@angular/core/testing';
 import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
-import { Vec2 } from '@app/classes/vec2';
 import { GameMode, LobbyConfig } from '@common/lobby-config';
+import { Vec2 } from '@common/vec2';
 import { MultiplayerGameManagerService } from './multiplayer-game-manager.service';
 
 describe('MultiplayerGameManagerService', () => {

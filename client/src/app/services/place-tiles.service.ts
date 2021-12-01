@@ -89,7 +89,7 @@ export class PlaceTilesService {
                                 easelLetter = '*';
                                 key = key.toLowerCase();
                             }
-                            if (this.generalGameManager.mainPlayer.easel.contains(easelLetter.split(''))) {
+                            if (this.generalGameManager.getMainPlayer().easel.contains(easelLetter.split(''))) {
                                 this.putEaselTileOnBoard(easelLetter, key);
                                 this.findNextEmptyTile();
                             }
@@ -176,7 +176,7 @@ export class PlaceTilesService {
     }
 
     putEaselTileOnBoard(easelLetter: string, boardLetter: string) {
-        const tileTaken: string = this.generalGameManager.mainPlayer.easel.getLetters([easelLetter]).pop() as string;
+        const tileTaken: string = this.generalGameManager.getMainPlayer().easel.getLetters([easelLetter]).pop() as string;
 
         const tileToPlace: string = boardLetter;
         this.removeIndicator();

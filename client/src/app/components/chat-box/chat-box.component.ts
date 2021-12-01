@@ -5,6 +5,7 @@ import { Player } from '@app/classes/player';
 import { COMMANDS, KEYBOARD_EVENT_RECEIVER, MouseButton, SYSTEM_NAME } from '@app/constants';
 import { CommandHandlerService } from '@app/services/command-handler.service';
 import { CommunicationService } from '@app/services/communication.service';
+import { GameManagerInterfaceService } from '@app/services/game-manager-interface.service';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-manager.service';
 import { PlayerService } from '@app/services/player.service';
@@ -33,6 +34,7 @@ export class ChatBoxComponent implements OnChanges {
     constructor(
         public gameManager: GameManagerService,
         public multiplayerGameManager: MultiplayerGameManagerService,
+        public gameManagerInterface: GameManagerInterfaceService,
         public playerService: PlayerService,
         public commandHandler: CommandHandlerService,
         private communication: CommunicationService,
@@ -45,6 +47,7 @@ export class ChatBoxComponent implements OnChanges {
             this.mainPlayerName = this.gameManager.mainPlayerName;
             this.enemyPlayerName = this.gameManager.enemyPlayerName;
         }
+        this.player = gameManagerInterface.getMainPlayer();
         this.gameManager.commandMessage.asObservable().subscribe((msg) => {
             this.showMessage(msg);
         });
