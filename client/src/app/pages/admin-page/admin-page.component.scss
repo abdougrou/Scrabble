@@ -58,3 +58,21 @@
 .file-input {
     display: none;
 }
+
+::ng-deep .green-snackbar {
+    color:white;
+    background: #3fc493;
+}
+
+::ng-deep .green-snackbar .mat-simple-snackbar-action  {
+    color:white;
+  }
+
+::ng-deep .red-snackbar {
+    color:white;
+    background: #d3302f;
+}
+
+::ng-deep .red-snackbar .mat-simple-snackbar-action  {
+    color:white;
+  }

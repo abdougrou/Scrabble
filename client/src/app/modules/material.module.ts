@@ -21,11 +21,11 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
-import { MatTableModule } from '@angular/material/table';
 // import { MatSidenavModule } from '@angular/material/sidenav';
 // import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 // import { MatSliderModule } from '@angular/material/slider';
-// import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
 // import { MatSortModule } from '@angular/material/sort';
 // import { MatStepperModule } from '@angular/material/stepper';
 // import { MatTableModule } from '@angular/material/table';
@@ -59,7 +59,7 @@ const modules = [
     // MatSidenavModule,
     // MatSliderModule,
     // MatSlideToggleModule,
-    // MatSnackBarModule,
+    MatSnackBarModule,
     // MatSortModule,
     // MatStepperModule,
     MatTableModule,
