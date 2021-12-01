@@ -16,7 +16,7 @@ export class PlaceTilesService {
     tilesPlacedOnBoard: TileCoords[] = [];
     updateEasel: BehaviorSubject<string> = new BehaviorSubject('');
 
-    constructor(private gridService: GridService, private boardService: BoardService, private generalGameManager: GameManagerInterfaceService) {}
+    constructor(private gridService: GridService, private boardService: BoardService, public generalGameManager: GameManagerInterfaceService) {}
 
     manageClick(mouseCoords: Vec2) {
         const tileCoord: Vec2 = this.getBoardTileFromMouse(mouseCoords);
@@ -28,7 +28,8 @@ export class PlaceTilesService {
     setCurrentTile(tileCoord: Vec2) {
         if (this.tilesPlacedOnBoard.length === 0) {
             if (!this.boardService.getLetter(tileCoord)) {
-                if (this.directionIndicator.coords !== INVALID_COORDS) this.removeIndicator();
+                if (this.directionIndicator.coords.x !== INVALID_COORDS.x && this.directionIndicator.coords.y !== INVALID_COORDS.y)
+                    this.removeIndicator();
                 this.directionIndicator.letter = RIGHT_ARROW;
                 this.directionIndicator.coords = tileCoord;
                 this.placeIndicator();
@@ -65,7 +66,7 @@ export class PlaceTilesService {
     }
 
     manageKeyboard(key: string) {
-        if (this.generalGameManager.getCurrentPlayer().name === this.generalGameManager.getCurrentPlayer().name) {
+        if (this.generalGameManager.getMainPlayer().name === this.generalGameManager.getCurrentPlayer().name) {
             switch (key) {
                 case 'Backspace': {
                     this.returnLastTileToEasel();
@@ -80,7 +81,7 @@ export class PlaceTilesService {
                     break;
                 }
                 default: {
-                    if (this.directionIndicator.coords !== INVALID_COORDS) {
+                    if (this.directionIndicator.coords.x !== INVALID_COORDS.x && this.directionIndicator.coords.y !== INVALID_COORDS.y) {
                         //  source: https://stackoverflow.com/a/37511463
                         key = key.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                         let easelLetter: string = key;
