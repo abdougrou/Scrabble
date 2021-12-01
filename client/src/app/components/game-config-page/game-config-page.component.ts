@@ -1,6 +1,7 @@
 import { Component, DoCheck, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Dictionary, GameConfig } from '@app/classes/game-config';
 import { DURATION_INIT, MAX_USERNAME_LENGTH, MIN_USERNAME_LENGTH, RANDOM_PLAYER_NAMES } from '@app/constants';
 import { CommunicationService } from '@app/services/communication.service';
@@ -20,6 +21,7 @@ export class GameConfigPageComponent implements DoCheck {
     dictionaries: DictionaryInfo[];
     randomPlayerNameIndex: number;
     randomPlayerName: string;
+    dictionaryValid: boolean = false;
 
     constructor(
         public dialogRef: MatDialogRef<GameConfigPageComponent>,
@@ -27,6 +29,7 @@ export class GameConfigPageComponent implements DoCheck {
         private formBuilder: FormBuilder,
         public gameManagerService: GameManagerService,
         public communication: CommunicationService,
+        private snackBar: MatSnackBar,
     ) {
         this.randomPlayerNameIndex = Math.floor(Math.random() * RANDOM_PLAYER_NAMES.length);
         this.randomPlayerName = RANDOM_PLAYER_NAMES[this.randomPlayerNameIndex];
@@ -71,5 +74,26 @@ export class GameConfigPageComponent implements DoCheck {
     pickPlayerName() {
         while (this.randomPlayerName === this.gameConfigForm.get('name')?.value)
             this.randomPlayerName = RANDOM_PLAYER_NAMES[Math.floor(Math.random() * RANDOM_PLAYER_NAMES.length)];
+    }
+
+    checkDictionaries(dictionary: DictionaryInfo | string) {
+        if (dictionary === Dictionary.French.toString()) {
+            this.dictionaryValid = true;
+            return;
+        }
+        if (dictionary as DictionaryInfo) {
+            this.communication.getDictionaryInfo().subscribe((dictionaries) => {
+                const found = dictionaries.find((element) => element.title === (dictionary as DictionaryInfo).title);
+                if (!found) {
+                    this.snackBar.open("Le dictionnaire n'existe plus dans la liste des dictionnaire", 'Fermer', {
+                        duration: 3000,
+                        panelClass: ['red-snackbar'],
+                    });
+                    this.dictionaryValid = false;
+                    return;
+                }
+                this.dictionaryValid = true;
+            });
+        }
     }
 }

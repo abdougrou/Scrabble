@@ -18,10 +18,10 @@
       <mat-checkbox formControlName="bonusEnabled"> Bonus Aléatoire</mat-checkbox>
       <!---   Dictionary   -->
       <mat-form-field appearance="outline">
-        <mat-select formControlName="dictionary" placeholder="Français" >
+        <mat-select formControlName="dictionary" placeholder="Français" (selectionChange)="checkDictionaries($event.value)">
           <mat-option value=0 matTooltip="Dictionnaire Français" matTooltipPosition="right">Français</mat-option>
           <mat-option value=1 matTooltip="Dictionnaire Anglais" matTooltipPosition="right">Anglais</mat-option>
-          <mat-option *ngFor="let dictionary of dictionaries" [value]="dictionary" matTooltip="{{dictionary.description}}" matTooltipPosition="right">
+          <mat-option *ngFor="let dictionary of dictionaries"  [value]="dictionary" matTooltip="{{dictionary.description}}" matTooltipPosition="right">
             {{dictionary.title}}
           </mat-option>
         </mat-select>
@@ -37,7 +37,7 @@
       <!---   Buttons      -->
       <div class="horizontal">
         <button mat-raised-button id="back" class="button"  (click)="back()">Retour</button>
-        <button mat-raised-button class="button" [disabled]="!this.gameConfigForm.valid" (click)="play()">Jouer</button>
+        <button mat-raised-button class="button" [disabled]="!this.gameConfigForm.valid || !this.dictionaryValid" (click)="play()">Jouer</button>
       </div>
     </div>
 </div>
