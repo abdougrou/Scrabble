@@ -174,6 +174,7 @@ export class SocketManagerService {
             const player: PlayerData = { name: serverPlayer.name, score: serverPlayer.score, easel: serverPlayer.easel.toString() };
             serverPlayers.push(player);
         }*/
+        console.log(gameManager?.players.map((player) => player.easel));
         this.io.to(key).emit(SocketEvent.update, {
             players: gameManager?.players,
             reserveData: gameManager?.reserve.data,

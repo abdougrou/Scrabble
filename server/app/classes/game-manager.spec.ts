@@ -74,9 +74,7 @@ describe('GameManager', () => {
         expect(gameManager.exchangeLetters(player1, 'abc')).to.equal(ExchangeResult.Success);
         const count = 100;
         gameManager.reserve.getRandomLetters(count);
-        expect(gameManager.exchangeLetters(player1, player1.easel.toString().split(',').join('').toLowerCase())).to.equal(
-            ExchangeResult.NotEnoughInReserve,
-        );
+        expect(gameManager.exchangeLetters(player1, player1.easel.toString().toLowerCase())).to.equal(ExchangeResult.NotEnoughInReserve);
     });
 
     it('printReserve returns correct value', () => {
@@ -129,7 +127,7 @@ describe('GameManager', () => {
     });
 
     it('readDictionary creates and fills a Trie', () => {
-        const trie = gameManager.readDictionary('app/assets/test_dictionary.json');
+        const trie = gameManager.readDictionary('assets/test_dictionary.json');
         const expected = trie.contains('aa') && trie.contains('bb') && trie.contains('cc');
         expect(expected).to.equal(true);
     });

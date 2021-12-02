@@ -32,8 +32,7 @@ describe('MoveGenerator', () => {
             [null, null, null, 'd', null, null, null],
         ];
         dictionary = new Trie(['abcde', 'abc']);
-        moveGenerator = new MoveGenerator(dictionary);
-        moveGenerator.pointGrid = POINT_GRID;
+        moveGenerator = new MoveGenerator(dictionary, POINT_GRID);
         moveGenerator.anchors = Anchor.findAnchors(board);
 
         const anchor = moveGenerator.anchors.filter((item) => item.across && item.x === 3 && item.y === 2)[0];
@@ -63,8 +62,7 @@ describe('MoveGenerator', () => {
             [null, null, null, 'd', null, null, null],
         ];
         dictionary = new Trie(['abcde', 'bcde']);
-        moveGenerator = new MoveGenerator(dictionary);
-        moveGenerator.pointGrid = POINT_GRID;
+        moveGenerator = new MoveGenerator(dictionary, POINT_GRID);
         moveGenerator.anchors = Anchor.findAnchors(board);
 
         const anchor = moveGenerator.anchors.filter((item) => item.across && item.x === 3 && item.y === 2)[0];
@@ -95,8 +93,7 @@ describe('MoveGenerator', () => {
             [null, null, null, null, null, null, null],
         ];
         dictionary = new Trie(['cacat', 'cat']);
-        moveGenerator = new MoveGenerator(dictionary);
-        moveGenerator.pointGrid = POINT_GRID;
+        moveGenerator = new MoveGenerator(dictionary, POINT_GRID);
         moveGenerator.calculateAnchorsAndCrossChecks(board);
 
         const expectedLength = 7;
@@ -115,8 +112,7 @@ describe('MoveGenerator', () => {
             [null, null, null, null, null, null, null],
         ];
         dictionary = new Trie(['cat', 'cbt', 'cab', 'cba']);
-        moveGenerator = new MoveGenerator(dictionary);
-        moveGenerator.pointGrid = POINT_GRID;
+        moveGenerator = new MoveGenerator(dictionary, POINT_GRID);
         moveGenerator.calculateAnchorsAndCrossChecks(board);
         const easel = 'ab';
         moveGenerator.generateLegalMoves(board, easel);
@@ -141,7 +137,7 @@ describe('MoveGenerator', () => {
             [null, null, null, null, null, null, null],
         ];
         dictionary = new Trie(['cat']);
-        moveGenerator = new MoveGenerator(dictionary);
+        moveGenerator = new MoveGenerator(dictionary, POINT_GRID);
 
         const coord1 = { x: 3, y: 3 };
         const across1 = true;
@@ -165,8 +161,7 @@ describe('MoveGenerator', () => {
             [null, null, null, null, null, null, null],
         ];
         dictionary = new Trie(['carotte']);
-        moveGenerator = new MoveGenerator(dictionary);
-        moveGenerator.pointGrid = POINT_GRID;
+        moveGenerator = new MoveGenerator(dictionary, POINT_GRID);
 
         const coord = { x: 2, y: 1 };
         // eslint-disable-next-line @typescript-eslint/no-magic-numbers

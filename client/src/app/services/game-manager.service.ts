@@ -129,7 +129,7 @@ export class GameManagerService {
         // if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
         if (this.gameConfig.gameMode === GameMode.LOG2990) for (const name of playerNames) this.objectiveService.assignObjective(name);
 
-        this.moveGeneratorService.generateLegalMoves(this.players.current.easel.letters.join(''));
+        this.moveGeneratorService.generateLegalMoves(this.players.current.easel.toString());
     }
 
     switchPlayers() {
@@ -141,7 +141,7 @@ export class GameManagerService {
         this.endTurn.next(this.players.current.name);
         if ((this.players.current as VirtualPlayer).chooseAction !== undefined) this.playVirtualPlayer();
 
-        this.moveGeneratorService.generateLegalMoves(this.players.current.easel.letters.join(''));
+        this.moveGeneratorService.generateLegalMoves(this.players.current.easel.letters.toString());
         console.log(this.moveGeneratorService.legalMoves);
     }
 

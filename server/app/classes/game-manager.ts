@@ -33,14 +33,15 @@ export class GameManager {
         this.objectives = [];
         this.reserve = new Reserve(CLASSIC_RESERVE);
         let trie = new Trie();
-        if (config.dictionary as DictionaryInfo)
+        if ((config.dictionary as DictionaryInfo).title)
             trie = this.readStringDictionary(this.dictionaryService.sendDictionaryFile(config.dictionary as DictionaryInfo));
         else trie = this.readDictionary('@app/../assets/dictionnary.json');
-        this.moveGenerator = new MoveGenerator(trie);
         this.board = new Board();
         this.board.initialize(config.bonusEnabled);
+        this.moveGenerator = new MoveGenerator(trie, this.board.pointGrid);
 
         if (config.gameMode === GameMode.LOG2990) {
+            this.placedWords = new Trie();
             const SORT_RANDOM = 0.5;
             const OBJECTIVES_COUNT = 4;
             this.objectives = OBJECTIVES.map((objective) => Object.assign({}, objective));
@@ -157,14 +158,16 @@ export class GameManager {
         }
         player.score += move.points;
 
-        this.placedWords.insert(move.word);
         // Objectives
-        for (const objective of this.objectives) {
-            if (!objective.achieved && (!objective.private || objective.playerName === player.name)) {
-                const objectiveResult = objective.check(move, usedLetters, this.placedWords, this.moveGenerator.pointMap);
-                if (objectiveResult) {
-                    player.score += objective.reward;
-                    objective.achieved = true;
+        if (this.config.gameMode === GameMode.LOG2990) {
+            this.placedWords.insert(move.word);
+            for (const objective of this.objectives) {
+                if (!objective.achieved && (!objective.private || objective.playerName === player.name)) {
+                    const objectiveResult = objective.check(move, usedLetters, this.placedWords, this.moveGenerator.pointMap);
+                    if (objectiveResult) {
+                        player.score += objective.reward;
+                        objective.achieved = true;
+                    }
                 }
             }
         }

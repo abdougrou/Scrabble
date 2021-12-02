@@ -19,8 +19,9 @@ export class MoveGenerator {
     pointMap: Map<string, number> = new Map();
     pointGrid: number[][] = [];
 
-    constructor(dictionary: Trie) {
+    constructor(dictionary: Trie, pointGrid: number[][]) {
         this.dictionary = dictionary;
+        this.pointGrid = pointGrid;
 
         const lettersData: string[] = CLASSIC_RESERVE.split(/\r?\n/);
         lettersData.forEach((letterData) => {
