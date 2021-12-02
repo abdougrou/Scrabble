@@ -44,24 +44,28 @@ export class PlayerNamesPopupComponent {
 
     editPlayerName(element: PlayerName) {
         const formConfig: FormConfig = { formType: FormType.EditForm, data: element.name };
-        const dialogRef = this.dialog.open(PlayerNameFormComponent, {
-            disableClose: true,
-            height: '220px',
-            width: '550px',
-            data: formConfig,
-        });
-
-        dialogRef.afterClosed().subscribe((result) => {
-            if (result !== '') {
-                this.communication
-                    .modifyPlayerName(element, { name: result, difficulty: this.playerType === 'expert' ? Difficulty.Expert : Difficulty.Beginner })
-                    .subscribe((response) => {
-                        if (response) {
-                            this.getPlayerNames();
-                        }
-                    });
-            }
-        });
+        this.dialog
+            .open(PlayerNameFormComponent, {
+                disableClose: true,
+                height: '220px',
+                width: '550px',
+                data: formConfig,
+            })
+            .afterClosed()
+            .subscribe((result) => {
+                if (result !== '') {
+                    this.communication
+                        .modifyPlayerName(element, {
+                            name: result,
+                            difficulty: this.playerType === 'expert' ? Difficulty.Expert : Difficulty.Beginner,
+                        })
+                        .subscribe((response) => {
+                            if (response) {
+                                this.getPlayerNames();
+                            }
+                        });
+                }
+            });
     }
 
     deletePlayerName(element: PlayerName) {
@@ -70,7 +74,7 @@ export class PlayerNamesPopupComponent {
         dialogConfig.id = 'abandon-page-component';
         dialogConfig.height = '200px';
         dialogConfig.width = '550px';
-        dialogConfig.data = 'delete';
+        dialogConfig.data = `Le joueur ${element.name} sera supprimé`;
         const dialogRef = this.dialog.open(ConfirmationPopupComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
@@ -85,24 +89,25 @@ export class PlayerNamesPopupComponent {
 
     addPlayer() {
         const formConfig: FormConfig = { formType: FormType.AddForm, data: '' };
-        const dialogRef = this.dialog.open(PlayerNameFormComponent, {
-            disableClose: true,
-            height: '220px',
-            width: '550px',
-            data: formConfig,
-        });
-
-        dialogRef.afterClosed().subscribe((result) => {
-            if (result !== '') {
-                this.communication
-                    .addPlayerName({ name: result, difficulty: this.playerType === 'expert' ? Difficulty.Expert : Difficulty.Beginner })
-                    .subscribe((response) => {
-                        if (response) {
-                            this.getPlayerNames();
-                        }
-                    });
-            }
-        });
+        this.dialog
+            .open(PlayerNameFormComponent, {
+                disableClose: true,
+                height: '220px',
+                width: '550px',
+                data: formConfig,
+            })
+            .afterClosed()
+            .subscribe((result) => {
+                if (result !== '') {
+                    this.communication
+                        .addPlayerName({ name: result, difficulty: this.playerType === 'expert' ? Difficulty.Expert : Difficulty.Beginner })
+                        .subscribe((response) => {
+                            if (response) {
+                                this.getPlayerNames();
+                            }
+                        });
+                }
+            });
     }
 
     isDefault(element: PlayerName): boolean {

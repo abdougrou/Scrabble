@@ -57,7 +57,6 @@ export class DatabaseController {
          * adds a player to the top list, or replaces the lowest player if size = 5
          */
         this.router.post('/ranking/classic', async (req: Request, res: Response, next: NextFunction) => {
-            console.log(req.body);
             this.classicRanking
                 .addPlayer(req.body)
                 .then(() => {

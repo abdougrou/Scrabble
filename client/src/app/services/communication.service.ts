@@ -188,11 +188,11 @@ export class CommunicationService {
             .pipe(catchError(this.handleError<ScoreConfig[]>('getClassicRanking')));
     }
 
-    putClassicPlayerScore(scoreConfig: ScoreConfig): Observable<unknown> {
+    postClassicPlayerScore(scoreConfig: ScoreConfig): Observable<unknown> {
         return this.http.post('http://localhost:3000/data/ranking/classic', scoreConfig, this.httpOptions);
     }
 
-    putLog2990PlayerScore(scoreConfig: ScoreConfig): Observable<unknown> {
+    postLog2990PlayerScore(scoreConfig: ScoreConfig): Observable<unknown> {
         return this.http.post('http://localhost:3000/data/ranking/log2990', scoreConfig, this.httpOptions);
     }
 

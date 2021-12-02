@@ -16,6 +16,9 @@ export class CommunicationServiceMock {
     getBeginnerPlayerNames(): Observable<PlayerName[]> {
         return from(new Promise<PlayerName[]>((resolve) => setTimeout(resolve, 2)).then(() => this.beginnerPlayers));
     }
+    modifyPlayerName(): Observable<boolean> {
+        return from(new Promise<PlayerName[]>((resolve) => setTimeout(resolve, 2)).then(() => true));
+    }
 }
 
 describe('PlayerNamesPopupComponent', () => {
@@ -25,8 +28,8 @@ describe('PlayerNamesPopupComponent', () => {
     let dialogRefSpy: SpyObj<MatDialogRef<PlayerNamesPopupComponent>>;
 
     beforeEach(() => {
-        dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
-        dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
+        dialogSpy = jasmine.createSpyObj('MatDialog', ['open', 'close']);
+        dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close', 'afterClosed']);
     });
 
     beforeEach(async () => {
@@ -53,7 +56,7 @@ describe('PlayerNamesPopupComponent', () => {
 
     it('should get the names of expert players when the type is expert', async () => {
         const expertPlayer: PlayerName[] = [{ name: 'player', difficulty: Difficulty.Expert }];
-        const spy = spyOn(component.communication, 'getExpertPlayerNames').and.returnValue(of());
+        const spy = spyOn(component.communication, 'getExpertPlayerNames').and.returnValue(of(expertPlayer));
         component.playerType = 'expert';
         component.getPlayerNames();
         expect(spy).toHaveBeenCalled();
@@ -62,7 +65,7 @@ describe('PlayerNamesPopupComponent', () => {
 
     it('should get the names of beginner players when the type is beginner', async () => {
         const beginnerPlayer: PlayerName[] = [{ name: 'player', difficulty: Difficulty.Beginner }];
-        const spy = spyOn(component.communication, 'getExpertPlayerNames').and.returnValue(of());
+        const spy = spyOn(component.communication, 'getBeginnerPlayerNames').and.returnValue(of(beginnerPlayer));
         component.playerType = 'beginner';
         component.getPlayerNames();
         expect(spy).toHaveBeenCalled();
@@ -71,12 +74,6 @@ describe('PlayerNamesPopupComponent', () => {
 
     it('should close the dialog', () => {
         component.back();
-        expect(dialogRefSpy.close).toHaveBeenCalled();
-    });
-
-    it('should open a dialog', () => {
-        const player: PlayerName = { name: 'player', difficulty: Difficulty.Beginner };
-        component.editPlayerName(player);
-        expect(dialogSpy.open).toHaveBeenCalled();
+        expect(component.dialogRef.close).toHaveBeenCalled();
     });
 });
