@@ -143,7 +143,7 @@ export class PlaceTilesService {
 
     placeTiles() {
         const vertical = this.directionIndicator.letter === DOWN_ARROW;
-        let start: Vec2 = this.getFirstLetterPosition(vertical);
+        const start: Vec2 = this.getFirstLetterPosition(vertical);
         const word = this.getFullWord(start, vertical);
 
         while (this.tilesPlacedOnBoard.length > 0) {
@@ -151,7 +151,7 @@ export class PlaceTilesService {
         }
         this.removeIndicator();
 
-        start = { x: start.y, y: start.x };
+        // start = { x: start.y, y: start.x };
         this.generalGameManager.placeWord(word, start, vertical, this.generalGameManager.getMainPlayer());
         this.gridService.drawBoard();
         this.updateEasel.next('update');

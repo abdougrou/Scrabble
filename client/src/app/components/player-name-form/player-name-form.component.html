@@ -1,11 +1,16 @@
-<h1 mat-dialog-title>{{ message }}</h1>
-<form [formGroup]="playerNameForm">
-    <mat-form-field hintLabel="Lettres seulement" appearance="outline">
-        <mat-label>Nom d'utilisateur</mat-label>
-        <input type="text" formControlName="name" pattern="[a-zA-Z]*" matInput />
-        <mat-hint align="end">{{ this.playerNameForm.get('name')?.value?.length || 0 }}/20</mat-hint>
-    </mat-form-field>
-</form>
-<button mat-raised-button id="back" class="button" (click)="cancel()">Retour</button>
-<button mat-raised-button class="button" (click)="confirm()" [disabled]="!this.playerNameForm.valid">Confirmer modification</button>
-
+<div class="container justified">
+    <div class="justified">
+        <h1 mat-dialog-title>{{ message }}</h1>
+        <form [formGroup]="playerNameForm">
+            <mat-form-field hintLabel="Lettres seulement" appearance="outline">
+                <mat-label>Nom d'utilisateur</mat-label>
+                <input type="text" formControlName="name" pattern="[a-zA-Z]*" matInput />
+                <mat-hint align="end">{{ this.playerNameForm.get('name')?.value?.length || 0 }}/20</mat-hint>
+            </mat-form-field>
+        </form>
+    </div>
+    <div class="horizontal">
+        <button mat-raised-button id="back" class="button" (click)="cancel()">Annuler</button>
+        <button mat-raised-button class="button" (click)="confirm()" [disabled]="!this.playerNameForm.valid">Confirmer</button>
+    </div>
+</div>

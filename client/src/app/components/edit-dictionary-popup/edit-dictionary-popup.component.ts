@@ -1,5 +1,5 @@
 import { Component, Inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MAX_DESCRIPTION_LENGTH, MAX_USERNAME_LENGTH, MIN_USERNAME_LENGTH } from '@app/constants';
 import { DictionaryInfo } from '@common/dictionaryTemplate';
@@ -12,8 +12,8 @@ import { DictionaryInfo } from '@common/dictionaryTemplate';
 export class EditDictionaryPopupComponent {
     titleForm: FormGroup;
     descriptionForm: FormGroup;
-
     message: string;
+
     constructor(
         public dialogRef: MatDialogRef<EditDictionaryPopupComponent>,
         private formBuilder: FormBuilder,
@@ -32,7 +32,10 @@ export class EditDictionaryPopupComponent {
     }
 
     confirm() {
-        this.dialogRef.close({ title: this.titleForm.get('title')?.value, description: this.descriptionForm.get('description')?.value });
+        this.dialogRef.close({
+            title: (this.titleForm.get('title') as AbstractControl).value,
+            description: (this.descriptionForm.get('description') as AbstractControl).value,
+        });
     }
     cancel() {
         this.dialogRef.close('');

@@ -8,11 +8,8 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 })
 export class ConfirmationPopupComponent {
     message: string;
-    constructor(public dialogRef: MatDialogRef<ConfirmationPopupComponent>, @Inject(MAT_DIALOG_DATA) public popupType: string) {
-        this.message =
-            popupType === 'delete'
-                ? 'Êtes-vous sûr de vouloir supprimer ce nom de joueur ?'
-                : 'Êtes vous sûr de vouloir reinitialiser la base de donnée ?';
+    constructor(public dialogRef: MatDialogRef<ConfirmationPopupComponent>, @Inject(MAT_DIALOG_DATA) public popupMessage: string) {
+        this.message = popupMessage;
     }
 
     quit(confirmation: boolean) {
