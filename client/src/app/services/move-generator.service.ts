@@ -42,7 +42,7 @@ export class MoveGeneratorService {
     }
 
     calculateCrossSum(coord: Vec2, across: boolean): number {
-        const row = across ? this.board.data[coord.x] : (transpose(this.board.data)[coord.y] as (string | null)[]);
+        const row = across ? (transpose(this.board.data)[coord.y] as (string | null)[]) : this.board.data[coord.x];
         const coord1D = across ? coord.y : coord.x;
         return this.calculateCrossSumOneDimension(row, coord1D);
     }
@@ -74,6 +74,8 @@ export class MoveGeneratorService {
      * @param easel current player's easel
      */
     generateLegalMoves(easel: string) {
+        this.legalMoves = [];
+        this.calculateAnchorsAndCrossChecks();
         this.anchors.forEach((anchor) => {
             if (anchor.leftPart.length > 0) {
                 const node = this.dictionary.getNode(anchor.leftPart);
@@ -169,7 +171,7 @@ export class MoveGeneratorService {
             else nextCoord.x++;
         });
         move.points += this.calculateWordPoints(move, row, pointRow);
-        this.legalMoves.push(move);
+        if (move.points > 0) this.legalMoves.push(move);
     }
 
     calculateWordPoints(move: Move, row: (string | null)[], pointRow: number[]): number {

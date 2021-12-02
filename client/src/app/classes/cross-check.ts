@@ -93,7 +93,7 @@ export class CrossCheck {
                 : colLetters.length === 0
                 ? rowLetters
                 : rowLetters.filter((letter) => colLetters.indexOf(letter) >= 0);
-        for (const letter of letters) CrossCheck.addLetter(crossCheck, letter);
+        for (const letter of letters) if (letter) CrossCheck.addLetter(crossCheck, letter);
 
         return crossCheck;
     }

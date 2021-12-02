@@ -70,7 +70,7 @@ export class GameManagerService {
             this.placedWords = new Trie();
             this.objectiveService.initialize();
         }
-        this.initializePlayers([this.mainPlayerName, this.enemyPlayerName], gameConfig.expert as boolean);
+        this.initializePlayers([this.mainPlayerName, this.enemyPlayerName]);
         this.players.mainPlayer = this.players.getPlayerByName(this.mainPlayerName);
         this.startTimer();
     }
@@ -79,7 +79,12 @@ export class GameManagerService {
         const source = timer(0, SECOND_MD);
         this.subscription = source.subscribe((seconds) => {
             this.currentTurnDurationLeft = this.turnDuration - (seconds % this.turnDuration) - 1;
-            if (this.currentTurnDurationLeft === 0) {
+            const VIRTUAL_PLAYER_MAX_TURN_DURATION = 5;
+            if (
+                ((this.players.current as VirtualPlayer).chooseAction !== undefined &&
+                    this.currentTurnDurationLeft === this.turnDuration - VIRTUAL_PLAYER_MAX_TURN_DURATION) ||
+                this.currentTurnDurationLeft === 0
+            ) {
                 this.currentTurnDurationLeft = this.turnDuration;
                 this.switchPlayers();
             }
@@ -101,11 +106,16 @@ export class GameManagerService {
     //     });
     // }
 
-    initializePlayers(playerNames: string[], expert: boolean) {
+    initializePlayers(playerNames: string[]) {
         this.players.createPlayer(playerNames[0], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
         if (this.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
         else {
-            this.virtualPlayerService.setupVirtualPlayer(playerNames[1], new Easel(this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT)), 0, expert);
+            this.virtualPlayerService.setupVirtualPlayer(
+                playerNames[1],
+                new Easel(this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT)),
+                0,
+                this.gameConfig.expert ? true : false,
+            );
             this.players.players.push(this.virtualPlayerService.virtualPlayer);
         }
         // if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
@@ -124,6 +134,7 @@ export class GameManagerService {
         if ((this.players.current as VirtualPlayer).chooseAction !== undefined) this.playVirtualPlayer();
 
         this.moveGeneratorService.generateLegalMoves(this.players.current.easel.letters.join(''));
+        console.log(this.moveGeneratorService.legalMoves);
     }
 
     playVirtualPlayer() {
@@ -183,8 +194,8 @@ export class GameManagerService {
         }
         player.score += move.points;
 
-        this.placedWords.insert(move.word);
         if (this.gameConfig.gameMode === GameMode.LOG2990) {
+            this.placedWords.insert(move.word);
             this.objectiveService.check(player, move, usedLetters, this.placedWords, this.moveGeneratorService.pointMap);
         }
 
