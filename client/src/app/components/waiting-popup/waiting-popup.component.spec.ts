@@ -1,5 +1,5 @@
 import { HttpClientModule } from '@angular/common/http';
-import { ComponentFixture, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -51,12 +51,14 @@ describe('WaitingPopupComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should close popup if game started', () => {
+    it('should close popup if game started', fakeAsync(() => {
         const spyClose = spyOn(component.dialogRef, 'close').and.callThrough();
+        console.log('communication started', component.communication.started);
         component.communication.started = true;
+        console.log('communication started', component.communication.started);
         tick();
         expect(spyClose).toHaveBeenCalled();
-    });
+    }));
 
     it('should leave lobby', () => {
         const spyLeave = spyOn(component.communication, 'leaveLobby').and.callThrough();

@@ -1,5 +1,5 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { TestBed, tick } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
 import { GameMode, LobbyConfig } from '@common/lobby-config';
@@ -52,14 +52,14 @@ describe('MultiplayerGameManagerService', () => {
         expect(spyNext).toHaveBeenCalled();
     });
 
-    it('should start timer', () => {
+    it('should start timer', fakeAsync(() => {
         const spySwitchPlayers = spyOn(service, 'switchPlayers').and.callThrough();
         service.turnDurationLeft = 30;
         service.startTimer();
         // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         tick(30);
         expect(spySwitchPlayers).toHaveBeenCalled();
-    });
+    }));
 
     it('should switch players', () => {
         const spySwitchPlayers = spyOn(service.communication, 'switchPlayers').and.callThrough();

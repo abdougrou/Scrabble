@@ -1,4 +1,5 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Easel } from '@app/classes/easel';
@@ -30,6 +31,7 @@ describe('EaselComponent', () => {
         await TestBed.configureTestingModule({
             imports: [HttpClientTestingModule, RouterTestingModule, AppMaterialModule],
             declarations: [EaselComponent],
+            schemas: [CUSTOM_ELEMENTS_SCHEMA],
             providers: [
                 { provide: PlayerService, useValue: playerService },
                 { provide: MouseManagerService, useValue: mouseService },

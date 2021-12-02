@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 // import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
@@ -75,6 +75,7 @@ const modules = [
 @NgModule({
     imports: [...modules],
     exports: [...modules],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA],
     providers: [],
 })
 export class AppMaterialModule {}

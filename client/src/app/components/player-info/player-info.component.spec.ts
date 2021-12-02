@@ -1,4 +1,5 @@
 import { HttpClientModule } from '@angular/common/http';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -29,6 +30,7 @@ describe('PlayerInfoComponent', () => {
         await TestBed.configureTestingModule({
             imports: [HttpClientModule, MatDialogModule, RouterTestingModule, MatCardModule, AppMaterialModule],
             declarations: [PlayerInfoComponent],
+            schemas: [CUSTOM_ELEMENTS_SCHEMA],
             providers: [
                 { provide: GameManagerService, useValue: gameManagerService },
                 { provide: PlayerService, useValue: playerService },

@@ -1,5 +1,5 @@
 import { HttpClientModule } from '@angular/common/http';
-import { NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { BrowserModule } from '@angular/platform-browser';
@@ -70,6 +70,7 @@ import { MultiplayerGamePageComponent } from '@app/pages/multiplayer-game-page/m
         DictionaryPopupComponent,
         EditDictionaryPopupComponent,
     ],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA],
     imports: [
         AppMaterialModule,
         AppRoutingModule,
@@ -80,6 +81,7 @@ import { MultiplayerGamePageComponent } from '@app/pages/multiplayer-game-page/m
         HttpClientModule,
         MatPaginatorModule,
     ],
+    exports: [AppMaterialModule],
     providers: [],
     bootstrap: [AppComponent],
 })
