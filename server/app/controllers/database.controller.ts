@@ -86,8 +86,6 @@ export class DatabaseController {
                     res.status(Httpstatus.NO_CONTENT).send();
                 })
                 .catch((error: Error) => {
-                    console.log(error);
-                    console.log('bro theres a mistake here dude omg wth gee');
                     res.status(Httpstatus.NOT_FOUND).send(error.message);
                 });
             this.log2990Ranking
