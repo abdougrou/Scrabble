@@ -113,18 +113,18 @@ describe('CommunicationService', () => {
         req.flush(expectedScoreConfig);
     });
     it('should get the right status for postClassic', () => {
-        service.postClassicPlayerScore(expectedScoreConfig[0]).subscribe((response) => {
+        service.putClassicPlayerScore(expectedScoreConfig[0]).subscribe((response) => {
             expect(response).toBe(HttpStatusCode.Created);
         });
-        const req = httpMock.expectOne(`${baseUrl}data/ranking/classic`);
+        const req = httpMock.expectOne(`${baseUrl}/data/ranking/classic`);
         expect(req.request.method).toBe('POST');
         req.flush(HttpStatusCode.Created);
     });
     it('should get the right status for postLog2990', () => {
-        service.postLog2990PlayerScore(expectedScoreConfig[0]).subscribe((response) => {
+        service.putLog2990PlayerScore(expectedScoreConfig[0]).subscribe((response) => {
             expect(response).toBe(HttpStatusCode.Created);
         });
-        const req = httpMock.expectOne(`${baseUrl}data/ranking/log2990`);
+        const req = httpMock.expectOne(`${baseUrl}/data/ranking/log2990`);
         expect(req.request.method).toBe('POST');
         req.flush(HttpStatusCode.Created);
     });
@@ -132,7 +132,7 @@ describe('CommunicationService', () => {
         service.resetPlayerScores().subscribe((response) => {
             expect(response).toBe(HttpStatusCode.NoContent);
         });
-        const req = httpMock.expectOne(`${baseUrl}data/ranking/log2990`);
+        const req = httpMock.expectOne(`${baseUrl}/data/ranking/reset`);
         expect(req.request.method).toBe('DELETE');
         req.flush(HttpStatusCode.NoContent);
     });
@@ -145,7 +145,7 @@ describe('CommunicationService', () => {
         req.flush(expectedPlayerName);
     });
     it('should get expert name', () => {
-        service.getPlayerNames().subscribe((names) => {
+        service.getExpertPlayerNames().subscribe((names) => {
             expect(names).toBe(expectedPlayerName);
         });
         const req = httpMock.expectOne(`${baseUrl}/data/player-names/expert`);
@@ -153,7 +153,7 @@ describe('CommunicationService', () => {
         req.flush(expectedPlayerName);
     });
     it('should get beginner name', () => {
-        service.getPlayerNames().subscribe((names) => {
+        service.getBeginnerPlayerNames().subscribe((names) => {
             expect(names).toBe(expectedPlayerName);
         });
         const req = httpMock.expectOne(`${baseUrl}/data/player-names/beginner`);
@@ -172,20 +172,20 @@ describe('CommunicationService', () => {
         service.deletePlayerName(expectedPlayerName[0]).subscribe((response) => {
             expect(response).toBeFalse();
         });
-        const req = httpMock.expectOne(`${baseUrl}/data/player-names`);
-        expect(req.request.method).toBe('DELETE');
+        const req = httpMock.expectOne(`${baseUrl}/data/player-names/delete`);
+        expect(req.request.method).toBe('POST');
         req.flush(false);
     });
-    it('shoul get the right status for resetting name', () => {
-        service.resetPlayerScores().subscribe((response) => {
+    it('should get the right status for resetting name', () => {
+        service.resetPlayerNames().subscribe((response) => {
             expect(response).toBe(HttpStatusCode.NoContent);
         });
-        const req = httpMock.expectOne(`${baseUrl}/player-names/reset`);
+        const req = httpMock.expectOne(`${baseUrl}/data/player-names/reset`);
         expect(req.request.method).toBe('DELETE');
         req.flush(HttpStatusCode.NoContent);
     });
     it('should get the right status when resetting dictionnary', () => {
-        service.resetPlayerScores().subscribe((response) => {
+        service.resetDictionary().subscribe((response) => {
             expect(response).toBe(HttpStatusCode.NoContent);
         });
         const req = httpMock.expectOne(`${baseUrl}/data/dictionary/reset`);
@@ -207,5 +207,29 @@ describe('CommunicationService', () => {
         const req = httpMock.expectOne(`${baseUrl}/data/dictionary`);
         expect(req.request.method).toBe('GET');
         req.flush(expectedDictionnaryInfo);
+    });
+    it('should modify dictionary info', () => {
+        service.modifyDictionary(expectedDictionnaryInfo[0].title, expectedDictionnaryInfo[1]).subscribe((response) => {
+            expect(response).toBeTrue();
+        });
+        const req = httpMock.expectOne(`${baseUrl}/data/dictionary/modify`);
+        expect(req.request.method).toBe('POST');
+        req.flush(true);
+    });
+    it('should delete dictionary', () => {
+        service.deleteDictionary(expectedDictionnaryInfo[0]).subscribe((response) => {
+            expect(response).toBeTrue();
+        });
+        const req = httpMock.expectOne(`${baseUrl}/data/dictionary/delete`);
+        expect(req.request.method).toBe('POST');
+        req.flush(true);
+    });
+    it('should get dictionary file', () => {
+        service.getDictionaryFile(expectedDictionnaryInfo[0]).subscribe((response) => {
+            expect(response).toBe('dictionnaire');
+        });
+        const req = httpMock.expectOne(`${baseUrl}/data/dictionary/file`);
+        expect(req.request.method).toBe('POST');
+        req.flush('dictionnaire');
     });
 });
