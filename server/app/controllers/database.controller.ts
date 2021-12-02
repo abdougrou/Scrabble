@@ -3,12 +3,12 @@
 /* eslint-disable deprecation/deprecation */
 /* eslint-disable import/no-deprecated */
 import { ClassicRankingService } from '@app/services/classic-ranking.service';
+import { DictionaryService } from '@app/services/dictionary.service';
 import { Log2990RankingService } from '@app/services/log2990-ranking.service';
 import { VirtualPlayerNamesService } from '@app/services/virtual-player-names.service';
 import { PlayerName } from '@common/player-name';
 import { ScoreConfig } from '@common/score-config';
 import { NextFunction, Request, Response, Router } from 'express';
-import { writeFileSync } from 'fs';
 import * as Httpstatus from 'http-status-codes';
 import { Service } from 'typedi';
 
@@ -20,6 +20,7 @@ export class DatabaseController {
         private classicRanking: ClassicRankingService,
         private log2990Ranking: Log2990RankingService,
         private virtualPlayerNames: VirtualPlayerNamesService,
+        private dictionaryService: DictionaryService,
     ) {
         this.configureRouter();
     }
@@ -178,10 +179,30 @@ export class DatabaseController {
                 });
         });
 
+        this.router.delete('/dictionary/reset', async (req: Request, res: Response, next: NextFunction) => {
+            this.dictionaryService.reset();
+        });
+
         // TODO: create a service for this
         this.router.post('/dictionary', async (req: Request, res: Response, next: NextFunction) => {
             const fileTemplate = req.body;
-            writeFileSync(`app/assets/${fileTemplate.fileName}`, JSON.stringify(fileTemplate.file));
+            this.dictionaryService.addDictionary(fileTemplate);
+        });
+
+        this.router.get('/dictionary', async (req: Request, res: Response, next: NextFunction) => {
+            res.json(this.dictionaryService.getDictionaryInfo());
+        });
+
+        this.router.post('/dictionary/modify', async (req: Request, res: Response, next: NextFunction) => {
+            this.dictionaryService.modifyDictionary(req.body[0], req.body[1]);
+        });
+        this.router.post('/dictionary/delete', async (req: Request, res: Response, next: NextFunction) => {
+            this.dictionaryService.deleteDictionary(req.body);
+        });
+
+        this.router.post('/dictionary/file', async (req: Request, res: Response, next: NextFunction) => {
+            console.log(req.body);
+            res.json(this.dictionaryService.sendDictionaryFile(req.body));
         });
     }
 }

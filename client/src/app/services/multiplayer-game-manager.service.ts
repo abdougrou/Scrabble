@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { GameMode } from '@app/classes/game-config';
 import { Player } from '@app/classes/player';
 import { SECOND_MD } from '@app/constants';
+import { DictionaryInfo } from '@common/dictionaryTemplate';
 import { LobbyConfig } from '@common/lobby-config';
 import { Vec2 } from '@common/vec2';
 import { BehaviorSubject, timer } from 'rxjs';
@@ -24,6 +25,7 @@ export class MultiplayerGameManagerService {
     isEnded: boolean;
     mainPlayerName: string;
     gameMode: GameMode;
+    dictionary: DictionaryInfo | string;
 
     isFirstTurn: boolean = true;
     endGameMessage: string = '';
@@ -48,6 +50,7 @@ export class MultiplayerGameManagerService {
         this.isEnded = false;
         this.gameMode = lobbyConfig.gameMode;
         this.board.initialize(lobbyConfig.bonusEnabled);
+        this.dictionary = lobbyConfig.dictionary;
         this.communication.update();
         this.mainPlayer = this.getMainPlayer();
         this.startTimer();

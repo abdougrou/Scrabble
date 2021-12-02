@@ -3,3 +3,8 @@ export class DictionaryTemplate {
     description: string;
     words: string[];
 }
+
+export class DictionaryInfo {
+    title: string;
+    description: string;
+}

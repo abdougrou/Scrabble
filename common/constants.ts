@@ -8,3 +8,5 @@ export const DEFAULT_VIRTUAL_PLAYER_NAMES: PlayerName[] = [
     { name: 'Rami', difficulty: Difficulty.Beginner },
     { name: 'Steve', difficulty: Difficulty.Beginner },
 ];
+
+export const DEFAULT_DICTIONARY_NAME = 'Mon dictionnaire';

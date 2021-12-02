@@ -7,8 +7,10 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AbandonPageComponent } from '@app/components/abandon-page/abandon-page.component';
 import { ChatBoxComponent } from '@app/components/chat-box/chat-box.component';
 import { ConfirmationPopupComponent } from '@app/components/confirmation-popup/confirmation-popup.component';
+import { DictionaryPopupComponent } from '@app/components/dictionary-popup/dictionary-popup.component';
 import { DisplayDictionaryPopupComponent } from '@app/components/display-dictionary-popup/display-dictionary-popup.component';
 import { EaselComponent } from '@app/components/easel/easel.component';
+import { EditDictionaryPopupComponent } from '@app/components/edit-dictionary-popup/edit-dictionary-popup.component';
 import { EndGamePopupComponent } from '@app/components/end-game-popup/end-game-popup.component';
 import { GameConfigPageComponent } from '@app/components/game-config-page/game-config-page.component';
 import { ModeSelectionComponent } from '@app/components/mode-selection/mode-selection.component';
@@ -65,6 +67,8 @@ import { MultiplayerGamePageComponent } from '@app/pages/multiplayer-game-page/m
         DisplayDictionaryPopupComponent,
         ConfirmationPopupComponent,
         PlayerNameFormComponent,
+        DictionaryPopupComponent,
+        EditDictionaryPopupComponent,
     ],
     imports: [
         AppMaterialModule,

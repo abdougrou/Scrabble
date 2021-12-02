@@ -14,9 +14,11 @@ import { PlayerService } from '@app/services/player.service';
 import { ReserveService } from '@app/services/reserve.service';
 import { VirtualPlayerService } from '@app/services/virtual-player.service';
 import { PlaceResult } from '@common/command-result';
+import { DictionaryInfo } from '@common/dictionaryTemplate';
 import { Move } from '@common/move';
 import { Vec2 } from '@common/vec2';
 import { BehaviorSubject, Subscription, timer } from 'rxjs';
+import { CommunicationService } from './communication.service';
 import { GridService } from './grid.service';
 import { ObjectiveService } from './objective.service';
 
@@ -53,10 +55,10 @@ export class GameManagerService {
         private objectiveService: ObjectiveService,
         private http: HttpClient,
         private gridService: GridService,
+        private communication: CommunicationService,
     ) {}
 
     initialize(gameConfig: GameConfig) {
-        this.placedWords = new Trie();
         this.gameConfig = gameConfig;
         this.mainPlayerName = gameConfig.playerName1;
         this.enemyPlayerName = gameConfig.playerName2;
@@ -65,7 +67,13 @@ export class GameManagerService {
         this.currentTurnDurationLeft = gameConfig.duration;
         this.isEnded = false;
         this.board.initialize(gameConfig.bonusEnabled);
-        this.moveGeneratorService.dictionary = this.readDictionary('@app/../assets/dictionnary.json');
+        let trie = new Trie();
+        if (gameConfig.dictionary as DictionaryInfo)
+            this.communication.getDictionaryFile(gameConfig.dictionary as DictionaryInfo).subscribe((str) => {
+                trie = this.readStringDictionary(str);
+            });
+        else trie = this.readDictionary('@app/../assets/dictionnary.json');
+        this.moveGeneratorService.dictionary = trie;
         if (this.gameConfig.gameMode === GameMode.LOG2990) {
             this.placedWords = new Trie();
             this.objectiveService.initialize();
@@ -183,8 +191,8 @@ export class GameManagerService {
         }
         player.score += move.points;
 
-        this.placedWords.insert(move.word);
         if (this.gameConfig.gameMode === GameMode.LOG2990) {
+            this.placedWords.insert(move.word);
             this.objectiveService.check(player, move, usedLetters, this.placedWords, this.moveGeneratorService.pointMap);
         }
 
@@ -295,6 +303,13 @@ export class GameManagerService {
             const words: string[] = JSON.parse(JSON.stringify(data)).words;
             for (const word of words) trie.insert(word);
         });
+        return trie;
+    }
+
+    readStringDictionary(dictionary: string): Trie {
+        const trie = new Trie();
+        const words: string[] = JSON.parse(dictionary).words;
+        for (const word of words) trie.insert(word);
         return trie;
     }
 

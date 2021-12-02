@@ -1,0 +1,30 @@
+table {
+    width: 100%;
+}
+
+.button {
+    margin-left: 10px;
+    text-align: center;
+}
+
+#back {
+    background-color: red;
+    color: white;
+}
+
+#action {
+    background-color: royalblue;
+    color: white;
+}
+.add-row-button {
+    justify-content: flex-end;
+}
+
+.mat-raised-button {
+    color: white;
+    background-color: #1e81b0;
+}
+
+.file-input {
+    display: none;
+}
