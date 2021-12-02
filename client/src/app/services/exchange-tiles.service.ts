@@ -9,7 +9,7 @@ import { ReserveService } from './reserve.service';
     providedIn: 'root',
 })
 export class ExchangeTilesService {
-    constructor(private reserve: ReserveService, private players: PlayerService) {}
+    constructor(public reserve: ReserveService, private players: PlayerService) {}
 
     exchangeLetters(letters: string[], player: Player): ChatMessage {
         const message: ChatMessage = { user: SYSTEM_NAME, body: '' };
@@ -21,7 +21,7 @@ export class ExchangeTilesService {
         } else if (!player.easel.contains(letters)) {
             message.body = 'Votre chevalet ne contient pas les lettres nécessaires';
         } else {
-            const easelLetters: string[] = player.easel.getLetters(letters); // getTiles remove and get the tiles
+            const easelLetters: string[] = player.easel.getLetters(letters);
             const reserveLetters: string[] = this.reserve.getRandomLetters(letters.length);
             player.easel.addLetters(reserveLetters);
             this.reserve.returnLetters(easelLetters);

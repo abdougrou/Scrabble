@@ -16,22 +16,23 @@ import { Difficulty, PlayerName } from '@common/player-name';
 export class PlayerNamesPopupComponent {
     displayedColumns = ['name', 'difficulty', 'edit', 'delete'];
     playerNames: MatTableDataSource<PlayerName>;
-
+    difficulty: string;
     constructor(
         public communication: CommunicationService,
         public dialogRef: MatDialogRef<PlayerNamesPopupComponent>,
         public dialog: MatDialog,
         @Inject(MAT_DIALOG_DATA) public playerType: string,
     ) {
+        this.difficulty = playerType;
         this.getPlayerNames();
     }
 
     getPlayerNames() {
-        if (this.playerType === 'expert') {
+        if (this.difficulty === 'expert') {
             this.communication.getExpertPlayerNames().subscribe((names) => {
                 this.playerNames = new MatTableDataSource<PlayerName>(names);
             });
-        } else if (this.playerType === 'beginner') {
+        } else if (this.difficulty === 'beginner') {
             this.communication.getBeginnerPlayerNames().subscribe((names) => {
                 this.playerNames = new MatTableDataSource<PlayerName>(names);
             });
@@ -100,7 +101,7 @@ export class PlayerNamesPopupComponent {
             .subscribe((result) => {
                 if (result !== '') {
                     this.communication
-                        .addPlayerName({ name: result, difficulty: this.playerType === 'expert' ? Difficulty.Expert : Difficulty.Beginner })
+                        .addPlayerName({ name: result, difficulty: this.difficulty === 'expert' ? Difficulty.Expert : Difficulty.Beginner })
                         .subscribe((response) => {
                             if (response) {
                                 this.getPlayerNames();
