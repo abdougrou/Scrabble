@@ -29,7 +29,6 @@ import { ObjectiveService } from './objective.service';
 })
 export class GameManagerService {
     commandMessage: BehaviorSubject<ChatMessage> = new BehaviorSubject({ user: '', body: '' });
-    endTurn: BehaviorSubject<string> = new BehaviorSubject('');
     currentTurnDurationLeft: number;
     subscription: Subscription;
     tilePlaceBackSubscription: Subscription;
@@ -140,8 +139,7 @@ export class GameManagerService {
         this.subscription.unsubscribe();
         this.currentTurnDurationLeft = this.gameConfig.duration;
         this.startTimer();
-        // Send player switch event
-        this.endTurn.next(this.players.current.name);
+
         if ((this.players.current as VirtualPlayer).chooseAction !== undefined) {
             const vPlayerDelay = new BehaviorSubject<null>(null).pipe(delay(Math.random() * VIRTUAL_PLAYER_MAX_TURN_DURATION));
             vPlayerDelay.subscribe(() => {
@@ -196,6 +194,7 @@ export class GameManagerService {
     }
 
     placeLetters(player: Player, word: string, coord: Vec2, across: boolean): PlaceResult {
+        console.log(this.board);
         if (player.name !== this.players.current.name) return PlaceResult.NotCurrentPlayer;
         if (this.firstMove && this.moveGeneratorService.dictionary.contains(word) && this.isCentered(word, coord, across)) {
             this.moveGeneratorService.legalMove(word, coord, across);

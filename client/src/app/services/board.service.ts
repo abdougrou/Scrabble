@@ -49,12 +49,12 @@ export class BoardService {
     }
 
     /**
-     * Places a letter in the board
+     * Places a letter or null in the board
      *
      * @param coord tile coordinate to place the letter
      * @param letter the letter to place
      */
-    setLetter(coord: Vec2, letter: string) {
+    setLetter(coord: Vec2, letter: string | null) {
         this.data[coord.x][coord.y] = letter;
     }
 

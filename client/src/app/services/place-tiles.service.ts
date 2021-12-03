@@ -45,7 +45,7 @@ export class PlaceTilesService {
 
     removeIndicator() {
         if (this.directionIndicator.coords.x !== INVALID_COORDS.x && this.directionIndicator.coords.x !== INVALID_COORDS.x) {
-            this.boardService.setLetter(this.directionIndicator.coords, '');
+            this.boardService.setLetter(this.directionIndicator.coords, null);
         }
         this.gridService.drawBoard();
     }
