@@ -21,12 +21,13 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
-    UpdateMessage,
+    UpdateMessage
 } from '@common/socket-messages';
 import { Vec2 } from '@common/vec2';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import * as io from 'socket.io-client';
+import { environment } from 'src/environments/environment';
 import { MultiplayerGameManagerService } from './multiplayer-game-manager.service';
 
 @Injectable({
@@ -46,7 +47,7 @@ export class CommunicationService {
         headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
     };
     constructor(private readonly http: HttpClient) {
-        this.socket = io.io('ws://localhost:3000');
+        this.socket = io.io(environment.serverSocketUrl);
 
         this.socket.on(SocketEvent.setTimer, () => {
             this.gameManager.turnDurationLeft = this.gameManager.turnDuration;
@@ -170,82 +171,82 @@ export class CommunicationService {
 
     getLobbies(): Observable<LobbyConfig[]> {
         return this.http
-            .get<LobbyConfig[]>('http://localhost:3000/api/lobby', this.httpOptions)
+            .get<LobbyConfig[]>(environment.serverUrl + '/api/lobby', this.httpOptions)
             .pipe(catchError(this.handleError<LobbyConfig[]>('getLobbies')));
     }
 
     putLobby(lobbyConfig: LobbyConfig): Observable<{ key: string }> {
         return this.http
-            .put<{ key: string }>('http://localhost:3000/api/lobby', lobbyConfig, this.httpOptions)
+            .put<{ key: string }>(environment.serverUrl + '/api/lobby', lobbyConfig, this.httpOptions)
             .pipe(catchError(this.handleError<{ key: string }>('putLobby')));
     }
 
     getClassicRanking(): Observable<ScoreConfig[]> {
         return this.http
-            .get<ScoreConfig[]>('http://localhost:3000/data/ranking/classic', this.httpOptions)
+            .get<ScoreConfig[]>(environment.serverUrl + '/data/ranking/classic', this.httpOptions)
             .pipe(catchError(this.handleError<ScoreConfig[]>('getClassicRanking')));
     }
 
     getLog2990Ranking(): Observable<ScoreConfig[]> {
         return this.http
-            .get<ScoreConfig[]>('http://localhost:3000/data/ranking/log2990', this.httpOptions)
+            .get<ScoreConfig[]>(environment.serverUrl + '/data/ranking/log2990', this.httpOptions)
             .pipe(catchError(this.handleError<ScoreConfig[]>('getClassicRanking')));
     }
 
     putClassicPlayerScore(scoreConfig: ScoreConfig): Observable<unknown> {
-        return this.http.post('http://localhost:3000/data/ranking/classic', scoreConfig, this.httpOptions);
+        return this.http.post(environment.serverUrl + '/data/ranking/classic', scoreConfig, this.httpOptions);
     }
 
     putLog2990PlayerScore(scoreConfig: ScoreConfig): Observable<unknown> {
-        return this.http.post('http://localhost:3000/data/ranking/log2990', scoreConfig, this.httpOptions);
+        return this.http.post(environment.serverUrl + '/data/ranking/log2990', scoreConfig, this.httpOptions);
     }
 
     resetPlayerScores(): Observable<unknown> {
-        return this.http.delete('http://localhost:3000/data/ranking/reset', this.httpOptions);
+        return this.http.delete(environment.serverUrl + '/data/ranking/reset', this.httpOptions);
     }
 
     getPlayerNames(): Observable<PlayerName[]> {
         return this.http
-            .get<PlayerName[]>('http://localhost:3000/data/player-names', this.httpOptions)
+            .get<PlayerName[]>(environment.serverUrl + '/data/player-names', this.httpOptions)
             .pipe(catchError(this.handleError<PlayerName[]>('getPlayerNames')));
     }
     getExpertPlayerNames(): Observable<PlayerName[]> {
         return this.http
-            .get<PlayerName[]>('http://localhost:3000/data/player-names/expert', this.httpOptions)
+            .get<PlayerName[]>(environment.serverUrl + '/data/player-names/expert', this.httpOptions)
             .pipe(catchError(this.handleError<PlayerName[]>('getPlayerNames')));
     }
     getBeginnerPlayerNames(): Observable<PlayerName[]> {
         return this.http
-            .get<PlayerName[]>('http://localhost:3000/data/player-names/beginner', this.httpOptions)
+            .get<PlayerName[]>(environment.serverUrl + '/data/player-names/beginner', this.httpOptions)
             .pipe(catchError(this.handleError<PlayerName[]>('getPlayerNames')));
     }
 
     // addPlayerName(playerName: PlayerName) {
-    //     this.http.post('http://localhost:3000/data/player-names', JSON.stringify(playerName), this.httpOptions);
+    //     this.http.post(environment.serverUrl+'/data/player-names', JSON.stringify(playerName), this.httpOptions);
     // }
 
     addPlayerName(playerName: PlayerName): Observable<boolean> {
         return this.http
-            .post<boolean>('http://localhost:3000/data/player-names', playerName, this.httpOptions)
+            .post<boolean>(environment.serverUrl + '/data/player-names', playerName, this.httpOptions)
             .pipe(catchError(this.handleError<boolean>('postPlayerName')));
     }
 
     deletePlayerName(playerName: PlayerName): Observable<boolean> {
         return this.http
-            .post<boolean>('http://localhost:3000/data/player-names/delete', playerName, this.httpOptions)
+            .post<boolean>(environment.serverUrl + '/data/player-names/delete', playerName, this.httpOptions)
             .pipe(catchError(this.handleError<boolean>('deletePlayerName')));
     }
 
     resetPlayerNames(): Observable<unknown> {
-        return this.http.delete('http://localhost:3000/data/player-names/reset', this.httpOptions);
+        return this.http.delete(environment.serverUrl + '/data/player-names/reset', this.httpOptions);
     }
 
     resetDictionary() {
-        return this.http.delete('http://localhost:3000/data/dictionary/reset');
+        return this.http.delete(environment.serverUrl + '/data/dictionary/reset');
     }
 
     postFile(fileTemplate: FileTemplate): Observable<HttpEvent<boolean>> {
-        return this.http.post<boolean>('http://localhost:3000/data/dictionary', fileTemplate, {
+        return this.http.post<boolean>(environment.serverUrl + '/data/dictionary', fileTemplate, {
             reportProgress: true,
             observe: 'events',
         });
@@ -253,31 +254,31 @@ export class CommunicationService {
     modifyPlayerName(playerName: PlayerName, newName: PlayerName): Observable<boolean> {
         const playerNames: PlayerName[] = [playerName, newName];
         return this.http
-            .post<boolean>('http://localhost:3000/data/player-names/modify', playerNames, this.httpOptions)
+            .post<boolean>(environment.serverUrl + '/data/player-names/modify', playerNames, this.httpOptions)
             .pipe(catchError(this.handleError<boolean>('modifyPlayerName')));
     }
 
     getDictionaryInfo(): Observable<DictionaryInfo[]> {
         return this.http
-            .get<DictionaryInfo[]>('http://localhost:3000/data/dictionary', this.httpOptions)
+            .get<DictionaryInfo[]>(environment.serverUrl + '/data/dictionary', this.httpOptions)
             .pipe(catchError(this.handleError<DictionaryInfo[]>('getDictionaryNames')));
     }
 
     modifyDictionary(dictionaryToModify: string, newDictionaryInfo: DictionaryInfo): Observable<boolean> {
         return this.http
-            .post<boolean>('http://localhost:3000/data/dictionary/modify', [dictionaryToModify, newDictionaryInfo], this.httpOptions)
+            .post<boolean>(environment.serverUrl + '/data/dictionary/modify', [dictionaryToModify, newDictionaryInfo], this.httpOptions)
             .pipe(catchError(this.handleError<boolean>('modifyDictionary')));
     }
 
     deleteDictionary(dictionary: DictionaryInfo): Observable<boolean> {
         return this.http
-            .post<boolean>('http://localhost:3000/data/dictionary/delete', dictionary, this.httpOptions)
+            .post<boolean>(environment.serverUrl + '/data/dictionary/delete', dictionary, this.httpOptions)
             .pipe(catchError(this.handleError<boolean>('deleteDictionary')));
     }
 
     getDictionaryFile(dictionaryName: DictionaryInfo): Observable<string> {
         return this.http
-            .post<string>('http://localhost:3000/data/dictionary/file', dictionaryName, this.httpOptions)
+            .post<string>(environment.serverUrl + '/data/dictionary/file', dictionaryName, this.httpOptions)
             .pipe(catchError(this.handleError<string>('deleteDictionary')));
     }
 
