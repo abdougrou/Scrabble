@@ -193,3 +193,10 @@ export const RED_MULTIPLIER = 3;
 export const MAX_DESCRIPTION_LENGTH = 50;
 
 export const VIRTUAL_PLAYER_MAX_TURN_DURATION = 20000;
+
+export const PLAYER_DELETE_MESSAGE = "Impossible de supprimer ce nom, assurez-vous qu'il ne s'agit pas d'un nom par défaut";
+export const PLAYER_MODIFY_MESSAGE = 'Impossible de modifier ce nom, assurez-vous que le nouveau nom ne correspond pas à un nom existant';
+export const PLAYER_ADD_MESSAGE = "Impossible d'ajouter ce nom, assurez-vous qu'il ne s'agit pas d'un nom par défaut";
+export const DICTIONARY_MODIFY_MESSAGE = 'Impossible de modifier ce dictionnaire, vérifiez que tous les dictionnaires ont des noms distincts';
+
+export const SNACKBAR_CONFIG = { duration: 4000, panelClass: ['red-snackbar'] };

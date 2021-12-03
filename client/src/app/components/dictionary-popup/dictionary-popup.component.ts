@@ -1,7 +1,9 @@
 import { AfterViewInit, Component } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 import { EditDictionaryPopupComponent } from '@app/components/edit-dictionary-popup/edit-dictionary-popup.component';
+import { DICTIONARY_MODIFY_MESSAGE, SNACKBAR_CONFIG } from '@app/constants';
 import { CommunicationService } from '@app/services/communication.service';
 import { DEFAULT_DICTIONARY_NAME } from '@common/constants';
 import { DictionaryInfo } from '@common/dictionaryTemplate';
@@ -15,7 +17,12 @@ export class DictionaryPopupComponent implements AfterViewInit {
     displayedColumns = ['name', 'description', 'edit', 'delete', 'download'];
     dictionaryTitles: MatTableDataSource<DictionaryInfo>;
 
-    constructor(public communication: CommunicationService, public dialogRef: MatDialogRef<DictionaryPopupComponent>, public dialog: MatDialog) {}
+    constructor(
+        public communication: CommunicationService,
+        public dialogRef: MatDialogRef<DictionaryPopupComponent>,
+        public dialog: MatDialog,
+        private snackBar: MatSnackBar,
+    ) {}
 
     ngAfterViewInit() {
         this.getDictionaries();
@@ -40,7 +47,11 @@ export class DictionaryPopupComponent implements AfterViewInit {
         });
         dialogRef.afterClosed().subscribe((result) => {
             if (result !== '') {
-                this.communication.modifyDictionary(element.title, result).subscribe();
+                this.communication.modifyDictionary(element.title, result).subscribe((response) => {
+                    if (!response) {
+                        this.snackBar.open(DICTIONARY_MODIFY_MESSAGE, 'Fermer', SNACKBAR_CONFIG);
+                    }
+                });
                 this.getDictionaries();
             }
         });
