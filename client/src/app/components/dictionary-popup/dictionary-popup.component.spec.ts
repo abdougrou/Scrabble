@@ -97,7 +97,7 @@ describe('DictionaryPopupComponent', () => {
 
     it('is default should return true if its the default dictionary', () => {
         const dictionary = {
-            title: 'Mon dictionaire',
+            title: 'Mon dictionnaire',
             description: 'Basic Dict',
         };
         expect(component.isDefault(dictionary)).toBeTrue();

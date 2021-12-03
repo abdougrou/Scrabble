@@ -24,6 +24,7 @@ describe('PlayAreaComponent', () => {
 
     beforeEach(() => {
         board = new BoardService();
+        board.initialize(false);
         grid = new GridService(board);
         ctxStub = CanvasTestHelper.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT).getContext('2d') as CanvasRenderingContext2D;
         grid.gridContext = ctxStub;

@@ -12,6 +12,7 @@ describe('GridService', () => {
 
     beforeEach(() => {
         boardService = new BoardService();
+        boardService.initialize(false);
         TestBed.configureTestingModule({
             providers: [{ provide: BoardService, useValue: boardService }],
         });

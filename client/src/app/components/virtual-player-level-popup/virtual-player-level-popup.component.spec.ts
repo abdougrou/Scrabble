@@ -1,6 +1,6 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { DURATION_INIT } from '@app/constants';
@@ -22,11 +22,20 @@ describe('VirtualPlayerLevelPopupComponent', () => {
         dictionary: Dictionary.French,
     };
 
+    const dialogMock = {
+        close: () => {
+            // Do nothing
+        },
+    };
+
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [HttpClientTestingModule, BrowserAnimationsModule, RouterTestingModule, AppMaterialModule],
             declarations: [VirtualPlayerLevelPopupComponent],
-            providers: [{ provide: MAT_DIALOG_DATA, useValue: { config: gameConfig } }],
+            providers: [
+                { provide: MAT_DIALOG_DATA, useValue: { config: gameConfig } },
+                { provide: MatDialogRef, useValue: dialogMock },
+            ],
         }).compileComponents();
     });
 
