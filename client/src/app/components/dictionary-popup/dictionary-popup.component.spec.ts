@@ -4,6 +4,8 @@ import { FormBuilder } from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
+// eslint-disable-next-line no-restricted-imports
+import { EditDictionaryPopupComponent } from '../edit-dictionary-popup/edit-dictionary-popup.component';
 import { DictionaryPopupComponent } from './dictionary-popup.component';
 
 describe('DictionaryPopupComponent', () => {
@@ -56,8 +58,20 @@ describe('DictionaryPopupComponent', () => {
             title: 'Mon dictionaire',
             description: 'Basic Dict',
         };
-        const spy = spyOn(component.dialogRef, 'afterClosed').and.returnValue(of('sdfa'));
+        const spy = spyOn(component.dialog, 'open').and.returnValue({ afterClosed: () => of('true') } as MatDialogRef<EditDictionaryPopupComponent>);
         component.edit(dictionary);
+        component.dialogRef.close();
+        expect(spy).toHaveBeenCalled();
+    });
+
+    it('edit should not call modifyDictionary', () => {
+        const dictionary = {
+            title: 'Mon dictionaire',
+            description: 'Basic Dict',
+        };
+        const spy = spyOn(component.dialog, 'open').and.returnValue({ afterClosed: () => of('') } as MatDialogRef<EditDictionaryPopupComponent>);
+        component.edit(dictionary);
+        component.dialogRef.close();
         expect(spy).toHaveBeenCalled();
     });
 
