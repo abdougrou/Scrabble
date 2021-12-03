@@ -1,7 +1,8 @@
 import { Component, DoCheck, HostListener, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { Dictionary } from '@app/classes/game-config';
+import { Dictionary, GameConfig } from '@app/classes/game-config';
+import { VirtualPlayerLevelPopupComponent } from '@app/components/virtual-player-level-popup/virtual-player-level-popup.component';
 import { RANDOM_PLAYER_NAMES } from '@app/constants';
 import { CommunicationService } from '@app/services/communication.service';
 import { GameManagerService } from '@app/services/game-manager.service';
@@ -16,6 +17,7 @@ export class WaitingPopupComponent implements DoCheck {
     result: { config: LobbyConfig; playerName: string; mainPlayerName: string };
     constructor(
         public dialogRef: MatDialogRef<WaitingPopupComponent>,
+        public dialog: MatDialog,
         @Inject(MAT_DIALOG_DATA) public data: { config: LobbyConfig },
         public communication: CommunicationService,
         public gameManager: GameManagerService,
@@ -42,6 +44,18 @@ export class WaitingPopupComponent implements DoCheck {
         }
     }
     switchMode() {
+        this.openVirtualPlayerLevelPopup()
+            .afterClosed()
+            .subscribe((result) => {
+                if (!result) return;
+                this.gameManager.initialize(result as GameConfig);
+                this.router.navigateByUrl('/game');
+                this.communication.leaveLobby();
+                this.dialogRef.close(true); // set param true to close all dialogs
+            });
+    }
+
+    openVirtualPlayerLevelPopup(): MatDialogRef<unknown, unknown> {
         const gameConfig = {
             playerName1: this.data.config.host,
             playerName2: this.pickPlayerName(this.data.config.host),
@@ -51,10 +65,11 @@ export class WaitingPopupComponent implements DoCheck {
             bonusEnabled: this.data.config.bonusEnabled,
             dictionary: this.data.config.dictionary === '0' ? Dictionary.French : Dictionary.English,
         };
-        this.gameManager.initialize(gameConfig);
-        this.router.navigateByUrl('/game');
-        this.communication.leaveLobby();
-        this.dialogRef.close(true); // set param true to close all dialogs
+        return this.dialog.open(VirtualPlayerLevelPopupComponent, {
+            height: '220px',
+            width: '500px',
+            data: { config: gameConfig },
+        });
     }
 
     back() {
