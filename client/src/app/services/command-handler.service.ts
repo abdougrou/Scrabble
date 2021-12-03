@@ -34,9 +34,9 @@ export class CommandHandlerService {
         let commandResult: ChatMessage = { user: '', body: '' };
         const regex = new RegExp(/^!échanger ([a-z]|\*){0,7}/g);
         if (regex.test(command)) {
-            window.alert(JSON.stringify(command.split(' ')[1].split('')));
+            // window.alert(JSON.stringify(command.split(' ')[1].split('')));
             if (!player) {
-                window.alert('no player');
+                // window.alert('no player');
             }
             commandResult = this.gameManager.exchangeLetters(player, command.split(' ')[1].split(''));
         } else {

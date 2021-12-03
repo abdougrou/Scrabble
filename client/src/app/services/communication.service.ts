@@ -22,7 +22,7 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
-    UpdateMessage
+    UpdateMessage,
 } from '@common/socket-messages';
 import { Vec2 } from '@common/vec2';
 import { BehaviorSubject, Observable, of } from 'rxjs';
@@ -80,7 +80,7 @@ export class CommunicationService {
     }
 
     connectionSuccesful() {
-        window.alert(JSON.stringify(this.socket.connected));
+        // window.alert(JSON.stringify(this.socket.connected));
     }
 
     setGameManager(gameManager: MultiplayerGameManagerService) {

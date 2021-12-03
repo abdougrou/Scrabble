@@ -90,7 +90,7 @@ describe('DictionaryPopupComponent', () => {
             title: 'Mon dictionaire',
             description: 'Basic Dict',
         };
-        const spy = spyOn(component.communication, 'getDictionaryFile').and.returnValue(of('sdf'));
+        const spy = spyOn(component.communication, 'getDictionaryFile').and.callFake(() => of('sdf'));
         component.downloadDictionary(dictionary);
         expect(spy).toHaveBeenCalled();
     });
