@@ -14,7 +14,7 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
-    UpdateMessage,
+    UpdateMessage
 } from '@common/socket-messages';
 import * as http from 'http';
 import * as io from 'socket.io';

@@ -21,7 +21,7 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
-    UpdateMessage,
+    UpdateMessage
 } from '@common/socket-messages';
 import { Vec2 } from '@common/vec2';
 import { BehaviorSubject, Observable, of } from 'rxjs';
@@ -64,6 +64,9 @@ export class CommunicationService {
             this.gameManager.board.data = gameManager.boardData;
             this.gameManager.gridService.drawBoard();
             this.gameManager.emitChanges();
+        });
+        this.socket.on(SocketEvent.chatMessage, (msg) => {
+            this.serverMessage.next({ user: msg.split(':')[0].trim(), body: msg.split(':')[1] });
         });
     }
 
@@ -152,9 +155,6 @@ export class CommunicationService {
 
     sendMessage(message: ChatMessage) {
         this.socket.emit(SocketEvent.chatMessage, { lobbyKey: this.lobbyKey, playerName: message.user, message: message.body } as NormalChatMessage);
-        this.socket.on(SocketEvent.chatMessage, (msg) => {
-            this.serverMessage.next({ user: msg.split(':')[0].trim(), body: msg.split(':')[1] });
-        });
     }
 
     leaveLobby() {
