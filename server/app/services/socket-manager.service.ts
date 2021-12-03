@@ -174,12 +174,15 @@ export class SocketManagerService {
             const player: PlayerData = { name: serverPlayer.name, score: serverPlayer.score, easel: serverPlayer.easel.toString() };
             serverPlayers.push(player);
         }*/
-        console.log(gameManager?.players.map((player) => player.easel));
         this.io.to(key).emit(SocketEvent.update, {
-            players: gameManager?.players,
+            players: gameManager?.players.map((player) => {
+                player.easel.letters = player.easel.letters.filter((letter) => letter !== ',');
+                return player;
+            }),
             reserveData: gameManager?.reserve.data,
             reserveCount: gameManager?.reserve.size,
             boardData: gameManager?.board.data,
         } as UpdateGameManagerMessage);
+        console.log(gameManager?.players.map((player) => player.easel));
     }
 }

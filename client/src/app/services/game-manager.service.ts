@@ -68,7 +68,7 @@ export class GameManagerService {
         this.isEnded = false;
         this.board.initialize(gameConfig.bonusEnabled);
         let trie = new Trie();
-        if (gameConfig.dictionary as DictionaryInfo)
+        if ((gameConfig.dictionary as DictionaryInfo).title)
             this.communication.getDictionaryFile(gameConfig.dictionary as DictionaryInfo).subscribe((str) => {
                 trie = this.readStringDictionary(str);
             });
@@ -142,26 +142,38 @@ export class GameManagerService {
         if ((this.players.current as VirtualPlayer).chooseAction !== undefined) this.playVirtualPlayer();
 
         this.moveGeneratorService.generateLegalMoves(this.players.current.easel.letters.toString());
-        console.log(this.moveGeneratorService.legalMoves);
     }
 
     playVirtualPlayer() {
         const vPlayer = this.virtualPlayerService.virtualPlayer;
-        const choice = vPlayer.chooseAction();
+        const choice = vPlayer.chooseAction(this.reserve, this.moveGeneratorService.legalMoves);
         choice.subscribe((action) => {
+            let messageBody = 'MESSAGE_BODY';
             switch (action) {
-                case PlayAction.Pass:
+                case PlayAction.Pass: {
                     this.buttonSkipTurn();
+                    messageBody = `${vPlayer.name} skipped their turn`;
                     break;
-                case PlayAction.Exchange:
-                    this.exchangeLetters(vPlayer, vPlayer.exchange());
+                }
+                case PlayAction.Exchange: {
+                    const letters: string[] = vPlayer.exchange(this.reserve);
+                    this.exchangeLetters(vPlayer, letters);
+                    messageBody = `${vPlayer.name} a echange les lettres ${letters.join('')}`;
                     break;
+                }
                 case PlayAction.Place: {
-                    const move: Move = vPlayer.place();
+                    const move: Move = vPlayer.place(this.moveGeneratorService.legalMoves);
                     this.placeLetters(vPlayer, move.word, move.coord, move.across);
+                    messageBody = `${vPlayer.name} a place le mot ${move.word} ${!move.across ? 'horizental' : 'vertical'}ement a la coordonnee x:${
+                        move.coord.x
+                    } y:${move.coord.y}`;
                     break;
                 }
             }
+            this.commandMessage.next({
+                user: vPlayer.name,
+                body: messageBody,
+            });
         });
     }
 
@@ -210,54 +222,6 @@ export class GameManagerService {
         this.gridService.drawBoard();
         return PlaceResult.Success;
     }
-    // TODO: COPY MESSAGES THEN DELETE THIS
-    // playVirtualPlayer() {
-    //     const vPlayer: VirtualPlayer = this.players.current as VirtualPlayer;
-    //     vPlayer.play().subscribe((action) => {
-    //         switch (action) {
-    //             case PlayAction.ExchangeTiles: {
-    //                 const tilesToExchange = vPlayer.exchange();
-    //                 if (this.reserve.isExchangePossible(tilesToExchange.length)) {
-    //                     const msg: ChatMessage = this.exchangeTiles(tilesToExchange, vPlayer);
-    //                     this.commandMessage.next(msg);
-    //                 } else {
-    //                     this.buttonSkipTurn();
-    //                 }
-    //                 break;
-    //             }
-    //             case PlayAction.PlaceTiles: {
-    //                 const placeTilesInfo: PlaceTilesInfo = vPlayer.place(
-    //                     this.wordValidation,
-    //                     this.calculatePoints,
-    //                     this.board,
-    //                     this.commandMessage,
-    //                     this.debug,
-    //                 );
-    //                 // console.log(
-    //                 //     `Bot places the word "${placeTilesInfo.word}" ${placeTilesInfo.vertical ? 'vertical' : 'horizontal'}ly at ${
-    //                 //         placeTilesInfo.coordStr
-    //                 //     }`,
-    //                 // );
-    //                 if (placeTilesInfo.word.length > 0) {
-    //                     // console.log(placeTilesInfo);
-    //                     // console.log(this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer));
-    //                     const msg: ChatMessage = {
-    //                         user: this.enemyPlayerName,
-    //                         body: this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer),
-    //                     };
-    //                     this.commandMessage.next(msg);
-    //                 } else {
-    //                     this.buttonSkipTurn();
-    //                 }
-    //                 break;
-    //             }
-    //             default:
-    //                 // console.log('Bot skipped his turn');
-    //                 this.buttonSkipTurn();
-    //                 break;
-    //         }
-    //     });
-    // }
 
     buttonSkipTurn(): void {
         const msg: ChatMessage = { user: COMMAND_RESULT, body: `${this.players.current.name} a passé son tour` };

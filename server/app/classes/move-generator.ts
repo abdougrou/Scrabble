@@ -77,7 +77,9 @@ export class MoveGenerator {
      * @param board board to generate moves for
      * @param easel current player's easel
      */
-    generateLegalMoves(board: (string | null)[][], easel: string) {
+    async generateLegalMoves(board: (string | null)[][], easel: string) {
+        this.legalMoves = [];
+        this.calculateAnchorsAndCrossChecks(board);
         this.anchors.forEach((anchor) => {
             if (anchor.leftPart.length > 0) {
                 const node = this.dictionary.getNode(anchor.leftPart);

@@ -35,7 +35,7 @@ export class GameManager {
         let trie = new Trie();
         if ((config.dictionary as DictionaryInfo).title)
             trie = this.readStringDictionary(this.dictionaryService.sendDictionaryFile(config.dictionary as DictionaryInfo));
-        else trie = this.readDictionary('@app/../assets/dictionnary.json');
+        else trie = this.readDictionary('assets/dictionnary.json');
         this.board = new Board();
         this.board.initialize(config.bonusEnabled);
         this.moveGenerator = new MoveGenerator(trie, this.board.pointGrid);
@@ -103,7 +103,6 @@ export class GameManager {
 
     swapPlayers() {
         this.players.reverse();
-        this.moveGenerator.calculateAnchorsAndCrossChecks(this.board.data);
         this.moveGenerator.generateLegalMoves(this.board.data, this.players[0].easel.letters.join(''));
     }
 

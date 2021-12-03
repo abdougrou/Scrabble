@@ -4,7 +4,6 @@ import { PlayAction, VirtualPlayer } from '@app/classes/virtual-player';
 import { Move } from '@common/move';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import { MoveGeneratorService } from './move-generator.service';
 import { ReserveService } from './reserve.service';
 
 const SORT_RANDOM = 0.5;
@@ -18,14 +17,12 @@ const IDLE_TIME_MS = 3000;
 export class VirtualPlayerService {
     virtualPlayer: VirtualPlayer;
 
-    constructor(private moveGenerator: MoveGeneratorService, private reserve: ReserveService) {}
-
     setupVirtualPlayer(name: string, easel: Easel, score: number, expert: boolean) {
         this.virtualPlayer = {
             name,
             easel,
             score,
-            chooseAction: expert ? this.beginnerChoose : this.expertChoose,
+            chooseAction: expert ? this.expertChoose : this.beginnerChoose,
             place: expert ? this.expertPlace : this.beginnerPlace,
             exchange: expert ? this.expertExchange : this.beginnerExchange,
         };
@@ -42,10 +39,10 @@ export class VirtualPlayerService {
      *
      * @returns Observable<PlayAction>
      */
-    expertChoose(): Observable<PlayAction> {
+    expertChoose(reserve: ReserveService, legalMoves: Move[]): Observable<PlayAction> {
         let action: PlayAction = PlayAction.Pass;
-        if (this.moveGenerator.legalMoves.length > 0) action = PlayAction.Place;
-        else if (this.reserve.isExchangePossibleBot(1)) action = PlayAction.Exchange; // We can exchange at least 1 letter
+        if (legalMoves.length > 0) action = PlayAction.Place;
+        else if (reserve.isExchangePossibleBot(1)) action = PlayAction.Exchange; // We can exchange at least 1 letter
 
         return new BehaviorSubject<PlayAction>(action).pipe(delay(IDLE_TIME_MS));
     }
@@ -55,8 +52,8 @@ export class VirtualPlayerService {
      *
      * @returns The move that gives the most points
      */
-    expertPlace(): Move {
-        return this.moveGenerator.legalMoves.reduce((highest, move) => (highest.points > move.points ? highest : move));
+    expertPlace(legalMoves: Move[]): Move {
+        return legalMoves.reduce((highest, move) => (highest.points > move.points ? highest : move));
     }
 
     /**
@@ -64,9 +61,9 @@ export class VirtualPlayerService {
      *
      * @returns array of letters to exchange
      */
-    expertExchange(): string[] {
+    expertExchange(reserve: ReserveService): string[] {
         for (let i = this.virtualPlayer.easel.letters.length; i >= 0; i--) {
-            if (!this.reserve.isExchangePossibleBot(i)) continue;
+            if (!reserve.isExchangePossibleBot(i)) continue;
 
             const easelLetters = this.virtualPlayer.easel.letters.sort(() => SORT_RANDOM - Math.random());
             while (easelLetters.length > i) easelLetters.pop();
@@ -86,12 +83,12 @@ export class VirtualPlayerService {
      *
      * @returns Observable<PlayAction>
      */
-    beginnerChoose(): Observable<PlayAction> {
+    beginnerChoose(reserve: ReserveService, legalMoves: Move[]): Observable<PlayAction> {
         const random = Math.random();
         let action: PlayAction = PlayAction.Pass;
         if (random < PASS_CHANCE) action = PlayAction.Pass;
-        else if (random < EXCHANGE_CHANCE && this.reserve.isExchangePossible(1)) action = PlayAction.Exchange;
-        else if (this.moveGenerator.legalMoves.length > 0) action = PlayAction.Place;
+        else if (random < EXCHANGE_CHANCE && reserve.isExchangePossible(1)) action = PlayAction.Exchange;
+        else if (legalMoves.length > 0) action = PlayAction.Place;
 
         return new BehaviorSubject<PlayAction>(action).pipe(delay(IDLE_TIME_MS));
     }
@@ -105,11 +102,23 @@ export class VirtualPlayerService {
      *
      * @returns A possible move
      */
-    beginnerPlace(): Move {
-        return this.moveGenerator.legalMoves.sort(() => SORT_RANDOM - Math.random())[0];
+    beginnerPlace(legalMoves: Move[]): Move {
+        return legalMoves.sort(() => SORT_RANDOM - Math.random())[0];
     }
 
-    beginnerExchange(): string[] {
-        return [];
+    beginnerExchange(reserve: ReserveService): string[] {
+        const output: string[] = [];
+        const easelLetters: string[] = this.virtualPlayer.easel.toString().split('');
+
+        let amount = Math.random() * this.virtualPlayer.easel.count;
+        while (!reserve.isExchangePossibleBot(amount)) {
+            amount = Math.random() * this.virtualPlayer.easel.count;
+        }
+
+        for (let i = amount; i > 0; i--) {
+            output.push(easelLetters.sort(() => SORT_RANDOM - Math.random()).pop() as string);
+        }
+
+        return output;
     }
 }
