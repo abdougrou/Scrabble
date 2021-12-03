@@ -141,7 +141,7 @@ export class GameManager {
         if (!move) return PlaceResult.NotValid;
 
         const usedLetters: string[] = [];
-        const nextCoord = coord;
+        const nextCoord = { x: coord.x, y: coord.y };
         for (const k of word) {
             if (!this.board.getLetter(nextCoord)) {
                 this.board.setLetter(nextCoord, k);

@@ -6,7 +6,7 @@ import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
 import { Trie } from '@app/classes/trie';
 import { PlayAction, VirtualPlayer } from '@app/classes/virtual-player';
-import { COMMAND_RESULT, MAX_SKIP_COUNT, SECOND_MD, STARTING_LETTER_AMOUNT, SYSTEM_NAME } from '@app/constants';
+import { COMMAND_RESULT, MAX_SKIP_COUNT, SECOND_MD, STARTING_LETTER_AMOUNT, SYSTEM_NAME, VIRTUAL_PLAYER_MAX_TURN_DURATION } from '@app/constants';
 import { BoardService } from '@app/services/board.service';
 import { ExchangeTilesService } from '@app/services/exchange-tiles.service';
 import { MoveGeneratorService } from '@app/services/move-generator.service';
@@ -18,6 +18,7 @@ import { DictionaryInfo } from '@common/dictionaryTemplate';
 import { Move } from '@common/move';
 import { Vec2 } from '@common/vec2';
 import { BehaviorSubject, Subscription, timer } from 'rxjs';
+import { delay } from 'rxjs/operators';
 import { CommunicationService } from './communication.service';
 import { GridService } from './grid.service';
 import { ObjectiveService } from './objective.service';
@@ -87,7 +88,6 @@ export class GameManagerService {
         const source = timer(0, SECOND_MD);
         this.subscription = source.subscribe((seconds) => {
             this.currentTurnDurationLeft = this.turnDuration - (seconds % this.turnDuration) - 1;
-            const VIRTUAL_PLAYER_MAX_TURN_DURATION = 5;
             if (
                 ((this.players.current as VirtualPlayer).chooseAction !== undefined &&
                     this.currentTurnDurationLeft === this.turnDuration - VIRTUAL_PLAYER_MAX_TURN_DURATION) ||
@@ -126,7 +126,6 @@ export class GameManagerService {
             );
             this.players.players.push(this.virtualPlayerService.virtualPlayer);
         }
-        // if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
         if (this.gameConfig.gameMode === GameMode.LOG2990) for (const name of playerNames) this.objectiveService.assignObjective(name);
 
         this.moveGeneratorService.generateLegalMoves(this.players.current.easel.toString());
@@ -139,7 +138,12 @@ export class GameManagerService {
         this.startTimer();
         // Send player switch event
         this.endTurn.next(this.players.current.name);
-        if ((this.players.current as VirtualPlayer).chooseAction !== undefined) this.playVirtualPlayer();
+        if ((this.players.current as VirtualPlayer).chooseAction !== undefined) {
+            const vPlayerDelay = new BehaviorSubject<null>(null).pipe(delay(Math.random() * VIRTUAL_PLAYER_MAX_TURN_DURATION));
+            vPlayerDelay.subscribe(() => {
+                this.playVirtualPlayer();
+            });
+        }
 
         this.moveGeneratorService.generateLegalMoves(this.players.current.easel.letters.toString());
     }
@@ -151,29 +155,30 @@ export class GameManagerService {
             let messageBody = 'MESSAGE_BODY';
             switch (action) {
                 case PlayAction.Pass: {
-                    this.buttonSkipTurn();
-                    messageBody = `${vPlayer.name} skipped their turn`;
+                    this.skipTurn();
+                    messageBody = `${vPlayer.name} a passé son tour`;
                     break;
                 }
                 case PlayAction.Exchange: {
                     const letters: string[] = vPlayer.exchange(this.reserve);
                     this.exchangeLetters(vPlayer, letters);
-                    messageBody = `${vPlayer.name} a echange les lettres ${letters.join('')}`;
+                    messageBody = `${vPlayer.name} a echangé les lettres ${letters.join('')}`;
                     break;
                 }
                 case PlayAction.Place: {
                     const move: Move = vPlayer.place(this.moveGeneratorService.legalMoves);
                     this.placeLetters(vPlayer, move.word, move.coord, move.across);
-                    messageBody = `${vPlayer.name} a place le mot ${move.word} ${!move.across ? 'horizental' : 'vertical'}ement a la coordonnee x:${
-                        move.coord.x
-                    } y:${move.coord.y}`;
+                    messageBody = `${vPlayer.name} a placé le mot ${move.word} ${!move.across ? 'horizental' : 'vertical'}ement a la coordonnee x:${
+                        move.coord.y
+                    } y:${move.coord.x}`;
                     break;
                 }
             }
             this.commandMessage.next({
-                user: vPlayer.name,
+                user: COMMAND_RESULT,
                 body: messageBody,
             });
+            this.switchPlayers();
         });
     }
 
@@ -198,7 +203,7 @@ export class GameManagerService {
         if (!move) return PlaceResult.NotValid;
 
         const usedLetters: string[] = [];
-        const nextCoord = coord;
+        const nextCoord = { x: coord.x, y: coord.y };
         for (const k of word) {
             if (!this.board.getLetter(nextCoord)) {
                 this.board.setLetter(nextCoord, k);
@@ -218,6 +223,7 @@ export class GameManagerService {
             this.placedWords.insert(move.word);
             this.objectiveService.check(player, move, usedLetters, this.placedWords, this.moveGeneratorService.pointMap);
         }
+        this.players.skipCounter = 0;
 
         this.gridService.drawBoard();
         return PlaceResult.Success;

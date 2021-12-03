@@ -191,3 +191,5 @@ export const DARK_BLUE_MULTIPLIER = 3;
 export const PINK_MULTIPLIER = 2;
 export const RED_MULTIPLIER = 3;
 export const MAX_DESCRIPTION_LENGTH = 50;
+
+export const VIRTUAL_PLAYER_MAX_TURN_DURATION = 20000;

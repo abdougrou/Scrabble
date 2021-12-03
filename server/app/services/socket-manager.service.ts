@@ -183,6 +183,5 @@ export class SocketManagerService {
             reserveCount: gameManager?.reserve.size,
             boardData: gameManager?.board.data,
         } as UpdateGameManagerMessage);
-        console.log(gameManager?.players.map((player) => player.easel));
     }
 }
