@@ -133,6 +133,7 @@ export class DatabaseController {
                     res.json(names);
                 })
                 .catch((error: Error) => {
+                    res.json([]);
                     res.status(Httpstatus.StatusCodes.NOT_FOUND).send(error.message);
                 });
         });
@@ -172,17 +173,17 @@ export class DatabaseController {
             this.dictionaryService.reset();
         });
 
-        this.router.post('/dictionary', async (req: Request) => {
+        this.router.post('/dictionary', async (req: Request, res: Response) => {
             const fileTemplate = req.body;
-            this.dictionaryService.addDictionary(fileTemplate);
+            res.json(this.dictionaryService.addDictionary(fileTemplate));
         });
 
         this.router.get('/dictionary', async (req: Request, res: Response) => {
             res.json(this.dictionaryService.getDictionaryInfo());
         });
 
-        this.router.post('/dictionary/modify', async (req: Request) => {
-            this.dictionaryService.modifyDictionary(req.body[0], req.body[1]);
+        this.router.post('/dictionary/modify', async (req: Request, res: Response) => {
+            res.json(this.dictionaryService.modifyDictionary(req.body[0], req.body[1]));
         });
         this.router.post('/dictionary/delete', async (req: Request) => {
             this.dictionaryService.deleteDictionary(req.body);

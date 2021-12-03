@@ -1,9 +1,11 @@
 import { AfterViewInit, Component, Inject } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 import { FormConfig, FormType } from '@app/classes/form-config';
 import { ConfirmationPopupComponent } from '@app/components/confirmation-popup/confirmation-popup.component';
 import { PlayerNameFormComponent } from '@app/components/player-name-form/player-name-form.component';
+import { PLAYER_ADD_MESSAGE, PLAYER_DELETE_MESSAGE, PLAYER_MODIFY_MESSAGE, SNACKBAR_CONFIG } from '@app/constants';
 import { CommunicationService } from '@app/services/communication.service';
 import { DEFAULT_VIRTUAL_PLAYER_NAMES } from '@common/constants';
 import { Difficulty, PlayerName } from '@common/player-name';
@@ -20,6 +22,7 @@ export class PlayerNamesPopupComponent implements AfterViewInit {
         public communication: CommunicationService,
         public dialogRef: MatDialogRef<PlayerNamesPopupComponent>,
         public dialog: MatDialog,
+        private snackBar: MatSnackBar,
         @Inject(MAT_DIALOG_DATA) public playerDifficulty: Difficulty,
     ) {}
 
@@ -44,7 +47,7 @@ export class PlayerNamesPopupComponent implements AfterViewInit {
         this.openForm(formConfig).then((result) => {
             if (result !== '') {
                 this.communication.addPlayerName({ name: result, difficulty: this.playerDifficulty }).subscribe((success) => {
-                    this.manageRequestResponses(success);
+                    this.manageRequestResponses(success, PLAYER_ADD_MESSAGE);
                 });
             }
         });
@@ -60,7 +63,7 @@ export class PlayerNamesPopupComponent implements AfterViewInit {
                         difficulty: this.playerDifficulty,
                     })
                     .subscribe((success) => {
-                        this.manageRequestResponses(success);
+                        this.manageRequestResponses(success, PLAYER_MODIFY_MESSAGE);
                     });
             }
         });
@@ -78,7 +81,7 @@ export class PlayerNamesPopupComponent implements AfterViewInit {
             .subscribe((result) => {
                 if (result) {
                     this.communication.deletePlayerName(element).subscribe((success) => {
-                        this.manageRequestResponses(success);
+                        this.manageRequestResponses(success, PLAYER_DELETE_MESSAGE);
                     });
                 }
             });
@@ -109,7 +112,10 @@ export class PlayerNamesPopupComponent implements AfterViewInit {
         this.dialogRef.close();
     }
 
-    manageRequestResponses(response: boolean) {
+    manageRequestResponses(response: boolean, message: string) {
         if (response) this.getPlayerNames();
+        else {
+            this.snackBar.open(message, 'Fermer', SNACKBAR_CONFIG);
+        }
     }
 }

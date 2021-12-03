@@ -1,6 +1,6 @@
 .container {
-    min-height: 100vh;
-    height: auto;
+    min-height: 90vh;
+    overflow: hidden;
     background-color: #eeeee4;
 }
 
@@ -23,9 +23,12 @@
 }
 
 .header-item {
+    min-height: 10vh;
     justify-content: center;
     text-align: center;
     color: rgba(0, 0, 0, 0.54);
+    background-color: #eeeee4;
+    margin: 0;
 }
 
 .footer-item {
@@ -60,19 +63,19 @@
 }
 
 ::ng-deep .green-snackbar {
-    color:white;
+    color: white;
     background: #3fc493;
 }
 
-::ng-deep .green-snackbar .mat-simple-snackbar-action  {
-    color:white;
-  }
+::ng-deep .green-snackbar .mat-simple-snackbar-action {
+    color: white;
+}
 
 ::ng-deep .red-snackbar {
-    color:white;
+    color: white;
     background: #d3302f;
 }
 
-::ng-deep .red-snackbar .mat-simple-snackbar-action  {
-    color:white;
-  }
+::ng-deep .red-snackbar .mat-simple-snackbar-action {
+    color: white;
+}

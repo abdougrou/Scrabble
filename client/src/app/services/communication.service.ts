@@ -79,8 +79,8 @@ export class CommunicationService {
         });
     }
 
-    connectionSuccesful() {
-        // window.alert(JSON.stringify(this.socket.connected));
+    connectionSuccesful(): boolean {
+        return this.socket.connected;
     }
 
     setGameManager(gameManager: MultiplayerGameManagerService) {
