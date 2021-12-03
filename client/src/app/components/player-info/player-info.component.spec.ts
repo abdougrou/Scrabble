@@ -24,7 +24,7 @@ describe('PlayerInfoComponent', () => {
         playerService.createPlayer('player', []);
         playerService.createPlayer('playerTwo', []);
         gameManagerService = jasmine.createSpyObj('GameManagerService', ['buttonSkipTurn', 'reset', 'stopTimer', 'endGame']);
-        gridService = jasmine.createSpyObj('GrideService', ['clearBoard', 'drawBoard']);
+        gridService = jasmine.createSpyObj('GridService', ['clearBoard', 'drawBoard']);
     });
     beforeEach(async () => {
         await TestBed.configureTestingModule({
