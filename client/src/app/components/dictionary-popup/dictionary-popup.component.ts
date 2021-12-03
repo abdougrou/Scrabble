@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { EditDictionaryPopupComponent } from '@app/components/edit-dictionary-popup/edit-dictionary-popup.component';
@@ -11,11 +11,13 @@ import { DictionaryInfo } from '@common/dictionaryTemplate';
     templateUrl: './dictionary-popup.component.html',
     styleUrls: ['./dictionary-popup.component.scss'],
 })
-export class DictionaryPopupComponent {
+export class DictionaryPopupComponent implements AfterViewInit {
     displayedColumns = ['name', 'description', 'edit', 'delete', 'download'];
     dictionaryTitles: MatTableDataSource<DictionaryInfo>;
 
-    constructor(public communication: CommunicationService, public dialogRef: MatDialogRef<DictionaryPopupComponent>, public dialog: MatDialog) {
+    constructor(public communication: CommunicationService, public dialogRef: MatDialogRef<DictionaryPopupComponent>, public dialog: MatDialog) {}
+
+    ngAfterViewInit() {
         this.getDictionaries();
     }
 

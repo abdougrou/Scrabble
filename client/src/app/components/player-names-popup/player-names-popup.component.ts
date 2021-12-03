@@ -1,5 +1,5 @@
-import { Component, Inject } from '@angular/core';
-import { MatDialog, MatDialogConfig, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { AfterViewInit, Component, Inject } from '@angular/core';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { FormConfig, FormType } from '@app/classes/form-config';
 import { ConfirmationPopupComponent } from '@app/components/confirmation-popup/confirmation-popup.component';
@@ -13,100 +13,73 @@ import { Difficulty, PlayerName } from '@common/player-name';
     templateUrl: './player-names-popup.component.html',
     styleUrls: ['./player-names-popup.component.scss'],
 })
-export class PlayerNamesPopupComponent {
+export class PlayerNamesPopupComponent implements AfterViewInit {
     displayedColumns = ['name', 'difficulty', 'edit', 'delete'];
     playerNames: MatTableDataSource<PlayerName>;
-    difficulty: string;
     constructor(
         public communication: CommunicationService,
         public dialogRef: MatDialogRef<PlayerNamesPopupComponent>,
         public dialog: MatDialog,
-        @Inject(MAT_DIALOG_DATA) public playerType: string,
-    ) {
-        this.difficulty = playerType;
+        @Inject(MAT_DIALOG_DATA) public playerDifficulty: Difficulty,
+    ) {}
+
+    ngAfterViewInit() {
         this.getPlayerNames();
     }
 
     getPlayerNames() {
-        if (this.difficulty === 'expert') {
+        if (this.playerDifficulty === Difficulty.Expert) {
             this.communication.getExpertPlayerNames().subscribe((names) => {
                 this.playerNames = new MatTableDataSource<PlayerName>(names);
             });
-        } else if (this.difficulty === 'beginner') {
+        } else {
             this.communication.getBeginnerPlayerNames().subscribe((names) => {
                 this.playerNames = new MatTableDataSource<PlayerName>(names);
             });
         }
     }
 
-    back() {
-        this.dialogRef.close();
-    }
-
-    editPlayerName(element: PlayerName) {
-        const formConfig: FormConfig = { formType: FormType.EditForm, data: element.name };
-        this.dialog
-            .open(PlayerNameFormComponent, {
-                disableClose: true,
-                height: '220px',
-                width: '550px',
-                data: formConfig,
-            })
-            .afterClosed()
-            .subscribe((result) => {
-                if (result !== '') {
-                    this.communication
-                        .modifyPlayerName(element, {
-                            name: result,
-                            difficulty: this.playerType === 'expert' ? Difficulty.Expert : Difficulty.Beginner,
-                        })
-                        .subscribe((response) => {
-                            if (response) {
-                                this.getPlayerNames();
-                            }
-                        });
-                }
-            });
-    }
-
-    deletePlayerName(element: PlayerName) {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = true;
-        dialogConfig.id = 'abandon-page-component';
-        dialogConfig.height = '200px';
-        dialogConfig.width = '550px';
-        dialogConfig.data = `Le joueur ${element.name} sera supprimé`;
-        const dialogRef = this.dialog.open(ConfirmationPopupComponent, dialogConfig);
-        dialogRef.afterClosed().subscribe((result) => {
-            if (result) {
-                this.communication.deletePlayerName(element).subscribe((success) => {
-                    if (success) {
-                        this.getPlayerNames();
-                    }
+    addPlayer() {
+        const formConfig: FormConfig = { formType: FormType.AddForm, data: '' };
+        this.openForm(formConfig).then((result) => {
+            if (result !== '') {
+                this.communication.addPlayerName({ name: result, difficulty: this.playerDifficulty }).subscribe((success) => {
+                    this.manageRequestResponses(success);
                 });
             }
         });
     }
 
-    addPlayer() {
-        const formConfig: FormConfig = { formType: FormType.AddForm, data: '' };
+    editPlayerName(element: PlayerName) {
+        const formConfig: FormConfig = { formType: FormType.EditForm, data: element.name };
+        this.openForm(formConfig).then((response) => {
+            if (response !== '') {
+                this.communication
+                    .modifyPlayerName(element, {
+                        name: response,
+                        difficulty: this.playerDifficulty,
+                    })
+                    .subscribe((success) => {
+                        this.manageRequestResponses(success);
+                    });
+            }
+        });
+    }
+
+    deletePlayerName(element: PlayerName) {
         this.dialog
-            .open(PlayerNameFormComponent, {
+            .open(ConfirmationPopupComponent, {
                 disableClose: true,
-                height: '220px',
+                height: '200px',
                 width: '550px',
-                data: formConfig,
+                data: `Le joueur ${element.name} sera supprimé`,
             })
             .afterClosed()
             .subscribe((result) => {
-                if (result !== '') {
-                    this.communication
-                        .addPlayerName({ name: result, difficulty: this.difficulty === 'expert' ? Difficulty.Expert : Difficulty.Beginner })
-                        .subscribe((response) => {
-                            if (response) {
-                                this.getPlayerNames();
-                            }
-                        });
+                if (result) {
+                    this.communication.deletePlayerName(element).subscribe((success) => {
+                        this.manageRequestResponses(success);
+                    });
                 }
             });
     }
@@ -118,5 +91,25 @@ export class PlayerNamesPopupComponent {
             }
         }
         return false;
+    }
+
+    async openForm(formConfig: FormConfig): Promise<string> {
+        return this.dialog
+            .open(PlayerNameFormComponent, {
+                disableClose: true,
+                height: '220px',
+                width: '550px',
+                data: formConfig,
+            })
+            .afterClosed()
+            .toPromise();
+    }
+
+    back() {
+        this.dialogRef.close();
+    }
+
+    manageRequestResponses(response: boolean) {
+        if (response) this.getPlayerNames();
     }
 }

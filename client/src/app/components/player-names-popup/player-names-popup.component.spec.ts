@@ -43,7 +43,7 @@ describe('PlayerNamesPopupComponent', () => {
         await TestBed.configureTestingModule({
             declarations: [PlayerNamesPopupComponent],
             providers: [
-                { provide: MAT_DIALOG_DATA, useValue: 'expert' },
+                { provide: MAT_DIALOG_DATA, useValue: Difficulty.Expert },
                 { provide: MatDialog, useValue: dialogSpy },
                 { provide: MatDialogRef, useValue: dialogRefSpy },
                 { provide: CommunicationService, useClass: CommunicationServiceMock },
@@ -65,7 +65,7 @@ describe('PlayerNamesPopupComponent', () => {
     it('should get the names of expert players when the type is expert', async () => {
         const expertPlayer: PlayerName[] = [{ name: 'player', difficulty: Difficulty.Expert }];
         const spy = spyOn(component.communication, 'getExpertPlayerNames').and.returnValue(of(expertPlayer));
-        component.difficulty = 'expert';
+        component.playerDifficulty = Difficulty.Expert;
         component.getPlayerNames();
         expect(spy).toHaveBeenCalled();
         expect(component.playerNames.data).toEqual(expertPlayer);
@@ -74,7 +74,7 @@ describe('PlayerNamesPopupComponent', () => {
     it('should get the names of beginner players when the type is beginner', async () => {
         const beginnerPlayer: PlayerName[] = [{ name: 'player', difficulty: Difficulty.Beginner }];
         const spy = spyOn(component.communication, 'getBeginnerPlayerNames').and.returnValue(of(beginnerPlayer));
-        component.difficulty = 'beginner';
+        component.playerDifficulty = Difficulty.Beginner;
         component.getPlayerNames();
         expect(spy).toHaveBeenCalled();
         expect(component.playerNames.data).toEqual(beginnerPlayer);
@@ -85,12 +85,19 @@ describe('PlayerNamesPopupComponent', () => {
         expect(component.dialogRef.close).toHaveBeenCalled();
     });
 
-    it('should call the modifyPlayerName method from communication if the popup returns valid text', () => {
-        dialogRefSpy.afterClosed.and.returnValue(of('newName'));
+    it('should call the modifyPlayerName method from communication if the popup returns valid text', async () => {
+        const spy = spyOn(component, 'openForm').and.resolveTo('newName');
+        spyOn(component.communication, 'modifyPlayerName').and.returnValue(of(true));
+        component.editPlayerName({ name: 'player', difficulty: Difficulty.Beginner });
+        expect(spy).toHaveBeenCalled();
+    });
+
+    it('should not call the modifyPlayerName method from communication if the popup returns an empty string', () => {
+        dialogRefSpy.afterClosed.and.returnValue(of(''));
         spyOn(component, 'getPlayerNames').and.returnValue();
         const spy = spyOn(component.communication, 'modifyPlayerName').and.returnValue(of(true));
         component.editPlayerName({ name: 'player', difficulty: Difficulty.Beginner });
-        expect(spy).toHaveBeenCalled();
+        expect(spy).not.toHaveBeenCalled();
     });
 
     it('should call the deletePlayerName method from communication if the popup returns true', () => {
@@ -102,12 +109,28 @@ describe('PlayerNamesPopupComponent', () => {
         expect(spy).toHaveBeenCalled();
     });
 
+    it('should not call the deletePlayerName method from communication if the popup returns false', () => {
+        const player: PlayerName = { name: 'player', difficulty: Difficulty.Beginner };
+        dialogRefSpy.afterClosed.and.returnValue(of(false));
+        spyOn(component, 'getPlayerNames').and.returnValue();
+        const spy = spyOn(component.communication, 'deletePlayerName').and.returnValue(of(true));
+        component.deletePlayerName(player);
+        expect(spy).not.toHaveBeenCalled();
+    });
+
     it('should call the addPlayerName method from communication if the popup returns a valid name', () => {
-        dialogRefSpy.afterClosed.and.returnValue(of('newPlayer'));
+        const spy = spyOn(component, 'openForm').and.resolveTo('newName');
+        spyOn(component.communication, 'addPlayerName').and.returnValue(of(true));
+        component.addPlayer();
+        expect(spy).toHaveBeenCalled();
+    });
+
+    it('should not call the addPlayerName method from communication if the popup returns an empty name', () => {
+        dialogRefSpy.afterClosed.and.returnValue(of(''));
         spyOn(component, 'getPlayerNames').and.returnValue();
         const spy = spyOn(component.communication, 'addPlayerName').and.returnValue(of(true));
         component.addPlayer();
-        expect(spy).toHaveBeenCalled();
+        expect(spy).not.toHaveBeenCalled();
     });
 
     it('should correctly determine wether or not a player name is default', () => {
@@ -117,5 +140,13 @@ describe('PlayerNamesPopupComponent', () => {
     it('should correctly determine wether or not a player name is default', () => {
         const randomPlayer: PlayerName = { name: 'notDefault', difficulty: Difficulty.Beginner };
         expect(component.isDefault(randomPlayer)).toBeFalse();
+    });
+
+    it('should not update the player names if the request fails', () => {
+        const spy = spyOn(component, 'getPlayerNames').and.returnValue();
+        component.manageRequestResponses(false);
+        expect(spy).not.toHaveBeenCalled();
+        component.manageRequestResponses(true);
+        expect(spy).toHaveBeenCalled();
     });
 });

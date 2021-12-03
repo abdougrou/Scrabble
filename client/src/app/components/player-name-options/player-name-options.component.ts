@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { PlayerNamesPopupComponent } from '@app/components/player-names-popup/player-names-popup.component';
 import { DIALOG_HEIGHT, DIALOG_WIDTH } from '@app/constants';
+import { Difficulty } from '@common/player-name';
 
 @Component({
     selector: 'app-player-name-options',
@@ -15,7 +16,7 @@ export class PlayerNameOptionsComponent {
         this.dialog.open(PlayerNamesPopupComponent, {
             height: DIALOG_HEIGHT,
             width: DIALOG_WIDTH,
-            data: 'beginner',
+            data: Difficulty.Beginner,
         });
     }
 
@@ -23,7 +24,7 @@ export class PlayerNameOptionsComponent {
         this.dialog.open(PlayerNamesPopupComponent, {
             height: DIALOG_HEIGHT,
             width: DIALOG_WIDTH,
-            data: 'expert',
+            data: Difficulty.Expert,
         });
     }
 
