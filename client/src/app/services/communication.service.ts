@@ -9,6 +9,7 @@ import { LobbyConfig } from '@common/lobby-config';
 import { PlayerName } from '@common/player-name';
 import { ScoreConfig } from '@common/score-config';
 import {
+    ContinueSoloMessage,
     DeleteLobbyMessage,
     ExchangeLettersMessage,
     JoinLobbyMessage,
@@ -49,7 +50,7 @@ export class CommunicationService {
         this.socket = io.io('ws://localhost:3000');
 
         this.socket.on(SocketEvent.setTimer, () => {
-            this.gameManager.turnDurationLeft = this.gameManager.turnDuration;
+            this.gameManager.turnDurationLeft = this.gameManager.lobbyConfig.turnDuration;
         });
         this.socket.on(SocketEvent.update, (gameManager: UpdateGameManagerMessage) => {
             /* for (const serverPlayer of gameManager.players) {
@@ -67,6 +68,14 @@ export class CommunicationService {
         });
         this.socket.on(SocketEvent.chatMessage, (msg) => {
             this.serverMessage.next({ user: msg.split(':')[0].trim(), body: msg.split(':')[1] });
+        });
+    }
+
+    continueSolo(): Observable<ContinueSoloMessage> {
+        return new Observable((subscriber) => {
+            this.socket.on(SocketEvent.continueSolo, (message: ContinueSoloMessage) => {
+                subscriber.next(message);
+            });
         });
     }
 

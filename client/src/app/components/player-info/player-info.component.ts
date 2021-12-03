@@ -5,6 +5,7 @@ import { GameMode } from '@app/classes/game-config';
 import { Objective } from '@app/classes/objective';
 import { Player } from '@app/classes/player';
 import { DURATION_INIT, MAX_FONT_MULTIPLIER, MIN_FONT_MULTIPLIER } from '@app/constants';
+import { CommunicationService } from '@app/services/communication.service';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { GridService } from '@app/services/grid.service';
 import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-manager.service';
@@ -36,6 +37,7 @@ export class PlayerInfoComponent implements DoCheck, OnDestroy {
         private reserve: ReserveService,
         private router: Router,
         private gridService: GridService,
+        private communication: CommunicationService,
         public matDialog: MatDialog,
     ) {
         if (this.router.url === '/multiplayer-game') {
@@ -45,7 +47,7 @@ export class PlayerInfoComponent implements DoCheck, OnDestroy {
             this.gameMode = this.multiplayerGameManager.gameMode;
         } else {
             this.players = this.playerService.players;
-            this.mainPlayerName = this.gameManager.mainPlayerName;
+            this.mainPlayerName = this.gameManager.gameConfig.playerName1;
             this.isEnded = this.gameManager.isEnded;
             this.gameMode = this.gameManager.gameConfig.gameMode;
         }
@@ -55,10 +57,14 @@ export class PlayerInfoComponent implements DoCheck, OnDestroy {
                 (obj) => (obj.playerName && obj.playerName === this.mainPlayerName) || (obj.private && obj.achieved),
             );
         }
+
+        this.communication.continueSolo().subscribe((message) => {
+            this.gameManager.initializeFromMultiplayer(this.multiplayerGameManager, message.vPlayer, message.mainPlayer);
+        });
     }
 
     ngOnDestroy(): void {
-        this.quit();
+        if (this.router.url === '/game') this.quit();
     }
     get timer() {
         let timerValue = 0;

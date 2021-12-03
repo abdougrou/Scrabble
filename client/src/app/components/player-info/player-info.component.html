@@ -44,7 +44,7 @@
     <div *ngIf="this.gameMode === 1">
         <h3>Objectifs privés</h3>
         <mat-divider></mat-divider>
-        <div class="goals" *ngFor="let objective of privateObjectives"><mat-checkbox [checked]="objective.achieved" >{{ objective.description }} ({{ objective.reward }}pts)</mat-checkbox></div>
+        <div class="goals" *ngFor="let objective of privateObjectives"><mat-checkbox [checked]="objective.achieved" [disableRipple]="true" (click)="$event.preventDefault()">{{ objective.description }} ({{ objective.reward }}pts)</mat-checkbox></div>
         <h3>Objectifs publics</h3>
         <mat-divider></mat-divider>
         <div class="goals" *ngFor="let objective of publicObjectives"><mat-checkbox [checked]="objective.achieved" [disableRipple]="true" (click)="$event.preventDefault()"> {{ objective.description }} ({{ objective.reward }}pts)</mat-checkbox></div>

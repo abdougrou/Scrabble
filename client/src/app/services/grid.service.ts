@@ -21,7 +21,7 @@ import {
     TILE_COLORS,
     TILE_MULTIPLIER,
     TILE_TEXT_COLOR,
-    TILE_TYPE,
+    TILE_TYPE
 } from '@app/constants';
 import { Vec2 } from '@common/vec2';
 import { BoardService } from './board.service';

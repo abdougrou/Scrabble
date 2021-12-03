@@ -44,8 +44,8 @@ export class ChatBoxComponent implements OnChanges {
             this.mainPlayerName = this.multiplayerGameManager.mainPlayerName;
             this.enemyPlayerName = this.multiplayerGameManager.players.find((player) => player.name !== this.mainPlayerName)?.name as string;
         } else {
-            this.mainPlayerName = this.gameManager.mainPlayerName;
-            this.enemyPlayerName = this.gameManager.enemyPlayerName;
+            this.mainPlayerName = this.gameManager.gameConfig.playerName1;
+            this.enemyPlayerName = this.gameManager.gameConfig.playerName2;
         }
         this.player = gameManagerInterface.getMainPlayer();
         this.gameManager.commandMessage.asObservable().subscribe((msg) => {
@@ -94,7 +94,7 @@ export class ChatBoxComponent implements OnChanges {
             const newMessage = document.createElement('p');
             switch (message.user) {
                 case SYSTEM_NAME:
-                    newMessage.innerHTML = message.body;
+                    newMessage.innerHTML = `${message.user} : ${message.body}`;
                     newMessage.style.color = 'rgb(207, 0, 15)';
                     break;
                 case this.mainPlayerName:

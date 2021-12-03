@@ -38,7 +38,7 @@ export class GameManagerInterfaceService {
         if (this.isMultiplayer()) {
             return this.multiGameManager.getMainPlayer();
         } else {
-            return this.playerService.players.find((player) => player.name === this.soloGameManager.mainPlayerName) as Player;
+            return this.playerService.players.find((player) => player.name === this.soloGameManager.gameConfig.playerName1) as Player;
         }
     }
 

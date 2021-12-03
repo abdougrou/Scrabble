@@ -8,6 +8,7 @@ import { Vec2 } from '@common/vec2';
 import { BehaviorSubject, timer } from 'rxjs';
 import { BoardService } from './board.service';
 import { CommunicationService } from './communication.service';
+import { GameManagerService } from './game-manager.service';
 import { GridService } from './grid.service';
 import { PlayerService } from './player.service';
 import { ReserveService } from './reserve.service';
@@ -18,8 +19,7 @@ import { ReserveService } from './reserve.service';
 export class MultiplayerGameManagerService {
     updatePlayer: BehaviorSubject<string> = new BehaviorSubject('');
     players: Player[] = [];
-    turnDuration: number;
-    hostName: string;
+    lobbyConfig: LobbyConfig;
     guestName: string;
     turnDurationLeft: number = 0;
     isEnded: boolean;
@@ -31,6 +31,7 @@ export class MultiplayerGameManagerService {
     endGameMessage: string = '';
     debug: boolean = false;
     mainPlayer: Player;
+    gameManagerSolo?: GameManagerService;
 
     constructor(
         public gridService: GridService,
@@ -43,9 +44,8 @@ export class MultiplayerGameManagerService {
     }
 
     initialize(lobbyConfig: LobbyConfig, playerName: string) {
-        this.hostName = lobbyConfig.host;
+        this.lobbyConfig = lobbyConfig;
         this.guestName = playerName;
-        this.turnDuration = lobbyConfig.turnDuration;
         this.turnDurationLeft = lobbyConfig.turnDuration;
         this.isEnded = false;
         this.gameMode = lobbyConfig.gameMode;

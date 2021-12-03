@@ -12,14 +12,12 @@ export class AbandonPageComponent {
     constructor(private gameManager: GameManagerService, private router: Router, private communicationService: CommunicationService) {}
 
     quit() {
-        this.router.navigateByUrl('./home');
-        this.gameManager.reset();
-        if (this.isMultiplayer()) {
-            this.communicationService.leaveLobby();
-        }
+        this.router.navigateByUrl('/home');
+        if (this.isMultiplayer()) this.communicationService.leaveLobby();
+        else this.gameManager.reset();
     }
 
     isMultiplayer(): boolean {
-        return this.router.url === './multiplayer-game';
+        return this.router.url === '/multiplayer-game';
     }
 }

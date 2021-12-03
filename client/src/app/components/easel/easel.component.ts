@@ -45,7 +45,7 @@ export class EaselComponent implements OnChanges {
             });
             this.mainPlayerName = this.multiGameManager.getMainPlayer().name;
         } else {
-            this.mainPlayerName = this.gameManager.mainPlayerName;
+            this.mainPlayerName = this.gameManager.gameConfig.playerName1;
             this.tiles = this.gameManager.players.mainPlayer.easel.letters.map((letter) => {
                 return { letter, state: TileState.None } as EaselTile;
             });

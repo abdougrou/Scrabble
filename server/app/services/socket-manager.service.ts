@@ -2,6 +2,7 @@ import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
 import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
 import {
+    ContinueSoloMessage,
     DeleteLobbyMessage,
     ExchangeLettersMessage,
     JoinLobbyMessage,
@@ -151,7 +152,16 @@ export class SocketManagerService {
             });
 
             socket.on(SocketEvent.playerLeaveLobby, (message: LeaveLobbyMessage) => {
-                this.lobbyService.playerLeaveLobby(message.playerName, message.lobbyKey);
+                const lobby = this.lobbyService.getLobby(message.lobbyKey);
+                if (lobby) {
+                    const playerLeaving = lobby.gameManager.getPlayer(message.playerName) as Player;
+                    this.lobbyService.playerLeaveLobby(message.playerName, message.lobbyKey);
+                    if (lobby.gameManager.players.length === 1) {
+                        const mainPlayer = lobby.gameManager.players[0];
+                        this.io.to(message.lobbyKey).emit(SocketEvent.chatMessage, `Système : le joueur ${playerLeaving.name} a quitté la partie.`);
+                        this.io.to(message.lobbyKey).emit(SocketEvent.continueSolo, { vPlayer: playerLeaving, mainPlayer } as ContinueSoloMessage);
+                    }
+                }
             });
 
             socket.on(SocketEvent.update, (message: UpdateMessage) => {

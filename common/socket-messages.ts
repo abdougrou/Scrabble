@@ -16,6 +16,7 @@ export const SocketEvent = {
     setPlayers: 'set players',
     update: 'update',
     reserve: 'reserve',
+    continueSolo: 'continue solo',
 };
 
 export interface JoinLobbyMessage {
@@ -37,6 +38,11 @@ export interface SetConfigMessage {
     config: LobbyConfig;
     guest: string;
     players?: Player[];
+}
+
+export interface ContinueSoloMessage {
+    vPlayer: Player;
+    mainPlayer: Player;
 }
 
 // I dont know how it will work currently

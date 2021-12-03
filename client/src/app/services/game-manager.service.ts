@@ -21,6 +21,7 @@ import { BehaviorSubject, Subscription, timer } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { CommunicationService } from './communication.service';
 import { GridService } from './grid.service';
+import { MultiplayerGameManagerService } from './multiplayer-game-manager.service';
 import { ObjectiveService } from './objective.service';
 
 @Injectable({
@@ -29,18 +30,14 @@ import { ObjectiveService } from './objective.service';
 export class GameManagerService {
     commandMessage: BehaviorSubject<ChatMessage> = new BehaviorSubject({ user: '', body: '' });
     endTurn: BehaviorSubject<string> = new BehaviorSubject('');
-    turnDuration: number;
     currentTurnDurationLeft: number;
     subscription: Subscription;
     tilePlaceBackSubscription: Subscription;
     randomPlayerNameIndex: number;
     isFirstTurn: boolean = true;
-    mainPlayerName: string;
-    enemyPlayerName: string;
     isEnded: boolean;
     endGameMessage: string = '';
     debug: boolean = false;
-    isMultiPlayer: boolean;
     gameConfig: GameConfig;
     firstMove: boolean = true;
 
@@ -61,10 +58,6 @@ export class GameManagerService {
 
     initialize(gameConfig: GameConfig) {
         this.gameConfig = gameConfig;
-        this.mainPlayerName = gameConfig.playerName1;
-        this.enemyPlayerName = gameConfig.playerName2;
-        this.isMultiPlayer = gameConfig.isMultiPlayer;
-        this.turnDuration = gameConfig.duration;
         this.currentTurnDurationLeft = gameConfig.duration;
         this.isEnded = false;
         this.board.initialize(gameConfig.bonusEnabled);
@@ -73,27 +66,38 @@ export class GameManagerService {
             this.communication.getDictionaryFile(gameConfig.dictionary as DictionaryInfo).subscribe((str) => {
                 trie = this.readStringDictionary(str);
             });
-        else trie = this.readDictionary('@app/../assets/dictionnary.json');
+        else trie = this.readDictionary('assets/dictionnary.json');
         this.moveGeneratorService.dictionary = trie;
         if (this.gameConfig.gameMode === GameMode.LOG2990) {
             this.placedWords = new Trie();
             this.objectiveService.initialize();
         }
-        this.initializePlayers([this.mainPlayerName, this.enemyPlayerName]);
-        this.players.mainPlayer = this.players.getPlayerByName(this.mainPlayerName);
+        this.initializePlayers([this.gameConfig.playerName1, this.gameConfig.playerName2]);
+        this.players.mainPlayer = this.players.getPlayerByName(this.gameConfig.playerName1);
+        this.startTimer();
+    }
+
+    initializeFromMultiplayer(gameManager: MultiplayerGameManagerService, vPlayer: Player, mainPlayer: Player) {
+        this.board.data = gameManager.board.data;
+        this.board.pointGrid = gameManager.board.pointGrid;
+        this.reserve.data = gameManager.reserve.data;
+        this.reserve.size = gameManager.reserve.size;
+        this.players.players.push(mainPlayer);
+        this.virtualPlayerService.setupVirtualPlayer(vPlayer.name, vPlayer.easel, vPlayer.score, false);
+        this.players.mainPlayer = mainPlayer;
         this.startTimer();
     }
 
     startTimer() {
         const source = timer(0, SECOND_MD);
         this.subscription = source.subscribe((seconds) => {
-            this.currentTurnDurationLeft = this.turnDuration - (seconds % this.turnDuration) - 1;
+            this.currentTurnDurationLeft = this.gameConfig.duration - (seconds % this.gameConfig.duration) - 1;
             if (
                 ((this.players.current as VirtualPlayer).chooseAction !== undefined &&
-                    this.currentTurnDurationLeft === this.turnDuration - VIRTUAL_PLAYER_MAX_TURN_DURATION) ||
+                    this.currentTurnDurationLeft === this.gameConfig.duration - VIRTUAL_PLAYER_MAX_TURN_DURATION) ||
                 this.currentTurnDurationLeft === 0
             ) {
-                this.currentTurnDurationLeft = this.turnDuration;
+                this.currentTurnDurationLeft = this.gameConfig.duration;
                 this.switchPlayers();
             }
         });
@@ -116,7 +120,7 @@ export class GameManagerService {
 
     initializePlayers(playerNames: string[]) {
         this.players.createPlayer(playerNames[0], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
-        if (this.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
+        if (this.gameConfig.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
         else {
             this.virtualPlayerService.setupVirtualPlayer(
                 playerNames[1],
@@ -134,7 +138,7 @@ export class GameManagerService {
     switchPlayers() {
         this.players.switchPlayers();
         this.subscription.unsubscribe();
-        this.currentTurnDurationLeft = this.turnDuration;
+        this.currentTurnDurationLeft = this.gameConfig.duration;
         this.startTimer();
         // Send player switch event
         this.endTurn.next(this.players.current.name);
@@ -249,8 +253,12 @@ export class GameManagerService {
         const msg: ChatMessage = {
             user: SYSTEM_NAME,
             body: `La partie est terminée! <br>
-            chevalet de ${this.players.getPlayerByName(this.mainPlayerName).name}: ${this.players.getPlayerByName(this.mainPlayerName).easel}.<br>
-            chevalet de ${this.players.getPlayerByName(this.enemyPlayerName).name}: ${this.players.getPlayerByName(this.enemyPlayerName).easel}.`,
+            chevalet de ${this.players.getPlayerByName(this.gameConfig.playerName1).name}: ${
+                this.players.getPlayerByName(this.gameConfig.playerName1).easel
+            }.<br>
+            chevalet de ${this.players.getPlayerByName(this.gameConfig.playerName2).name}: ${
+                this.players.getPlayerByName(this.gameConfig.playerName2).easel
+            }.`,
         };
         this.commandMessage.next(msg);
         this.stopTimer();

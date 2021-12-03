@@ -33,8 +33,8 @@ describe('VirtualPlayerLevelPopupComponent', () => {
             imports: [HttpClientTestingModule, BrowserAnimationsModule, RouterTestingModule, AppMaterialModule],
             declarations: [VirtualPlayerLevelPopupComponent],
             providers: [
-                { provide: MAT_DIALOG_DATA, useValue: { config: gameConfig } },
                 { provide: MatDialogRef, useValue: dialogMock },
+                { provide: MAT_DIALOG_DATA, useValue: { config: gameConfig } },
             ],
         }).compileComponents();
     });
