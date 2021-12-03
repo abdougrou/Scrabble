@@ -4,6 +4,7 @@ import { FileTemplate } from '@common/fileTemplate';
 import * as fs from 'fs';
 import 'reflect-metadata';
 import { Service } from 'typedi';
+
 @Service()
 export class DictionaryService {
     addDictionary(fileTemplate: FileTemplate): boolean {

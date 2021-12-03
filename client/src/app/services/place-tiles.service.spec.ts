@@ -13,6 +13,7 @@ export class GameManagerInterfaceMock {
     mainPlayer: Player = { name: 'player', easel: new Easel(['a', 'b', 'c', 'd', 'e', 'f', '*']), score: 0, debug: false };
     secondaryPlayer = { name: 'player2', easel: new Easel(['a', 'b', 'c', 'd', 'e', 'f', 'g']), score: 0, debug: false };
     switched: boolean = false;
+    placed: boolean;
 
     getMainPlayer(): Player {
         return this.mainPlayer;
@@ -23,10 +24,7 @@ export class GameManagerInterfaceMock {
     }
 
     placeWord(word: string, coord: Vec2, vertical: boolean, player: Player) {
-        console.log(word);
-        console.log(coord);
-        console.log(vertical);
-        console.log(player);
+        this.placed = word !== undefined && coord !== undefined && vertical !== undefined && player !== undefined;
     }
 
     switchPlayers() {
