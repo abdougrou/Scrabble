@@ -53,9 +53,7 @@ describe('WaitingPopupComponent', () => {
 
     it('should close popup if game started', fakeAsync(() => {
         const spyClose = spyOn(component.dialogRef, 'close').and.callThrough();
-        console.log('communication started', component.communication.started);
         component.communication.started = true;
-        console.log('communication started', component.communication.started);
         tick();
         expect(spyClose).toHaveBeenCalled();
     }));

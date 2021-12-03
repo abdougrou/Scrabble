@@ -33,6 +33,7 @@ import { GamePageComponent } from '@app/pages/game-page/game-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { MaterialPageComponent } from '@app/pages/material-page/material-page.component';
 import { MultiplayerGamePageComponent } from '@app/pages/multiplayer-game-page/multiplayer-game-page.component';
+import { VirtualPlayerLevelPopupComponent } from './components/virtual-player-level-popup/virtual-player-level-popup.component';
 
 /**
  * Main module that is used in main.ts.
@@ -69,6 +70,7 @@ import { MultiplayerGamePageComponent } from '@app/pages/multiplayer-game-page/m
         PlayerNameFormComponent,
         DictionaryPopupComponent,
         EditDictionaryPopupComponent,
+        VirtualPlayerLevelPopupComponent,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
     imports: [

@@ -1,20 +1,23 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnDestroy } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Dictionary, GameMode } from '@app/classes/game-config';
 import { MultiGameConfigComponent } from '@app/components/multi-game-config/multi-game-config.component';
 import { MultiplayerJoinFormComponent } from '@app/components/multiplayer-join-form/multiplayer-join-form.component';
-import { DIALOG_HEIGHT, DIALOG_WIDTH, DURATION_INIT } from '@app/constants';
+import { DIALOG_HEIGHT, DIALOG_WIDTH, DURATION_INIT, SECOND_MD } from '@app/constants';
 import { CommunicationService } from '@app/services/communication.service';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { LobbyConfig } from '@common/lobby-config';
+import { Subscription, timer } from 'rxjs';
 
 @Component({
     selector: 'app-multiplayer-rooms',
     templateUrl: './multiplayer-rooms.component.html',
     styleUrls: ['./multiplayer-rooms.component.scss'],
 })
-export class MultiplayerRoomsComponent {
+export class MultiplayerRoomsComponent implements OnDestroy {
     lobbies: LobbyConfig[] = [];
+    getLobbiesSubscription: Subscription;
 
     constructor(
         public dialogRef: MatDialogRef<MultiplayerRoomsComponent>,
@@ -22,8 +25,14 @@ export class MultiplayerRoomsComponent {
         public gameManager: GameManagerService,
         public dialog: MatDialog,
         @Inject(MAT_DIALOG_DATA) public data: { mode: GameMode },
+        private snackBar: MatSnackBar,
     ) {
-        this.getLobbies();
+        const source = timer(0, SECOND_MD);
+        this.getLobbiesSubscription = source.subscribe(() => this.getLobbies());
+    }
+
+    ngOnDestroy() {
+        this.getLobbiesSubscription.unsubscribe();
     }
 
     async createLobby() {
@@ -63,7 +72,12 @@ export class MultiplayerRoomsComponent {
     }
 
     joinLobby(key: string): void {
-        if (!this.lobbies.find((lobby) => lobby.key === key)) window.alert("La salle n'est pas disponible, veuillez actualiser la liste des salles.");
+        if (!this.lobbies.find((lobby) => lobby.key === key))
+            this.snackBar.open("La salle n'est pas disponible, veuillez actualiser la liste des salles.", 'Fermer', {
+                duration: 3000,
+                panelClass: ['red-snackbar'],
+            });
+
         this.openJoinPopup(key)
             .afterClosed()
             .subscribe((result) => {
