@@ -2,10 +2,11 @@ import { HttpClient, HttpEvent, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Easel } from '@app/classes/easel';
 import { ChatMessage } from '@app/classes/message';
+import { Objective } from '@app/classes/objective';
 import { Player } from '@app/classes/player';
 import { DictionaryInfo } from '@common/dictionaryTemplate';
 import { FileTemplate } from '@common/fileTemplate';
-import { LobbyConfig } from '@common/lobby-config';
+import { GameMode, LobbyConfig } from '@common/lobby-config';
 import { PlayerName } from '@common/player-name';
 import { ScoreConfig } from '@common/score-config';
 import {
@@ -22,13 +23,14 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
-    UpdateMessage,
+    UpdateMessage
 } from '@common/socket-messages';
 import { Vec2 } from '@common/vec2';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import * as io from 'socket.io-client';
 import { MultiplayerGameManagerService } from './multiplayer-game-manager.service';
+import { PlayerService } from './player.service';
 
 @Injectable({
     providedIn: 'root',
@@ -46,7 +48,7 @@ export class CommunicationService {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
     };
-    constructor(private readonly http: HttpClient) {
+    constructor(private readonly http: HttpClient, private playerService: PlayerService) {
         this.socket = io.io('ws://localhost:3000');
 
         this.socket.on(SocketEvent.setTimer, () => {
@@ -58,8 +60,8 @@ export class CommunicationService {
                 this.gameManager.player.players[playerIndex] = player;
                 playerIndex++;
             }*/
-            this.gameManager.players = gameManager.players;
-            this.gameManager.players.forEach((player) => (player.easel = new Easel(player.easel.letters)));
+            this.playerService.players = gameManager.players;
+            this.playerService.players.forEach((player) => (player.easel = new Easel(player.easel.letters)));
             this.gameManager.reserve.data = gameManager.reserveData;
             this.gameManager.reserve.size = gameManager.reserveCount;
             this.gameManager.board.data = gameManager.boardData;
@@ -113,7 +115,8 @@ export class CommunicationService {
             this.started = true;
             this.config = message.config;
             this.guestName = message.guest;
-            this.gameManager.players = message.players as Player[];
+            this.playerService.players = message.players as Player[];
+            if (this.config.gameMode === GameMode.LOG2990) this.gameManager.objectivesService.objectives = message.objectives as Objective[];
         });
     }
 
@@ -130,7 +133,7 @@ export class CommunicationService {
                 this.gameManager.player.players[playerIndex] = player;
                 playerIndex++;
             }*/
-            this.gameManager.players = gameManager.players;
+            this.playerService.players = gameManager.players;
             this.gameManager.reserve.data = gameManager.reserveData;
             this.gameManager.reserve.size = gameManager.reserveCount;
             this.gameManager.board.data = gameManager.boardData;

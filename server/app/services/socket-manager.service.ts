@@ -47,6 +47,7 @@ export class SocketManagerService {
                         config: message.config,
                         guest: message.guest,
                         players: lobby.gameManager.players,
+                        objectives: lobby.gameManager.objectives,
                     } as SetConfigMessage);
             });
 

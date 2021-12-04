@@ -41,7 +41,7 @@ export class PlayerInfoComponent implements DoCheck, OnDestroy {
         public matDialog: MatDialog,
     ) {
         if (this.router.url === '/multiplayer-game') {
-            this.players = this.multiplayerGameManager.players;
+            this.players = this.playerService.players;
             this.mainPlayerName = this.multiplayerGameManager.getMainPlayer().name;
             this.isEnded = false;
             this.gameMode = this.multiplayerGameManager.gameMode;
@@ -59,7 +59,11 @@ export class PlayerInfoComponent implements DoCheck, OnDestroy {
         }
 
         this.communication.continueSolo().subscribe((message) => {
-            this.gameManager.initializeFromMultiplayer(this.multiplayerGameManager, message.vPlayer, message.mainPlayer);
+            if (this.multiplayerGameManager.mainPlayerName === message.mainPlayer.name) {
+                this.gameManager.initializeFromMultiplayer(this.multiplayerGameManager, message.vPlayer, message.mainPlayer);
+                this.players = this.playerService.players;
+                this.router.navigateByUrl('/game');
+            }
         });
     }
 
@@ -125,7 +129,7 @@ export class PlayerInfoComponent implements DoCheck, OnDestroy {
     }
 
     quit() {
-        if (this.router.url !== '/multiplayer-game') this.gameManager.reset();
+        if (this.router.url === '/game') this.gameManager.reset();
     }
 
     openAbandonPage() {

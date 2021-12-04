@@ -1,3 +1,4 @@
+import { Objective } from '@app/classes/objective';
 import { Player } from '@app/classes/player';
 import { Vec2 } from '@common/vec2';
 import { LobbyConfig } from './lobby-config';
@@ -38,6 +39,7 @@ export interface SetConfigMessage {
     config: LobbyConfig;
     guest: string;
     players?: Player[];
+    objectives?: Objective[];
 }
 
 export interface ContinueSoloMessage {
