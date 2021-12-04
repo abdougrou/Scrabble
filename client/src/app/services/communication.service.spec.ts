@@ -20,7 +20,6 @@ describe('CommunicationService', () => {
     let service: CommunicationService;
     let socketMock: SocketMock;
 
-    const baseUrl = 'http://localhost:3000';
     const expectedLobbies: LobbyConfig[] = [
         {
             key: '',
