@@ -1,9 +1,13 @@
 import { CLASSIC_RESERVE } from '@app/constants';
+import { ClassicRankingService } from '@app/services/classic-ranking.service';
+import { DatabaseService } from '@app/services/database.service';
 import { DictionaryService } from '@app/services/dictionary.service';
+import { Log2990RankingService } from '@app/services/log2990-ranking.service';
 import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
 import { DictionaryInfo } from '@common/dictionaryTemplate';
 import { GameMode, LobbyConfig } from '@common/lobby-config';
 import { Move } from '@common/move';
+import { ScoreConfig } from '@common/score-config';
 import { Vec2 } from '@common/vec2';
 import { readFileSync } from 'fs';
 import { Board } from './board';
@@ -21,12 +25,17 @@ export class GameManager {
     moveGenerator: MoveGenerator;
     firstMove: boolean = true;
     dictionaryService: DictionaryService = new DictionaryService();
+    skipCounter: number;
 
     /**
      * Objectives related variables
      */
     objectives: Objective[];
     placedWords: Trie = new Trie();
+
+    private database: DatabaseService;
+    private classicRanking: ClassicRankingService;
+    private log2990Ranking: Log2990RankingService;
 
     constructor(private config: LobbyConfig) {
         this.players = [];
@@ -39,6 +48,7 @@ export class GameManager {
         this.board = new Board();
         this.board.initialize(config.bonusEnabled);
         this.moveGenerator = new MoveGenerator(trie, this.board.pointGrid);
+        this.skipCounter = 0;
 
         if (config.gameMode === GameMode.LOG2990) {
             this.placedWords = new Trie();
@@ -48,6 +58,10 @@ export class GameManager {
             this.objectives.sort(() => SORT_RANDOM - Math.random());
             while (this.objectives.length > OBJECTIVES_COUNT) this.objectives.pop();
         }
+
+        this.database = new DatabaseService();
+        this.classicRanking = new ClassicRankingService(this.database);
+        this.log2990Ranking = new Log2990RankingService(this.database);
     }
 
     /**
@@ -243,5 +257,13 @@ export class GameManager {
     isCentered(word: string, coord: Vec2, across: boolean): boolean {
         const center = Math.floor(this.board.data.length / 2);
         return across ? coord.y <= center && coord.y + word.length - 1 >= center : coord.x <= center && coord.x + word.length - 1 >= center;
+    }
+
+    endGame() {
+        const winner = this.players[1].score > this.players[0].score ? this.players[1] : this.players[0];
+        const scoreConfig: ScoreConfig = { name: winner.name, score: winner.score };
+
+        if (this.config.gameMode === GameMode.Classic) this.classicRanking.addPlayer(scoreConfig);
+        else this.log2990Ranking.addPlayer(scoreConfig);
     }
 }

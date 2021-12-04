@@ -76,7 +76,7 @@ describe('MoveGenerator', () => {
 
         moveGenerator.extendLeft(board, easel, '', anchor, dictionary.root, anchor.leftPart.length > 0 ? 0 : anchor.leftLength);
         const expectedLegalMoves: Move[] = [
-            { word: 'bcde', coord: { x: 3, y: 2 }, across: true, points: 9, formedWords: 5 },
+            { word: 'bcde', coord: { x: 3, y: 2 }, across: true, points: 21, formedWords: 5 },
             { word: 'abcde', coord: { x: 3, y: 1 }, across: true, points: 10, formedWords: 1 },
         ];
         expect(moveGenerator.legalMoves).to.have.deep.members(expectedLegalMoves);

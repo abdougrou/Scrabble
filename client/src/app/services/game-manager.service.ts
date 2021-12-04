@@ -16,6 +16,7 @@ import { VirtualPlayerService } from '@app/services/virtual-player.service';
 import { PlaceResult } from '@common/command-result';
 import { DictionaryInfo } from '@common/dictionaryTemplate';
 import { Move } from '@common/move';
+import { ScoreConfig } from '@common/score-config';
 import { Vec2 } from '@common/vec2';
 import { BehaviorSubject, Subscription, timer } from 'rxjs';
 import { delay } from 'rxjs/operators';
@@ -94,7 +95,6 @@ export class GameManagerService {
         this.players.players = [];
         this.players.players.push({ name: mainPlayer.name, easel: new Easel(mainPlayer.easel.letters), score: mainPlayer.score });
         this.players.mainPlayer = this.players.players[0];
-        console.log('MainPlayer: ', this.players.mainPlayer);
         this.virtualPlayerService.setupVirtualPlayer(vPlayer.name, vPlayer.easel, vPlayer.score, false);
         this.players.players.push(this.virtualPlayerService.virtualPlayer);
         this.startTimer();
@@ -105,13 +105,11 @@ export class GameManagerService {
         this.subscription = source.subscribe((seconds) => {
             this.currentTurnDurationLeft = this.gameConfig.duration - (seconds % this.gameConfig.duration) - 1;
             if (
-                ((this.players.current as VirtualPlayer).chooseAction !== undefined &&
-                    this.currentTurnDurationLeft === this.gameConfig.duration - VIRTUAL_PLAYER_MAX_TURN_DURATION) ||
-                this.currentTurnDurationLeft === 0
-            ) {
-                this.currentTurnDurationLeft = this.gameConfig.duration;
-                this.switchPlayers();
-            }
+                (this.players.current as VirtualPlayer).chooseAction !== undefined &&
+                this.currentTurnDurationLeft <= this.gameConfig.duration - VIRTUAL_PLAYER_MAX_TURN_DURATION
+            )
+                this.skipTurn();
+            else if (this.currentTurnDurationLeft <= 0) this.switchPlayers();
         });
     }
 
@@ -164,6 +162,7 @@ export class GameManagerService {
                     const letters: string[] = vPlayer.exchange(this.reserve);
                     this.exchangeLetters(vPlayer, letters);
                     messageBody = `${vPlayer.name} a echangé les lettres ${letters.join('')}`;
+                    this.switchPlayers();
                     break;
                 }
                 case PlayAction.Place: {
@@ -172,6 +171,7 @@ export class GameManagerService {
                     messageBody = `${vPlayer.name} a placé le mot ${move.word} ${!move.across ? 'horizental' : 'vertical'}ement a la coordonnee x:${
                         move.coord.y
                     } y:${move.coord.x}`;
+                    this.switchPlayers();
                     break;
                 }
             }
@@ -179,7 +179,6 @@ export class GameManagerService {
                 user: COMMAND_RESULT,
                 body: messageBody,
             });
-            this.switchPlayers();
         });
     }
 
@@ -260,6 +259,14 @@ export class GameManagerService {
         this.commandMessage.next(msg);
         this.stopTimer();
         this.isEnded = true;
+
+        const player = this.players.mainPlayer;
+        const scoreConfig: ScoreConfig = {
+            name: player.name,
+            score: player.score,
+        };
+        if (this.gameConfig.gameMode === GameMode.Classic) this.communication.putClassicPlayerScore(scoreConfig);
+        else this.communication.putLog2990PlayerScore(scoreConfig);
     }
 
     stopTimer() {

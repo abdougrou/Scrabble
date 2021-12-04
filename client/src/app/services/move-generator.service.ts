@@ -3,7 +3,14 @@ import { Anchor } from '@app/classes/anchor';
 import { coordToKey, transpose } from '@app/classes/board-utils';
 import { CrossCheck } from '@app/classes/cross-check';
 import { Trie, TrieNode } from '@app/classes/trie';
-import { CLASSIC_RESERVE, DARK_BLUE_MULTIPLIER, LIGHT_BLUE_MULTIPLIER, PINK_MULTIPLIER, RED_MULTIPLIER } from '@app/constants';
+import {
+    CLASSIC_RESERVE,
+    DARK_BLUE_MULTIPLIER,
+    LIGHT_BLUE_MULTIPLIER,
+    PINK_MULTIPLIER,
+    RED_MULTIPLIER,
+    STARTING_LETTER_AMOUNT
+} from '@app/constants';
 import { Move } from '@common/move';
 import { Vec2 } from '@common/vec2';
 import { BoardService } from './board.service';
@@ -73,7 +80,8 @@ export class MoveGeneratorService {
      * @param board board to generate moves for
      * @param easel current player's easel
      */
-    async generateLegalMoves(easel: string) {
+    generateLegalMoves(easel: string) {
+        easel = easel.split(',').join('');
         this.legalMoves = [];
         this.calculateAnchorsAndCrossChecks();
         this.anchors.forEach((anchor) => {
@@ -124,7 +132,7 @@ export class MoveGeneratorService {
 
         const boardLetter = this.board.data[square.x][square.y];
         if (!boardLetter) {
-            if (node.terminal) {
+            if (node.terminal && easel.length < STARTING_LETTER_AMOUNT) {
                 const coord = anchor.across ? { x: square.x, y: square.y - partialWord.length } : { x: square.x - partialWord.length, y: square.y };
                 this.legalMove(partialWord, coord, anchor.across);
             }
