@@ -23,7 +23,7 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
-    UpdateMessage
+    UpdateMessage,
 } from '@common/socket-messages';
 import { Vec2 } from '@common/vec2';
 import { BehaviorSubject, Observable, of } from 'rxjs';

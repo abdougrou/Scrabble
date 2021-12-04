@@ -69,3 +69,7 @@ export const getCoordinateFromString = (coordStr: string): Vec2 => {
     const coordY = coordStr[0].toLowerCase().charCodeAt(0) - CHAR_OFFSET;
     return { x: coordX, y: coordY } as Vec2;
 };
+
+export const vecEqual = (coordA: Vec2, coordB: Vec2): boolean => {
+    return coordA.x === coordB.x && coordA.y === coordB.y;
+};
