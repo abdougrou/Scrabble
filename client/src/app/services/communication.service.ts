@@ -43,7 +43,7 @@ export class CommunicationService {
     gameManager: MultiplayerGameManagerService;
     guestName: string;
     serverMessage: BehaviorSubject<ChatMessage> = new BehaviorSubject({ user: '', body: '' });
-    private socket: io.Socket;
+    socket: io.Socket;
     private httpOptions = {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
