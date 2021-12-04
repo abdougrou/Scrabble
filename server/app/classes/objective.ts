@@ -1,3 +1,4 @@
+import { vecEqual } from '@app/constants';
 import { Move } from '@common/move';
 import { Vec2 } from '@common/vec2';
 import { Trie } from './trie';
@@ -31,11 +32,21 @@ export const placeInCorner: Objective = {
         };
 
         if (move.across) {
-            if (startCoord === { x: 0, y: 0 } || startCoord === { x: 14, y: 0 } || endCoord === { x: 0, y: 14 } || endCoord === { x: 14, y: 14 }) {
+            if (
+                vecEqual(startCoord, { x: 0, y: 0 }) ||
+                vecEqual(startCoord, { x: 14, y: 0 }) ||
+                vecEqual(endCoord, { x: 0, y: 14 }) ||
+                vecEqual(endCoord, { x: 14, y: 14 })
+            ) {
                 return true;
             }
         } else {
-            if (startCoord === { x: 0, y: 0 } || startCoord === { x: 0, y: 14 } || endCoord === { x: 14, y: 0 } || endCoord === { x: 14, y: 14 }) {
+            if (
+                vecEqual(startCoord, { x: 0, y: 0 }) ||
+                vecEqual(startCoord, { x: 0, y: 14 }) ||
+                vecEqual(endCoord, { x: 14, y: 0 }) ||
+                vecEqual(endCoord, { x: 14, y: 14 })
+            ) {
                 return true;
             }
         }
@@ -95,7 +106,7 @@ export const formPalindrome: Objective = {
     reward: 45,
     description: 'Former un palindrome',
     check: (move: Move): boolean => {
-        return move.word === move.word.split('').reverse().join();
+        return move.word === move.word.split('').reverse().join('');
     },
 };
 

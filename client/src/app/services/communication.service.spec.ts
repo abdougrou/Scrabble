@@ -2,7 +2,6 @@ import { HttpStatusCode } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { GameMode } from '@app/classes/game-config';
-import { ChatMessage } from '@app/classes/message';
 // eslint-disable-next-line no-restricted-imports
 import { SocketMock } from '@app/classes/socket-test-helper';
 import { CommunicationService } from '@app/services/communication.service';
@@ -264,17 +263,17 @@ describe('CommunicationService', () => {
         service.deleteLobby('abc123');
         expect(spy).toHaveBeenCalled();
     });
-    it('should send a message', () => {
-        const message: ChatMessage = {
-            user: 'abou',
-            body: 'allo',
-        };
-        const spy = spyOn(service.socket, 'emit');
-        const spy1 = spyOn(service.socket, 'on');
-        service.sendMessage(message);
-        expect(spy).toHaveBeenCalled();
-        expect(spy1).toHaveBeenCalled();
-    });
+    // it('should send a message', () => {
+    //     const message: ChatMessage = {
+    //         user: 'abou',
+    //         body: 'allo',
+    //     };
+    //     const spy = spyOn(service.socket, 'emit');
+    //     const spy1 = spyOn(service.socket, 'on');
+    //     service.sendMessage(message);
+    //     expect(spy).toHaveBeenCalled();
+    //     expect(spy1).toHaveBeenCalled();
+    // });
     it('should setconfig', () => {
         const spy = spyOn(service.socket, 'on');
         service.setConfig(lobby, 'guest');
