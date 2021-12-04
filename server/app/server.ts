@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+// Allowed console log in this file to make sure the server started correctly
 import { Application } from '@app/app';
 import * as http from 'http';
 import { AddressInfo } from 'net';

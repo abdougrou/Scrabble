@@ -63,7 +63,8 @@ describe('Database service', () => {
         databaseService.db = client.db('database');
         await databaseService.database.collection('classic_ranking').insertMany(DEFAULT_SCOREBOARD);
         const courses = await databaseService.database.collection('classic_ranking').find({}).toArray();
-        expect(courses.length).to.equal(5);
+        const expected = 5;
+        expect(courses.length).to.equal(expected);
     });
 
     it('should not start another client if its already', async () => {

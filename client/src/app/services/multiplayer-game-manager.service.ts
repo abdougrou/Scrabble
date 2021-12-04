@@ -58,8 +58,6 @@ export class MultiplayerGameManagerService {
     }
 
     getMainPlayer(): Player {
-        // const result = this.player.players.find((player) => player.name === this.mainPlayerName);
-        // console.log(result);
         if (this.player.players[0].name === this.mainPlayerName) return this.player.players[0];
         else return this.player.players[1];
     }

@@ -8,6 +8,7 @@ import { DatabaseService } from './database.service';
 
 const DATABASE_COLLECTION = 'classic_ranking';
 const MAX = 5;
+const ERROR = 500;
 @Service()
 export class ClassicRankingService {
     dataSize = 0;
@@ -19,7 +20,7 @@ export class ClassicRankingService {
 
     async reset() {
         this.collection.deleteMany({}).catch(() => {
-            throw new HttpException('Failed to reset', 500);
+            throw new HttpException('Failed to reset', ERROR);
         });
         this.collection.insertMany(DEFAULT_SCOREBOARD);
         this.dataSize = 5;
@@ -49,9 +50,8 @@ export class ClassicRankingService {
             if (!(await this.validateSize())) {
                 if (await this.validatePlayer(playerscore)) this.deleteLowestPlayer();
             }
-            await this.collection.insertOne(playerscore).catch((error: Error) => {
-                // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-                throw new HttpException('Failed to insert', 500);
+            await this.collection.insertOne(playerscore).catch(() => {
+                throw new HttpException('Failed to insert', ERROR);
             });
         } else {
             throw new Error('Invalid');

@@ -74,7 +74,8 @@ describe('Log2990 ranking service', () => {
     it('reset should reset the database to its default values', async () => {
         await log2990RankingService.reset();
         const players = await log2990RankingService.collection.find({}).toArray();
-        expect(players.length).to.equal(5);
+        const expected = 5;
+        expect(players.length).to.equal(expected);
     });
 
     it('adding a player after max size should delete the lowest', async () => {
@@ -85,7 +86,8 @@ describe('Log2990 ranking service', () => {
         await log2990RankingService.reset();
         await log2990RankingService.addPlayer(player);
         const players = await log2990RankingService.collection.find({}).toArray();
-        expect(players.length).to.equal(5);
+        const expected = 5;
+        expect(players.length).to.equal(expected);
     });
 
     it('Validate player should return true if max size isnt reached ', async () => {

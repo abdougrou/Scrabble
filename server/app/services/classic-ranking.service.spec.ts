@@ -74,7 +74,8 @@ describe('Classic ranking service', () => {
     it('reset should reset the database to its default values', async () => {
         await classicRankingService.reset();
         const players = await classicRankingService.collection.find({}).toArray();
-        expect(players.length).to.equal(5);
+        const expected = 5;
+        expect(players.length).to.equal(expected);
     });
 
     it('adding a player after max size should delete the lowest', async () => {
@@ -85,7 +86,8 @@ describe('Classic ranking service', () => {
         await classicRankingService.reset();
         await classicRankingService.addPlayer(player);
         const players = await classicRankingService.collection.find({}).toArray();
-        expect(players.length).to.equal(5);
+        const expected = 5;
+        expect(players.length).to.equal(expected);
     });
 
     it('Validate player should return true if max size isnt reached ', async () => {
