@@ -12,6 +12,7 @@ import { ScoreConfig } from '@common/score-config';
 import { SetConfigMessage } from '@common/socket-messages';
 import { of } from 'rxjs';
 import { Socket } from 'socket.io-client';
+import { environment } from 'src/environments/environment';
 // import SpyObj = jasmine.SpyObj;
 
 describe('CommunicationService', () => {
@@ -103,7 +104,7 @@ describe('CommunicationService', () => {
             expect(response).toBe(expectedLobbies);
         }, fail);
 
-        const req = httpMock.expectOne(`${baseUrl}/api/lobby`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/api/lobby`);
         expect(req.request.method).toBe('GET');
         // actually send the request
         req.flush(expectedLobbies);
@@ -113,7 +114,7 @@ describe('CommunicationService', () => {
         service.putLobby(expectedLobbies[0]).subscribe((key) => {
             expect(key).toBe(expectedKey);
         });
-        const req = httpMock.expectOne(`${baseUrl}/api/lobby`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/api/lobby`);
         expect(req.request.method).toBe('PUT');
         req.flush(expectedKey);
     });
@@ -121,7 +122,7 @@ describe('CommunicationService', () => {
         service.getClassicRanking().subscribe((score) => {
             expect(score).toBe(expectedScoreConfig);
         });
-        const req = httpMock.expectOne(`${baseUrl}/data/ranking/classic`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/data/ranking/classic`);
         expect(req.request.method).toBe('GET');
         req.flush(expectedScoreConfig);
     });
@@ -129,7 +130,7 @@ describe('CommunicationService', () => {
         service.getLog2990Ranking().subscribe((score) => {
             expect(score).toBe(expectedScoreConfig);
         });
-        const req = httpMock.expectOne(`${baseUrl}/data/ranking/log2990`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/data/ranking/log2990`);
         expect(req.request.method).toBe('GET');
         req.flush(expectedScoreConfig);
     });
@@ -137,7 +138,7 @@ describe('CommunicationService', () => {
         service.putClassicPlayerScore(expectedScoreConfig[0]).subscribe((response) => {
             expect(response).toBe(HttpStatusCode.Created);
         });
-        const req = httpMock.expectOne(`${baseUrl}/data/ranking/classic`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/data/ranking/classic`);
         expect(req.request.method).toBe('POST');
         req.flush(HttpStatusCode.Created);
     });
@@ -145,7 +146,7 @@ describe('CommunicationService', () => {
         service.putLog2990PlayerScore(expectedScoreConfig[0]).subscribe((response) => {
             expect(response).toBe(HttpStatusCode.Created);
         });
-        const req = httpMock.expectOne(`${baseUrl}/data/ranking/log2990`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/data/ranking/log2990`);
         expect(req.request.method).toBe('POST');
         req.flush(HttpStatusCode.Created);
     });
@@ -153,7 +154,7 @@ describe('CommunicationService', () => {
         service.resetPlayerScores().subscribe((response) => {
             expect(response).toBe(HttpStatusCode.NoContent);
         });
-        const req = httpMock.expectOne(`${baseUrl}/data/ranking/reset`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/data/ranking/reset`);
         expect(req.request.method).toBe('DELETE');
         req.flush(HttpStatusCode.NoContent);
     });
@@ -161,7 +162,7 @@ describe('CommunicationService', () => {
         service.getPlayerNames().subscribe((names) => {
             expect(names).toBe(expectedPlayerName);
         });
-        const req = httpMock.expectOne(`${baseUrl}/data/player-names`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/data/player-names`);
         expect(req.request.method).toBe('GET');
         req.flush(expectedPlayerName);
     });
@@ -169,7 +170,7 @@ describe('CommunicationService', () => {
         service.getExpertPlayerNames().subscribe((names) => {
             expect(names).toBe(expectedPlayerName);
         });
-        const req = httpMock.expectOne(`${baseUrl}/data/player-names/expert`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/data/player-names/expert`);
         expect(req.request.method).toBe('GET');
         req.flush(expectedPlayerName);
     });
@@ -177,7 +178,7 @@ describe('CommunicationService', () => {
         service.getBeginnerPlayerNames().subscribe((names) => {
             expect(names).toBe(expectedPlayerName);
         });
-        const req = httpMock.expectOne(`${baseUrl}/data/player-names/beginner`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/data/player-names/beginner`);
         expect(req.request.method).toBe('GET');
         req.flush(expectedPlayerName);
     });
@@ -185,7 +186,7 @@ describe('CommunicationService', () => {
         service.addPlayerName(expectedPlayerName[0]).subscribe((response) => {
             expect(response).toBeTrue();
         });
-        const req = httpMock.expectOne(`${baseUrl}/data/player-names`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/data/player-names`);
         expect(req.request.method).toBe('POST');
         req.flush(true);
     });
@@ -193,7 +194,7 @@ describe('CommunicationService', () => {
         service.deletePlayerName(expectedPlayerName[0]).subscribe((response) => {
             expect(response).toBeFalse();
         });
-        const req = httpMock.expectOne(`${baseUrl}/data/player-names/delete`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/data/player-names/delete`);
         expect(req.request.method).toBe('POST');
         req.flush(false);
     });
@@ -201,7 +202,7 @@ describe('CommunicationService', () => {
         service.resetPlayerNames().subscribe((response) => {
             expect(response).toBe(HttpStatusCode.NoContent);
         });
-        const req = httpMock.expectOne(`${baseUrl}/data/player-names/reset`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/data/player-names/reset`);
         expect(req.request.method).toBe('DELETE');
         req.flush(HttpStatusCode.NoContent);
     });
@@ -209,7 +210,7 @@ describe('CommunicationService', () => {
         service.resetDictionary().subscribe((response) => {
             expect(response).toBe(HttpStatusCode.NoContent);
         });
-        const req = httpMock.expectOne(`${baseUrl}/data/dictionary/reset`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/data/dictionary/reset`);
         expect(req.request.method).toBe('DELETE');
         req.flush(HttpStatusCode.NoContent);
     });
@@ -217,7 +218,7 @@ describe('CommunicationService', () => {
         service.modifyPlayerName(expectedPlayerName[0], expectedPlayerName[1]).subscribe((response) => {
             expect(response).toBeTrue();
         });
-        const req = httpMock.expectOne(`${baseUrl}/data/player-names/modify`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/data/player-names/modify`);
         expect(req.request.method).toBe('POST');
         req.flush(true);
     });
@@ -225,7 +226,7 @@ describe('CommunicationService', () => {
         service.getDictionaryInfo().subscribe((dictionnary) => {
             expect(dictionnary).toBe(expectedDictionnaryInfo);
         });
-        const req = httpMock.expectOne(`${baseUrl}/data/dictionary`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/data/dictionary`);
         expect(req.request.method).toBe('GET');
         req.flush(expectedDictionnaryInfo);
     });
@@ -233,7 +234,7 @@ describe('CommunicationService', () => {
         service.modifyDictionary(expectedDictionnaryInfo[0].title, expectedDictionnaryInfo[1]).subscribe((response) => {
             expect(response).toBeTrue();
         });
-        const req = httpMock.expectOne(`${baseUrl}/data/dictionary/modify`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/data/dictionary/modify`);
         expect(req.request.method).toBe('POST');
         req.flush(true);
     });
@@ -241,7 +242,7 @@ describe('CommunicationService', () => {
         service.deleteDictionary(expectedDictionnaryInfo[0]).subscribe((response) => {
             expect(response).toBeTrue();
         });
-        const req = httpMock.expectOne(`${baseUrl}/data/dictionary/delete`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/data/dictionary/delete`);
         expect(req.request.method).toBe('POST');
         req.flush(true);
     });
@@ -249,7 +250,7 @@ describe('CommunicationService', () => {
         service.getDictionaryFile(expectedDictionnaryInfo[0]).subscribe((response) => {
             expect(response).toBe('dictionnaire');
         });
-        const req = httpMock.expectOne(`${baseUrl}/data/dictionary/file`);
+        const req = httpMock.expectOne(`${environment.serverUrl}/data/dictionary/file`);
         expect(req.request.method).toBe('POST');
         req.flush('dictionnaire');
     });
