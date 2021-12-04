@@ -29,13 +29,13 @@ describe('MultiplayerGameManagerService', () => {
     });
 
     it('should get main player', () => {
-        service.players = [
+        service.player.players = [
             { name: '1', easel: new Easel(), score: 0, debug: false },
             { name: '2', easel: new Easel(), score: 0, debug: false },
         ];
         service.mainPlayerName = '1';
         const player: Player = service.getMainPlayer();
-        expect(player).toBe(service.players[0]);
+        expect(player).toBe(service.player.players[0]);
     });
 
     it('should update', () => {
@@ -76,7 +76,7 @@ describe('MultiplayerGameManagerService', () => {
     });
 
     it('should skip turn', () => {
-        service.players = [{ name: '1', easel: new Easel(), score: 0, debug: false }];
+        service.player.players = [{ name: '1', easel: new Easel(), score: 0, debug: false }];
         const spySkipTurn = spyOn(service.communication, 'skipTurn').and.callThrough();
         service.skipTurn();
         expect(spySkipTurn).toHaveBeenCalled();

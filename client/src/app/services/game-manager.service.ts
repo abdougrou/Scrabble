@@ -86,6 +86,7 @@ export class GameManagerService {
             dictionary: gameManager.lobbyConfig.dictionary as Dictionary | DictionaryInfo,
             isMultiPlayer: false,
         };
+        this.currentTurnDurationLeft = gameManager.lobbyConfig.turnDuration;
         this.board.data = gameManager.board.data;
         this.board.pointGrid = gameManager.board.pointGrid;
         this.reserve.data = gameManager.reserve.data;

@@ -5,7 +5,7 @@ import { SECOND_MD } from '@app/constants';
 import { DictionaryInfo } from '@common/dictionaryTemplate';
 import { LobbyConfig } from '@common/lobby-config';
 import { Vec2 } from '@common/vec2';
-import { BehaviorSubject, timer } from 'rxjs';
+import { BehaviorSubject, Subscription, timer } from 'rxjs';
 import { BoardService } from './board.service';
 import { CommunicationService } from './communication.service';
 import { GameManagerService } from './game-manager.service';
@@ -26,7 +26,7 @@ export class MultiplayerGameManagerService {
     mainPlayerName: string;
     gameMode: GameMode;
     dictionary: DictionaryInfo | string;
-
+    subscription: Subscription;
     isFirstTurn: boolean = true;
     endGameMessage: string = '';
     debug: boolean = false;
@@ -75,7 +75,7 @@ export class MultiplayerGameManagerService {
 
     startTimer() {
         const source = timer(0, SECOND_MD);
-        source.subscribe(() => {
+        this.subscription = source.subscribe(() => {
             this.turnDurationLeft -= 1;
             if (this.turnDurationLeft === 0) {
                 this.switchPlayers();
@@ -93,6 +93,10 @@ export class MultiplayerGameManagerService {
 
     skipTurn() {
         this.communication.skipTurn(this.player.players[0]);
+    }
+
+    reset() {
+        this.subscription.unsubscribe();
     }
 
     // TODO implement stopTimer() to end the game after 6 skipTurn
