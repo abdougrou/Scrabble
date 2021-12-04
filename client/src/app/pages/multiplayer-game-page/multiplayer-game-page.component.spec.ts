@@ -51,6 +51,12 @@ describe('MultiplayerGamePageComponent', () => {
         expect(component.clickInsideCounter).toEqual(0);
     });
 
+    it('should keyboardReceiver be different', () => {
+        const oldValue = component.keyboardReceiver;
+        component.changeKeyboardReceiver('event value');
+        expect(component.keyboardReceiver).not.toEqual(oldValue);
+    });
+
     it('should change keyboard receiver', () => {
         component.changeKeyboardReceiver(KEYBOARD_EVENT_RECEIVER.chatbox);
         expect(component.keyboardReceiver).toEqual(KEYBOARD_EVENT_RECEIVER.chatbox);

@@ -3,12 +3,15 @@
 // import { ComponentFixture, TestBed } from '@angular/core/testing';
 // import { MatCardModule } from '@angular/material/card';
 // import { MatDialogModule } from '@angular/material/dialog';
+// import { Router } from '@angular/router';
 // import { RouterTestingModule } from '@angular/router/testing';
 // import { MAX_SKIP_COUNT } from '@app/constants';
 // import { AppMaterialModule } from '@app/modules/material.module';
 // import { GameManagerService } from '@app/services/game-manager.service';
 // import { GridService } from '@app/services/grid.service';
+// import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-manager.service';
 // import { PlayerService } from '@app/services/player.service';
+// import { ReserveService } from '@app/services/reserve.service';
 // import { PlayerInfoComponent } from './player-info.component';
 // import SpyObj = jasmine.SpyObj;
 
@@ -16,14 +19,18 @@
 //     let component: PlayerInfoComponent;
 //     let fixture: ComponentFixture<PlayerInfoComponent>;
 //     let gameManagerService: SpyObj<GameManagerService>;
+//     let multiplayerGameManagerService: SpyObj<MultiplayerGameManagerService>;
 //     let gridService: SpyObj<GridService>;
 //     let playerService: PlayerService;
+//     let reserveService: ReserveService;
 
 //     beforeEach(() => {
 //         playerService = new PlayerService();
-//         playerService.createPlayer('player', []);
-//         playerService.createPlayer('playerTwo', []);
+//         reserveService = new ReserveService();
+//         playerService.createPlayer('player', ['a', 'b']);
+//         playerService.createPlayer('playerTwo', ['c', 'd']);
 //         gameManagerService = jasmine.createSpyObj('GameManagerService', ['buttonSkipTurn', 'reset', 'stopTimer', 'endGame']);
+//         multiplayerGameManagerService = jasmine.createSpyObj('MultiplayerGameManagerService', ['getMainPlayer', 'reset', 'skipTurn', 'endGame']);
 //         gridService = jasmine.createSpyObj('GridService', ['clearBoard', 'drawBoard']);
 //     });
 //     beforeEach(async () => {
@@ -32,8 +39,11 @@
 //             declarations: [PlayerInfoComponent],
 //             schemas: [CUSTOM_ELEMENTS_SCHEMA],
 //             providers: [
-//                 { provide: GameManagerService, useValue: gameManagerService },
 //                 { provide: PlayerService, useValue: playerService },
+//                 { provide: GameManagerService, useValue: gameManagerService },
+//                 { provide: MultiplayerGameManagerService, useValue: multiplayerGameManagerService },
+//                 { provide: ReserveService, useValue: reserveService },
+//                 { provide: Router, useValue: { url: '/game' } },
 //                 { provide: GridService, useValue: gridService },
 //             ],
 //         }).compileComponents();
@@ -52,13 +62,18 @@
 //     it('should have winner', () => {
 //         playerService.players[0].score = 0;
 //         playerService.players[1].score = 10;
+//         component.players = playerService.players;
 
 //         expect(component.winner).toEqual(playerService.players[1].name);
 
-//         playerService.players[0].score = 10;
-//         playerService.players[1].score = 0;
+//         // playerService.players[0].score = 10;
+//         // playerService.players[1].score = 0;
 
-//         expect(component.winner).toEqual(playerService.players[0].name);
+//         // expect(component.winner).toEqual(playerService.players[0].name);
+//     });
+
+//     it('should reserveCount equal reserveService size', () => {
+//         expect(component.reserveCount).toEqual(reserveService.size);
 //     });
 
 //     it('should increase font', () => {

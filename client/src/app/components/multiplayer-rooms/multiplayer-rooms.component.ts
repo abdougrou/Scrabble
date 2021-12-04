@@ -23,7 +23,7 @@ export class MultiplayerRoomsComponent {
         public gameManager: GameManagerService,
         public dialog: MatDialog,
         @Inject(MAT_DIALOG_DATA) public data: { mode: GameMode },
-        private snackBar: MatSnackBar,
+        public snackBar: MatSnackBar,
     ) {
         this.getLobbies();
     }

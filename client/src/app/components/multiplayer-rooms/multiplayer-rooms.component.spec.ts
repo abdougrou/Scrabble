@@ -1,86 +1,137 @@
-// import { HttpClientTestingModule } from '@angular/common/http/testing';
-// import { ComponentFixture, TestBed } from '@angular/core/testing';
-// import { FormBuilder } from '@angular/forms';
-// import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-// import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-// import { RouterTestingModule } from '@angular/router/testing';
-// import { AppMaterialModule } from '@app/modules/material.module';
-// import { GameMode } from '@common/lobby-config';
-// import { MultiplayerRoomsComponent } from './multiplayer-rooms.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormBuilder } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterTestingModule } from '@angular/router/testing';
+import { DURATION_INIT } from '@app/constants';
+import { AppMaterialModule } from '@app/modules/material.module';
+import { CommunicationService } from '@app/services/communication.service';
+import { GameMode, LobbyConfig } from '@common/lobby-config';
+import { from, Observable, of } from 'rxjs';
+import { MultiplayerRoomsComponent } from './multiplayer-rooms.component';
+import SpyObj = jasmine.SpyObj;
 
-// describe('MultiplayerRoomsComponent', () => {
-//     let component: MultiplayerRoomsComponent;
-//     let fixture: ComponentFixture<MultiplayerRoomsComponent>;
+export class CommunicationServiceMock {
+    lobbies: LobbyConfig[] = [{ host: 'name', turnDuration: DURATION_INIT, bonusEnabled: false, dictionary: 'francais', gameMode: GameMode.Classic }];
+    getLobbies(): Observable<LobbyConfig[]> {
+        return from(new Promise<LobbyConfig[]>((resolve) => setTimeout(resolve, 2)).then(() => this.lobbies));
+    }
+}
 
-//     const dialogMock = {
-//         close: () => {
-//             // Do nothing
-//         },
-//     };
+describe('MultiplayerRoomsComponent', () => {
+    let component: MultiplayerRoomsComponent;
+    let fixture: ComponentFixture<MultiplayerRoomsComponent>;
+    let snackbarSpy: SpyObj<MatSnackBar>;
 
-//     beforeEach(async () => {
-//         await TestBed.configureTestingModule({
-//             imports: [HttpClientTestingModule, BrowserAnimationsModule, AppMaterialModule, RouterTestingModule],
-//             declarations: [MultiplayerRoomsComponent],
-//             providers: [
-//                 { provide: MatDialogRef, useValue: dialogMock },
-//                 { provide: MAT_DIALOG_DATA, useValue: {} },
-//                 { provide: MAT_DIALOG_DATA, useValue: { mode: GameMode.Classic } },
-//                 FormBuilder,
-//             ],
-//         }).compileComponents();
-//     });
+    const dialogMock = {
+        close: () => {
+            // Do nothing
+        },
+    };
 
-//     beforeEach(() => {
-//         fixture = TestBed.createComponent(MultiplayerRoomsComponent);
-//         component = fixture.componentInstance;
-//         fixture.detectChanges();
-//     });
+    beforeEach(() => {
+        snackbarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
+    });
 
-//     it('should create', () => {
-//         expect(component).toBeTruthy();
-//     });
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [HttpClientTestingModule, BrowserAnimationsModule, AppMaterialModule, RouterTestingModule],
+            declarations: [MultiplayerRoomsComponent],
+            providers: [
+                { provide: MatDialogRef, useValue: dialogMock },
+                { provide: CommunicationService, useClass: CommunicationServiceMock },
+                { provide: MatSnackBar, useValue: snackbarSpy },
+                { provide: MAT_DIALOG_DATA, useValue: {} },
+                { provide: MAT_DIALOG_DATA, useValue: { mode: GameMode.Classic } },
+                FormBuilder,
+            ],
+        }).compileComponents();
+    });
 
-//     it('create lobby should open form popup', async () => {
-//         const spy = spyOn(component, 'openFormPopup').and.callThrough();
-//         component.createLobby();
-//         fixture.detectChanges();
-//         expect(spy).toHaveBeenCalled();
-//     });
+    beforeEach(() => {
+        fixture = TestBed.createComponent(MultiplayerRoomsComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-//     it('should refresh lobbies list after creating lobby', () => {
-//         const spy = spyOn(component, 'getLobbies').and.callThrough();
-//         component.createLobby();
-//         fixture.detectChanges();
-//         expect(spy).toBeTruthy();
-//     });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 
-//     it('should open form popup', () => {
-//         const spy = spyOn(component.dialog, 'open').and.callThrough();
-//         component.openFormPopup();
-//         fixture.detectChanges();
-//         expect(spy).toBeTruthy();
-//     });
+    it('create lobby should open form popup', async () => {
+        const spy = spyOn(component.dialogRef, 'close').and.callThrough();
+        fixture.detectChanges();
+        // spyOn(component, 'openFormPopup').and.returnValue(Promise.resolve(true));
+        spyOn(component, 'openFormPopup').and.returnValue({ afterClosed: () => of(true) } as MatDialogRef<typeof component>);
+        component.createLobby();
+        fixture.detectChanges();
+        expect(spy).toHaveBeenCalled();
+    });
 
-//     it('should refreh lobbies', () => {
-//         const spy = spyOn(component.communication, 'getLobbies').and.callThrough();
-//         component.getLobbies();
-//         fixture.detectChanges();
-//         expect(spy).toHaveBeenCalled();
-//     });
+    it('join lobby should open join form popup', async () => {
+        const spy = spyOn(component.dialogRef, 'close').and.callThrough();
+        component.lobbies = [
+            { key: 'abcd', host: 'name', turnDuration: DURATION_INIT, bonusEnabled: false, dictionary: 'francais', gameMode: GameMode.Classic },
+        ];
+        fixture.detectChanges();
+        spyOn(component, 'openJoinPopup').and.returnValue({ afterClosed: () => of(true) } as MatDialogRef<typeof component>);
+        component.joinLobby('abcd');
+        fixture.detectChanges();
+        expect(spy).toHaveBeenCalled();
+    });
 
-//     it('should join random lobby', () => {
-//         const spyJoin = spyOn(component, 'joinLobby').and.callThrough();
-//         component.joinRandomLobby();
-//         fixture.detectChanges();
-//         expect(spyJoin).toHaveBeenCalled();
-//     });
+    it('join lobby should open snack bar error', async () => {
+        const spy = spyOn(component.snackBar, 'open').and.callThrough();
+        component.lobbies = [
+            { key: 'keyA', host: 'name', turnDuration: DURATION_INIT, bonusEnabled: false, dictionary: 'francais', gameMode: GameMode.Classic },
+        ];
+        fixture.detectChanges();
+        component.joinLobby('keyB');
+        fixture.detectChanges();
+        expect(spy).toHaveBeenCalled();
+    });
 
-//     it('should open join form popup', () => {
-//         const spyJoin = spyOn(component.dialog, 'open').and.callThrough();
-//         const key = 'key';
-//         component.openJoinPopup(key);
-//         fixture.detectChanges();
-//         expect(spyJoin).toHaveBeenCalled();
-//     });
-// });
+    it('should refresh lobbies list after creating lobby', () => {
+        const spy = spyOn(component, 'getLobbies').and.callThrough();
+        component.createLobby();
+        fixture.detectChanges();
+        expect(spy).toBeTruthy();
+    });
+
+    it('should open form popup', () => {
+        const spy = spyOn(component.dialog, 'open').and.callThrough();
+        component.openFormPopup();
+        fixture.detectChanges();
+        expect(spy).toBeTruthy();
+    });
+
+    it('should refreh lobbies', () => {
+        const spy = spyOn(component.communication, 'getLobbies').and.callThrough();
+        component.getLobbies();
+        fixture.detectChanges();
+        expect(spy).toHaveBeenCalled();
+    });
+
+    it('should join random lobby', () => {
+        component.lobbies = [
+            { key: 'keyA', host: 'name', turnDuration: DURATION_INIT, bonusEnabled: false, dictionary: 'francais', gameMode: GameMode.Classic },
+            { key: 'keyB', host: 'name', turnDuration: DURATION_INIT, bonusEnabled: false, dictionary: 'francais', gameMode: GameMode.Classic },
+            { key: 'keyC', host: 'name', turnDuration: DURATION_INIT, bonusEnabled: false, dictionary: 'francais', gameMode: GameMode.Classic },
+            { key: 'keyD', host: 'name', turnDuration: DURATION_INIT, bonusEnabled: false, dictionary: 'francais', gameMode: GameMode.Classic },
+        ];
+        const spyJoin = spyOn(component, 'joinLobby').and.callThrough();
+        component.joinRandomLobby();
+        fixture.detectChanges();
+        expect(spyJoin).toHaveBeenCalled();
+    });
+
+    it('should open join form popup', () => {
+        const spyJoin = spyOn(component.dialog, 'open').and.callThrough();
+        const key = 'key';
+        component.openJoinPopup(key);
+        fixture.detectChanges();
+        expect(spyJoin).toHaveBeenCalled();
+    });
+});
