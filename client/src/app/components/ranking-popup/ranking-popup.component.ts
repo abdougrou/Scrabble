@@ -11,7 +11,7 @@ export class RankingPopupComponent {
     columnsToDisplay = ['name', 'score'];
     classicRanking: ScoreConfig[] = [];
     log2990Ranking: ScoreConfig[] = [];
-    constructor(private communication: CommunicationService) {
+    constructor(public communication: CommunicationService) {
         this.getClassicRanking();
         this.getLog2990Ranking();
     }

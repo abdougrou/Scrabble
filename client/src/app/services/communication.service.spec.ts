@@ -2,15 +2,24 @@ import { HttpStatusCode } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { GameMode } from '@app/classes/game-config';
+import { ChatMessage } from '@app/classes/message';
+// eslint-disable-next-line no-restricted-imports
+import { SocketMock } from '@app/classes/socket-test-helper';
 import { CommunicationService } from '@app/services/communication.service';
 import { DictionaryInfo } from '@common/dictionaryTemplate';
 import { LobbyConfig } from '@common/lobby-config';
 import { Difficulty, PlayerName } from '@common/player-name';
 import { ScoreConfig } from '@common/score-config';
+import { SetConfigMessage } from '@common/socket-messages';
+import { of } from 'rxjs';
+import { Socket } from 'socket.io-client';
+// import SpyObj = jasmine.SpyObj;
 
 describe('CommunicationService', () => {
     let httpMock: HttpTestingController;
     let service: CommunicationService;
+    let socketMock: SocketMock;
+
     const baseUrl = 'http://localhost:3000';
     const expectedLobbies: LobbyConfig[] = [
         {
@@ -60,9 +69,22 @@ describe('CommunicationService', () => {
             description: 'un dictionnaire anglais',
         },
     ];
+    const lobby: LobbyConfig = {
+        host: 'abdou',
+        turnDuration: 60,
+        bonusEnabled: false,
+        dictionary: 'francais',
+        gameMode: GameMode.Classic,
+    };
+
+    beforeEach(() => {
+        socketMock = new SocketMock();
+    });
+
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule],
+            providers: [{ provide: Socket, useValue: socketMock }],
         });
         service = TestBed.inject(CommunicationService);
         httpMock = TestBed.inject(HttpTestingController);
@@ -231,5 +253,58 @@ describe('CommunicationService', () => {
         const req = httpMock.expectOne(`${baseUrl}/data/dictionary/file`);
         expect(req.request.method).toBe('POST');
         req.flush('dictionnaire');
+    });
+    it('should emit switch player', () => {
+        const spy = spyOn(service.socket, 'emit');
+        service.switchPlayers();
+        expect(spy).toHaveBeenCalled();
+    });
+    it('should update gameManager', () => {
+        const spy = spyOn(service.socket, 'emit');
+        service.deleteLobby('abc123');
+        expect(spy).toHaveBeenCalled();
+    });
+    it('should send a message', () => {
+        const message: ChatMessage = {
+            user: 'abou',
+            body: 'allo',
+        };
+        const spy = spyOn(service.socket, 'emit');
+        const spy1 = spyOn(service.socket, 'on');
+        service.sendMessage(message);
+        expect(spy).toHaveBeenCalled();
+        expect(spy1).toHaveBeenCalled();
+    });
+    it('should setconfig', () => {
+        const spy = spyOn(service.socket, 'on');
+        service.setConfig(lobby, 'guest');
+        expect(spy).toHaveBeenCalled();
+    });
+    it('should call join lobby when the method create lobby is called', async () => {
+        const key = 'testKey';
+        spyOn(service, 'putLobby').and.returnValue(of({ key }));
+        const spy = spyOn(service, 'joinLobby').and.returnValue();
+        service.createLobby(lobby);
+        expect(spy).toHaveBeenCalled();
+    });
+
+    it('should emit and call getLobbies method when we call delete lobby', () => {
+        const key = 'testKey';
+        const socketSpy = spyOn(service.socket, 'emit');
+        const getLobbiesSpy = spyOn(service, 'getLobbies');
+        service.deleteLobby(key);
+        expect(socketSpy).toHaveBeenCalled();
+        expect(getLobbiesSpy).toHaveBeenCalled();
+    });
+    it('should emit', () => {
+        const onSpy = spyOn(service.socket, 'on').and.callThrough();
+        const message: SetConfigMessage = {
+            lobbyKey: 'abc',
+            config: lobby,
+            guest: 'moi',
+        };
+        service.setConfig(lobby, 'sam');
+        socketMock.emit('start game', message);
+        expect(onSpy).toHaveBeenCalled();
     });
 });

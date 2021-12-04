@@ -89,12 +89,19 @@ describe('PlaceTilesService', () => {
         expect(service.directionIndicator.coords).toEqual(service.getBoardTileFromMouse(mouseCoords));
     });
 
+    it('should not remove the indicator if its coord are invalid', () => {
+        const spy = spyOn(service.boardService, 'setLetter');
+        service.directionIndicator.coords = INVALID_COORDS;
+        service.removeIndicator();
+        expect(spy).not.toHaveBeenCalled();
+    });
+
     it('should change the position of the indicator if the player clicks on another empty tile', () => {
         const firstMouseCoord: Vec2 = { x: 300, y: 300 };
         const secondMouseCoord: Vec2 = { x: 400, y: 300 };
         service.manageClick(firstMouseCoord);
         service.manageClick(secondMouseCoord);
-        expect(boardService.getLetter(service.getBoardTileFromMouse(firstMouseCoord))).toEqual('');
+        expect(boardService.getLetter(service.getBoardTileFromMouse(firstMouseCoord))).toEqual(null);
         expect(boardService.getLetter(service.getBoardTileFromMouse(secondMouseCoord))).toEqual(RIGHT_ARROW);
     });
 
@@ -121,7 +128,7 @@ describe('PlaceTilesService', () => {
         service.manageClick(mouseCoords);
         service.manageKeyboard('a');
         service.manageKeyboard('Escape');
-        expect(boardService.getLetter(service.getBoardTileFromMouse(mouseCoords))).toEqual('');
+        expect(boardService.getLetter(service.getBoardTileFromMouse(mouseCoords))).toEqual(null);
         expect(service.directionIndicator.coords).toEqual(INVALID_COORDS);
     });
 

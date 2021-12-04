@@ -16,7 +16,7 @@ export class PlaceTilesService {
     tilesPlacedOnBoard: TileCoords[] = [];
     updateEasel: BehaviorSubject<string> = new BehaviorSubject('');
 
-    constructor(private gridService: GridService, private boardService: BoardService, public generalGameManager: GameManagerInterfaceService) {}
+    constructor(private gridService: GridService, public boardService: BoardService, public generalGameManager: GameManagerInterfaceService) {}
 
     manageClick(mouseCoords: Vec2) {
         const tileCoord: Vec2 = this.getBoardTileFromMouse(mouseCoords);
@@ -44,7 +44,7 @@ export class PlaceTilesService {
     }
 
     removeIndicator() {
-        if (this.directionIndicator.coords.x !== INVALID_COORDS.x && this.directionIndicator.coords.x !== INVALID_COORDS.x) {
+        if (this.directionIndicator.coords.x !== INVALID_COORDS.x && this.directionIndicator.coords.y !== INVALID_COORDS.y) {
             this.boardService.setLetter(this.directionIndicator.coords, null);
         }
         this.gridService.drawBoard();
