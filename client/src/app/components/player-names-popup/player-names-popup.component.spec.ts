@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommunicationService } from '@app/services/communication.service';
 import { DEFAULT_VIRTUAL_PLAYER_NAMES } from '@common/constants';
 import { Difficulty, PlayerName } from '@common/player-name';
@@ -33,10 +34,12 @@ describe('PlayerNamesPopupComponent', () => {
     let fixture: ComponentFixture<PlayerNamesPopupComponent>;
     let dialogSpy: SpyObj<MatDialog>;
     let dialogRefSpy: SpyObj<MatDialogRef<PlayerNamesPopupComponent>>;
+    let snackbarSpy: SpyObj<MatSnackBar>;
 
     beforeEach(() => {
         dialogSpy = jasmine.createSpyObj('MatDialog', ['open', 'close']);
         dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close', 'afterClosed']);
+        snackbarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
     });
 
     beforeEach(async () => {
@@ -46,6 +49,7 @@ describe('PlayerNamesPopupComponent', () => {
                 { provide: MAT_DIALOG_DATA, useValue: Difficulty.Expert },
                 { provide: MatDialog, useValue: dialogSpy },
                 { provide: MatDialogRef, useValue: dialogRefSpy },
+                { provide: MatSnackBar, useValue: snackbarSpy },
                 { provide: CommunicationService, useClass: CommunicationServiceMock },
             ],
         }).compileComponents();
@@ -142,11 +146,8 @@ describe('PlayerNamesPopupComponent', () => {
         expect(component.isDefault(randomPlayer)).toBeFalse();
     });
 
-    it('should not update the player names if the request fails', () => {
-        const spy = spyOn(component, 'getPlayerNames').and.returnValue();
-        component.manageRequestResponses(false);
-        expect(spy).not.toHaveBeenCalled();
-        component.manageRequestResponses(true);
-        expect(spy).toHaveBeenCalled();
+    it('should open snackbar when request fails', () => {
+        component.manageRequestResponses(false, 'message');
+        expect(snackbarSpy.open).toHaveBeenCalled();
     });
 });

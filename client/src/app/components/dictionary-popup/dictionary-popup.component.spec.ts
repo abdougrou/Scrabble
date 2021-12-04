@@ -1,31 +1,36 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder } from '@angular/forms';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
-// eslint-disable-next-line no-restricted-imports
-import { EditDictionaryPopupComponent } from '../edit-dictionary-popup/edit-dictionary-popup.component';
 import { DictionaryPopupComponent } from './dictionary-popup.component';
+import SpyObj = jasmine.SpyObj;
 
 describe('DictionaryPopupComponent', () => {
     let component: DictionaryPopupComponent;
+    let dialogSpy: SpyObj<MatDialog>;
+    let dialogRefSpy: SpyObj<MatDialogRef<DictionaryPopupComponent>>;
+    let snackBarSpy: SpyObj<MatSnackBar>;
     let fixture: ComponentFixture<DictionaryPopupComponent>;
 
-    const dialogMock = {
-        close: () => {
-            // Do nothing
-        },
-        afterClosed: () => {
-            // Do nothing
-        },
-    };
+    beforeEach(() => {
+        dialogSpy = jasmine.createSpyObj('MatDialog', ['open', 'close']);
+        dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close', 'afterClosed']);
+        snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
+    });
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [HttpClientTestingModule, MatDialogModule, BrowserAnimationsModule],
             declarations: [DictionaryPopupComponent],
-            providers: [FormBuilder, { provide: MatDialogRef, useValue: dialogMock }],
+            providers: [
+                FormBuilder,
+                { provide: MatDialogRef, useValue: dialogRefSpy },
+                { provide: MatDialog, useValue: dialogSpy },
+                { provide: MatSnackBar, useValue: snackBarSpy },
+            ],
         }).compileComponents();
     });
 
@@ -48,20 +53,35 @@ describe('DictionaryPopupComponent', () => {
     });
 
     it('back should close', () => {
-        const spy = spyOn(component.dialogRef, 'close').and.callThrough();
         component.back();
-        expect(spy).toHaveBeenCalled();
+        expect(dialogRefSpy.close).toHaveBeenCalled();
     });
 
-    it('edit should call modifyDictionary', () => {
+    it('edit should call modifyDictionary', async () => {
         const dictionary = {
             title: 'Mon dictionaire',
             description: 'Basic Dict',
         };
-        const spy = spyOn(component.dialog, 'open').and.returnValue({ afterClosed: () => of('true') } as MatDialogRef<EditDictionaryPopupComponent>);
+        dialogSpy.open.and.returnValue(dialogRefSpy);
+        dialogRefSpy.afterClosed.and.returnValue(of('something'));
+        const spy = spyOn(component.communication, 'modifyDictionary').and.returnValue(of(true));
         component.edit(dictionary);
         component.dialogRef.close();
         expect(spy).toHaveBeenCalled();
+    });
+
+    it('edit should call modifyDictionary and open snackbar if modifydictionary returns false', async () => {
+        const dictionary = {
+            title: 'Mon dictionaire',
+            description: 'Basic Dict',
+        };
+        dialogSpy.open.and.returnValue(dialogRefSpy);
+        dialogRefSpy.afterClosed.and.returnValue(of('something'));
+        const spy = spyOn(component.communication, 'modifyDictionary').and.returnValue(of(false));
+        component.edit(dictionary);
+        component.dialogRef.close();
+        expect(spy).toHaveBeenCalled();
+        expect(snackBarSpy.open).toHaveBeenCalled();
     });
 
     it('edit should not call modifyDictionary', () => {
@@ -69,10 +89,12 @@ describe('DictionaryPopupComponent', () => {
             title: 'Mon dictionaire',
             description: 'Basic Dict',
         };
-        const spy = spyOn(component.dialog, 'open').and.returnValue({ afterClosed: () => of('') } as MatDialogRef<EditDictionaryPopupComponent>);
+        dialogSpy.open.and.returnValue(dialogRefSpy);
+        dialogRefSpy.afterClosed.and.returnValue(of(''));
+        const spy = spyOn(component.communication, 'modifyDictionary').and.returnValue(of(true));
         component.edit(dictionary);
         component.dialogRef.close();
-        expect(spy).toHaveBeenCalled();
+        expect(spy).not.toHaveBeenCalled();
     });
 
     it('deleteDictionary should call communication deletedDictionary', () => {
