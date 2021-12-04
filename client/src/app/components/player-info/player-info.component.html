@@ -1,6 +1,6 @@
 <div class="container">
-    <mat-card class="card">
-        <mat-card-title > Timer : {{ this.timer }}</mat-card-title>
+    <mat-card class="card timer">
+        <mat-card-title> Temps restant: {{ this.timer }}</mat-card-title>
     </mat-card>
 
     <div *ngFor="let player of players; first as isFirst" >
@@ -8,11 +8,10 @@
             <mat-card-title-group >
             <mat-card-title>{{ player.name }}</mat-card-title>
             <mat-card-subtitle>Score : {{ player.score }}</mat-card-subtitle>
-            <mat-card-subtitle>Tiles : {{ player.easel.count }}</mat-card-subtitle>
-            <div>
-                <mat-icon *ngIf="player.name === this.mainPlayerName">person</mat-icon>
-            <img *ngIf="isFirst;else other_content" mat-card-sm-image src="../../../assets/profile-pic-first.jpg" >
-            <ng-template #other_content><img  mat-card-sm-image src="../../../assets/profile-pic.jpg" ></ng-template>
+            <mat-card-subtitle>Lettres : {{ player.easel.count }}</mat-card-subtitle>
+            <div *ngIf="player.name === this.mainPlayerName">
+                <img *ngIf="isFirst;else other_content" mat-card-sm-image src="../../../assets/profile-pic-first.jpg" >
+                <ng-template #other_content><img  mat-card-sm-image src="../../../assets/profile-pic.jpg" ></ng-template>
             </div>
             </mat-card-title-group>
         </mat-card>
@@ -25,11 +24,29 @@
             <button mat-raised-button (click)="increaseFont()">+</button>
         </mat-card>
     </div>
-    <div class="justified-right">
-        <button mat-raised-button [disabled]="this.players[0].name !== this.mainPlayerName || this.isEnded" (click)= "skipTurn()">Passer le tour</button>
-        <button mat-raised-button *ngIf="!this.isEnded" (click)="openAbandonPage()" class="warn">Abandonner</button>
-        <button mat-raised-button *ngIf="this.isEnded" [routerLink]="['/home']" (click)="quit()" class="warn">Quitter</button>
+    <div class="align">
+        <span matBadge="{{this.reserveCount}}" matBadgeColor="warn" ><img class='reserve' src="../../../assets/reserve.png" width="100%" ></span>    
+        <div class="justified-right">
+            <button mat-raised-button [disabled]="this.players[0].name !== this.mainPlayerName || this.isEnded" (click)= "skipTurn()">Passer le tour</button>
+            <button mat-raised-button *ngIf="!this.isEnded" (click)="openAbandonPage()" class="warn">Abandonner</button>
+            <button mat-raised-button *ngIf="this.isEnded" [routerLink]="['/home']" (click)="quit()" class="warn">Quitter</button>
+        </div>
     </div>
-    <div><span matBadge="{{this.reserveCount}}" matBadgeColor="warn" ><img src="../../../assets/reserve.png" width="8%" ></span></div>
     <app-end-game-popup *ngIf="this.isEnded" [players]="players" [winnerName]="this.winner" [isEqual]="this.players[0].score === this.players[1].score"></app-end-game-popup>
+    <!-------------------- First Style ------------------>
+    <!-- <mat-tab-group class="goals" dynamicHeight>
+        <mat-tab label="Objectifs privés">
+             <div class="goals" *ngFor="let objective of privateObjectives"><mat-checkbox [checked]="objective.achieved" [disableRipple]="true" (click)="$event.preventDefault()">{{ objective.description }} ({{ objective.reward }}pts)</mat-checkbox></div> 
+            </mat-tab>
+        <mat-tab label="Objectifs publics"> <div class="goals" *ngFor="let objective of publicObjectives"><mat-checkbox [checked]="objective.achieved" [disableRipple]="true" (click)="$event.preventDefault()"> {{ objective.description }} ({{ objective.reward }}pts)</mat-checkbox></div> </mat-tab>
+      </mat-tab-group> -->
+    <!------------------- Second Style ------------------->
+    <div *ngIf="this.gameMode === 1">
+        <h3>Objectifs privés</h3>
+        <mat-divider></mat-divider>
+        <div class="goals" *ngFor="let objective of privateObjectives"><mat-checkbox [checked]="objective.achieved" [disableRipple]="true" (click)="$event.preventDefault()">{{ objective.description }} ({{ objective.reward }}pts)</mat-checkbox></div>
+        <h3>Objectifs publics</h3>
+        <mat-divider></mat-divider>
+        <div class="goals" *ngFor="let objective of publicObjectives"><mat-checkbox [checked]="objective.achieved" [disableRipple]="true" (click)="$event.preventDefault()"> {{ objective.description }} ({{ objective.reward }}pts)</mat-checkbox></div>
+    </div>
 </div>

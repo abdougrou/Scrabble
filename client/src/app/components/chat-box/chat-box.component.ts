@@ -5,6 +5,7 @@ import { Player } from '@app/classes/player';
 import { COMMANDS, KEYBOARD_EVENT_RECEIVER, MouseButton, SYSTEM_NAME } from '@app/constants';
 import { CommandHandlerService } from '@app/services/command-handler.service';
 import { CommunicationService } from '@app/services/communication.service';
+import { GameManagerInterfaceService } from '@app/services/game-manager-interface.service';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-manager.service';
 import { PlayerService } from '@app/services/player.service';
@@ -33,6 +34,7 @@ export class ChatBoxComponent implements OnChanges {
     constructor(
         public gameManager: GameManagerService,
         public multiplayerGameManager: MultiplayerGameManagerService,
+        public gameManagerInterface: GameManagerInterfaceService,
         public playerService: PlayerService,
         public commandHandler: CommandHandlerService,
         private communication: CommunicationService,
@@ -40,11 +42,12 @@ export class ChatBoxComponent implements OnChanges {
     ) {
         if (this.router.url === '/multiplayer-game') {
             this.mainPlayerName = this.multiplayerGameManager.mainPlayerName;
-            this.enemyPlayerName = this.multiplayerGameManager.players.find((player) => player.name !== this.mainPlayerName)?.name as string;
+            this.enemyPlayerName = this.playerService.players.find((player) => player.name !== this.mainPlayerName)?.name as string;
         } else {
-            this.mainPlayerName = this.gameManager.mainPlayerName;
-            this.enemyPlayerName = this.gameManager.enemyPlayerName;
+            this.mainPlayerName = this.gameManager.gameConfig.playerName1;
+            this.enemyPlayerName = this.gameManager.gameConfig.playerName2;
         }
+        this.player = gameManagerInterface.getMainPlayer();
         this.gameManager.commandMessage.asObservable().subscribe((msg) => {
             this.showMessage(msg);
         });
@@ -70,12 +73,12 @@ export class ChatBoxComponent implements OnChanges {
         if (this.messageInput.nativeElement.value !== '') {
             this.chatMessage.user = this.mainPlayerName;
             this.chatMessage.body = this.message;
-            this.player = this.multiplayerGameManager.getMainPlayer();
             this.messageInput.nativeElement.value = '';
             if (this.router.url === '/game') {
                 this.showMessage(this.chatMessage);
                 this.showMessage(this.checkCommand(this.chatMessage, this.player));
             } else if (this.router.url === '/multiplayer-game') {
+                this.player = this.multiplayerGameManager.getMainPlayer();
                 if (!this.isCommand(this.chatMessage.body)) {
                     this.communication.sendMessage(this.chatMessage);
                 } else {
@@ -91,7 +94,7 @@ export class ChatBoxComponent implements OnChanges {
             const newMessage = document.createElement('p');
             switch (message.user) {
                 case SYSTEM_NAME:
-                    newMessage.innerHTML = message.body;
+                    newMessage.innerHTML = `${message.user} : ${message.body}`;
                     newMessage.style.color = 'rgb(207, 0, 15)';
                     break;
                 case this.mainPlayerName:

@@ -1,42 +1,84 @@
 import { Injectable } from '@angular/core';
-import { Tile } from '@app/classes/tile';
-import { Vec2 } from '@app/classes/vec2';
-import { GRID_SIZE, LETTER_POINTS } from '@app/constants';
+import { BOARD_SIZE, POINT_GRID } from '@app/constants';
+import { Vec2 } from '@common/vec2';
+
+const BONUS_STR = '4444444433333333333333332222222222222111111111111111111111111';
 
 @Injectable({
     providedIn: 'root',
 })
 export class BoardService {
-    board: Map<number, Tile> = new Map();
-    multiplayerBoard: (string | null)[][] = [];
+    /**
+     * 2d character array storing letters
+     */
+    data: (string | null)[][] = [];
+    pointGrid: number[][] = [];
 
-    getTile(coord: Vec2): Tile | undefined {
-        return this.board.get(this.coordToKey(coord));
+    /**
+     * Initializes a 15x15 null matrix
+     */
+    initialize(randomBonus: boolean) {
+        this.data = [];
+        this.pointGrid = [];
+        for (let x = 0; x < BOARD_SIZE; x++) {
+            const row: (string | null)[] = [];
+            const anchorRow: boolean[] = [];
+            const pointRow: number[] = [];
+            for (let y = 0; y < BOARD_SIZE; y++) {
+                row.push(null);
+                anchorRow.push(false);
+                pointRow.push(0);
+            }
+            this.data.push(row);
+            this.pointGrid.push(pointRow);
+        }
+
+        if (!randomBonus) this.pointGrid = POINT_GRID;
+        else this.randomizeBonuses();
     }
 
-    placeTile(coord: Vec2, tile: Tile): boolean {
-        if (this.getTile(coord)) return false;
-        this.board.set(this.coordToKey(coord), tile);
-        return true;
+    /**
+     * @returns a copy of the board
+     */
+    clone(): (string | null)[][] {
+        const newBoard: (string | null)[][] = [];
+        for (const row of this.data) {
+            newBoard.push(row.slice());
+        }
+        return newBoard;
     }
 
-    coordToKey(coord: Vec2): number {
-        const xMultiplier = 100;
-        return coord.x * xMultiplier + coord.y;
+    /**
+     * Places a letter or null in the board
+     *
+     * @param coord tile coordinate to place the letter
+     * @param letter the letter to place
+     */
+    setLetter(coord: Vec2, letter: string | null) {
+        this.data[coord.x][coord.y] = letter;
     }
 
-    multiplayerBoardToBoard() {
-        this.board.clear();
-        for (let i = 0; i < GRID_SIZE; i++) {
-            for (let j = 0; j < GRID_SIZE; j++) {
-                if (this.multiplayerBoard[i]) {
-                    if (this.multiplayerBoard[i][j]) {
-                        const boardTile: Tile = {
-                            letter: this.multiplayerBoard[i][j] as string,
-                            points: LETTER_POINTS.get(this.multiplayerBoard[i][j] as string) as number,
-                        };
-                        this.board.set(this.coordToKey({ x: i, y: j }), boardTile);
-                    }
+    /**
+     * Get a letter at the provided coordinate
+     *
+     * @param coord letter coordinate
+     * @returns letter at coordinate if it null if it does not exist
+     */
+    getLetter(coord: Vec2): string | null {
+        return this.data[coord.x][coord.y];
+    }
+
+    /**
+     * Replace bonuses with a random one
+     */
+    randomizeBonuses() {
+        const bonusStr = BONUS_STR;
+        for (let x = 0; x < BOARD_SIZE; x++) {
+            for (let y = 0; y < BOARD_SIZE; y++) {
+                const bonus = bonusStr.charAt(Math.floor(Math.random() * BONUS_STR.length));
+                if (POINT_GRID[x][y] !== 0 && bonus !== undefined) {
+                    this.pointGrid[x][y] = parseInt(bonus, 10);
+                    bonusStr.replace(bonus, '');
                 }
             }
         }

@@ -1,13 +1,8 @@
-import { Easel } from './easel';
+import { Easel } from '@app/classes/easel';
 
 export interface Player {
     name: string;
-    score: number;
     easel: Easel;
-}
-
-export enum PlayAction {
-    Pass,
-    ExchangeTiles,
-    PlaceTiles,
+    score: number;
+    debug?: boolean;
 }

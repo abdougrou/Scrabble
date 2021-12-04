@@ -1,0 +1,18 @@
+.container {
+    display: flex;
+    justify-content: center;
+}
+
+.classic {
+    min-width: 50%;
+    margin-right: 1em;
+    box-shadow: .5px .5px 5px rgba(0,0,0,.2);
+}
+
+.log {
+    min-width: 50%;
+    box-shadow: .5px .5px 5px rgba(0,0,0,.2);
+}
+table {
+    width: 100%;
+}

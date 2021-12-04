@@ -1,0 +1,81 @@
+.container {
+    min-height: 90vh;
+    overflow: hidden;
+    background-color: #eeeee4;
+}
+
+.justified {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.button {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.team-name {
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
+    color: rgba(0, 0, 0, 0.54);
+}
+
+.header-item {
+    min-height: 10vh;
+    justify-content: center;
+    text-align: center;
+    color: rgba(0, 0, 0, 0.54);
+    background-color: #eeeee4;
+    margin: 0;
+}
+
+.footer-item {
+    text-align: center;
+}
+
+.footer-item p :nth-child(even) {
+    color: rgba(0, 0, 0, 0.54);
+}
+.footer-item p :nth-child(odd) {
+    color: rgba(0, 0, 0, 0.54);
+}
+
+.server-message {
+    justify-content: center;
+    width: 20%;
+    min-width: min-content;
+}
+
+.mat-raised-button {
+    color: white;
+    background-color: #1e81b0;
+    width: 100%;
+}
+
+#reset-button {
+    background-color: red;
+}
+
+.file-input {
+    display: none;
+}
+
+::ng-deep .green-snackbar {
+    color: white;
+    background: #3fc493;
+}
+
+::ng-deep .green-snackbar .mat-simple-snackbar-action {
+    color: white;
+}
+
+::ng-deep .red-snackbar {
+    color: white;
+    background: #d3302f;
+}
+
+::ng-deep .red-snackbar .mat-simple-snackbar-action {
+    color: white;
+}

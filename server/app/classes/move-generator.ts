@@ -1,20 +1,15 @@
 import { CLASSIC_RESERVE } from '@app/constants';
+import { Move } from '@common/move';
+import { Vec2 } from '@common/vec2';
 import { Anchor } from './anchor';
 import { coordToKey, transpose } from './board-utils';
 import { CrossCheck } from './cross-check';
 import { Trie, TrieNode } from './trie';
-import { Vec2 } from './vec2';
 
 const LIGHT_BLUE_MULTIPLIER = 2;
 const DARK_BLUE_MULTIPLIER = 3;
 const PINK_MULTIPLIER = 2;
 const RED_MULTIPLIER = 3;
-
-export interface Move {
-    word: string;
-    coord: Vec2;
-    across: boolean;
-}
 
 export class MoveGenerator {
     anchors: Anchor[] = [];
@@ -22,9 +17,11 @@ export class MoveGenerator {
     dictionary: Trie;
     legalMoves: Move[] = [];
     pointMap: Map<string, number> = new Map();
+    pointGrid: number[][] = [];
 
-    constructor(dictionary: Trie) {
+    constructor(dictionary: Trie, pointGrid: number[][]) {
         this.dictionary = dictionary;
+        this.pointGrid = pointGrid;
 
         const lettersData: string[] = CLASSIC_RESERVE.split(/\r?\n/);
         lettersData.forEach((letterData) => {
@@ -80,7 +77,9 @@ export class MoveGenerator {
      * @param board board to generate moves for
      * @param easel current player's easel
      */
-    generateLegalMoves(board: (string | null)[][], easel: string) {
+    async generateLegalMoves(board: (string | null)[][], easel: string) {
+        this.legalMoves = [];
+        this.calculateAnchorsAndCrossChecks(board);
         this.anchors.forEach((anchor) => {
             if (anchor.leftPart.length > 0) {
                 const node = this.dictionary.getNode(anchor.leftPart);
@@ -129,7 +128,10 @@ export class MoveGenerator {
 
         const boardLetter = board[square.x][square.y];
         if (!boardLetter) {
-            if (node.terminal) this.legalMove(partialWord, square, anchor.across);
+            if (node.terminal) {
+                const coord = anchor.across ? { x: square.x, y: square.y - partialWord.length } : { x: square.x - partialWord.length, y: square.y };
+                this.legalMove(board, partialWord, coord, anchor.across);
+            }
 
             node.children.forEach((edge) => {
                 const crossCheck = this.crossChecks.get(coordToKey(square));
@@ -154,12 +156,26 @@ export class MoveGenerator {
      * Stores the generated legal move
      *
      * @param word word to save
-     * @param square word's starting coordinate
+     * @param coord word's starting coordinate
      * @param across whether the word is across or down
      */
-    legalMove(word: string, square: Vec2, across: boolean) {
-        const coord = across ? { x: square.x, y: square.y - word.length } : { x: square.x - word.length, y: square.y };
-        this.legalMoves.push({ word, coord, across });
+    legalMove(board: (string | null)[][], word: string, coord: Vec2, across: boolean) {
+        const move = { word, coord, across, points: 0, formedWords: 1 };
+        const nextCoord = { x: coord.x, y: coord.y };
+        const row: (string | null)[] = across ? board[coord.x] : (transpose(board)[coord.y] as (string | null)[]);
+        const pointRow: number[] = across ? this.pointGrid[coord.x] : (transpose(this.pointGrid)[coord.y] as number[]);
+        word.split('').forEach(() => {
+            const crossPoints = this.calculateCrossSum(board, coord, across);
+            if (crossPoints > 0) {
+                move.points += crossPoints;
+                move.formedWords++;
+            }
+
+            if (across) nextCoord.y++;
+            else nextCoord.x++;
+        });
+        move.points += this.calculateWordPoints(move, row, pointRow);
+        this.legalMoves.push(move);
     }
 
     calculateWordPoints(move: Move, row: (string | null)[], pointRow: number[]): number {
@@ -174,27 +190,29 @@ export class MoveGenerator {
 
         for (let i = 0; i < move.word.length; i++) {
             const coord = i + (move.across ? move.coord.y : move.coord.x);
-            const letter = row[coord];
-            if (letter) {
-                points += this.pointMap.get(letter) as number;
+            const letter = move.word[i];
+            const letterPoint = this.pointMap.get(letter) as number;
+            const boardLetter = row[coord];
+            if (boardLetter) {
+                points += this.pointMap.get(boardLetter) as number;
             } else {
                 const multiplier = pointRow[coord];
                 switch (multiplier) {
                     case blank:
-                        points += pointRow[coord];
+                        points += letterPoint;
                         break;
                     case lightBlue:
-                        points += LIGHT_BLUE_MULTIPLIER * pointRow[coord];
+                        points += LIGHT_BLUE_MULTIPLIER * letterPoint;
                         break;
                     case darkBlue:
-                        points += DARK_BLUE_MULTIPLIER * pointRow[coord];
+                        points += DARK_BLUE_MULTIPLIER * letterPoint;
                         break;
                     case pink:
-                        points += pointRow[coord];
+                        points += letterPoint;
                         numNewPinkTiles++;
                         break;
                     case red:
-                        points += pointRow[coord];
+                        points += letterPoint;
                         numNewRedTiles++;
                         break;
                 }

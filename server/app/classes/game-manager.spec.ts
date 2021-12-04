@@ -1,9 +1,10 @@
-import { ExchangeResult, PassResult, PlaceResult, ReserveResult as PrintReserveResult } from '@common/command-result';
+import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
+import { GameMode } from '@common/lobby-config';
+import { Move } from '@common/move';
 import { expect } from 'chai';
 import { describe } from 'mocha';
 import { Easel } from './easel';
 import { GameManager } from './game-manager';
-import { Move } from './move-generator';
 import { Player } from './player';
 import { Reserve } from './reserve';
 
@@ -11,7 +12,14 @@ describe('GameManager', () => {
     let gameManager: GameManager;
 
     beforeEach(() => {
-        gameManager = new GameManager();
+        gameManager = new GameManager({
+            key: 'key',
+            host: 'player1',
+            turnDuration: 60,
+            bonusEnabled: false,
+            dictionary: 'french',
+            gameMode: GameMode.Classic,
+        });
     });
 
     it('addPlayer adds players', () => {
@@ -66,9 +74,7 @@ describe('GameManager', () => {
         expect(gameManager.exchangeLetters(player1, 'abc')).to.equal(ExchangeResult.Success);
         const count = 100;
         gameManager.reserve.getRandomLetters(count);
-        expect(gameManager.exchangeLetters(player1, player1.easel.toString().split(',').join('').toLowerCase())).to.equal(
-            ExchangeResult.NotEnoughInReserve,
-        );
+        expect(gameManager.exchangeLetters(player1, player1.easel.toString().toLowerCase())).to.equal(ExchangeResult.NotEnoughInReserve);
     });
 
     it('printReserve returns correct value', () => {
@@ -78,11 +84,8 @@ describe('GameManager', () => {
 
         const reserveStr = 'a,5\nb,3';
         gameManager.reserve = new Reserve(reserveStr);
-        expect(gameManager.printReserve(player2)).to.equal(PrintReserveResult.NotCurrentPlayer);
-        expect(gameManager.printReserve(player1)).to.equal(PrintReserveResult.NotInDebugMode);
-        gameManager.swapPlayers();
         const expected = 'A: 5\nB: 3';
-        expect(gameManager.printReserve(player2)).to.equal(expected);
+        expect(gameManager.printReserve()).to.equal(expected);
     });
 
     it('placeLetters works just fine', () => {
@@ -108,7 +111,7 @@ describe('GameManager', () => {
         gameManager.board.pointGrid = pointGrid;
 
         const coord = { x: 3, y: 2 };
-        const move: Move = { word: 'cat', coord, across: true };
+        const move: Move = { word: 'cat', coord, across: true, points: 14, formedWords: 2 };
         gameManager.moveGenerator.legalMoves.push(move);
 
         const player: Player = { name: 'player', easel: new Easel(['c', 'a']), score: 0 };
@@ -121,6 +124,28 @@ describe('GameManager', () => {
 
         const expectedScore = 14;
         expect(player.score).to.equal(expectedScore);
-        // normal case
+    });
+
+    it('readDictionary creates and fills a Trie', () => {
+        const trie = gameManager.readDictionary('assets/test_dictionary.json');
+        const expected = trie.contains('aa') && trie.contains('bb') && trie.contains('cc');
+        expect(expected).to.equal(true);
+    });
+
+    it('isCentered returns correct value', () => {
+        const word = 'mossy';
+        const coordAcrossBefore = { x: 7, y: 0 };
+        const coordAcrossCentered = { x: 7, y: 5 };
+        const coordAcrossAfter = { x: 7, y: 9 };
+        const coordDownBefore = { x: 0, y: 7 };
+        const coordDownCentered = { x: 5, y: 7 };
+        const coordDownAfter = { x: 9, y: 7 };
+
+        expect(gameManager.isCentered(word, coordAcrossBefore, true)).to.equal(false);
+        expect(gameManager.isCentered(word, coordAcrossCentered, true)).to.equal(true);
+        expect(gameManager.isCentered(word, coordAcrossAfter, true)).to.equal(false);
+        expect(gameManager.isCentered(word, coordDownBefore, false)).to.equal(false);
+        expect(gameManager.isCentered(word, coordDownCentered, false)).to.equal(true);
+        expect(gameManager.isCentered(word, coordDownAfter, false)).to.equal(false);
     });
 });

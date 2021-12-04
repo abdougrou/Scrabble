@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Lobby } from '@app/classes/lobby';
-import { LobbyConfig } from '@common/lobby-config';
+import { GameMode, LobbyConfig } from '@common/lobby-config';
 import { expect } from 'chai';
 import { describe } from 'mocha';
 import { LobbyService } from './lobby.service';
@@ -20,6 +20,7 @@ describe('LobbyService', () => {
             turnDuration: 60,
             bonusEnabled: false,
             dictionary: 'french',
+            gameMode: GameMode.Classic,
         };
         expect(lobbyService.createLobby(config)).to.equal(key);
     });
@@ -31,6 +32,7 @@ describe('LobbyService', () => {
             turnDuration: 60,
             bonusEnabled: false,
             dictionary: 'french',
+            gameMode: GameMode.Classic,
         };
         lobbyService.lobbies.set('lobby1', new Lobby(lobby.key!, lobby));
         lobbyService.lobbies.set('lobby2', new Lobby(lobby.key!, lobby));
@@ -44,6 +46,7 @@ describe('LobbyService', () => {
             turnDuration: 60,
             bonusEnabled: false,
             dictionary: 'french',
+            gameMode: GameMode.Classic,
         };
         lobbyService.lobbies.set(lobby.key!, new Lobby(lobby.key!, lobby));
         expect(lobbyService.playerJoinLobby('player1', lobby.key!)).to.equal(true);
@@ -59,6 +62,7 @@ describe('LobbyService', () => {
             turnDuration: 60,
             bonusEnabled: false,
             dictionary: 'french',
+            gameMode: GameMode.Classic,
         };
         const player1 = 'player1';
         const player2 = 'player2';
@@ -79,6 +83,7 @@ describe('LobbyService', () => {
             turnDuration: 60,
             bonusEnabled: false,
             dictionary: 'french',
+            gameMode: GameMode.Classic,
         };
         lobbyService.lobbies.set(lobby.key!, new Lobby(lobby.key!, lobby));
         expect(lobbyService.getLobby(lobby.key!)?.config).to.equal(lobby);
@@ -92,6 +97,7 @@ describe('LobbyService', () => {
             turnDuration: 60,
             bonusEnabled: false,
             dictionary: 'french',
+            gameMode: GameMode.Classic,
         };
         lobbyService.lobbies.set(lobby.key!, new Lobby(lobby.key!, lobby));
         lobbyService.deleteLobby(lobby.key!);

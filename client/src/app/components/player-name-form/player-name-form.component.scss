@@ -1,0 +1,23 @@
+.mat-raised-button {
+    color: white;
+    background-color: #1e81b0;
+}
+#back {
+    background-color: #cf000f;
+    color: white;
+}
+.button {
+    margin-left: 10px;
+    text-align: center;
+}
+
+.justified {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+.horizontal {
+    flex-direction: row;
+    justify-content: space-between;
+}

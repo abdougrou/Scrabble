@@ -1,34 +1,33 @@
 import { TestBed } from '@angular/core/testing';
 import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
-import { Tile } from '@app/classes/tile';
 import { CommandHandlerService } from './command-handler.service';
 import { GameManagerService } from './game-manager.service';
 
 describe('CommandHandlerService', () => {
     let service: CommandHandlerService;
     let gameManagerSpy: jasmine.SpyObj<GameManagerService>;
-    let tiles: Tile[];
+    let letters: string[];
     let player: Player;
 
     beforeEach(() => {
-        gameManagerSpy = jasmine.createSpyObj<GameManagerService>('GameManagerService', ['exchangeTiles', 'placeTiles', 'skipTurn', 'activateDebug']);
+        gameManagerSpy = jasmine.createSpyObj<GameManagerService>('GameManagerService', [
+            'exchangeLetters',
+            'placeLetters',
+            'skipTurn',
+            'activateDebug',
+        ]);
     });
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [{ provide: GameManagerService, useValue: gameManagerSpy }],
         });
         service = TestBed.inject(CommandHandlerService);
-        tiles = [
-            { letter: 'a', points: 0 },
-            { letter: 'b', points: 0 },
-            { letter: 'c', points: 0 },
-            { letter: 'd', points: 0 },
-        ];
+        letters = ['a', 'b', 'c', 'd'];
         player = {
             name: 'player',
             score: 0,
-            easel: new Easel(tiles),
+            easel: new Easel(letters),
         };
     });
 
@@ -37,7 +36,7 @@ describe('CommandHandlerService', () => {
     });
 
     it('should call the right functions when the command is valid', () => {
-        const exchange = '!echanger abcdef';
+        const exchange = '!échanger abcdef';
         const place = '!placer a10v abcdef';
         const pass = '!passer';
         const debug = '!debug';
@@ -45,20 +44,20 @@ describe('CommandHandlerService', () => {
         service.handleCommand(place, player);
         service.handleCommand(pass, player);
         service.handleCommand(debug, player);
-        expect(gameManagerSpy.exchangeTiles).toHaveBeenCalledTimes(1);
-        expect(gameManagerSpy.placeTiles).toHaveBeenCalledTimes(1);
+        expect(gameManagerSpy.exchangeLetters).toHaveBeenCalledTimes(1);
+        expect(gameManagerSpy.placeLetters).toHaveBeenCalledTimes(1);
         expect(gameManagerSpy.skipTurn).toHaveBeenCalledTimes(1);
         expect(gameManagerSpy.activateDebug).toHaveBeenCalledTimes(1);
     });
 
     it('should call GameManager exchangeTiles when the command is valid', () => {
-        const exchangeGood = '!echanger abcdef';
-        const exchangeGoodStar = '!echanger abcde*';
-        const exchangeBad = 'echanger q';
+        const exchangeGood = '!échanger abcdef';
+        const exchangeGoodStar = '!échanger abcde*';
+        const exchangeBad = 'échanger q';
         service.exchange(exchangeGood, player);
         service.exchange(exchangeGoodStar, player);
         service.exchange(exchangeBad, player);
-        expect(gameManagerSpy.exchangeTiles).toHaveBeenCalledTimes(2);
+        expect(gameManagerSpy.exchangeLetters).toHaveBeenCalledTimes(2);
     });
 
     it('should call GameManager placeTiles when command is valid', () => {
@@ -68,7 +67,7 @@ describe('CommandHandlerService', () => {
         service.place(placeGood, player);
         service.place(placeCapital, player);
         service.place(placeBad, player);
-        expect(gameManagerSpy.placeTiles).toHaveBeenCalledTimes(2);
+        expect(gameManagerSpy.placeLetters).toHaveBeenCalledTimes(2);
     });
 
     it('should call GameManager skipTurn when command is valid', () => {
@@ -88,7 +87,7 @@ describe('CommandHandlerService', () => {
     });
 
     it('should return an error message when the command is invalid', () => {
-        const invalidCmdExchange = 'echanger abcccccas';
+        const invalidCmdExchange = 'échanger abcccccas';
         expect(service.handleCommand(invalidCmdExchange, player).body).toBe("La commande entrée n'est pas valide");
     });
 });

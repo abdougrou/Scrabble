@@ -1,4 +1,4 @@
-import { Vec2 } from './vec2';
+import { Vec2 } from '@common/vec2';
 
 /**
  * Converts a Vec2 into a string key
@@ -46,6 +46,8 @@ export const getStringCombinations = (str: string, length: number): string[] => 
 };
 
 /**
+ * Creates a transposed copy
+ *
  * @param arr 2d array to transpose
  * @returns a transposed copy of the current board state
  */

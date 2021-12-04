@@ -1,5 +1,4 @@
 import { Easel } from './easel';
-import { Tile } from './tile';
 
 describe('Easel', () => {
     let easel: Easel;
@@ -8,75 +7,42 @@ describe('Easel', () => {
         easel = new Easel();
     });
 
-    it('should create an instance', () => {
-        expect(easel).toBeTruthy();
+    it('constructor initializes the easel correctly', () => {
+        expect(easel.count).toEqual(0);
+        easel = new Easel(['a', 'b', 'c']);
+        expect(easel.count).toEqual(3);
     });
 
-    it('should not return invalid tile', () => {
-        expect(easel.getTiles('4')).toEqual([]);
+    it('addLetters adds letter to the easel', () => {
+        const letters = ['a', 'b', 'c'];
+        easel.addLetters(letters);
+        expect(easel.letters).toEqual(letters);
     });
 
-    it('addTiles adds tiles to the easel', () => {
-        const tiles: Tile[] = [
-            { letter: 'a', points: 0 },
-            { letter: 'b', points: 0 },
-            { letter: 'c', points: 0 },
-            { letter: 'd', points: 0 },
-        ];
-        easel.addTiles(tiles);
-        expect(easel.count).toBe(tiles.length);
+    it('getLetters adds letter to the easel', () => {
+        const letters = ['a', 'b', 'c'];
+        const getLetters = ['a', 'b', 'd'];
+        easel.addLetters(letters);
+        const actual = easel.getLetters(getLetters);
+        const expected = ['a', 'b'];
+        expect(actual).toEqual(expected);
     });
 
-    it('getTiles removes tiles from easel and returns them', () => {
-        const tiles: Tile[] = [
-            { letter: 'a', points: 0 },
-            { letter: 'b', points: 0 },
-            { letter: 'c', points: 0 },
-            { letter: 'd', points: 0 },
-        ];
-        easel.addTiles(tiles);
-        const tilesGot = easel.getTiles('ac');
-
-        expect(easel.toString()).toBe('bd');
-        expect(easel.count).toBe(2);
-        expect(tilesGot.length).toBe(2);
-        expect(new Easel(tilesGot).toString()).toBe('ac');
+    it('contains returns true when it contains all letters, false otherwise', () => {
+        const letters = ['a', 'b', 'c'];
+        const containsTrue = ['a'];
+        const containsFalse = ['a', 'b', 'd'];
+        const containsFalse2 = ['a', 'b', 'c', 'd'];
+        easel.addLetters(letters);
+        expect(easel.contains(containsTrue)).toEqual(true);
+        expect(easel.contains(containsFalse)).toEqual(false);
+        expect(easel.contains(containsFalse2)).toEqual(false);
     });
 
-    it('toString returns letters in the easel as a string', () => {
-        const tiles: Tile[] = [
-            { letter: 'a', points: 0 },
-            { letter: 'b', points: 0 },
-            { letter: 'c', points: 0 },
-            { letter: 'd', points: 0 },
-        ];
-        easel.addTiles(tiles);
-        expect(easel.toString()).toBe('abcd');
-    });
-
-    it('containsTiles should return false when the easel does not contain all the tiles', () => {
-        const tiles: Tile[] = [
-            { letter: 'a', points: 0 },
-            { letter: 'b', points: 0 },
-            { letter: 'c', points: 0 },
-            { letter: 'd', points: 0 },
-        ];
-        easel.addTiles(tiles);
-
-        expect(easel.containsTiles('z')).toBe(false);
-        expect(easel.containsTiles('abcde')).toBe(false);
-    });
-
-    it('containsTiles should return true when the easel contains all the tiles', () => {
-        const tiles: Tile[] = [
-            { letter: 'a', points: 0 },
-            { letter: 'b', points: 0 },
-            { letter: 'c', points: 0 },
-            { letter: 'd', points: 0 },
-        ];
-        easel.addTiles(tiles);
-
-        expect(easel.containsTiles('a')).toBe(true);
-        expect(easel.containsTiles('abcd')).toBe(true);
+    it('toString returns correct string', () => {
+        const letters = ['a', 'b', 'c'];
+        easel.addLetters(letters);
+        const expected = 'a,b,c';
+        expect(easel.toString()).toEqual(expected);
     });
 });

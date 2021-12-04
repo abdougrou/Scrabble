@@ -36,8 +36,12 @@ p {
 
 #message-input {
     width: 98%;
-    height: 25px;
+    height: 30px;
     font-size: 12px;
     outline: none;
     background-color: white;
+}
+
+input {
+    border-style: none;
 }

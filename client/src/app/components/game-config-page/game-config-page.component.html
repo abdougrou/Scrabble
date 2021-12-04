@@ -3,30 +3,40 @@
   <h2 mat-dialog-title>Paramètres de la partie</h2>
     <p>vous jouez contre : {{ this.randomPlayerName }}</p>
     <div class="justified">
+      <!---   Username     -->
       <mat-form-field hintLabel="Lettres seulement" appearance="outline">
-        <mat-label>Username</mat-label>
+        <mat-label>Nom d'utilisateur</mat-label>
         <input type="text" formControlName="name"  pattern="[a-zA-Z]*" matInput>
         <mat-hint align="end">{{ this.gameConfigForm.get('name')?.value?.length || 0 }}/20</mat-hint>
       </mat-form-field>
-
+      <!---   Duration     -->
       <mat-form-field appearance="outline">
         <mat-label>Minuterie (en secondes):</mat-label>
-        <input type="number" name="points"  value="60" step="30" min="60" max="300" formControlName="duration"  matInput>
+        <input type="number" name="points"  value="60" step="30" min="30" max="300" formControlName="duration"  matInput>
       </mat-form-field>
-
-      <mat-checkbox formControlName="bonusEnabled"> Bonus Aléatoire
-      </mat-checkbox>
-
+      <!---   Bonus        -->
+      <mat-checkbox formControlName="bonusEnabled"> Bonus Aléatoire</mat-checkbox>
+      <!---   Dictionary   -->
       <mat-form-field appearance="outline">
-        <mat-select formControlName="dictionary" placeholder="Français" >
-          <mat-option value=0>Français</mat-option>
-          <mat-option value=1>Anglais</mat-option>
+        <mat-select formControlName="dictionary" placeholder="Français" (selectionChange)="checkDictionaries($event.value)">
+          <mat-option value=0 matTooltip="Dictionnaire Français" matTooltipPosition="right">Français</mat-option>
+          <mat-option value=1 matTooltip="Dictionnaire Anglais" matTooltipPosition="right">Anglais</mat-option>
+          <mat-option *ngFor="let dictionary of dictionaries"  [value]="dictionary" matTooltip="{{dictionary.description}}" matTooltipPosition="right">
+            {{dictionary.title}}
+          </mat-option>
         </mat-select>
       </mat-form-field>
+      <!---   Difficulty   -->
+      <mat-form-field appearance="outline">
+        <mat-label>Difficulté</mat-label>
+        <mat-select formControlName="expert" >
+          <mat-option value=''>Débutant</mat-option>
+          <mat-option value='true'>Expert</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <!---   Buttons      -->
       <div class="horizontal">
         <button mat-raised-button id="back" class="button"  (click)="back()">Retour</button>
-        <button mat-raised-button class="button" [disabled]="!this.gameConfigForm.valid" (click)="play()">Jouer</button>
+        <button mat-raised-button class="button" [disabled]="!this.gameConfigForm.valid || !this.dictionaryValid" (click)="play()">Jouer</button>
       </div>
     </div>
-</div>
-</form>

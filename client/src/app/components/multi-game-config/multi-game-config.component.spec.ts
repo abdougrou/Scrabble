@@ -1,6 +1,11 @@
+import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormBuilder } from '@angular/forms';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterTestingModule } from '@angular/router/testing';
+import { AppMaterialModule } from '@app/modules/material.module';
+import { GameMode } from '@common/lobby-config';
 import { MultiGameConfigComponent } from './multi-game-config.component';
 
 describe('MultiGameConfigComponent', () => {
@@ -13,11 +18,20 @@ describe('MultiGameConfigComponent', () => {
         },
     };
 
+    const config = {
+        key: '',
+        host: '',
+        turnDuration: 60,
+        bonusEnabled: false,
+        dictionary: 'francais',
+        gameMode: GameMode.Classic,
+    };
+
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [MatDialogModule],
+            imports: [HttpClientModule, BrowserAnimationsModule, RouterTestingModule, AppMaterialModule, ReactiveFormsModule],
             declarations: [MultiGameConfigComponent],
-            providers: [FormBuilder, { provide: MatDialogRef, useValue: dialogMock }, { provide: MAT_DIALOG_DATA, useValue: {} }],
+            providers: [FormBuilder, { provide: MatDialogRef, useValue: dialogMock }, { provide: MAT_DIALOG_DATA, useValue: { data: config } }],
         }).compileComponents();
     });
 
@@ -29,5 +43,44 @@ describe('MultiGameConfigComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('Creating lobby should send game config to server', () => {
+        const spy = spyOn(component.communication, 'setConfig').and.callThrough();
+        component.data.config = { host: '', key: '', dictionary: '', bonusEnabled: false, turnDuration: 60, gameMode: GameMode.Classic };
+        component.createLobby();
+        expect(spy).toHaveBeenCalled();
+    });
+
+    it('Creating lobby should open waiting popup', () => {
+        const spy = spyOn(component, 'openWaitingPopup').and.callThrough();
+        component.data.config = { host: '', key: '', dictionary: '', bonusEnabled: false, turnDuration: 60, gameMode: GameMode.Classic };
+        component.createLobby();
+        expect(spy).toHaveBeenCalled();
+    });
+
+    // it('should be closed when waiting popup is closed', () => {
+    //     const spy = spyOn(component.dialogRef, 'close').and.callThrough();
+    //     component.data.config = { host: '', key: '', dictionary: '', bonusEnabled: false, turnDuration: 60, gameMode: GameMode.Classic };
+    //     component.createLobby();
+    //     component.dialog.closeAll();
+    //     expect(spy).toHaveBeenCalled();
+    // });
+
+    it('should open waiting popup', () => {
+        const spy = spyOn(component.dialog, 'open').and.callThrough();
+
+        component.openWaitingPopup();
+        fixture.detectChanges();
+
+        expect(spy).toHaveBeenCalled();
+        component.dialog.closeAll();
+    });
+
+    it('back button should close popup ', () => {
+        const spy = spyOn(component.dialogRef, 'close').and.callThrough();
+
+        component.back();
+        expect(spy).toHaveBeenCalled();
     });
 });

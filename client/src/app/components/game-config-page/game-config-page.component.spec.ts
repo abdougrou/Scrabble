@@ -1,9 +1,11 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Dictionary, GameConfig } from '@app/classes/game-config';
 import { DURATION_INIT, MAX_USERNAME_LENGTH, MIN_USERNAME_LENGTH } from '@app/constants';
+import { AppMaterialModule } from '@app/modules/material.module';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { GameConfigPageComponent } from './game-config-page.component';
 
@@ -24,9 +26,10 @@ describe('GameConfigPageComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [MatDialogModule, HttpClientModule],
+            imports: [HttpClientModule, BrowserAnimationsModule, AppMaterialModule, ReactiveFormsModule],
             declarations: [GameConfigPageComponent],
             providers: [
+                FormBuilder,
                 { provide: MAT_DIALOG_DATA, useValue: {} },
                 { provide: MatDialogRef, useValue: dialogMock },
                 FormBuilder,
@@ -55,7 +58,7 @@ describe('GameConfigPageComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should change enemy name when player names matchs', () => {
+    it('should change enemy name when player names matches', () => {
         const oldEnemyName = component.randomPlayerName;
         component.gameConfigForm.get('name')?.setValue(component.randomPlayerName);
         fixture.detectChanges();
@@ -98,7 +101,7 @@ describe('GameConfigPageComponent', () => {
         expect(sameName).toEqual(false);
     });
 
-    it('play should call gameManager initialize ', () => {
+    it('play should set gameManager configuration ', () => {
         const testConfigForm = {
             name: 'player',
             duration: DURATION_INIT,
@@ -122,6 +125,5 @@ describe('GameConfigPageComponent', () => {
         expect(component.data.config.duration).toEqual(testConfigForm.duration);
         expect(component.data.config.bonusEnabled).toEqual(testConfigForm.bonusEnabled);
         expect(component.data.config.dictionary).toEqual(testConfigForm.dictionary);
-        expect(gameManagerSpy.initialize).toHaveBeenCalled();
     });
 });

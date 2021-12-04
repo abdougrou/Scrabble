@@ -1,9 +1,12 @@
+import { DictionaryInfo } from "./dictionaryTemplate";
+
 export interface LobbyConfig {
     key?: string;
     host: string;
     turnDuration: number;
     bonusEnabled: boolean;
-    dictionary: string;
+    dictionary: string | DictionaryInfo;
+    gameMode: GameMode;
 }
 
 export interface GameConfig {

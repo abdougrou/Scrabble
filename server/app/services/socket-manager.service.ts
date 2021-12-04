@@ -1,12 +1,14 @@
+import { Easel } from '@app/classes/easel';
 import { Player } from '@app/classes/player';
 import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
 import {
+    ContinueSoloMessage,
+    DeleteLobbyMessage,
     ExchangeLettersMessage,
     JoinLobbyMessage,
     LeaveLobbyMessage,
     NormalChatMessage,
     PlaceLettersMessage,
-    PlayerData,
     SetConfigMessage,
     ShowReserveMessage,
     SkipTurnMessage,
@@ -40,93 +42,105 @@ export class SocketManagerService {
             socket.on(SocketEvent.setConfig, (message: SetConfigMessage) => {
                 const lobby = this.lobbyService.getLobby(message.lobbyKey);
                 if (lobby?.started)
-                    this.io
-                        .to(message.lobbyKey)
-                        .emit('start game', { lobbyKey: message.lobbyKey, config: message.config, guest: message.guest } as SetConfigMessage);
+                    this.io.to(message.lobbyKey).emit('start game', {
+                        lobbyKey: message.lobbyKey,
+                        config: message.config,
+                        guest: message.guest,
+                        players: lobby.gameManager.players,
+                        objectives: lobby.gameManager.objectives,
+                    } as SetConfigMessage);
+            });
+
+            socket.on(SocketEvent.deleteLobby, (message: DeleteLobbyMessage) => {
+                this.lobbyService.deleteLobby(message.lobbyKey);
             });
 
             socket.on(SocketEvent.switchPlayers, (message: SwitchPlayersMessage) => {
                 this.lobbyService.getLobby(message.lobbyKey)?.gameManager.swapPlayers();
+                this.io.to(message.lobbyKey).emit(SocketEvent.setTimer);
             });
 
             socket.on(SocketEvent.exchangeLetters, (message: ExchangeLettersMessage) => {
-                let commandResult = '';
-                let privateResult = true;
-                switch (this.lobbyService.getLobby(message.lobbyKey)?.gameManager.exchangeLetters(message.player, message.letters)) {
+                const player = this.lobbyService.getLobby(message.lobbyKey)?.gameManager.getPlayer(message.playerData.name) as Player;
+                player.score = message.playerData.score;
+                player.easel = new Easel(message.playerData.easel.split(''));
+                switch (this.lobbyService.getLobby(message.lobbyKey)?.gameManager.exchangeLetters(player, message.letters)) {
                     case ExchangeResult.NotCurrentPlayer:
-                        privateResult = true;
-                        commandResult = "Ce n'est pas votre tour";
+                        socket.emit(SocketEvent.chatMessage, `${player} : "Ce n'est pas votre tour"`);
                         break;
                     case ExchangeResult.NotInEasel:
-                        privateResult = true;
-                        commandResult = 'Votre chevalet ne contient pas les lettres nécessaires';
+                        socket.emit(SocketEvent.chatMessage, `${player} : 'Votre chevalet ne contient pas les lettres nécessaires'`);
                         break;
                     case ExchangeResult.NotEnoughInReserve:
-                        privateResult = true;
-                        commandResult = "Il n'y a pas assez de tuiles dans la réserve";
+                        socket.emit(SocketEvent.chatMessage, `${player} : "Il n'y a pas assez de tuiles dans la réserve"`);
                         break;
                     case ExchangeResult.Success:
-                        privateResult = false;
+                        this.io.to(message.lobbyKey).emit(SocketEvent.setTimer);
+                        socket.emit(SocketEvent.chatMessage, `Commande : ${player} a échangé les lettres ${message.letters}`);
+                        socket.broadcast.emit(SocketEvent.chatMessage, `Commande : ${player} a échangé  ${message.letters.length} lettres`);
                         break;
-                }
-                if (privateResult) {
-                    socket.emit(SocketEvent.chatMessage, `${message.player} : ${commandResult}`);
-                } else {
-                    socket.emit(SocketEvent.chatMessage, `Commande : ${message.player} a échangé les lettres ${message.letters}`);
-                    socket.broadcast.emit(SocketEvent.chatMessage, `Commande : ${message.player} a échangé  ${message.letters.length} lettres`);
                 }
             });
 
             socket.on(SocketEvent.placeLetters, (message: PlaceLettersMessage) => {
-                let commandResult = '';
-                let privateResult = true;
+                const player = this.lobbyService.getLobby(message.lobbyKey)?.gameManager.getPlayer(message.playerData.name) as Player;
+                player.score = message.playerData.score;
+                player.easel = new Easel(message.playerData.easel.split(''));
                 switch (
                     this.lobbyService
                         .getLobby(message.lobbyKey)
-                        ?.gameManager.placeLetters(message.player, message.word, message.coord, message.across)
+                        ?.gameManager.placeLetters(player as Player, message.word, message.coord, message.across)
                 ) {
                     case PlaceResult.NotCurrentPlayer:
-                        privateResult = true;
-                        commandResult = "Ce n'est pas votre tour";
+                        socket.emit(SocketEvent.chatMessage, `${player} : Ce n'est pas votre tour`);
                         break;
                     case PlaceResult.NotValid:
-                        privateResult = true;
-                        commandResult = 'Commande impossible à realiser';
+                        socket.emit(SocketEvent.chatMessage, `${player} : Commande impossible à realiser`);
                         break;
-                    case PlaceResult.Success:
-                        privateResult = false;
+                    case PlaceResult.NotInEasel:
+                        socket.emit(SocketEvent.chatMessage, `${player} : Commande impossible à realiser`);
                         break;
-                }
-                if (privateResult) {
-                    socket.emit(SocketEvent.chatMessage, `${message.player} : ${commandResult}`);
-                } else {
-                    this.io
-                        .to(message.lobbyKey)
-                        .emit(
-                            SocketEvent.chatMessage,
-                            `Commande : ${message.player} a placé le mot "${message.word}" ${
-                                message.across ? 'horizontale' : 'verticale'
-                            }ment à la case ${message.coord}`,
-                        );
+                    case PlaceResult.Success: {
+                        this.io.to(message.lobbyKey).emit(SocketEvent.setTimer);
+                        this.io
+                            .to(message.lobbyKey)
+                            .emit(
+                                SocketEvent.chatMessage,
+                                `Commande : ${player} a placé le mot "${message.word}" ${
+                                    message.across ? 'horizontale' : 'verticale'
+                                }ment à la case ${message.coord}`,
+                            );
+                        this.lobbyService.getLobby(message.lobbyKey)?.gameManager.swapPlayers();
+                        /* const gameManager = this.lobbyService.getLobby(message.lobbyKey)?.gameManager;
+                        const serverPlayers: PlayerData[] = [];
+                        for (const serverPlayer of gameManager?.players as Player[]) {
+                            const playerData: PlayerData = {
+                                name: serverPlayer.name,
+                                score: serverPlayer.score,
+                                easel: serverPlayer.easel.toString(),
+                            };
+                            serverPlayers.push(playerData);
+                        } */
+                        // (gameManager as GameManager).board.data = transpose(gameManager?.board.data as (string | null)[][]) as (string | null)[][];
+                        this.update(message.lobbyKey);
+                        // (gameManager as GameManager).board.data = transpose(gameManager?.board.data as (string | null)[][]) as (string | null)[][];
+                        break;
+                    }
                 }
             });
 
             socket.on(SocketEvent.skipTurn, (message: SkipTurnMessage) => {
-                let commandResult = 'error';
-                let privateResult = true;
-                switch (this.lobbyService.getLobby(message.lobbyKey)?.gameManager.passTurn(message.player)) {
+                const player = this.lobbyService.getLobby(message.lobbyKey)?.gameManager.getPlayer(message.playerData.name) as Player;
+                player.score = message.playerData.score;
+                player.easel = new Easel(message.playerData.easel.split(''));
+                switch (this.lobbyService.getLobby(message.lobbyKey)?.gameManager.passTurn(player)) {
                     case PassResult.NotCurrentPlayer:
-                        privateResult = true;
-                        commandResult = "Ce n'est pas votre tour";
+                        socket.emit(SocketEvent.chatMessage, `${player} : "Ce n'est pas votre tour"`);
                         break;
                     case PassResult.Success:
-                        privateResult = false;
+                        this.io.to(message.lobbyKey).emit(SocketEvent.setTimer);
+                        this.io.to(message.lobbyKey).emit(SocketEvent.chatMessage, `${player} a passé son tour`);
                         break;
-                }
-                if (privateResult) {
-                    socket.emit(SocketEvent.chatMessage, `${message.player} : ${commandResult}`);
-                } else {
-                    this.io.to(message.lobbyKey).emit(SocketEvent.chatMessage, `${message.player} a passé son tour`);
                 }
             });
 
@@ -139,22 +153,20 @@ export class SocketManagerService {
             });
 
             socket.on(SocketEvent.playerLeaveLobby, (message: LeaveLobbyMessage) => {
-                this.lobbyService.playerLeaveLobby(message.playerName, message.lobbyKey);
+                const lobby = this.lobbyService.getLobby(message.lobbyKey);
+                if (lobby) {
+                    const playerLeaving = lobby.gameManager.getPlayer(message.playerName) as Player;
+                    this.lobbyService.playerLeaveLobby(message.playerName, message.lobbyKey);
+                    if (lobby.gameManager.players.length === 1) {
+                        const mainPlayer = lobby.gameManager.players[0];
+                        this.io.to(message.lobbyKey).emit(SocketEvent.chatMessage, `Système : le joueur ${playerLeaving.name} a quitté la partie.`);
+                        this.io.to(message.lobbyKey).emit(SocketEvent.continueSolo, { vPlayer: playerLeaving, mainPlayer } as ContinueSoloMessage);
+                    }
+                }
             });
 
             socket.on(SocketEvent.update, (message: UpdateMessage) => {
-                const gameManager = this.lobbyService.getLobby(message.lobbyKey)?.gameManager;
-                const serverPlayers: PlayerData[] = [];
-                for (const serverPlayer of gameManager?.players as Player[]) {
-                    const player: PlayerData = { name: serverPlayer.name, score: serverPlayer.score, easel: serverPlayer.easel.toString() };
-                    serverPlayers.push(player);
-                }
-                this.io.to(message.lobbyKey).emit(SocketEvent.update, {
-                    players: serverPlayers,
-                    reserveData: gameManager?.reserve.data,
-                    reserveCount: gameManager?.reserve.size,
-                    boardData: gameManager?.board.data,
-                } as UpdateGameManagerMessage);
+                this.update(message.lobbyKey);
             });
 
             socket.on('disconnection', () => {
@@ -164,5 +176,23 @@ export class SocketManagerService {
                 });
             });
         });
+    }
+
+    update(key: string) {
+        const gameManager = this.lobbyService.getLobby(key)?.gameManager;
+        /* const serverPlayers: PlayerData[] = [];
+        for (const serverPlayer of gameManager?.players as Player[]) {
+            const player: PlayerData = { name: serverPlayer.name, score: serverPlayer.score, easel: serverPlayer.easel.toString() };
+            serverPlayers.push(player);
+        }*/
+        this.io.to(key).emit(SocketEvent.update, {
+            players: gameManager?.players.map((player) => {
+                player.easel.letters = player.easel.letters.filter((letter) => letter !== ',');
+                return player;
+            }),
+            reserveData: gameManager?.reserve.data,
+            reserveCount: gameManager?.reserve.size,
+            boardData: gameManager?.board.data,
+        } as UpdateGameManagerMessage);
     }
 }

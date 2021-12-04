@@ -1,5 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Dictionary, GameMode } from '@app/classes/game-config';
 import { MultiGameConfigComponent } from '@app/components/multi-game-config/multi-game-config.component';
 import { MultiplayerJoinFormComponent } from '@app/components/multiplayer-join-form/multiplayer-join-form.component';
@@ -14,7 +15,7 @@ import { LobbyConfig } from '@common/lobby-config';
     styleUrls: ['./multiplayer-rooms.component.scss'],
 })
 export class MultiplayerRoomsComponent {
-    lobbies: LobbyConfig[];
+    lobbies: LobbyConfig[] = [];
 
     constructor(
         public dialogRef: MatDialogRef<MultiplayerRoomsComponent>,
@@ -22,6 +23,7 @@ export class MultiplayerRoomsComponent {
         public gameManager: GameManagerService,
         public dialog: MatDialog,
         @Inject(MAT_DIALOG_DATA) public data: { mode: GameMode },
+        public snackBar: MatSnackBar,
     ) {
         this.getLobbies();
     }
@@ -46,6 +48,7 @@ export class MultiplayerRoomsComponent {
             turnDuration: DURATION_INIT,
             bonusEnabled: false,
             dictionary: Dictionary.French,
+            gameMode: this.data.mode,
         };
 
         return this.dialog.open(MultiGameConfigComponent, {
@@ -62,12 +65,24 @@ export class MultiplayerRoomsComponent {
     }
 
     joinLobby(key: string): void {
+        if (!this.lobbies.find((lobby) => lobby.key === key))
+            this.snackBar.open("La salle n'est pas disponible, veuillez actualiser la liste des salles.", 'Fermer', {
+                duration: 3000,
+                panelClass: ['red-snackbar'],
+            });
+
         this.openJoinPopup(key)
             .afterClosed()
             .subscribe((result) => {
                 if (!result) return;
                 this.dialogRef.close(result);
             });
+    }
+
+    joinRandomLobby(): void {
+        const randomIndex = Math.floor(Math.random() * this.lobbies.length);
+        const key = this.lobbies[randomIndex].key;
+        this.joinLobby(key as string);
     }
 
     openJoinPopup(key: string): MatDialogRef<unknown, unknown> {

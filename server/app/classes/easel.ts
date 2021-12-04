@@ -57,9 +57,9 @@ export class Easel {
     }
 
     /**
-     * @returns string containing all letters, comma separated
+     * @returns string containing all letters
      */
     toString(): string {
-        return this.letters.join();
+        return this.letters.join('');
     }
 }

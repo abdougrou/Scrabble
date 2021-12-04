@@ -2,10 +2,12 @@ import { Component, EventEmitter, HostListener, Input, OnChanges, Output, Simple
 import { Router } from '@angular/router';
 import { Player } from '@app/classes/player';
 import { EaselTile, TileState } from '@app/classes/tile';
-import { KEYBOARD_EVENT_RECEIVER, MouseButton } from '@app/constants';
+import { KEYBOARD_EVENT_RECEIVER, LETTER_POINTS, MouseButton } from '@app/constants';
+import { GameManagerInterfaceService } from '@app/services/game-manager-interface.service';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { MouseManagerService } from '@app/services/mouse-manager.service';
 import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-manager.service';
+import { PlaceTilesService } from '@app/services/place-tiles.service';
 import { PlayerService } from '@app/services/player.service';
 import { ReserveService } from '@app/services/reserve.service';
 
@@ -25,22 +27,30 @@ export class EaselComponent implements OnChanges {
     mainPlayerName;
     exchangableTiles = false;
     numTilesReserve;
+    mainPlayer: Player;
+    letterPoints: Map<string, number> = LETTER_POINTS;
 
     constructor(
-        readonly playerService: PlayerService,
         private mouseManager: MouseManagerService,
         private reserve: ReserveService,
         private gameManager: GameManagerService,
         private multiGameManager: MultiplayerGameManagerService,
+        private generalGameManagerService: GameManagerInterfaceService,
+        private playerService: PlayerService,
         private router: Router,
+        private placeTilesService: PlaceTilesService,
     ) {
         if (this.router.url === '/multiplayer-game') {
-            this.players = this.multiGameManager.players;
-            if (this.multiGameManager.getMainPlayer().easel.tiles) this.tiles = this.multiGameManager.getMainPlayer().easel.tiles;
+            this.players = this.playerService.players;
+            this.tiles = this.generalGameManagerService.mainPlayer.easel.letters.map((letter) => {
+                return { letter, state: TileState.None } as EaselTile;
+            });
             this.mainPlayerName = this.multiGameManager.getMainPlayer().name;
         } else {
-            this.mainPlayerName = this.gameManager.mainPlayerName;
-            this.tiles = this.playerService.mainPlayer.easel.tiles;
+            this.mainPlayerName = this.gameManager.gameConfig.playerName1;
+            this.tiles = this.gameManager.players.mainPlayer.easel.letters.map((letter) => {
+                return { letter, state: TileState.None } as EaselTile;
+            });
             this.players = this.playerService.players;
         }
 
@@ -49,7 +59,14 @@ export class EaselComponent implements OnChanges {
                 easelTile.state = TileState.None;
             }
 
-        this.numTilesReserve = this.reserve.tileCount;
+        this.numTilesReserve = this.reserve.size;
+        this.mainPlayer = this.generalGameManagerService.mainPlayer;
+        this.multiGameManager.updatePlayer.asObservable().subscribe((msg) => {
+            this.update(msg);
+        });
+        this.placeTilesService.updateEasel.asObservable().subscribe((msg) => {
+            this.updateEasel(msg);
+        });
     }
 
     @HostListener('mousedown', ['$event'])
@@ -95,6 +112,20 @@ export class EaselComponent implements OnChanges {
         }
     }
 
+    update(msg: string) {
+        if (msg === 'updated') {
+            // this.tiles = this.generalGameManagerService.mainPlayer.easel.letters;
+        }
+    }
+
+    updateEasel(msg: string) {
+        if (msg === 'update') {
+            this.tiles = this.generalGameManagerService.mainPlayer.easel.letters.map((letter) => {
+                return { letter, state: TileState.None } as EaselTile;
+            });
+        }
+    }
+
     resetTileState() {
         for (const easelTile of this.tiles) {
             easelTile.state = TileState.None;
@@ -105,7 +136,7 @@ export class EaselComponent implements OnChanges {
     containsTile(tileLetter: string): boolean {
         let found = false;
         for (const easelTile of this.tiles) {
-            if (easelTile.tile.letter === tileLetter) {
+            if (easelTile.letter === tileLetter) {
                 found = true;
             }
         }
@@ -119,7 +150,7 @@ export class EaselComponent implements OnChanges {
         let indexOfNextOccurance = NOT_PRESENT;
         // We try to find the first occurance of the tile with the selected letter
         for (const easelTile of this.tiles) {
-            if (easelTile.tile.letter === letter && indexOfFirstOccuredTile === NOT_PRESENT) {
+            if (easelTile.letter === letter && indexOfFirstOccuredTile === NOT_PRESENT) {
                 indexOfFirstOccuredTile = this.tiles.indexOf(easelTile);
             }
         }
@@ -130,14 +161,11 @@ export class EaselComponent implements OnChanges {
         }
         // we take the first occurance if there is no manipulated tile already
         // or if the manipulated tile is not the same as the one we are looking for
-        if (
-            indexOfManipulatedTile === NOT_PRESENT ||
-            this.tiles[indexOfFirstOccuredTile].tile.letter !== this.tiles[indexOfManipulatedTile].tile.letter
-        ) {
+        if (indexOfManipulatedTile === NOT_PRESENT || this.tiles[indexOfFirstOccuredTile].letter !== this.tiles[indexOfManipulatedTile].letter) {
             return this.tiles[indexOfFirstOccuredTile];
         } else {
             for (const easelTile of this.tiles) {
-                if (easelTile.tile.letter === letter && indexOfNextOccurance === NOT_PRESENT) {
+                if (easelTile.letter === letter && indexOfNextOccurance === NOT_PRESENT) {
                     indexOfNextOccurance = this.tiles.indexOf(easelTile, indexOfManipulatedTile + 1);
                 }
             }
@@ -232,15 +260,17 @@ export class EaselComponent implements OnChanges {
     exchangeTiles() {
         let tilesToExchange = '';
         for (const easelTile of this.tiles) {
-            if (easelTile.state === TileState.Exchange) tilesToExchange += easelTile.tile.letter;
+            if (easelTile.state === TileState.Exchange) tilesToExchange += easelTile.letter;
         }
         if (this.router.url === '/multiplayer-game') {
             this.multiGameManager.exchangeLetters(tilesToExchange, this.multiGameManager.getMainPlayer());
+            this.multiGameManager.switchPlayers();
         } else {
-            this.gameManager.exchangeTiles(tilesToExchange, this.playerService.getPlayerByName(this.mainPlayerName));
+            this.gameManager.exchangeLetters(this.generalGameManagerService.getMainPlayer(), tilesToExchange.split(''));
         }
         this.resetTileState();
+        this.tiles = this.generalGameManagerService.mainPlayer.easel.letters.map((letter) => {
+            return { letter, state: TileState.None } as EaselTile;
+        });
     }
-
-    // selectTileWithKeyboard(event: KeyboardEvent) {}
 }

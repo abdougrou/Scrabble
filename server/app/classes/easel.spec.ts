@@ -44,7 +44,7 @@ describe('Easel', () => {
     it('toString returns correct string', () => {
         const letters = ['a', 'b', 'c'];
         easel.addLetters(letters);
-        const expected = 'a,b,c';
+        const expected = 'abc';
         expect(easel.toString()).to.equal(expected);
     });
 });

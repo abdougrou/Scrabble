@@ -1,7 +1,7 @@
 /* eslint-disable no-bitwise */
+import { Vec2 } from '@common/vec2';
 import { transpose } from './board-utils';
 import { Trie } from './trie';
-import { Vec2 } from './vec2';
 
 const CHAR_CODE_A = 'a'.charCodeAt(0);
 const CHAR_CODE_Z = 'z'.charCodeAt(0);
@@ -93,7 +93,7 @@ export class CrossCheck {
                 : colLetters.length === 0
                 ? rowLetters
                 : rowLetters.filter((letter) => colLetters.indexOf(letter) >= 0);
-        for (const letter of letters) CrossCheck.addLetter(crossCheck, letter);
+        for (const letter of letters) if (letter) CrossCheck.addLetter(crossCheck, letter);
 
         return crossCheck;
     }

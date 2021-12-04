@@ -1,71 +1,126 @@
 import { Injectable } from '@angular/core';
-import { ReserveTile, Tile } from '@app/classes/tile';
-import { CLASSIC_RESERVE, LETTER_POINTS, MIN_EXCHANGE_RESERVE_COUNT } from '@app/constants';
+import { CLASSIC_RESERVE, RESERVE_EXCHANGE_LIMIT } from '@app/constants';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ReserveService {
-    tiles: Map<string, ReserveTile> = new Map<string, ReserveTile>();
-    tileCount: number = 0;
-    serverReserveData: Map<string, number>;
+    data: Map<string, number> = new Map();
+    size: number = 0;
 
     constructor() {
         const lettersData: string[] = CLASSIC_RESERVE.split(/\r?\n/);
         lettersData.forEach((letterData) => {
             const data = letterData.split(',');
-
-            this.tiles.set(data[0], {
-                tile: {
-                    letter: data[0],
-                    points: parseInt(data[2], 10),
-                },
-                count: parseInt(data[1], 10),
-            });
-
-            this.tileCount += parseInt(data[1], 10);
+            this.data.set(data[0], parseInt(data[1], 10));
+            this.size += parseInt(data[1], 10);
         });
     }
 
-    serverReserveToTiles() {
-        this.tiles.clear();
-        for (const tile of Array.from(Object.keys(this.serverReserveData))) {
-            const clientTile: Tile = { letter: tile, points: LETTER_POINTS.get(tile) as number };
-            const reserveTile: ReserveTile = { tile: clientTile, count: this.serverReserveData.get(tile) as number };
-            this.tiles.set(tile[0], reserveTile);
+    /**
+     * Takes a letter from the reserve
+     *
+     * @param letter letter to remove from the reserve
+     * @returns the letter, null if there's no more of that letter in reserve
+     */
+    getLetter(letter: string): string | null {
+        const count = this.data.get(letter);
+        if (count && count > 0) {
+            this.data.set(letter, count - 1);
+            this.size--;
         }
+        return count ? letter : null;
     }
 
-    isExchangePossible(amount: number) {
-        if (this.tileCount < MIN_EXCHANGE_RESERVE_COUNT) return false;
-        else if (this.tileCount - amount >= 0) return true;
-        return false;
-    }
-
-    getLetters(amount: number): Tile[] {
-        const tiles: Tile[] = [];
-        let availableTiles = Array.from(this.tiles.values()).filter((tile) => tile.count > 0);
-
-        for (let i = 0; i < amount; i++) {
-            const randomTile: ReserveTile = availableTiles[Math.floor(Math.random() * availableTiles.length)];
-            tiles.push({ ...randomTile.tile });
-            randomTile.count--;
-            if (randomTile.count === 0) availableTiles = availableTiles.filter((tile) => tile.count > 0);
-        }
-
-        this.tileCount -= amount;
-        return tiles;
-    }
-
-    returnLetters(tiles: Tile[]) {
-        tiles.forEach((tile) => {
-            const reserveTile = this.tiles.get(tile.letter);
-            if (reserveTile !== undefined) {
-                reserveTile.count++;
-            } else {
-                this.tiles.set(tile.letter, { tile, count: 1 });
+    /**
+     * Returns letters into the reserve
+     *
+     * Does nothing if letter should not be in reserve
+     *
+     * @param letters letters to put into the reserve
+     */
+    returnLetters(letters: string[]) {
+        for (const letter of letters) {
+            const count = this.data.get(letter);
+            if (count !== undefined) {
+                this.data.set(letter, count + 1);
+                this.size++;
             }
+        }
+    }
+
+    /**
+     * Checks if exchange is possible with the current reserve
+     *
+     * Use this function when the player is the one exchanging
+     *
+     * @returns true if exchange is possible
+     */
+    isExchangePossible(quantity: number): boolean {
+        if (this.size < RESERVE_EXCHANGE_LIMIT) return false;
+        else if (this.size - quantity < 0) return false;
+        return true;
+    }
+
+    /**
+     * Checks if exchange is possible with the current reserve
+     *
+     * Use this function when the virtual player is the one exchaning
+     *
+     * @returns true if exchange is possible
+     */
+    isExchangePossibleBot(quantity: number): boolean {
+        if (this.size - quantity < 0) return false;
+        return true;
+    }
+
+    /**
+     * Exchanges letters with the reserve
+     *
+     * @param letters letters to exchange
+     * @returns a new array of letters
+     */
+    exchangeLetters(letters: string[]): string[] {
+        const newLetters = this.getRandomLetters(letters.length);
+        this.returnLetters(letters);
+        return newLetters;
+    }
+
+    /**
+     * Takes quantity amount of letters from the reserve
+     *
+     * Returns less than quantity amount if not enough letters are available
+     *
+     * @param quantity amount of letters to get from the reserve
+     * @returns an array of letters
+     */
+    getRandomLetters(quantity: number): string[] {
+        const output: string[] = [];
+        let available = Array.from(this.data.entries()).filter((entry) => entry[1] > 0);
+        for (let i = 0; i < quantity && available.length > 0; i++) {
+            const [letter, count] = available[Math.floor(Math.random() * available.length)];
+            this.data.set(letter, count - 1);
+            this.size--;
+            output.push(letter);
+            available = Array.from(this.data.entries()).filter((entry) => entry[1] > 0);
+        }
+        return output;
+    }
+
+    /**
+     * Prints the reserve in the following format:
+     *
+     * A: 2
+     *
+     * B: 3
+     *
+     * @return formatted string of the reserve
+     */
+    toString(): string {
+        let output = '';
+        Array.from(this.data.entries()).forEach((item) => {
+            output += item[0].toUpperCase() + ': ' + item[1] + '\n';
         });
-        this.tileCount += tiles.length;
+        return output.slice(0, output.length - 1);
     }
 }

@@ -1,7 +1,10 @@
+/* eslint-disable no-console */
+// Allowed console log in this file to make sure the server started correctly
 import { Application } from '@app/app';
 import * as http from 'http';
 import { AddressInfo } from 'net';
 import { Service } from 'typedi';
+import { DatabaseService } from './services/database.service';
 import { LobbyService } from './services/lobby.service';
 import { SocketManagerService } from './services/socket-manager.service';
 
@@ -13,7 +16,7 @@ export class Server {
     private server: http.Server;
     private socketManager: SocketManagerService;
 
-    constructor(private readonly application: Application, private lobbyService: LobbyService) {}
+    constructor(private readonly application: Application, private lobbyService: LobbyService, private databaseService: DatabaseService) {}
 
     private static normalizePort(val: number | string): number | string | boolean {
         const port: number = typeof val === 'string' ? parseInt(val, this.baseDix) : val;
@@ -25,7 +28,7 @@ export class Server {
             return false;
         }
     }
-    init(): void {
+    async init(): Promise<void> {
         this.application.app.set('port', Server.appPort);
 
         this.server = http.createServer(this.application.app);
@@ -37,6 +40,11 @@ export class Server {
 
         this.server.on('error', (error: NodeJS.ErrnoException) => this.onError(error));
         this.server.on('listening', () => this.onListening());
+        try {
+            await this.databaseService.start();
+        } catch {
+            process.exit(1);
+        }
     }
 
     private onError(error: NodeJS.ErrnoException): void {
@@ -66,6 +74,6 @@ export class Server {
     private onListening(): void {
         const addr = this.server.address() as AddressInfo;
         const bind: string = typeof addr === 'string' ? `pipe ${addr}` : `port ${addr.port}`;
-        console.log(bind);
+        console.log(`Listening on ${bind}`);
     }
 }

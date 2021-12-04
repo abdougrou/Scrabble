@@ -1,169 +1,232 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { GameConfig } from '@app/classes/game-config';
+import { Easel } from '@app/classes/easel';
+import { Dictionary, GameConfig, GameMode } from '@app/classes/game-config';
 import { ChatMessage } from '@app/classes/message';
-import { PlayAction, Player } from '@app/classes/player';
-import { PlaceTilesInfo, Tile, TileCoords } from '@app/classes/tile';
-import { Vec2 } from '@app/classes/vec2';
-import { VirtualPlayer } from '@app/classes/virtual-player';
-import { COMMAND_RESULT, GRID_SIZE, LETTER_POINTS, MAX_SKIP_COUNT, SECOND_MD, STARTING_TILE_AMOUNT, SYSTEM_NAME } from '@app/constants';
+import { Player } from '@app/classes/player';
+import { Trie } from '@app/classes/trie';
+import { PlayAction, VirtualPlayer } from '@app/classes/virtual-player';
+import { COMMAND_RESULT, MAX_SKIP_COUNT, SECOND_MD, STARTING_LETTER_AMOUNT, SYSTEM_NAME, VIRTUAL_PLAYER_MAX_TURN_DURATION } from '@app/constants';
+import { BoardService } from '@app/services/board.service';
+import { ExchangeTilesService } from '@app/services/exchange-tiles.service';
+import { MoveGeneratorService } from '@app/services/move-generator.service';
+import { PlayerService } from '@app/services/player.service';
+import { ReserveService } from '@app/services/reserve.service';
+import { VirtualPlayerService } from '@app/services/virtual-player.service';
+import { PlaceResult } from '@common/command-result';
+import { DictionaryInfo } from '@common/dictionaryTemplate';
+import { Move } from '@common/move';
+import { ScoreConfig } from '@common/score-config';
+import { Vec2 } from '@common/vec2';
 import { BehaviorSubject, Subscription, timer } from 'rxjs';
-import { BoardService } from './board.service';
-import { CalculatePointsService } from './calculate-points.service';
-import { ExchangeTilesService } from './exchange-tiles.service';
+import { delay } from 'rxjs/operators';
+import { CommunicationService } from './communication.service';
 import { GridService } from './grid.service';
-import { PlayerService } from './player.service';
-import { ReserveService } from './reserve.service';
-import { WordValidationService } from './word-validation.service';
+import { MultiplayerGameManagerService } from './multiplayer-game-manager.service';
+import { ObjectiveService } from './objective.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class GameManagerService {
     commandMessage: BehaviorSubject<ChatMessage> = new BehaviorSubject({ user: '', body: '' });
-    endTurn: BehaviorSubject<string> = new BehaviorSubject('');
-    turnDuration: number;
     currentTurnDurationLeft: number;
     subscription: Subscription;
     tilePlaceBackSubscription: Subscription;
     randomPlayerNameIndex: number;
     isFirstTurn: boolean = true;
-    mainPlayerName: string;
-    enemyPlayerName: string;
     isEnded: boolean;
     endGameMessage: string = '';
     debug: boolean = false;
-    isMultiPlayer: boolean;
+    gameConfig: GameConfig;
+    firstMove: boolean = true;
+
+    placedWords: Trie;
 
     constructor(
-        private board: BoardService,
-        private reserve: ReserveService,
         public players: PlayerService,
-        private gridService: GridService,
-        private wordValidation: WordValidationService,
-        private calculatePoints: CalculatePointsService,
+        private reserve: ReserveService,
+        private board: BoardService,
+        private moveGeneratorService: MoveGeneratorService,
         private exchangeTileService: ExchangeTilesService,
+        private virtualPlayerService: VirtualPlayerService,
+        private objectiveService: ObjectiveService,
+        private http: HttpClient,
+        private gridService: GridService,
+        private communication: CommunicationService,
     ) {}
 
-    get reserveCount() {
-        return this.reserve.tileCount;
-    }
-
     initialize(gameConfig: GameConfig) {
-        this.mainPlayerName = gameConfig.playerName1;
-        this.enemyPlayerName = gameConfig.playerName2;
-        this.isMultiPlayer = gameConfig.isMultiPlayer;
-        this.turnDuration = gameConfig.duration;
+        this.gameConfig = gameConfig;
         this.currentTurnDurationLeft = gameConfig.duration;
         this.isEnded = false;
-        this.initializePlayers([this.mainPlayerName, this.enemyPlayerName]);
-        this.players.mainPlayer = this.players.getPlayerByName(this.mainPlayerName);
+        this.board.initialize(gameConfig.bonusEnabled);
+        let trie = new Trie();
+        if ((gameConfig.dictionary as DictionaryInfo).title)
+            this.communication.getDictionaryFile(gameConfig.dictionary as DictionaryInfo).subscribe((str) => {
+                trie = this.readStringDictionary(str);
+            });
+        else trie = this.readDictionary('assets/dictionnary.json');
+        this.moveGeneratorService.dictionary = trie;
+        if (this.gameConfig.gameMode === GameMode.LOG2990) {
+            this.placedWords = new Trie();
+            this.objectiveService.initialize();
+        }
+        this.initializePlayers([this.gameConfig.playerName1, this.gameConfig.playerName2]);
+        this.players.mainPlayer = this.players.getPlayerByName(this.gameConfig.playerName1);
+        this.startTimer();
+    }
+
+    initializeFromMultiplayer(gameManager: MultiplayerGameManagerService, vPlayer: Player, mainPlayer: Player) {
+        this.gameConfig = {
+            playerName1: mainPlayer.name,
+            playerName2: vPlayer.name,
+            duration: gameManager.lobbyConfig.turnDuration,
+            bonusEnabled: gameManager.lobbyConfig.bonusEnabled,
+            gameMode: gameManager.lobbyConfig.gameMode,
+            dictionary: gameManager.lobbyConfig.dictionary as Dictionary | DictionaryInfo,
+            isMultiPlayer: false,
+        };
+        this.currentTurnDurationLeft = gameManager.lobbyConfig.turnDuration;
+        this.board.data = gameManager.board.data;
+        this.board.pointGrid = gameManager.board.pointGrid;
+        this.reserve.data = gameManager.reserve.data;
+        this.reserve.size = gameManager.reserve.size;
+        this.players.players = [];
+        this.players.players.push({ name: mainPlayer.name, easel: new Easel(mainPlayer.easel.letters), score: mainPlayer.score });
+        this.players.mainPlayer = this.players.players[0];
+        this.virtualPlayerService.setupVirtualPlayer(vPlayer.name, vPlayer.easel, vPlayer.score, false);
+        this.players.players.push(this.virtualPlayerService.virtualPlayer);
         this.startTimer();
     }
 
     startTimer() {
         const source = timer(0, SECOND_MD);
         this.subscription = source.subscribe((seconds) => {
-            this.currentTurnDurationLeft = this.turnDuration - (seconds % this.turnDuration) - 1;
-            if (this.currentTurnDurationLeft === 0) {
-                this.currentTurnDurationLeft = this.turnDuration;
-                this.switchPlayers();
-                // TODO send player switch event
-            }
-        });
-    }
-
-    startTilePLaceBackCountdown(player: Player, retrievedTiles: Tile[], tilesToPlace: TileCoords[]) {
-        const source = timer(0, SECOND_MD);
-        this.tilePlaceBackSubscription = source.subscribe((seconds) => {
-            const counter = 3 - (seconds % 3) - 1;
-            if (counter === 0) {
-                player.easel.addTiles(retrievedTiles);
-                for (const aTile of tilesToPlace) {
-                    this.board.board.delete(this.board.coordToKey(aTile.coords));
-                }
-                this.gridService.drawBoard();
-                this.tilePlaceBackSubscription.unsubscribe();
-            }
+            this.currentTurnDurationLeft = this.gameConfig.duration - (seconds % this.gameConfig.duration) - 1;
+            if (
+                (this.players.current as VirtualPlayer).chooseAction !== undefined &&
+                this.currentTurnDurationLeft <= this.gameConfig.duration - VIRTUAL_PLAYER_MAX_TURN_DURATION
+            )
+                this.skipTurn();
+            else if (this.currentTurnDurationLeft <= 0) this.switchPlayers();
         });
     }
 
     initializePlayers(playerNames: string[]) {
-        this.players.createPlayer(playerNames[0], this.reserve.getLetters(STARTING_TILE_AMOUNT));
-        if (this.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getLetters(STARTING_TILE_AMOUNT));
-        else this.players.createVirtualPlayer(playerNames[1], this.reserve.getLetters(STARTING_TILE_AMOUNT));
-        // if (Math.random() > FIRST_PLAYER_COIN_FLIP) this.switchPlayers();
+        this.players.players = [];
+        this.players.createPlayer(playerNames[0], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
+        if (this.gameConfig.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
+        else {
+            this.virtualPlayerService.setupVirtualPlayer(
+                playerNames[1],
+                new Easel(this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT)),
+                0,
+                this.gameConfig.expert ? true : false,
+            );
+            this.players.players.push(this.virtualPlayerService.virtualPlayer);
+        }
+        if (this.gameConfig.gameMode === GameMode.LOG2990) for (const name of playerNames) this.objectiveService.assignObjective(name);
+
+        this.moveGeneratorService.generateLegalMoves(this.players.current.easel.toString());
     }
 
     switchPlayers() {
         this.players.switchPlayers();
         this.subscription.unsubscribe();
-        this.currentTurnDurationLeft = this.turnDuration;
+        this.currentTurnDurationLeft = this.gameConfig.duration;
         this.startTimer();
-        // Send player switch event
-        this.endTurn.next(this.players.current.name);
-        if (this.players.current instanceof VirtualPlayer) this.playVirtualPlayer();
-    }
 
-    exchangeTiles(tiles: string, player: Player): ChatMessage {
-        const message = this.exchangeTileService.exchangeTiles(tiles, player);
-        if (message.body === '') {
-            this.players.skipCounter = 0;
-            this.switchPlayers();
-            return { user: COMMAND_RESULT, body: `${player.name} a échangé les lettres ${tiles}` };
-        } else return message;
+        if ((this.players.current as VirtualPlayer).chooseAction !== undefined) {
+            const vPlayerDelay = new BehaviorSubject<null>(null).pipe(delay(Math.random() * VIRTUAL_PLAYER_MAX_TURN_DURATION));
+            vPlayerDelay.subscribe(() => {
+                this.playVirtualPlayer();
+            });
+        }
+
+        this.moveGeneratorService.generateLegalMoves(this.players.current.easel.letters.toString());
     }
 
     playVirtualPlayer() {
-        const vPlayer: VirtualPlayer = this.players.current as VirtualPlayer;
-        vPlayer.play().subscribe((action) => {
+        const vPlayer = this.virtualPlayerService.virtualPlayer;
+        const choice = vPlayer.chooseAction(this.reserve, this.moveGeneratorService.legalMoves);
+        choice.subscribe((action) => {
+            let messageBody = 'MESSAGE_BODY';
             switch (action) {
-                case PlayAction.ExchangeTiles: {
-                    const tilesToExchange = vPlayer.exchange();
-                    if (this.reserve.isExchangePossible(tilesToExchange.length)) {
-                        const msg: ChatMessage = this.exchangeTiles(tilesToExchange, vPlayer);
-                        this.commandMessage.next(msg);
-                    } else {
-                        this.buttonSkipTurn();
-                    }
+                case PlayAction.Pass: {
+                    this.skipTurn();
+                    messageBody = `${vPlayer.name} a passé son tour`;
                     break;
                 }
-                case PlayAction.PlaceTiles: {
-                    const placeTilesInfo: PlaceTilesInfo = vPlayer.place(
-                        this.wordValidation,
-                        this.calculatePoints,
-                        this.board,
-                        this.commandMessage,
-                        this.debug,
-                    );
-                    // console.log(
-                    //     `Bot places the word "${placeTilesInfo.word}" ${placeTilesInfo.vertical ? 'vertical' : 'horizontal'}ly at ${
-                    //         placeTilesInfo.coordStr
-                    //     }`,
-                    // );
-                    if (placeTilesInfo.word.length > 0) {
-                        // console.log(placeTilesInfo);
-                        // console.log(this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer));
-                        const msg: ChatMessage = {
-                            user: this.enemyPlayerName,
-                            body: this.placeTiles(placeTilesInfo.word, placeTilesInfo.coordStr, placeTilesInfo.vertical, vPlayer),
-                        };
-                        this.commandMessage.next(msg);
-                    } else {
-                        this.buttonSkipTurn();
-                    }
+                case PlayAction.Exchange: {
+                    const letters: string[] = vPlayer.exchange(this.reserve);
+                    this.exchangeLetters(vPlayer, letters);
+                    messageBody = `${vPlayer.name} a echangé les lettres ${letters.join('')}`;
+                    this.switchPlayers();
                     break;
                 }
-                default:
-                    // console.log('Bot skipped his turn');
-                    this.buttonSkipTurn();
+                case PlayAction.Place: {
+                    const move: Move = vPlayer.place(this.moveGeneratorService.legalMoves);
+                    this.placeLetters(vPlayer, move.word, move.coord, move.across);
+                    messageBody = `${vPlayer.name} a placé le mot ${move.word} ${!move.across ? 'horizental' : 'vertical'}ement a la coordonnee x:${
+                        move.coord.y
+                    } y:${move.coord.x}`;
+                    this.switchPlayers();
                     break;
+                }
             }
+            this.commandMessage.next({
+                user: COMMAND_RESULT,
+                body: messageBody,
+            });
         });
     }
 
-    giveTiles(player: Player, amount: number) {
-        const tiles: Tile[] = this.reserve.getLetters(amount);
-        player.easel.addTiles(tiles);
+    exchangeLetters(player: Player, letters: string[]): ChatMessage {
+        const message = this.exchangeTileService.exchangeLetters(letters, player);
+        if (message.body === '') {
+            this.players.skipCounter = 0;
+            // this.switchPlayers();
+            return { user: COMMAND_RESULT, body: `${player.name} a échangé les lettres ${letters}` };
+        } else return message;
+    }
+
+    placeLetters(player: Player, word: string, coord: Vec2, across: boolean): PlaceResult {
+        if (player.name !== this.players.current.name) return PlaceResult.NotCurrentPlayer;
+        if (this.firstMove && this.moveGeneratorService.dictionary.contains(word) && this.isCentered(word, coord, across)) {
+            this.moveGeneratorService.legalMove(word, coord, across);
+            this.firstMove = false;
+        }
+        const move: Move | undefined = this.moveGeneratorService.legalMoves.find(
+            (_move) => _move.word === word && _move.coord.x === coord.x && _move.coord.y === coord.y && _move.across === across,
+        );
+        if (!move) return PlaceResult.NotValid;
+
+        const usedLetters: string[] = [];
+        const nextCoord = { x: coord.x, y: coord.y };
+        for (const k of word) {
+            if (!this.board.getLetter(nextCoord)) {
+                this.board.setLetter(nextCoord, k);
+                usedLetters.push(k);
+                const letter: string[] = [k];
+                player.easel.getLetters(letter);
+                const reserveLetters: string[] = this.reserve.getRandomLetters(1);
+                player.easel.addLetters(reserveLetters);
+            }
+
+            if (across) nextCoord.y++;
+            else nextCoord.x++;
+        }
+        player.score += move.points;
+
+        if (this.gameConfig.gameMode === GameMode.LOG2990) {
+            this.placedWords.insert(move.word);
+            this.objectiveService.check(player, move, usedLetters, this.placedWords, this.moveGeneratorService.pointMap);
+        }
+        this.players.skipCounter = 0;
+
+        this.gridService.drawBoard();
+        return PlaceResult.Success;
     }
 
     buttonSkipTurn(): void {
@@ -181,17 +244,29 @@ export class GameManagerService {
         }
     }
 
-    // TODO implement stopTimer() to end the game after 6 skipTurn
+    // // TODO implement stopTimer() to end the game after 6 skipTurn
     endGame() {
         const msg: ChatMessage = {
             user: SYSTEM_NAME,
             body: `La partie est terminée! <br>
-            chevalet de ${this.players.getPlayerByName(this.mainPlayerName).name}: ${this.players.getPlayerByName(this.mainPlayerName).easel}.<br>
-            chevalet de ${this.players.getPlayerByName(this.enemyPlayerName).name}: ${this.players.getPlayerByName(this.enemyPlayerName).easel}.`,
+            chevalet de ${this.players.getPlayerByName(this.gameConfig.playerName1).name}: ${
+                this.players.getPlayerByName(this.gameConfig.playerName1).easel
+            }.<br>
+            chevalet de ${this.players.getPlayerByName(this.gameConfig.playerName2).name}: ${
+                this.players.getPlayerByName(this.gameConfig.playerName2).easel
+            }.`,
         };
         this.commandMessage.next(msg);
         this.stopTimer();
         this.isEnded = true;
+
+        const player = this.players.mainPlayer;
+        const scoreConfig: ScoreConfig = {
+            name: player.name,
+            score: player.score,
+        };
+        if (this.gameConfig.gameMode === GameMode.Classic) this.communication.putClassicPlayerScore(scoreConfig);
+        else this.communication.putLog2990PlayerScore(scoreConfig);
     }
 
     stopTimer() {
@@ -200,9 +275,6 @@ export class GameManagerService {
 
     reset() {
         this.stopTimer();
-        this.board.board = new Map();
-        this.reserve = new ReserveService();
-        this.players.clear();
     }
 
     activateDebug(): string {
@@ -215,125 +287,24 @@ export class GameManagerService {
         }
     }
 
-    placeTiles(word: string, coordStr: string, vertical: boolean, player: Player): string {
-        //  Check if it's the player's turn to play
-        if (this.players.current !== player) return "Ce n'est pas votre tour";
-        //  Get the tiles and coordinates associated to the word
-        const tileCoords: TileCoords[] = this.getTileCoords(word, coordStr, vertical);
-        //  Compare the letter positions to the tiles on the board
-        if (this.wordCollides(tileCoords)) return 'Commande impossible a realise';
-        //  Check that the command will lead to tiles being placed
-        if (tileCoords.length === 0) return 'Le mot que vous tentez de placer se trouve deja sur le tableau';
-        //  Manage blank letters
-        const tilesToRetrieve: TileCoords[] = [];
-        const tilesToPlace: TileCoords[] = [];
-        for (const tileCoord of tileCoords) {
-            if (tileCoord.tile.letter === tileCoord.tile.letter.toUpperCase()) {
-                tilesToRetrieve.push({ tile: { letter: '*', points: tileCoord.tile.points }, coords: tileCoord.coords });
-                tilesToPlace.push({ tile: { letter: tileCoord.tile.letter.toLowerCase(), points: 0 }, coords: tileCoord.coords });
-            } else {
-                tilesToRetrieve.push(tileCoord);
-                tilesToPlace.push(tileCoord);
-            }
-        }
-        //  Check that the easel contains all the needed letters
-        if (!player.easel.containsTiles(this.getStringToRetrieve(tilesToRetrieve))) return 'Votre chevalet ne contient pas les lettres nécessaires';
-        //  Retrieve the tiles from the player's easel
-        const retrievedTiles: Tile[] = player.easel.getTiles(this.getStringToRetrieve(tilesToRetrieve));
-        //  Check that the position of the word is valid
-        if (this.validWordPosition(word, tilesToPlace, vertical)) {
-            //  check that the word itself is valid
-            //  We place the tiles on the board and give the player new tiles if the word and position are valid
-            const scoreNewTiles = this.calculatePoints.calculatePoints(tilesToPlace);
-            for (const aTile of tilesToPlace) {
-                this.board.placeTile(aTile.coords, aTile.tile);
-            }
-            this.gridService.drawBoard();
-            if (this.wordValidation.validateWords(tilesToPlace)) {
-                player.score += scoreNewTiles;
-                const numTiles = this.reserve.tileCount < tilesToPlace.length ? this.reserve.tileCount : tilesToPlace.length;
-                player.easel.addTiles(this.reserve.getLetters(numTiles));
-            } else {
-                this.startTilePLaceBackCountdown(player, retrievedTiles, tilesToPlace);
-                this.gridService.drawBoard();
-                return 'le mot nest pas dans le dictionnaire';
-            }
-        } else {
-            //  We give the player his tiles back if the word is invalid
-            player.easel.addTiles(retrievedTiles);
-            return 'placement de mot invalide';
-        }
-        this.gridService.drawBoard();
-        this.switchPlayers();
-        this.players.skipCounter = 0;
-        return `${player.name} a placé le mot "${word}" ${vertical ? 'verticale' : 'horizontale'}ment à la case ${coordStr}`;
+    readDictionary(dictionary: string): Trie {
+        const trie = new Trie();
+        this.http.get(dictionary).subscribe((data) => {
+            const words: string[] = JSON.parse(JSON.stringify(data)).words;
+            for (const word of words) trie.insert(word);
+        });
+        return trie;
     }
 
-    wordCollides(tileCoords: TileCoords[]): boolean {
-        for (let i = tileCoords.length - 1; i >= 0; i--) {
-            if (this.board.getTile(tileCoords[i].coords)) {
-                if ((this.board.getTile(tileCoords[i].coords) as Tile).letter === tileCoords[i].tile.letter) {
-                    tileCoords.splice(i, 1);
-                } else {
-                    return true;
-                }
-            }
-        }
-        return false;
+    readStringDictionary(dictionary: string): Trie {
+        const trie = new Trie();
+        const words: string[] = JSON.parse(dictionary).words;
+        for (const word of words) trie.insert(word);
+        return trie;
     }
 
-    getTileCoords(word: string, coordStr: string, vertical: boolean): TileCoords[] {
-        const coords = this.getCoordinateFromString(coordStr);
-        const tileCoords: TileCoords[] = [];
-        for (let i = 0; i < word.length; i++) {
-            const coord: Vec2 = vertical ? { x: coords.x, y: coords.y + i } : { x: coords.x + i, y: coords.y };
-            tileCoords.push({ tile: { letter: word.charAt(i), points: LETTER_POINTS.get(word.charAt(i)) as number }, coords: coord });
-        }
-        return tileCoords;
-    }
-
-    getCoordinateFromString(coordStr: string): Vec2 {
-        const CHAR_OFFSET = 'a'.charCodeAt(0);
-        const coordX = parseInt(coordStr.substr(1, coordStr.length), 10) - 1;
-        const coordY = coordStr[0].toLowerCase().charCodeAt(0) - CHAR_OFFSET;
-        return { x: coordX, y: coordY } as Vec2;
-    }
-
-    private getStringToRetrieve(tileCoords: TileCoords[]): string {
-        let stringToRetrieve = '';
-        for (const aLetter of tileCoords) {
-            stringToRetrieve += aLetter.tile.letter;
-        }
-        return stringToRetrieve;
-    }
-    private validWordPosition(word: string, tilesToPlace: TileCoords[], vertical: boolean): boolean {
-        const BOARD_CENTER: Vec2 = { x: 7, y: 7 };
-        //  Check if word is placed outside of the board
-        for (const aTile of tilesToPlace) {
-            if (aTile.coords.x >= GRID_SIZE || aTile.coords.y >= GRID_SIZE) return false;
-        }
-        //  if first turn, the word must touch the center of the board
-        if (this.board.board.size === 0) {
-            let isCenter = false;
-            for (const aTile of tilesToPlace) {
-                if (aTile.coords.x === BOARD_CENTER.x && aTile.coords.y === BOARD_CENTER.y) {
-                    isCenter = true;
-                }
-            }
-            return isCenter;
-        }
-        // If size of tiles to be placed is inferior to size of word we can determine the word touches another one
-        if (tilesToPlace.length < word.length) {
-            return true;
-        } else {
-            //  Iterate through the tiles to see if any of them is adjacent to a tile on the board
-            let isTouching = false;
-            for (const aTile of tilesToPlace) {
-                const firstCoord = vertical ? { x: aTile.coords.x + 1, y: aTile.coords.y } : { x: aTile.coords.x, y: aTile.coords.y + 1 };
-                const secondCoord = vertical ? { x: aTile.coords.x - 1, y: aTile.coords.y } : { x: aTile.coords.x, y: aTile.coords.y - 1 };
-                if (this.board.getTile(firstCoord) !== undefined || this.board.getTile(secondCoord) !== undefined) isTouching = true;
-            }
-            return isTouching;
-        }
+    isCentered(word: string, coord: Vec2, across: boolean): boolean {
+        const center = Math.floor(this.board.data.length / 2);
+        return across ? coord.y <= center && coord.y + word.length - 1 >= center : coord.x <= center && coord.x + word.length - 1 >= center;
     }
 }

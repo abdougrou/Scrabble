@@ -1,5 +1,5 @@
 import { BOARD_SIZE, POINT_GRID } from '@app/constants';
-import { Vec2 } from './vec2';
+import { Vec2 } from '@common/vec2';
 
 const BONUS_STR = '4444444433333333333333332222222222222111111111111111111111111';
 export class Board {

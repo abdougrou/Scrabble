@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { TileState } from '@app/classes/tile';
-import { Vec2 } from '@app/classes/vec2';
 import { MouseButton } from '@app/constants';
+import { Vec2 } from '@common/vec2';
 
 @Injectable({
     providedIn: 'root',

@@ -1,3 +1,5 @@
+import { DictionaryInfo } from '@common/dictionaryTemplate';
+
 export interface GameConfig {
     playerName1: string;
     playerName2: string;
@@ -5,7 +7,8 @@ export interface GameConfig {
     isMultiPlayer: boolean;
     duration: number;
     bonusEnabled: boolean;
-    dictionary: Dictionary;
+    dictionary: Dictionary | DictionaryInfo;
+    expert?: boolean;
 }
 
 export enum GameMode {

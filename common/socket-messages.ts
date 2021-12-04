@@ -1,13 +1,15 @@
+import { Objective } from '@app/classes/objective';
 import { Player } from '@app/classes/player';
-import { Vec2 } from '@app/classes/vec2';
+import { Vec2 } from '@common/vec2';
 import { LobbyConfig } from './lobby-config';
 
 export const SocketEvent = {
     playerJoinLobby: 'player join lobby',
     playerLeaveLobby: 'player leave lobby',
+    deleteLobby: 'delete-lobby',
     setConfig: 'set config',
     chatMessage: 'message',
-    startTimer: 'start timer',
+    setTimer: 'set timer',
     switchPlayers: 'switch players',
     placeLetters: 'place letters',
     exchangeLetters: 'exchange letters',
@@ -15,6 +17,7 @@ export const SocketEvent = {
     setPlayers: 'set players',
     update: 'update',
     reserve: 'reserve',
+    continueSolo: 'continue solo',
 };
 
 export interface JoinLobbyMessage {
@@ -27,16 +30,27 @@ export interface LeaveLobbyMessage {
     playerName: string;
 }
 
+export interface DeleteLobbyMessage {
+    lobbyKey: string;
+}
+
 export interface SetConfigMessage {
     lobbyKey: string;
     config: LobbyConfig;
     guest: string;
+    players?: Player[];
+    objectives?: Objective[];
+}
+
+export interface ContinueSoloMessage {
+    vPlayer: Player;
+    mainPlayer: Player;
 }
 
 // I dont know how it will work currently
-export interface StartTimerMessage {
+export interface SetTimerMessage {
     lobbyKey: string;
-    playerName: string;
+    duration: number;
 }
 
 export interface SwitchPlayersMessage {
@@ -45,7 +59,7 @@ export interface SwitchPlayersMessage {
 
 export interface PlaceLettersMessage {
     lobbyKey: string;
-    player: Player;
+    playerData: PlayerData;
     word: string;
     coord: Vec2;
     across: boolean;
@@ -53,19 +67,16 @@ export interface PlaceLettersMessage {
 
 export interface ExchangeLettersMessage {
     lobbyKey: string;
-    player: Player;
+    playerData: PlayerData;
     letters: string;
 }
 
 export interface SkipTurnMessage {
     lobbyKey: string;
-    player: Player;
-}
-export interface ShowReserveMessage {
-    lobbyKey: string;
+    playerData: PlayerData;
 }
 
-export interface UpdateMessage {
+export interface ShowReserveMessage {
     lobbyKey: string;
 }
 
@@ -74,13 +85,19 @@ export interface NormalChatMessage {
     playerName: string;
     message: string;
 }
+
 export interface PlayerData {
     name: string;
     score: number;
     easel: string;
 }
+
+export interface UpdateMessage {
+    lobbyKey: string;
+}
+
 export interface UpdateGameManagerMessage {
-    players: PlayerData[];
+    players: Player[];
     reserveData: Map<string, number>;
     reserveCount: number;
     boardData: (string | null)[][];

@@ -1,3 +1,8 @@
+h3 {
+  margin: 0;
+  margin-top: 1em;
+}
+
 .container {
   width: 100%;
   display: flex;
@@ -8,6 +13,11 @@
     margin-bottom: 8px;
     background-color: #abdbe3;
 }
+
+.reserve {
+  max-height: 40px;
+}
+
 mat-card-title {
   color: black;
 }
@@ -38,6 +48,12 @@ mat-card-subtitle {
   margin-right: 1em;
 }
 
+.align {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 .first {
   background-color: #1e81b0;
 }
@@ -58,4 +74,9 @@ mat-card-subtitle {
 .warn {
   background-color: #cf000f;
   color: white;
+}
+
+.goals {
+  padding-top: 10px;
+  min-height: min-content;
 }

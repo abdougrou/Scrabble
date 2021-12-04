@@ -1,31 +1,71 @@
 import { CLASSIC_RESERVE } from '@app/constants';
+import { ClassicRankingService } from '@app/services/classic-ranking.service';
+import { DatabaseService } from '@app/services/database.service';
+import { DictionaryService } from '@app/services/dictionary.service';
+import { Log2990RankingService } from '@app/services/log2990-ranking.service';
 import { ExchangeResult, PassResult, PlaceResult } from '@common/command-result';
+import { DictionaryInfo } from '@common/dictionaryTemplate';
+import { GameMode, LobbyConfig } from '@common/lobby-config';
+import { Move } from '@common/move';
+import { ScoreConfig } from '@common/score-config';
+import { Vec2 } from '@common/vec2';
+import { readFileSync } from 'fs';
 import { Board } from './board';
-import { transpose } from './board-utils';
 import { Easel } from './easel';
-import { Move, MoveGenerator } from './move-generator';
+import { MoveGenerator } from './move-generator';
+import { Objective, OBJECTIVES } from './objective';
 import { Player } from './player';
 import { Reserve } from './reserve';
 import { Trie } from './trie';
-import { Vec2 } from './vec2';
 
 export class GameManager {
     players: Player[];
     reserve: Reserve;
     board: Board;
     moveGenerator: MoveGenerator;
+    firstMove: boolean = true;
+    dictionaryService: DictionaryService = new DictionaryService();
+    skipCounter: number;
 
-    constructor() {
+    /**
+     * Objectives related variables
+     */
+    objectives: Objective[];
+    placedWords: Trie = new Trie();
+
+    private database: DatabaseService;
+    private classicRanking: ClassicRankingService;
+    private log2990Ranking: Log2990RankingService;
+
+    constructor(private config: LobbyConfig) {
         this.players = [];
+        this.objectives = [];
         this.reserve = new Reserve(CLASSIC_RESERVE);
+        let trie = new Trie();
+        if ((config.dictionary as DictionaryInfo).title)
+            trie = this.readStringDictionary(this.dictionaryService.sendDictionaryFile(config.dictionary as DictionaryInfo));
+        else trie = this.readDictionary('assets/dictionnary.json');
         this.board = new Board();
-        this.moveGenerator = new MoveGenerator(new Trie()); // TODO Fill trie with words
-        this.board = new Board();
-        this.board.initialize(false);
+        this.board.initialize(config.bonusEnabled);
+        this.moveGenerator = new MoveGenerator(trie, this.board.pointGrid);
+        this.skipCounter = 0;
+
+        if (config.gameMode === GameMode.LOG2990) {
+            this.placedWords = new Trie();
+            const SORT_RANDOM = 0.5;
+            const OBJECTIVES_COUNT = 4;
+            this.objectives = OBJECTIVES.map((objective) => Object.assign({}, objective));
+            this.objectives.sort(() => SORT_RANDOM - Math.random());
+            while (this.objectives.length > OBJECTIVES_COUNT) this.objectives.pop();
+        }
+
+        this.database = new DatabaseService();
+        this.classicRanking = new ClassicRankingService(this.database);
+        this.log2990Ranking = new Log2990RankingService(this.database);
     }
 
     /**
-     * Adds a player to the game
+     * Adds a player to the game and assigns private objective if LOG2990 mode
      *
      * @param name player name, must be different than current player's name
      * @returns true if the player is added successfully
@@ -34,7 +74,18 @@ export class GameManager {
         if (this.players.length > 1) return false;
         else if (this.players[0]?.name === name) return false;
         const startingLetterCount = 7;
-        this.players.push({ name, easel: new Easel(this.reserve.getRandomLetters(startingLetterCount)), score: 0 });
+        const player = { name, easel: new Easel(this.reserve.getRandomLetters(startingLetterCount)), score: 0 };
+        this.players.push(player);
+
+        // Assign private objective
+        if (this.config.gameMode === GameMode.LOG2990) {
+            this.objectives.reverse();
+            const objective = this.objectives.pop() as Objective;
+            objective.playerName = name;
+            objective.private = true;
+            this.objectives.push(objective);
+        }
+
         return true;
     }
 
@@ -66,6 +117,7 @@ export class GameManager {
 
     swapPlayers() {
         this.players.reverse();
+        this.moveGenerator.generateLegalMoves(this.board.data, this.players[0].easel.letters.join(''));
     }
 
     /**
@@ -77,12 +129,13 @@ export class GameManager {
     passTurn(player: Player): PassResult {
         if (player.name !== this.players[0].name) return PassResult.NotCurrentPlayer;
         this.swapPlayers();
-        // reset timer
         return PassResult.Success;
     }
 
     /**
      * Places a word on the board if it is possible
+     *
+     * Refills the player's easel if letters are placed
      *
      * @param player player to place letters
      * @param word word to place on the board
@@ -91,40 +144,47 @@ export class GameManager {
      * @returns PlaceResult
      */
     placeLetters(player: Player, word: string, coord: Vec2, across: boolean): PlaceResult {
-        console.log(player);
-        console.log(word);
-        console.log(coord);
-        console.log(across);
         if (player.name !== this.players[0].name) return PlaceResult.NotCurrentPlayer;
-
+        if (this.firstMove && this.moveGenerator.dictionary.contains(word) && this.isCentered(word, coord, across)) {
+            this.moveGenerator.legalMove(this.board.data, word, coord, across);
+            this.firstMove = false;
+        }
         const move: Move | undefined = this.moveGenerator.legalMoves.find(
-            (_move) => _move.word === word && _move.coord === coord && _move.across === across,
+            (_move) => _move.word === word && _move.coord.x === coord.x && _move.coord.y === coord.y && _move.across === across,
         );
         if (!move) return PlaceResult.NotValid;
 
-        const nextCoord = coord;
-        let points = 0;
-        const row: (string | null)[] = (move.across ? this.board.data : transpose(this.board.data))[move.across ? move.coord.x : move.coord.y] as (
-            | string
-            | null
-        )[];
-        const pointRow: number[] = (move.across ? this.board.pointGrid : transpose(this.board.pointGrid))[
-            move.across ? move.coord.x : move.coord.y
-        ] as number[];
+        const usedLetters: string[] = [];
+        const nextCoord = { x: coord.x, y: coord.y };
         for (const k of word) {
             if (!this.board.getLetter(nextCoord)) {
                 this.board.setLetter(nextCoord, k);
-                player.easel.getLetters([k]);
+                usedLetters.push(k);
+                const letter: string[] = [k];
+                player.easel.getLetters(letter);
+                const reserveLetter: string[] = this.reserve.getRandomLetters(1);
+                player.easel.addLetters(reserveLetter);
             }
-            points += this.moveGenerator.calculateCrossSum(this.board.data, coord, move.across);
 
             if (across) nextCoord.y++;
             else nextCoord.x++;
         }
-        points += this.moveGenerator.calculateWordPoints(move, row, pointRow);
+        player.score += move.points;
 
-        // place the word on the board, recalculate anchors and cross checks
-        player.score += points;
+        // Objectives
+        if (this.config.gameMode === GameMode.LOG2990) {
+            this.placedWords.insert(move.word);
+            for (const objective of this.objectives) {
+                if (!objective.achieved && (!objective.private || objective.playerName === player.name)) {
+                    const objectiveResult = objective.check(move, usedLetters, this.placedWords, this.moveGenerator.pointMap);
+                    if (objectiveResult) {
+                        player.score += objective.reward;
+                        objective.achieved = true;
+                    }
+                }
+            }
+        }
+
         return PlaceResult.Success;
     }
 
@@ -155,5 +215,55 @@ export class GameManager {
      */
     printReserve(): string {
         return this.reserve.toString();
+    }
+
+    /**
+     * Creates a Trie from the dictionary at the path provided
+     *
+     * @param dictionary dictionary path
+     * @returns Trie representing the dictionary
+     */
+    readDictionary(dictionary: string): Trie {
+        const trie = new Trie();
+        const raw = readFileSync(dictionary).toString();
+        const words: string[] = JSON.parse(raw).words;
+        words.forEach((word) => {
+            trie.insert(word);
+        });
+        return trie;
+    }
+
+    /**
+     * Read stringified dictionary in a trie.
+     *
+     * @param dictionary takes a stringed dictionary
+     * @returns trie
+     */
+    readStringDictionary(dictionary: string): Trie {
+        const trie = new Trie();
+        const words: string[] = JSON.parse(dictionary).words;
+        for (const word of words) trie.insert(word);
+        return trie;
+    }
+
+    /**
+     * Checks if a word we try to place is centered
+     *
+     * @param word to place
+     * @param coord word's starting coordinate
+     * @param across whether the word is across or down
+     * @returns true if the word passes by the center of the board
+     */
+    isCentered(word: string, coord: Vec2, across: boolean): boolean {
+        const center = Math.floor(this.board.data.length / 2);
+        return across ? coord.y <= center && coord.y + word.length - 1 >= center : coord.x <= center && coord.x + word.length - 1 >= center;
+    }
+
+    endGame() {
+        const winner = this.players[1].score > this.players[0].score ? this.players[1] : this.players[0];
+        const scoreConfig: ScoreConfig = { name: winner.name, score: winner.score };
+
+        if (this.config.gameMode === GameMode.Classic) this.classicRanking.addPlayer(scoreConfig);
+        else this.log2990Ranking.addPlayer(scoreConfig);
     }
 }
