@@ -23,6 +23,8 @@ import {
     SocketEvent,
     SwitchPlayersMessage,
     UpdateGameManagerMessage,
+    // vscode removes the comma, causing an ESLint error
+    // eslint-disable-next-line prettier/prettier
     UpdateMessage
 } from '@common/socket-messages';
 import { Vec2 } from '@common/vec2';
