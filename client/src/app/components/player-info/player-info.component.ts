@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { GameMode } from '@app/classes/game-config';
 import { Objective } from '@app/classes/objective';
 import { Player } from '@app/classes/player';
+import { AbandonPageComponent } from '@app/components/abandon-page/abandon-page.component';
 import { DURATION_INIT, MAX_FONT_MULTIPLIER, MIN_FONT_MULTIPLIER } from '@app/constants';
 import { CommunicationService } from '@app/services/communication.service';
 import { GameManagerService } from '@app/services/game-manager.service';
@@ -12,8 +13,6 @@ import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-ma
 import { ObjectiveService } from '@app/services/objective.service';
 import { PlayerService } from '@app/services/player.service';
 import { ReserveService } from '@app/services/reserve.service';
-// eslint-disable-next-line no-restricted-imports
-import { AbandonPageComponent } from '../abandon-page/abandon-page.component';
 
 @Component({
     selector: 'app-player-info',
@@ -72,13 +71,14 @@ export class PlayerInfoComponent implements DoCheck, OnDestroy {
         if (this.router.url === '/game') this.quit();
     }
     get timer() {
+        const MIN_VALUE = 10;
         let timerValue = 0;
         if (this.router.url === '/multiplayer-game') timerValue = this.multiplayerGameManager.turnDurationLeft;
         else timerValue = this.gameManager.currentTurnDurationLeft;
         const mins = Math.floor(timerValue / DURATION_INIT);
         const secs = timerValue % DURATION_INIT;
         if (timerValue >= DURATION_INIT) return `0${mins}: ${secs}`;
-        else if (timerValue >= 10) return `00:${secs}`;
+        else if (timerValue >= MIN_VALUE) return `00:${secs}`;
         else return `00:0${secs}`;
     }
 

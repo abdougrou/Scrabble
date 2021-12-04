@@ -9,7 +9,7 @@ import {
     LIGHT_BLUE_MULTIPLIER,
     PINK_MULTIPLIER,
     RED_MULTIPLIER,
-    STARTING_LETTER_AMOUNT
+    STARTING_LETTER_AMOUNT,
 } from '@app/constants';
 import { Move } from '@common/move';
 import { Vec2 } from '@common/vec2';
