@@ -60,6 +60,7 @@ export class PlayerInfoComponent implements DoCheck, OnDestroy {
 
         this.communication.continueSolo().subscribe((message) => {
             if (this.multiplayerGameManager.mainPlayerName === message.mainPlayer.name) {
+                this.multiplayerGameManager.reset();
                 this.gameManager.initializeFromMultiplayer(this.multiplayerGameManager, message.vPlayer, message.mainPlayer);
                 this.players = this.playerService.players;
                 this.router.navigateByUrl('/game');
