@@ -42,7 +42,7 @@ export class ChatBoxComponent implements OnChanges {
     ) {
         if (this.router.url === '/multiplayer-game') {
             this.mainPlayerName = this.multiplayerGameManager.mainPlayerName;
-            this.enemyPlayerName = this.multiplayerGameManager.players.find((player) => player.name !== this.mainPlayerName)?.name as string;
+            this.enemyPlayerName = this.playerService.players.find((player) => player.name !== this.mainPlayerName)?.name as string;
         } else {
             this.mainPlayerName = this.gameManager.gameConfig.playerName1;
             this.enemyPlayerName = this.gameManager.gameConfig.playerName2;

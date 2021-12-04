@@ -43,7 +43,7 @@ export class GameManagerInterfaceService {
     }
 
     getCurrentPlayer(): Player {
-        return this.isMultiplayer() ? this.multiGameManager.players[0] : this.soloGameManager.players.current;
+        return this.isMultiplayer() ? this.playerService.players[0] : this.soloGameManager.players.current;
     }
 
     skipTurn() {

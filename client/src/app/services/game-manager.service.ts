@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Easel } from '@app/classes/easel';
-import { GameConfig, GameMode } from '@app/classes/game-config';
+import { Dictionary, GameConfig, GameMode } from '@app/classes/game-config';
 import { ChatMessage } from '@app/classes/message';
 import { Player } from '@app/classes/player';
 import { Trie } from '@app/classes/trie';
@@ -29,7 +29,6 @@ import { ObjectiveService } from './objective.service';
 })
 export class GameManagerService {
     commandMessage: BehaviorSubject<ChatMessage> = new BehaviorSubject({ user: '', body: '' });
-    endTurn: BehaviorSubject<string> = new BehaviorSubject('');
     currentTurnDurationLeft: number;
     subscription: Subscription;
     tilePlaceBackSubscription: Subscription;
@@ -78,13 +77,25 @@ export class GameManagerService {
     }
 
     initializeFromMultiplayer(gameManager: MultiplayerGameManagerService, vPlayer: Player, mainPlayer: Player) {
+        this.gameConfig = {
+            playerName1: mainPlayer.name,
+            playerName2: vPlayer.name,
+            duration: gameManager.lobbyConfig.turnDuration,
+            bonusEnabled: gameManager.lobbyConfig.bonusEnabled,
+            gameMode: gameManager.lobbyConfig.gameMode,
+            dictionary: gameManager.lobbyConfig.dictionary as Dictionary | DictionaryInfo,
+            isMultiPlayer: false,
+        };
         this.board.data = gameManager.board.data;
         this.board.pointGrid = gameManager.board.pointGrid;
         this.reserve.data = gameManager.reserve.data;
         this.reserve.size = gameManager.reserve.size;
-        this.players.players.push(mainPlayer);
+        this.players.players = [];
+        this.players.players.push({ name: mainPlayer.name, easel: new Easel(mainPlayer.easel.letters), score: mainPlayer.score });
+        this.players.mainPlayer = this.players.players[0];
+        console.log('MainPlayer: ', this.players.mainPlayer);
         this.virtualPlayerService.setupVirtualPlayer(vPlayer.name, vPlayer.easel, vPlayer.score, false);
-        this.players.mainPlayer = mainPlayer;
+        this.players.players.push(this.virtualPlayerService.virtualPlayer);
         this.startTimer();
     }
 
@@ -103,22 +114,8 @@ export class GameManagerService {
         });
     }
 
-    // startTilePLaceBackCountdown(player: Player, retrievedTiles: Tile[], tilesToPlace: TileCoords[]) {
-    //     const source = timer(0, SECOND_MD);
-    //     this.tilePlaceBackSubscription = source.subscribe((seconds) => {
-    //         const counter = 3 - (seconds % 3) - 1;
-    //         if (counter === 0) {
-    //             player.easel.addTiles(retrievedTiles);
-    //             for (const aTile of tilesToPlace) {
-    //                 this.board.board.delete(this.board.coordToKey(aTile.coords));
-    //             }
-    //             this.gridService.drawBoard();
-    //             this.tilePlaceBackSubscription.unsubscribe();
-    //         }
-    //     });
-    // }
-
     initializePlayers(playerNames: string[]) {
+        this.players.players = [];
         this.players.createPlayer(playerNames[0], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
         if (this.gameConfig.isMultiPlayer) this.players.createPlayer(playerNames[1], this.reserve.getRandomLetters(STARTING_LETTER_AMOUNT));
         else {
@@ -140,8 +137,7 @@ export class GameManagerService {
         this.subscription.unsubscribe();
         this.currentTurnDurationLeft = this.gameConfig.duration;
         this.startTimer();
-        // Send player switch event
-        this.endTurn.next(this.players.current.name);
+
         if ((this.players.current as VirtualPlayer).chooseAction !== undefined) {
             const vPlayerDelay = new BehaviorSubject<null>(null).pipe(delay(Math.random() * VIRTUAL_PLAYER_MAX_TURN_DURATION));
             vPlayerDelay.subscribe(() => {
@@ -196,6 +192,7 @@ export class GameManagerService {
     }
 
     placeLetters(player: Player, word: string, coord: Vec2, across: boolean): PlaceResult {
+        console.log(this.board);
         if (player.name !== this.players.current.name) return PlaceResult.NotCurrentPlayer;
         if (this.firstMove && this.moveGeneratorService.dictionary.contains(word) && this.isCentered(word, coord, across)) {
             this.moveGeneratorService.legalMove(word, coord, across);
@@ -271,9 +268,6 @@ export class GameManagerService {
 
     reset() {
         this.stopTimer();
-        this.board.initialize(false); // TODO repalce false by real value
-        this.reserve = new ReserveService();
-        this.players.clear();
     }
 
     activateDebug(): string {

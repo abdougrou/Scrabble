@@ -1,23 +1,21 @@
-import { Component, Inject, OnDestroy } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Dictionary, GameMode } from '@app/classes/game-config';
 import { MultiGameConfigComponent } from '@app/components/multi-game-config/multi-game-config.component';
 import { MultiplayerJoinFormComponent } from '@app/components/multiplayer-join-form/multiplayer-join-form.component';
-import { DIALOG_HEIGHT, DIALOG_WIDTH, DURATION_INIT, SECOND_MD } from '@app/constants';
+import { DIALOG_HEIGHT, DIALOG_WIDTH, DURATION_INIT } from '@app/constants';
 import { CommunicationService } from '@app/services/communication.service';
 import { GameManagerService } from '@app/services/game-manager.service';
 import { LobbyConfig } from '@common/lobby-config';
-import { Subscription, timer } from 'rxjs';
 
 @Component({
     selector: 'app-multiplayer-rooms',
     templateUrl: './multiplayer-rooms.component.html',
     styleUrls: ['./multiplayer-rooms.component.scss'],
 })
-export class MultiplayerRoomsComponent implements OnDestroy {
+export class MultiplayerRoomsComponent {
     lobbies: LobbyConfig[] = [];
-    getLobbiesSubscription: Subscription;
 
     constructor(
         public dialogRef: MatDialogRef<MultiplayerRoomsComponent>,
@@ -27,12 +25,7 @@ export class MultiplayerRoomsComponent implements OnDestroy {
         @Inject(MAT_DIALOG_DATA) public data: { mode: GameMode },
         private snackBar: MatSnackBar,
     ) {
-        const source = timer(0, SECOND_MD);
-        this.getLobbiesSubscription = source.subscribe(() => this.getLobbies());
-    }
-
-    ngOnDestroy() {
-        this.getLobbiesSubscription.unsubscribe();
+        this.getLobbies();
     }
 
     async createLobby() {

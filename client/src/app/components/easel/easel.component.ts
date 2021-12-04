@@ -8,6 +8,7 @@ import { GameManagerService } from '@app/services/game-manager.service';
 import { MouseManagerService } from '@app/services/mouse-manager.service';
 import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-manager.service';
 import { PlaceTilesService } from '@app/services/place-tiles.service';
+import { PlayerService } from '@app/services/player.service';
 import { ReserveService } from '@app/services/reserve.service';
 
 @Component({
@@ -35,11 +36,12 @@ export class EaselComponent implements OnChanges {
         private gameManager: GameManagerService,
         private multiGameManager: MultiplayerGameManagerService,
         private generalGameManagerService: GameManagerInterfaceService,
+        private playerService: PlayerService,
         private router: Router,
         private placeTilesService: PlaceTilesService,
     ) {
         if (this.router.url === '/multiplayer-game') {
-            this.players = this.multiGameManager.players;
+            this.players = this.playerService.players;
             this.tiles = this.generalGameManagerService.mainPlayer.easel.letters.map((letter) => {
                 return { letter, state: TileState.None } as EaselTile;
             });
@@ -49,7 +51,7 @@ export class EaselComponent implements OnChanges {
             this.tiles = this.gameManager.players.mainPlayer.easel.letters.map((letter) => {
                 return { letter, state: TileState.None } as EaselTile;
             });
-            this.players = this.gameManager.players.players;
+            this.players = this.playerService.players;
         }
 
         if (this.keyboardReceiver !== KEYBOARD_EVENT_RECEIVER.easel)
