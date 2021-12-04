@@ -85,8 +85,8 @@ export class CrossCheck {
     static crossCheck(board: (string | null)[][], coord: Vec2, dictionary: Trie): CrossCheck {
         const crossCheck = new CrossCheck();
         const transposedBoard = transpose(board);
-        const rowLetters = this.crossCheckOneDimension(board[coord.x], coord.y, dictionary);
-        const colLetters = this.crossCheckOneDimension(transposedBoard[coord.y] as (string | null)[], coord.x, dictionary);
+        const rowLetters = this.crossCheckOneDimension(board[coord.x], coord.y, dictionary).filter((letter) => letter);
+        const colLetters = this.crossCheckOneDimension(transposedBoard[coord.y] as (string | null)[], coord.x, dictionary).filter((letter) => letter);
         const letters =
             rowLetters.length === 0
                 ? colLetters

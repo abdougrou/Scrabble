@@ -192,7 +192,6 @@ export class GameManagerService {
     }
 
     placeLetters(player: Player, word: string, coord: Vec2, across: boolean): PlaceResult {
-        console.log(this.board);
         if (player.name !== this.players.current.name) return PlaceResult.NotCurrentPlayer;
         if (this.firstMove && this.moveGeneratorService.dictionary.contains(word) && this.isCentered(word, coord, across)) {
             this.moveGeneratorService.legalMove(word, coord, across);

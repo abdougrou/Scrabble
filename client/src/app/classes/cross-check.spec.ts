@@ -193,4 +193,26 @@ describe('CrossCheck', () => {
 
         expect(CrossCheck.crossCheckOneDimension(row, coord, dict)).toEqual([]);
     });
+
+    it('debugging', () => {
+        const dict: Trie = new Trie(['oh', 'ho', 'dol', 'dor', 'lys']);
+        const board = [
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, 'd', null, null, null],
+            [null, null, null, 'o', 'h', null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+        ];
+        const coord1 = { x: 4, y: 3 };
+        const expected1 = 133120;
+        const result1 = CrossCheck.crossCheck(board, coord1, dict).value;
+
+        const coord2 = { x: 4, y: 4 };
+        const expected2 = 16384;
+        const result2 = CrossCheck.crossCheck(board, coord2, dict).value;
+        expect(result1).toEqual(expected1);
+        expect(result2).toEqual(expected2);
+    });
 });

@@ -57,8 +57,8 @@ describe('MoveGeneratorService', () => {
 
         service.extendLeft(easel, 'a', anchor, service.dictionary.getNode('a') as TrieNode, anchor.leftPart.length > 0 ? 0 : anchor.leftLength);
         const expectedLegalMoves: Move[] = [
-            { word: 'abc', coord: { x: 3, y: 1 }, across: true, points: 4, formedWords: 1 },
-            { word: 'abcde', coord: { x: 3, y: 1 }, across: true, points: 5, formedWords: 1 },
+            { word: 'abc', coord: { x: 3, y: 1 }, across: true, points: 7, formedWords: 1 },
+            { word: 'abcde', coord: { x: 3, y: 1 }, across: true, points: 10, formedWords: 1 },
         ];
         expect(service.legalMoves).toEqual(expectedLegalMoves);
     });
@@ -86,13 +86,13 @@ describe('MoveGeneratorService', () => {
 
         service.extendLeft(easel, '', anchor, service.dictionary.root, anchor.leftPart.length > 0 ? 0 : anchor.leftLength);
         const expectedLegalMoves: Move[] = [
-            { word: 'bcde', coord: { x: 3, y: 2 }, across: true, points: 4, formedWords: 1 },
-            { word: 'abcde', coord: { x: 3, y: 1 }, across: true, points: 4, formedWords: 1 },
+            { word: 'bcde', coord: { x: 3, y: 2 }, across: true, points: 9, formedWords: 1 },
+            { word: 'abcde', coord: { x: 3, y: 1 }, across: true, points: 10, formedWords: 1 },
         ];
         expect(service.legalMoves).toEqual(expectedLegalMoves);
     });
 
-    it('calculateAnchorsAndCrossChecks finds all anchors and cross checks for a given board', () => {
+    it('calculateAnchorsAndCrossChecks finds all anchors for a given board', () => {
         board.data = [
             [null, null, null, null, null, null, null],
             [null, null, null, null, null, null, null],
@@ -107,7 +107,27 @@ describe('MoveGeneratorService', () => {
 
         const expectedLength = 7;
         expect(service.anchors.length).toEqual(expectedLength);
-        expect(service.crossChecks.size).toEqual(expectedLength);
+    });
+
+    it('calculateAnchorsAndCrossChecks finds all cross checks for a given board', () => {
+        service.dictionary = new Trie(['oh', 'ho', 'dol', 'dor', 'lys']);
+        board.data = [
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, 'd', null, null, null],
+            [null, null, null, 'o', 'h', null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null],
+        ];
+        service.calculateAnchorsAndCrossChecks();
+        const coord1 = { x: 4, y: 3 };
+        const expected1 = 133120;
+
+        const coord2 = { x: 4, y: 4 };
+        const expected2 = 16384;
+        expect(service.crossChecks.get(coordToKey(coord1))?.value).toEqual(expected1);
+        expect(service.crossChecks.get(coordToKey(coord2))?.value).toEqual(expected2);
     });
 
     it('generateLegalMoves finds all legal moves for a given board and easel', () => {
@@ -126,10 +146,10 @@ describe('MoveGeneratorService', () => {
         service.generateLegalMoves(easel);
         const coord = { x: 3, y: 2 };
         const expectedMoves: Move[] = [
-            { word: 'cab', coord, across: false, points: 15, formedWords: 4 },
-            { word: 'cba', coord, across: false, points: 15, formedWords: 4 },
-            { word: 'cat', coord, across: true, points: 13, formedWords: 4 },
-            { word: 'cbt', coord, across: true, points: 13, formedWords: 4 },
+            { word: 'cab', coord, across: false, points: 19, formedWords: 4 },
+            { word: 'cba', coord, across: false, points: 19, formedWords: 4 },
+            { word: 'cat', coord, across: true, points: 14, formedWords: 4 },
+            { word: 'cbt', coord, across: true, points: 16, formedWords: 4 },
         ];
         expect(service.legalMoves).toEqual(expectedMoves);
     });
@@ -177,7 +197,7 @@ describe('MoveGeneratorService', () => {
             board.data[coord.x],
             pointRow,
         );
-        const expectedPoints = 96;
+        const expectedPoints = 78;
         expect(points).toEqual(expectedPoints);
     });
 });

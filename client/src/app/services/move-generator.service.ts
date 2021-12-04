@@ -186,27 +186,29 @@ export class MoveGeneratorService {
 
         for (let i = 0; i < move.word.length; i++) {
             const coord = i + (move.across ? move.coord.y : move.coord.x);
-            const letter = row[coord];
-            if (letter) {
-                points += this.pointMap.get(letter) as number;
+            const letter = move.word[i];
+            const letterPoint = this.pointMap.get(letter) as number;
+            const boardLetter = row[coord];
+            if (boardLetter) {
+                points += this.pointMap.get(boardLetter) as number;
             } else {
                 const multiplier = pointRow[coord];
                 switch (multiplier) {
                     case blank:
-                        points += pointRow[coord];
+                        points += letterPoint;
                         break;
                     case lightBlue:
-                        points += LIGHT_BLUE_MULTIPLIER * pointRow[coord];
+                        points += LIGHT_BLUE_MULTIPLIER * letterPoint;
                         break;
                     case darkBlue:
-                        points += DARK_BLUE_MULTIPLIER * pointRow[coord];
+                        points += DARK_BLUE_MULTIPLIER * letterPoint;
                         break;
                     case pink:
-                        points += pointRow[coord];
+                        points += letterPoint;
                         numNewPinkTiles++;
                         break;
                     case red:
-                        points += pointRow[coord];
+                        points += letterPoint;
                         numNewRedTiles++;
                         break;
                 }

@@ -46,8 +46,8 @@ describe('MoveGenerator', () => {
 
         moveGenerator.extendLeft(board, easel, 'a', anchor, dictionary.getNode('a') as TrieNode, anchor.leftPart.length > 0 ? 0 : anchor.leftLength);
         const expectedLegalMoves: Move[] = [
-            { word: 'abc', coord: { x: 3, y: 1 }, across: true, points: 4, formedWords: 1 },
-            { word: 'abcde', coord: { x: 3, y: 1 }, across: true, points: 5, formedWords: 1 },
+            { word: 'abc', coord: { x: 3, y: 1 }, across: true, points: 7, formedWords: 1 },
+            { word: 'abcde', coord: { x: 3, y: 1 }, across: true, points: 10, formedWords: 1 },
         ];
         expect(moveGenerator.legalMoves).to.have.deep.members(expectedLegalMoves);
     });
@@ -76,8 +76,8 @@ describe('MoveGenerator', () => {
 
         moveGenerator.extendLeft(board, easel, '', anchor, dictionary.root, anchor.leftPart.length > 0 ? 0 : anchor.leftLength);
         const expectedLegalMoves: Move[] = [
-            { word: 'bcde', coord: { x: 3, y: 2 }, across: true, points: 16, formedWords: 5 },
-            { word: 'abcde', coord: { x: 3, y: 1 }, across: true, points: 4, formedWords: 1 },
+            { word: 'bcde', coord: { x: 3, y: 2 }, across: true, points: 9, formedWords: 5 },
+            { word: 'abcde', coord: { x: 3, y: 1 }, across: true, points: 10, formedWords: 1 },
         ];
         expect(moveGenerator.legalMoves).to.have.deep.members(expectedLegalMoves);
     });
@@ -118,10 +118,10 @@ describe('MoveGenerator', () => {
         moveGenerator.generateLegalMoves(board, easel);
         const coord = { x: 3, y: 2 };
         const expectedMoves: Move[] = [
-            { word: 'cat', coord, across: true, points: 4, formedWords: 1 },
-            { word: 'cbt', coord, across: true, points: 4, formedWords: 1 },
-            { word: 'cab', coord, across: false, points: 3, formedWords: 1 },
-            { word: 'cba', coord, across: false, points: 3, formedWords: 1 },
+            { word: 'cat', coord, across: true, points: 5, formedWords: 1 },
+            { word: 'cbt', coord, across: true, points: 7, formedWords: 1 },
+            { word: 'cab', coord, across: false, points: 7, formedWords: 1 },
+            { word: 'cba', coord, across: false, points: 7, formedWords: 1 },
         ];
         expect(moveGenerator.legalMoves).to.have.deep.members(expectedMoves);
     });
@@ -167,11 +167,11 @@ describe('MoveGenerator', () => {
         // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         const pointRow = [0, 1, 2, 0, 3, 4, 0];
         const points = moveGenerator.calculateWordPoints(
-            { word: 'carotte', coord, across: true, points: 96, formedWords: 1 },
+            { word: 'carotte', coord, across: true, points: 0, formedWords: 1 },
             board[coord.x],
             pointRow,
         );
-        const expectedPoints = 96;
+        const expectedPoints = 78;
         expect(points).to.equal(expectedPoints);
     });
 });
