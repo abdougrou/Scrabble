@@ -1,52 +1,75 @@
 <div class="container">
+    <!-- Timer Card -->
     <mat-card class="card timer">
-        <mat-card-title> Temps restant: {{ this.timer }}</mat-card-title>
+        <mat-card-title>Temps restant: {{ timer }}</mat-card-title>
     </mat-card>
 
-    <div *ngFor="let player of players; first as isFirst" >
-        <mat-card [ngClass]="{ 'first' : isFirst }" class="card">
-            <mat-card-title-group >
-            <mat-card-title>{{ player.name }}</mat-card-title>
-            <mat-card-subtitle>Score : {{ player.score }}</mat-card-subtitle>
-            <mat-card-subtitle>Lettres : {{ player.easel.count }}</mat-card-subtitle>
-            <div *ngIf="player.name === this.mainPlayerName">
-                <img *ngIf="isFirst;else other_content" mat-card-sm-image src="../../../assets/profile-pic-first.jpg" >
-                <ng-template #other_content><img  mat-card-sm-image src="../../../assets/profile-pic.jpg" ></ng-template>
-            </div>
+    <!-- Player Cards -->
+    <div *ngFor="let player of players; first as isFirst">
+        <mat-card [ngClass]="{ first: isFirst }" class="card">
+            <mat-card-title-group>
+                <mat-card-title>{{ player.name }}</mat-card-title>
+                <mat-card-subtitle>Score : {{ player.score }}</mat-card-subtitle>
+                <mat-card-subtitle>Lettres : {{ player.easel.count }}</mat-card-subtitle>
+                <div *ngIf="player.name === mainPlayerName">
+                    <img *ngIf="isFirst; else other_content" mat-card-sm-image src="../../../assets/profile-pic-first.jpg" />
+                    <ng-template #other_content>
+                        <img mat-card-sm-image src="../../../assets/profile-pic.jpg" />
+                    </ng-template>
+                </div>
             </mat-card-title-group>
         </mat-card>
     </div>
 
-    <div>
-        <mat-card class="card justified">
-            <button mat-raised-button (click)="decreaseFont()">-</button>
-            <span class="font-size-display">Taille: {{fontSize}}</span>
-            <button mat-raised-button (click)="increaseFont()">+</button>
-        </mat-card>
-    </div>
+    <!-- Font Size Controls -->
+    <mat-card class="card justified">
+        <button mat-raised-button (click)="decreaseFont()">-</button>
+        <span class="font-size-display">Taille: {{ fontSize }}</span>
+        <button mat-raised-button (click)="increaseFont()">+</button>
+    </mat-card>
+
+    <!-- Game Controls -->
     <div class="align">
-        <span matBadge="{{this.reserveCount}}" matBadgeColor="warn" ><img class='reserve' src="../../../assets/reserve.png" width="100%" ></span>    
+        <span matBadge="{{ reserveCount }}" matBadgeColor="warn">
+            <img class="reserve" src="../../../assets/reserve.png" width="100%" />
+        </span>
         <div class="justified-right">
-            <button mat-raised-button [disabled]="this.players[0].name !== this.mainPlayerName || this.isEnded" (click)= "skipTurn()">Passer le tour</button>
-            <button mat-raised-button *ngIf="!this.isEnded" (click)="openAbandonPage()" class="warn">Abandonner</button>
-            <button mat-raised-button *ngIf="this.isEnded" [routerLink]="['/home']" (click)="quit()" class="warn">Quitter</button>
+            <button mat-raised-button [disabled]="players[0].name !== mainPlayerName || isEnded" (click)="skipTurn()">Passer le tour</button>
+            <button mat-raised-button *ngIf="!isEnded" (click)="openAbandonPage()" class="warn">Abandonner</button>
+            <button mat-raised-button *ngIf="isEnded" [routerLink]="['/home']" (click)="quit()" class="warn">Quitter</button>
         </div>
     </div>
-    <app-end-game-popup *ngIf="this.isEnded" [players]="players" [winnerName]="this.winner" [isEqual]="this.players[0].score === this.players[1].score"></app-end-game-popup>
-    <!-------------------- First Style ------------------>
-    <!-- <mat-tab-group class="goals" dynamicHeight>
-        <mat-tab label="Objectifs privés">
-             <div class="goals" *ngFor="let objective of privateObjectives"><mat-checkbox [checked]="objective.achieved" [disableRipple]="true" (click)="$event.preventDefault()">{{ objective.description }} ({{ objective.reward }}pts)</mat-checkbox></div> 
-            </mat-tab>
-        <mat-tab label="Objectifs publics"> <div class="goals" *ngFor="let objective of publicObjectives"><mat-checkbox [checked]="objective.achieved" [disableRipple]="true" (click)="$event.preventDefault()"> {{ objective.description }} ({{ objective.reward }}pts)</mat-checkbox></div> </mat-tab>
-      </mat-tab-group> -->
-    <!------------------- Second Style ------------------->
-    <div *ngIf="this.gameMode === 1">
+
+    <!-- Objectives Section -->
+    <div *ngIf="gameMode === 1">
         <h3>Objectifs privés</h3>
         <mat-divider></mat-divider>
-        <div class="goals" *ngFor="let objective of privateObjectives"><mat-checkbox [checked]="objective.achieved" [disableRipple]="true" (click)="$event.preventDefault()">{{ objective.description }} ({{ objective.reward }}pts)</mat-checkbox></div>
+        <div class="goals">
+            <mat-checkbox
+                *ngFor="let objective of privateObjectives"
+                [checked]="objective.achieved"
+                [disableRipple]="true"
+                (click)="$event.preventDefault()"
+            >
+                {{ objective.description }} ({{ objective.reward }}pts)
+            </mat-checkbox>
+        </div>
+
         <h3>Objectifs publics</h3>
         <mat-divider></mat-divider>
-        <div class="goals" *ngFor="let objective of publicObjectives"><mat-checkbox [checked]="objective.achieved" [disableRipple]="true" (click)="$event.preventDefault()"> {{ objective.description }} ({{ objective.reward }}pts)</mat-checkbox></div>
+        <div class="goals">
+            <mat-checkbox
+                *ngFor="let objective of publicObjectives"
+                [checked]="objective.achieved"
+                [disableRipple]="true"
+                (click)="$event.preventDefault()"
+            >
+                {{ objective.description }} ({{ objective.reward }}pts)
+            </mat-checkbox>
+        </div>
     </div>
+
+    <!-- End Game Popup -->
+    <app-end-game-popup *ngIf="isEnded" [players]="players" [winnerName]="winner" [isEqual]="players[0].score === players[1].score">
+    </app-end-game-popup>
 </div>

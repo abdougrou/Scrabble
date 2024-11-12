@@ -38,7 +38,7 @@ export class GridService {
     drawGridIds() {
         const startPositionX: Vec2 = { x: STEP / 2, y: CANVAS_HEIGHT - STEP / 2 };
         const startPositionY: Vec2 = { x: CANVAS_WIDTH - STEP / 2, y: STEP / 2 };
-        this.gridContext.fillStyle = 'black';
+        this.gridContext.fillStyle = 'white';
         this.gridContext.textBaseline = 'middle';
         this.gridContext.textAlign = 'center';
         this.gridContext.font = '20px system-ui';

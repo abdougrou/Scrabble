@@ -1,6 +1,6 @@
 <form [formGroup]="gameConfigForm">
     <div class="container justified">
-        <h2 mat-dialog-title>Paramètres de la partie</h2>
+        <h1 mat-dialog-title>Paramètres de la partie</h1>
         <div class="justified">
             <mat-form-field hintLabel="Lettres seulement" appearance="outline">
                 <mat-label>Nom d'utilisateur</mat-label>
@@ -17,10 +17,15 @@
 
             <mat-form-field appearance="outline">
                 <mat-select formControlName="dictionary" placeholder="Français">
-                    <mat-option value=0 matTooltip="Dictionnaire Français" matTooltipPosition="right">Français</mat-option>
-                    <mat-option value=1 matTooltip="Dictionnaire Anglais" matTooltipPosition="right">Anglais</mat-option>
-                    <mat-option *ngFor="let dictionary of dictionaries" [value]="dictionary" matTooltip="{{dictionary.description}}" matTooltipPosition="right">
-                        {{dictionary.title}}
+                    <mat-option value="0" matTooltip="Dictionnaire Français" matTooltipPosition="right">Français</mat-option>
+                    <mat-option value="1" matTooltip="Dictionnaire Anglais" matTooltipPosition="right">Anglais</mat-option>
+                    <mat-option
+                        *ngFor="let dictionary of dictionaries"
+                        [value]="dictionary"
+                        matTooltip="{{ dictionary.description }}"
+                        matTooltipPosition="right"
+                    >
+                        {{ dictionary.title }}
                     </mat-option>
                 </mat-select>
             </mat-form-field>

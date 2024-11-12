@@ -1,18 +1,18 @@
-<mat-card id="easel" *ngIf="{tiles}">
+<mat-card id="easel">
     <mat-card
         class="tile"
+        [ngClass]="{
+            selected: tile.state === 1,
+            exchange: tile.state === 2
+        }"
         (mousedown)="tileClicked(tile, $event)"
         *ngFor="let tile of tiles"
-        [ngStyle]="{ 'background-color': tile.state === 1 ? '#8FC1D4' : tile.state === 2 ? '#76b947' : 'burlywood' }"
     >
-        <div class="letter">
-            {{ tile.letter | uppercase }}
-        </div>
-        <div class="points">
-            {{ letterPoints.get(tile.letter) }}
-        </div>
+        <div class="letter">{{ tile.letter | uppercase }}</div>
+        <div class="points">{{ letterPoints.get(tile.letter) }}</div>
     </mat-card>
 </mat-card>
+
 <div class="exchange-buttons" *ngIf="exchangableTiles">
     <button
         mat-raised-button

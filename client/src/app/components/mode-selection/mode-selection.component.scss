@@ -1,31 +1,20 @@
-.container {
-    min-height: 50vh;
-    height: auto;
+::ng-deep .mat-dialog-container {
+    background: #262522 !important;
+    box-shadow: none !important;
+    border-radius: 8px !important;
+    padding: 24px !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-h2 {
-    color: #3f51b5;
+.container {
+    min-width: 300px;
+    background-color: #262522;
 }
 
 .justified {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.button {
-    margin-top: 10px;
-    text-align: center;
-}
-
-#back {
-    background-color: #cf000f;
-    color: white;
-}
-
-.mat-raised-button {
-    color: white;
-    background-color: #1e81b0;
-    width: 100%;
+    gap: 1rem;
 }

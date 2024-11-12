@@ -1,18 +1,143 @@
-.container {
+:host {
+    display: block;
+}
+
+::ng-deep .mat-dialog-container {
+    background: #262522 !important;
+    padding: 0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+}
+
+.scoreboard-container {
+    background: #262522;
+    color: white;
+    padding: 1.5rem;
     display: flex;
-    justify-content: center;
+    gap: 1.5rem;
+    min-width: 600px;
 }
 
-.classic {
-    min-width: 50%;
-    margin-right: 1em;
-    box-shadow: .5px .5px 5px rgba(0,0,0,.2);
+.ranking-section {
+    flex: 1;
+    background: #363636;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-.log {
-    min-width: 50%;
-    box-shadow: .5px .5px 5px rgba(0,0,0,.2);
+.section-header {
+    background: linear-gradient(to right, #7fb654 0%, #50931c 100%);
+    padding: 1rem;
+
+    h2 {
+        margin: 0;
+        color: white;
+        font-size: 1.25rem;
+        font-weight: 500;
+        text-align: center;
+    }
 }
+
+// Table Styles
 table {
     width: 100%;
+    background: transparent !important;
+}
+
+::ng-deep {
+    // Header Styles
+    .mat-header-row {
+        background: rgba(255, 255, 255, 0.05);
+        height: 48px;
+    }
+
+    .mat-header-cell {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.875rem;
+        font-weight: 500;
+        padding: 0 1rem;
+    }
+
+    // Row Styles
+    .mat-row {
+        height: 52px;
+        transition: background-color 0.3s ease;
+
+        &:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+    }
+
+    .mat-cell {
+        color: white;
+        font-size: 0.9rem;
+        padding: 0 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+}
+
+// Rank Info Styles
+.rank-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.rank-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #7fb654;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.user-name {
+    font-weight: 500;
+}
+
+.score {
+    font-family: 'Roboto Mono', monospace;
+    color: #9ed374;
+    font-weight: 500;
+}
+
+// Top 3 Highlighting
+::ng-deep {
+    .mat-row:nth-child(1) {
+        .rank-number {
+            background: linear-gradient(to bottom, #ffd700 0%, #ffc800 100%);
+            color: #262522;
+        }
+    }
+
+    .mat-row:nth-child(2) {
+        .rank-number {
+            background: linear-gradient(to bottom, #c0c0c0 0%, #b3b3b3 100%);
+            color: #262522;
+        }
+    }
+
+    .mat-row:nth-child(3) {
+        .rank-number {
+            background: linear-gradient(to bottom, #cd7f32 0%, #be732d 100%);
+            color: #262522;
+        }
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+    .scoreboard-container {
+        flex-direction: column;
+        min-width: auto;
+    }
 }

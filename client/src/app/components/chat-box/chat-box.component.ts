@@ -10,6 +10,11 @@ import { GameManagerService } from '@app/services/game-manager.service';
 import { MultiplayerGameManagerService } from '@app/services/multiplayer-game-manager.service';
 import { PlayerService } from '@app/services/player.service';
 
+interface StyledChatMessage extends ChatMessage {
+    timestamp: string;
+    type: 'system' | 'user' | 'enemy' | 'default';
+}
+
 @Component({
     selector: 'app-chat-box',
     templateUrl: './chat-box.component.html',
@@ -17,6 +22,7 @@ import { PlayerService } from '@app/services/player.service';
 })
 export class ChatBoxComponent implements OnChanges {
     @ViewChild('messageInput') messageInput: ElementRef<HTMLInputElement>;
+    @ViewChild('chatBody') chatBody: ElementRef;
 
     @Input() keyboardReceiver: string;
     @Output() keyboardReceiverChange = new EventEmitter<string>();
@@ -24,7 +30,8 @@ export class ChatBoxComponent implements OnChanges {
 
     buttonPressed = '';
     message = '';
-    chatMessage: ChatMessage = { user: '', body: '' };
+    messages: StyledChatMessage[] = [];
+    chatMessage: StyledChatMessage = { user: '', body: '', timestamp: '', type: 'default' };
     player: Player;
     mainPlayerName: string;
     enemyPlayerName: string;
@@ -48,11 +55,12 @@ export class ChatBoxComponent implements OnChanges {
             this.enemyPlayerName = this.gameManager.gameConfig.playerName2;
         }
         this.player = gameManagerInterface.getMainPlayer();
+        // Subscribe to messages
         this.gameManager.commandMessage.asObservable().subscribe((msg) => {
-            this.showMessage(msg);
+            this.addMessage(msg);
         });
         this.communication.serverMessage.asObservable().subscribe((msg) => {
-            this.showMessage(msg);
+            this.addMessage(msg);
         });
     }
 
@@ -71,21 +79,32 @@ export class ChatBoxComponent implements OnChanges {
 
     submitInput(): void {
         if (this.messageInput.nativeElement.value !== '') {
-            this.chatMessage.user = this.mainPlayerName;
-            this.chatMessage.body = this.message;
+            const newMessage: StyledChatMessage = {
+                user: this.mainPlayerName,
+                body: this.message,
+                timestamp: this.getCurrentTime(),
+                type: 'user',
+            };
+
             this.messageInput.nativeElement.value = '';
+
             if (this.router.url === '/game') {
-                this.showMessage(this.chatMessage);
-                this.showMessage(this.checkCommand(this.chatMessage, this.player));
+                this.addMessage(newMessage);
+                const commandResponse = this.checkCommand(newMessage, this.player);
+                if (commandResponse.body) {
+                    this.addMessage(commandResponse);
+                }
             } else if (this.router.url === '/multiplayer-game') {
                 this.player = this.multiplayerGameManager.getMainPlayer();
-                if (!this.isCommand(this.chatMessage.body)) {
-                    this.communication.sendMessage(this.chatMessage);
+                if (!this.isCommand(newMessage.body)) {
+                    this.communication.sendMessage(newMessage);
                 } else {
-                    this.showMessage(this.chatMessage);
-                    this.handleMultiplayerCommand(this.chatMessage);
+                    this.addMessage(newMessage);
+                    this.handleMultiplayerCommand(newMessage);
                 }
             }
+
+            this.message = '';
         }
     }
 
@@ -119,13 +138,14 @@ export class ChatBoxComponent implements OnChanges {
     }
 
     scrollDown(): void {
-        const chatBody = document.getElementById('messages');
-        if (chatBody) {
-            chatBody.scrollTop = 0;
-        }
+        setTimeout(() => {
+            if (this.chatBody) {
+                this.chatBody.nativeElement.scrollTop = 0;
+            }
+        });
     }
 
-    handleMultiplayerCommand(message: ChatMessage) {
+    handleMultiplayerCommand(message: StyledChatMessage) {
         switch (message.body.split(' ')[0]) {
             case COMMANDS.exchange:
                 this.multiplayerExchange(message.body);
@@ -138,13 +158,18 @@ export class ChatBoxComponent implements OnChanges {
                 this.multiplayerGameManager.skipTurn();
                 break;
             case COMMANDS.debug:
-                this.showMessage(this.commandHandler.debug(message.body));
+                this.addMessage(this.commandHandler.debug(message.body));
                 break;
             case COMMANDS.reserve:
-                this.showMessage(this.commandHandler.reserve(message.body));
+                this.addMessage(this.commandHandler.reserve(message.body));
                 break;
             default:
-                this.showMessage({ user: SYSTEM_NAME, body: "La commande entrée n'est pas valide" } as ChatMessage);
+                this.addMessage({
+                    user: SYSTEM_NAME,
+                    body: "La commande entrée n'est pas valide",
+                    timestamp: this.getCurrentTime(),
+                    type: 'system',
+                } as StyledChatMessage);
                 break;
         }
     }
@@ -220,6 +245,44 @@ export class ChatBoxComponent implements OnChanges {
             this.keyboardReceiver = KEYBOARD_EVENT_RECEIVER.chatbox;
             this.keyboardReceiverChange.emit(KEYBOARD_EVENT_RECEIVER.chatbox);
             this.isInside.emit(true);
+        }
+    }
+
+    private getCurrentTime(): string {
+        const now = new Date();
+        return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    }
+
+    private addMessage(message: ChatMessage): void {
+        if (message.body !== '') {
+            const styledMessage: StyledChatMessage = {
+                ...message,
+                timestamp: this.getCurrentTime(),
+                type: 'default',
+            };
+
+            // Determine message type
+            switch (message.user) {
+                case SYSTEM_NAME: {
+                    styledMessage.type = 'system';
+
+                    break;
+                }
+                case this.mainPlayerName: {
+                    styledMessage.type = 'user';
+
+                    break;
+                }
+                case this.enemyPlayerName: {
+                    styledMessage.type = 'enemy';
+
+                    break;
+                }
+                // No default
+            }
+
+            this.messages.unshift(styledMessage); // Add to start of array for reverse display
+            this.scrollDown();
         }
     }
 }

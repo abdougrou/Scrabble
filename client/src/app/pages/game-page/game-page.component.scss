@@ -1,12 +1,14 @@
 .container {
     height: 100%;
     display: flex;
-    background-color: #eeeee4;
+    background: #262522;
 }
 
 .play-area-container {
     overflow: auto;
     flex: 1 1 auto;
+    display: flex;
+    justify-content: center;
 }
 
 .play-area {
@@ -17,7 +19,7 @@
 
 .sidebar {
     margin-right: 3em;
-    width:30%;
+    max-width: 350px;
 }
 
 #chat-box {
@@ -25,5 +27,5 @@
     width: 25%;
     display: flex;
     justify-content: end;
-    box-shadow: 2px 2px 20px rgb(0,0,0,0.4);
+    box-shadow: 2px 2px 20px rgb(0, 0, 0, 0.4);
 }

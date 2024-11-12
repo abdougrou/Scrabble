@@ -1,7 +1,6 @@
 .container {
     min-height: 100vh;
     height: auto;
-    background-color: #eeeee4;
 }
 
 .justified {
@@ -49,4 +48,28 @@
     color: white;
     background-color: #1e81b0;
     width: 100%;
+}
+
+.container {
+    min-height: 100vh;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+h1 {
+    color: white;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    max-width: 300px;
 }

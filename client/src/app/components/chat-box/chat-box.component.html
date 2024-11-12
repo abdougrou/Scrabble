@@ -1,7 +1,31 @@
 <div (mousedown)="insideChatBox($event)" class="chat-container">
     <div #chatBody class="chat-body" id="messages">
-        <p #defaultMessage id="default-message"></p>
+        <!-- Messages list with reverse display (newest first) -->
+        <div
+            *ngFor="let msg of messages"
+            class="message"
+            [ngClass]="{
+                'system-message': msg.type === 'system',
+                'user-message': msg.type === 'user',
+                'enemy-message': msg.type === 'enemy',
+                'default-message': msg.type === 'default'
+            }"
+        >
+            <!-- Message header with username if exists -->
+            <div class="message-header" *ngIf="msg.user">
+                <span class="username">{{ msg.user }}</span>
+            </div>
+
+            <!-- Message content -->
+            <div class="message-content">
+                {{ msg.body }}
+            </div>
+
+            <!-- Message timestamp -->
+            <div class="timestamp">{{ msg.timestamp }}</div>
+        </div>
     </div>
+
     <div class="message-box">
         <input
             #messageInput

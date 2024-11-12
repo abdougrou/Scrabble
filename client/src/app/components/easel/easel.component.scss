@@ -1,38 +1,99 @@
+/* easel.component.scss */
+:host {
+    display: block;
+}
+
 #easel {
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
-    background-color: #ba8c63;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #363636;
+    border-radius: 8px;
+    margin: 1rem 0;
 }
 
 .tile {
-    display: block;
-    border: 3px;
-    background-color: burlywood;
-    font-weight: 700;
-    font-size: x-large;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(to bottom, #424242 0%, #363636 100%);
+    border-radius: 4px;
     cursor: pointer;
-}
-.points {
-    height: 29%;
-    font-size: xx-small;
-    position: absolute;
-    bottom: 0%;
-    right: 0%;
-    padding: 7%;
+    transition: all 0.3s ease;
+    padding: 0;
+    margin: 0;
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+
+    .letter {
+        color: white;
+        font-weight: 700;
+        font-size: 1.25rem;
+        text-align: center;
+    }
+
+    .points {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        font-size: 0.6rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    // States
+    &.selected {
+        background: linear-gradient(to bottom, #1e81b0 0%, #1a6d94 100%);
+    }
+
+    &.exchange {
+        background: linear-gradient(to bottom, #9ed374 0%, #7fb654 100%);
+    }
 }
 
 .exchange-buttons {
     display: flex;
-    justify-content: space-evenly;
-    margin-top: 1em;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
 }
 
-.mat-raised-button {
-    background-color: burlywood;
-}
+button.mat-raised-button {
+    padding: 0.5rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
 
-.validate {
-    background-color: #76b947;
-    color: white;
+    &.validate {
+        background: linear-gradient(to bottom, #9ed374 0%, #7fb654 100%);
+        color: white;
+
+        &:hover:not([disabled]) {
+            background: linear-gradient(to bottom, #b6e388 0%, #95cf65 100%);
+            transform: translateY(-1px);
+        }
+
+        &:disabled {
+            background: #363636;
+            color: rgba(255, 255, 255, 0.3);
+        }
+    }
+
+    &:not(.validate) {
+        background: linear-gradient(to bottom, #424242 0%, #363636 100%);
+        color: white;
+
+        &:hover {
+            background: linear-gradient(to bottom, #4a4a4a 0%, #404040 100%);
+            transform: translateY(-1px);
+        }
+    }
 }
